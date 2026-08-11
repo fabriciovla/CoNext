@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Sistema de animación
+   ---------------------------------------------------------------------------
+   Los keyframes viven acá (CSS plano) y no en tailwind.config.js a propósito:
+   así HMR los toma sin reiniciar Vite. Cada utilidad `animate-*` respeta un
+   retraso opcional vía `--d`, que es lo que permite escalonar (stagger) una
+   grilla o una lista pasando `style={{ '--d': '120ms' }}` desde React. */
+
+:root {
+  /* Salidas largas y frenado suave: da la sensación "cara" sin rebote. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-pop: cubic-bezier(0.34, 1.28, 0.64, 1);
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 560ms;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-page text-ink-primary antialiased;
+  font-feature-settings: 'tnum' 1;
+}
+
+::selection {
+  background: rgba(144, 133, 233, 0.35);
+}
+
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  transition: background 200ms ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-fade-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-fade-right {
+  from {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-fade-left {
+  from {
+    opacity: 0;
+    transform: translate3d(14px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Barras de "mensajes por hora": crecen desde la base. */
+@keyframes ui-grow-up {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Trazo de líneas SVG. Requiere pathLength="1" en el <path>. */
+@keyframes ui-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Halo del punto "día abierto": late sin llamar la atención. */
+@keyframes ui-pulse-ring {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: ui-fade-in var(--dur-base) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-fade-up {
+    animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-fade-down {
+    animation: ui-fade-down var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-fade-right {
+    animation: ui-fade-right var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-fade-left {
+    animation: ui-fade-left var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-scale-in {
+    animation: ui-scale-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-pop-in {
+    animation: ui-pop-in 260ms var(--ease-pop) var(--d, 0ms) backwards;
+  }
+  .animate-grow-up {
+    transform-origin: bottom;
+    animation: ui-grow-up 700ms var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: ui-draw 1200ms var(--ease-out-soft) var(--d, 0ms) forwards;
+  }
+  .animate-pulse-ring {
+    animation: ui-pulse-ring 2.4s var(--ease-out-soft) infinite;
+  }
+
+  /* Escalona los hijos directos sin calcular delays en JS. El contenedor puede
+     correr toda la secuencia con `style={{ '--stagger-base': '260ms' }}`, que es
+     como se encadena una sección detrás de la anterior. */
+  /* `backwards` y no `both`: al terminar, el elemento vuelve a sus estilos
+     normales. Con `both` quedaría fijado `transform: none` y ningún hover que
+     mueva la tarjeta funcionaría después (una animación gana en la cascada). */
+  .stagger > * {
+    animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) backwards;
+  }
+  .stagger > *:nth-child(1) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 40ms);
+  }
+  .stagger > *:nth-child(2) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 100ms);
+  }
+  .stagger > *:nth-child(3) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 160ms);
+  }
+  .stagger > *:nth-child(4) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 220ms);
+  }
+  .stagger > *:nth-child(5) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 280ms);
+  }
+  .stagger > *:nth-child(6) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 340ms);
+  }
+  .stagger > *:nth-child(7) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 400ms);
+  }
+  .stagger > *:nth-child(8) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 460ms);
+  }
+  .stagger > *:nth-child(n + 9) {
+    animation-delay: calc(var(--stagger-base, 0ms) + 520ms);
+  }
+
+  /* Realce compartido de tarjetas: borde y sombra, sin mover el layout. */
+  .card-interactive {
+    transition:
+      border-color 300ms var(--ease-out-soft),
+      box-shadow 300ms var(--ease-out-soft),
+      transform 300ms var(--ease-out-soft),
+      background-color 300ms var(--ease-out-soft);
+  }
+}
+
+/* Nada de todo lo anterior debería marear a quien pidió menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
