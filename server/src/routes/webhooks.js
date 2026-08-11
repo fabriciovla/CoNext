@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import db from '../db/index.js'
 import { verifyMetaSignature } from '../middleware/verifyMetaSignature.js'
-import { handleIncomingMessage } from '../services/conversationService.js'
+import { handleIncomingMessage, updateDeliveryStatus } from '../services/conversationService.js'
 
 const router = Router()
 
@@ -20,6 +20,29 @@ router.get('/meta', (req, res) => {
 // WhatsApp Cloud API and Instagram Messaging both post to the same webhook
 // URL under one Meta app, in their own payload shapes — this pulls both
 // into one normalized event list.
+// Acuses de entrega de WhatsApp (sent/delivered/read/failed). Van aparte de
+// los mensajes porque no crean nada en la bandeja: solo actualizan el estado
+// del saliente que ya está guardado.
+function extractStatuses(body) {
+  const statuses = []
+  for (const entry of body.entry ?? []) {
+    for (const change of entry.changes ?? []) {
+      for (const status of change.value?.statuses ?? []) {
+        statuses.push({
+          externalId: status.id,
+          status: status.status,
+          // Meta manda los errores como lista; para la bandeja alcanza el
+          // primero, que es el que explica por qué no llegó.
+          error: status.errors?.[0]
+            ? `${status.errors[0].code}: ${status.errors[0].title ?? status.errors[0].message ?? ''}`.trim()
+            : null,
+        })
+      }
+    }
+  }
+  return statuses
+}
+
 function normalizeEvents(body) {
   const events = []
 
@@ -60,6 +83,19 @@ router.post('/meta', verifyMetaSignature, async (req, res) => {
   // Ack immediately — Meta retries aggressively if the webhook is slow, and
   // the AI classification/send happens async after we've already responded.
   res.sendStatus(200)
+
+  // Los acuses van primero y sin dedup: son idempotentes (el rank impide
+  // retroceder de estado) y no cuesta nada reprocesarlos.
+  for (const { externalId, status, error } of extractStatuses(req.body)) {
+    try {
+      updateDeliveryStatus(externalId, status, error)
+      if (status === 'failed') {
+        console.error(`[webhooks/meta] envío fallido (${externalId}): ${error ?? 'sin detalle'}`)
+      }
+    } catch (err) {
+      console.error('[webhooks/meta] no se pudo actualizar el estado de entrega:', err)
+    }
+  }
 
   const events = normalizeEvents(req.body)
   const seen = db.prepare('SELECT id FROM webhook_events WHERE id = ?')

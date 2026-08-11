@@ -7,16 +7,38 @@ import { getProducts } from './productsService.js'
 import { getEnabledAgents, getAgentByKey } from './agentsService.js'
 import { resolveAdapter } from './channels/index.js'
 import { isWithinBusinessHours } from './businessHours.js'
+import { MESSAGE_COLUMNS } from './messageColumns.js'
 
 // Cada cuánto se repite el aviso de "estamos cerrados" a un mismo contacto.
 // WhatsApp Business manda el suyo una vez por conversación por período; acá
 // alcanza con no repetirlo si el cliente escribe varias veces seguidas.
 const AWAY_COOLDOWN_MS = 12 * 60 * 60 * 1000
 
-const MESSAGE_COLUMNS = `
-  id, customer, phone, text, direction, type, status, author,
-  agent_key AS agentKey, created_at AS createdAt
-`
+// Orden de los estados de entrega de Meta. Los eventos pueden llegar
+// desordenados (un 'sent' después de un 'read' si se demoró en la red), así
+// que nunca se retrocede: sin esto, un mensaje ya leído volvería a "enviado".
+const DELIVERY_RANK = { sent: 1, delivered: 2, read: 3, failed: 4 }
+
+// Los mensajes salientes se identifican con el wamid que devolvió Meta al
+// enviarlos, que es el mismo id que después viaja en el evento de estado.
+export function updateDeliveryStatus(externalId, status, error = null) {
+  if (!externalId || !DELIVERY_RANK[status]) return null
+
+  const row = db
+    .prepare('SELECT id, delivery_status AS actual FROM messages WHERE external_id = ?')
+    .get(externalId)
+  if (!row) return null // no es nuestro, o es un mensaje anterior a esta tabla
+
+  const rankActual = DELIVERY_RANK[row.actual] ?? 0
+  if (DELIVERY_RANK[status] < rankActual) return null
+
+  db.prepare('UPDATE messages SET delivery_status = ?, delivery_error = ? WHERE id = ?').run(
+    status,
+    error,
+    row.id,
+  )
+  return row.id
+}
 
 function mostRecentDayId() {
   const open = getOpenDay()
@@ -361,14 +383,23 @@ export async function handleIncomingMessage({ phone, channel = 'whatsapp', text,
   // borrador para que el equipo la mande cuando abra.
   const open = getOpenDay()
   if (category === 'automatico' && canAutoSend && open && dentroDeHorario) {
-    const outgoing = await sendOutboundMessage(phone, reply, 'bot', agent.key)
-    db.prepare("UPDATE messages SET status = 'resuelto' WHERE id = ?").run(incoming.id)
-    return {
-      incoming: { ...incoming, type: category, status: 'resuelto', agentKey: agent.key },
-      outgoing,
-      classification,
-      agent,
-      away,
+    try {
+      const outgoing = await sendOutboundMessage(phone, reply, 'bot', agent.key)
+      db.prepare("UPDATE messages SET status = 'resuelto' WHERE id = ?").run(incoming.id)
+      return {
+        incoming: { ...incoming, type: category, status: 'resuelto', agentKey: agent.key },
+        outgoing,
+        classification,
+        agent,
+        away,
+      }
+    } catch (err) {
+      // Se cayó el envío (red, cuota de Meta, número fuera de la allow list).
+      // La respuesta ya estaba redactada y costó una llamada al modelo: en vez
+      // de descartarla, sigue de largo al guardado de borrador de abajo y
+      // queda en la bandeja para mandarla a mano. El mensaje entrante se
+      // mantiene pendiente, así nadie cree que ya se contestó.
+      console.error('[ai] el auto-envío falló, la respuesta queda como borrador:', err)
     }
   }
 

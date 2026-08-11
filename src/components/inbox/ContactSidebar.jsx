@@ -143,7 +143,7 @@ export default function ContactSidebar({ group, agents = [], onChangeAgent, onAd
                             <button
                               onClick={() => onRemoveTag(group.phone, tag)}
                               title={`Quitar “${tag}”`}
-                              className="text-white/30 transition-colors duration-150 hover:text-status-danger"
+                              className="text-white/30 transition-colors duration-150 hover:text-status-critical"
                             >
                               ×
                             </button>

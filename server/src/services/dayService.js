@@ -1,9 +1,5 @@
 import db from '../db/index.js'
-
-const MESSAGE_COLUMNS = `
-  id, customer, phone, text, direction, type, status, author,
-  agent_key AS agentKey, created_at AS createdAt
-`
+import { MESSAGE_COLUMNS } from './messageColumns.js'
 
 export function getOpenDay() {
   return db.prepare("SELECT id, status, opened_at AS openedAt FROM days WHERE status = 'open' LIMIT 1").get()

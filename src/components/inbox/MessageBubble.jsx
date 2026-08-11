@@ -57,6 +57,15 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
   const isPending = message.direction === 'in' && message.status === 'pendiente'
   const isBot = isOut && message.author === 'bot'
 
+  // Estado de entrega que manda Meta por el webhook. Sin novedades todavía
+  // (o mensajes viejos, anteriores a que esto existiera) queda tenue: decimos
+  // "salió", no "llegó", que es lo único que sabemos en ese momento.
+  const entrega = message.deliveryStatus ?? null
+  const falloEnvio = entrega === 'failed'
+  const tonoTilde =
+    entrega === 'read' ? 'text-violet' : entrega === 'delivered' ? 'text-white/45' : 'text-white/25'
+  const textoEntrega = { sent: 'Enviado', delivered: 'Entregado', read: 'Leído' }[entrega]
+
   return (
     // Cada globo entra desde su lado del hilo, y el retraso se cuenta desde el
     // final: el último aparece sin espera (es lo que importa al enviar uno
@@ -74,7 +83,21 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
 
         {/* La tilde va afuera del globo, a su izquierda, como en la referencia:
             el estado de entrega se lee en la misma columna en todos los mensajes. */}
-        {isOut && <IconDoubleCheck size={13} className="mb-1 shrink-0 text-violet" />}
+        {isOut &&
+          (falloEnvio ? (
+            <span
+              title={message.deliveryError ?? 'No se pudo entregar'}
+              className="mb-1 flex h-[13px] w-[13px] shrink-0 items-center justify-center rounded-full border border-status-critical text-[9px] font-bold leading-none text-status-critical"
+            >
+              !
+            </span>
+          ) : (
+            // El tooltip va en el span y no en el <svg>: como atributo del SVG
+            // no lo muestra el navegador.
+            <span title={textoEntrega ?? 'Enviado'} className="mb-1 flex shrink-0">
+              <IconDoubleCheck size={13} className={`transition-colors duration-300 ${tonoTilde}`} />
+            </span>
+          ))}
 
         <div
           className={`min-w-0 rounded-2xl border px-3.5 py-2.5 transition-colors duration-300 ${
@@ -112,6 +135,17 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
         {isPending && (
           <>
             <span className="text-status-warning">Pendiente</span>
+            <span aria-hidden="true">·</span>
+          </>
+        )}
+        {/* Un envío fallido se dice con todas las letras: es el caso en que el
+            cliente no recibió nada y, sin esto, la conversación se ve igual
+            que una contestada. */}
+        {falloEnvio && (
+          <>
+            <span className="text-status-critical">
+              No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
+            </span>
             <span aria-hidden="true">·</span>
           </>
         )}
