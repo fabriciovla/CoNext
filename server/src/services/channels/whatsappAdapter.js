@@ -1,4 +1,6 @@
-const GRAPH_VERSION = process.env.WA_GRAPH_VERSION || 'v21.0'
+import { getWhatsappCredentials } from '../tenantsService.js'
+
+const GRAPH_VERSION = process.env.WA_GRAPH_VERSION || 'v25.0'
 
 // El webhook de Meta entrega el remitente como wa_id (dígitos, sin '+'), pero
 // los teléfonos cargados a mano o por seed suelen traer '+' y espacios. Graph
@@ -12,6 +14,9 @@ function toWaId(phone) {
 // coincide con el número que la consola guarda (54…15…): son el mismo teléfono
 // para WhatsApp pero dos strings distintos para la validación. Formato:
 // "waId:destino,waId:destino". Vacío (producción) = no hace nada.
+//
+// Es global y no por cliente a propósito: solo sirve con el número de prueba de
+// Meta, que es uno solo. En producción no hay allow list y esto queda vacío.
 function applyDevRecipientMap(waId) {
   const raw = process.env.WA_DEV_RECIPIENT_MAP
   if (!raw) return waId
@@ -27,23 +32,32 @@ function applyDevRecipientMap(waId) {
 }
 
 // sendMessage(conversation, text) -> Promise<{ externalId: string }>
-// WhatsApp va por la Cloud API de Meta directo (sin BSP intermediario).
+//
+// Las credenciales salen del tenant, no del .env: con varios negocios en la
+// misma instancia, un token global mandaría todos los mensajes desde el mismo
+// número. Las puebla Embedded Signup en el alta de cada cliente.
+//
 // Los mensajes de texto libre solo salen dentro de la ventana de servicio de
-// 24h que abre el cliente al escribirnos; como el CRM siempre responde a un
-// entrante, estamos dentro de esa ventana y no hacen falta plantillas.
+// 24h que abre el cliente al escribirnos. Hoy el CRM responde a un entrante, así
+// que casi siempre está dentro — pero no siempre: un borrador que queda
+// pendiente y se manda al día siguiente cae fuera y Meta lo rechaza. Por eso
+// `conversations.last_inbound_at` guarda cuándo se abrió la ventana; falta el
+// paso de elegir plantilla cuando ya venció.
 export async function sendMessage(conversation, text) {
-  const token = process.env.WA_ACCESS_TOKEN
-  const phoneNumberId = process.env.WA_PHONE_NUMBER_ID
+  const { tenantId } = conversation
+  if (!tenantId) throw new Error('sendMessage necesita el tenantId de la conversación')
 
-  if (!token || !phoneNumberId) {
-    console.log(`[DEV][whatsapp] simulated send to ${conversation.phone}: ${text}`)
+  const creds = await getWhatsappCredentials(tenantId)
+
+  if (!creds) {
+    console.log(`[DEV][whatsapp] simulated send to ${conversation.phone} (tenant ${tenantId}): ${text}`)
     return { externalId: `dev-${Date.now()}` }
   }
 
-  const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${phoneNumberId}/messages`, {
+  const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${creds.phoneNumberId}/messages`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${creds.accessToken}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

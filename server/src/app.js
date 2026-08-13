@@ -8,10 +8,9 @@ import conversationsRouter from './routes/conversations.js'
 import agentsRouter from './routes/agents.js'
 import quickRepliesRouter from './routes/quickReplies.js'
 import webhooksRouter from './routes/webhooks.js'
-import webhooksTwilioRouter from './routes/webhooksTwilio.js'
 import devRouter from './routes/dev.js'
 import { errorHandler } from './middleware/errorHandler.js'
-import { requireApiKey } from './middleware/requireApiKey.js'
+import { resolveTenant } from './middleware/resolveTenant.js'
 
 export function createApp() {
   const app = express()
@@ -27,12 +26,13 @@ export function createApp() {
     }),
   )
 
-  // Los webhooks van antes de la API key: los firma el proveedor, no nosotros.
+  // Los webhooks van antes de la resolución de tenant: los firma Meta, no
+  // nosotros, y no pueden mandar una API key. Resuelven su propio cliente por
+  // el phone_number_id del payload.
   app.use('/webhooks', webhooksRouter)
-  app.use('/webhooks/twilio', webhooksTwilioRouter)
 
-  // De acá para abajo, todo pide la key.
-  app.use(requireApiKey)
+  // De acá para abajo, todo exige API key y todo queda scopeado a req.tenant.
+  app.use(resolveTenant)
 
   app.use('/messages', messagesRouter)
   app.use('/days', daysRouter)

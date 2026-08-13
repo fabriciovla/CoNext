@@ -7,12 +7,15 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "seed": "node scripts/seed.js",
-    "simulate": "node scripts/simulate.js"
+    "simulate": "node scripts/simulate.js",
+    "tenant": "node scripts/createTenant.js",
+    "connect-wa": "node scripts/connectWa.js"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "pg": "^8.23.0"
   }
 }

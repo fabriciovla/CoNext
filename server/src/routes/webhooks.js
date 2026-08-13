@@ -1,7 +1,8 @@
 import { Router } from 'express'
-import db from '../db/index.js'
+import { run } from '../db/index.js'
 import { verifyMetaSignature } from '../middleware/verifyMetaSignature.js'
 import { handleIncomingMessage, updateDeliveryStatus } from '../services/conversationService.js'
+import { getTenantByPhoneNumberId } from '../services/tenantsService.js'
 
 const router = Router()
 
@@ -17,65 +18,60 @@ router.get('/meta', (req, res) => {
   res.sendStatus(403)
 })
 
-// WhatsApp Cloud API and Instagram Messaging both post to the same webhook
-// URL under one Meta app, in their own payload shapes — this pulls both
-// into one normalized event list.
+// Todos los clientes entran por esta misma URL: es una sola app de Meta con una
+// sola suscripción. Lo único que dice de quién es cada mensaje es el
+// phone_number_id que Meta pone en value.metadata — de ahí sale el tenant.
+//
+// Si no resuelve, el evento se descarta: un mensaje que no se puede atribuir a
+// nadie no se puede guardar en ningún lado, y adivinar sería escribirlo en la
+// bandeja del cliente equivocado.
+function extractWhatsappChanges(body) {
+  const cambios = []
+  for (const entry of body.entry ?? []) {
+    for (const change of entry.changes ?? []) {
+      const value = change.value ?? {}
+      const phoneNumberId = value.metadata?.phone_number_id
+      if (!phoneNumberId) continue
+      cambios.push({ phoneNumberId, value })
+    }
+  }
+  return cambios
+}
+
 // Acuses de entrega de WhatsApp (sent/delivered/read/failed). Van aparte de
 // los mensajes porque no crean nada en la bandeja: solo actualizan el estado
 // del saliente que ya está guardado.
-function extractStatuses(body) {
-  const statuses = []
-  for (const entry of body.entry ?? []) {
-    for (const change of entry.changes ?? []) {
-      for (const status of change.value?.statuses ?? []) {
-        statuses.push({
-          externalId: status.id,
-          status: status.status,
-          // Meta manda los errores como lista; para la bandeja alcanza el
-          // primero, que es el que explica por qué no llegó.
-          error: status.errors?.[0]
-            ? `${status.errors[0].code}: ${status.errors[0].title ?? status.errors[0].message ?? ''}`.trim()
-            : null,
-        })
-      }
-    }
-  }
-  return statuses
+function extractStatuses(value) {
+  return (value.statuses ?? []).map((status) => ({
+    externalId: status.id,
+    status: status.status,
+    // Meta manda los errores como lista; para la bandeja alcanza el primero,
+    // que es el que explica por qué no llegó.
+    error: status.errors?.[0]
+      ? `${status.errors[0].code}: ${status.errors[0].title ?? status.errors[0].message ?? ''}`.trim()
+      : null,
+  }))
 }
 
-function normalizeEvents(body) {
+function extractMessages(value) {
   const events = []
-
-  for (const entry of body.entry ?? []) {
-    // WhatsApp: entry.changes[].value.{contacts,messages}
-    for (const change of entry.changes ?? []) {
-      const value = change.value ?? {}
-      for (const message of value.messages ?? []) {
-        if (message.type !== 'text') continue
-        const contact = value.contacts?.find((c) => c.wa_id === message.from)
-        events.push({
-          phone: message.from,
-          channel: 'whatsapp',
-          text: message.text?.body ?? '',
-          customerName: contact?.profile?.name ?? message.from,
-          externalId: message.id,
-        })
-      }
+  for (const message of value.messages ?? []) {
+    if (message.type !== 'text') {
+      // Audios, fotos y ubicaciones se descartan. Queda logueado a propósito:
+      // antes desaparecían en silencio y el cliente quedaba esperando una
+      // respuesta que nadie sabía que tenía que dar.
+      console.warn(`[webhooks/meta] mensaje de tipo "${message.type}" ignorado (solo se procesa texto)`)
+      continue
     }
-
-    // Instagram: entry.messaging[].{sender,message}
-    for (const item of entry.messaging ?? []) {
-      if (!item.message?.text || item.message.is_echo) continue
-      events.push({
-        phone: item.sender?.id,
-        channel: 'instagram',
-        text: item.message.text,
-        customerName: item.sender?.id,
-        externalId: item.message.mid,
-      })
-    }
+    const contact = value.contacts?.find((c) => c.wa_id === message.from)
+    events.push({
+      phone: message.from,
+      channel: 'whatsapp',
+      text: message.text?.body ?? '',
+      customerName: contact?.profile?.name ?? message.from,
+      externalId: message.id,
+    })
   }
-
   return events
 }
 
@@ -84,32 +80,63 @@ router.post('/meta', verifyMetaSignature, async (req, res) => {
   // the AI classification/send happens async after we've already responded.
   res.sendStatus(200)
 
-  // Los acuses van primero y sin dedup: son idempotentes (el rank impide
-  // retroceder de estado) y no cuesta nada reprocesarlos.
-  for (const { externalId, status, error } of extractStatuses(req.body)) {
-    try {
-      updateDeliveryStatus(externalId, status, error)
-      if (status === 'failed') {
-        console.error(`[webhooks/meta] envío fallido (${externalId}): ${error ?? 'sin detalle'}`)
-      }
-    } catch (err) {
-      console.error('[webhooks/meta] no se pudo actualizar el estado de entrega:', err)
-    }
+  // Instagram (entry[].messaging[]) queda sin procesar: el canal está dormido y
+  // todavía no hay columna en `tenants` que ate una cuenta de IG a un cliente,
+  // así que no habría forma de atribuir el mensaje.
+  if (req.body.entry?.some((e) => e.messaging)) {
+    console.warn('[webhooks/meta] evento de Instagram recibido, todavía sin soporte multi-cliente')
   }
 
-  const events = normalizeEvents(req.body)
-  const seen = db.prepare('SELECT id FROM webhook_events WHERE id = ?')
-  const markSeen = db.prepare('INSERT INTO webhook_events (id, received_at) VALUES (?, ?)')
-
-  for (const event of events) {
-    if (!event.phone || !event.text) continue
-    if (event.externalId && seen.get(event.externalId)) continue
-    if (event.externalId) markSeen.run(event.externalId, new Date().toISOString())
-
+  for (const { phoneNumberId, value } of extractWhatsappChanges(req.body)) {
+    let tenant
     try {
-      await handleIncomingMessage(event)
+      tenant = await getTenantByPhoneNumberId(phoneNumberId)
     } catch (err) {
-      console.error('[webhooks/meta] failed to process incoming message:', err)
+      console.error('[webhooks/meta] no se pudo resolver el tenant:', err)
+      continue
+    }
+
+    if (!tenant) {
+      console.warn(
+        `[webhooks/meta] llegó un evento para phone_number_id ${phoneNumberId} que no ` +
+          'corresponde a ningún cliente activo; se descarta',
+      )
+      continue
+    }
+
+    // Los acuses van primero y sin dedup: son idempotentes (el rank impide
+    // retroceder de estado) y no cuesta nada reprocesarlos.
+    for (const { externalId, status, error } of extractStatuses(value)) {
+      try {
+        await updateDeliveryStatus(tenant.id, externalId, status, error)
+        if (status === 'failed') {
+          console.error(`[webhooks/meta] envío fallido (${externalId}): ${error ?? 'sin detalle'}`)
+        }
+      } catch (err) {
+        console.error('[webhooks/meta] no se pudo actualizar el estado de entrega:', err)
+      }
+    }
+
+    for (const event of extractMessages(value)) {
+      if (!event.phone || !event.text) continue
+
+      try {
+        if (event.externalId) {
+          // El INSERT hace de dedup: si el wamid ya estaba, no toca ninguna fila
+          // y salimos. Reemplaza al par SELECT-después-INSERT, que con dos
+          // entregas simultáneas del mismo evento dejaba pasar las dos.
+          const filas = await run(
+            `INSERT INTO webhook_events (id, tenant_id, received_at) VALUES ($1, $2, $3)
+             ON CONFLICT (id) DO NOTHING`,
+            [event.externalId, tenant.id, new Date().toISOString()],
+          )
+          if (filas === 0) continue
+        }
+
+        await handleIncomingMessage(tenant.id, event)
+      } catch (err) {
+        console.error('[webhooks/meta] failed to process incoming message:', err)
+      }
     }
   }
 })

@@ -1,67 +1,103 @@
-import db from '../db/index.js'
+import { one, many, run } from '../db/index.js'
 import { MESSAGE_COLUMNS } from './messageColumns.js'
 
-export function getOpenDay() {
-  return db.prepare("SELECT id, status, opened_at AS openedAt FROM days WHERE status = 'open' LIMIT 1").get()
+// Todas las funciones de acá abajo reciben `tenantId` como primer argumento.
+// No hay versión "sin tenant": un día abierto es de un negocio, y mezclarlos
+// haría que abrir la caja de un cliente abra la de todos.
+
+export async function getOpenDay(tenantId) {
+  return one(
+    `SELECT id, status, opened_at AS "openedAt" FROM days WHERE tenant_id = $1 AND status = 'open' LIMIT 1`,
+    [tenantId],
+  )
 }
 
-// Boots the server into a valid state: if this is the very first run (no
-// days at all), open one automatically so the inbox isn't stuck on
-// "cerrado" before anyone has touched /days/open.
-export function ensureInitialDay() {
-  const any = db.prepare('SELECT id FROM days LIMIT 1').get()
-  if (!any) openDay()
+// Deja al cliente en un estado usable: si es la primera vez (no hay ningún
+// día), se abre uno solo, así la bandeja no queda trabada en "cerrado" antes
+// de que nadie haya tocado /days/open.
+export async function ensureInitialDay(tenantId) {
+  const any = await one('SELECT id FROM days WHERE tenant_id = $1 LIMIT 1', [tenantId])
+  if (!any) return openDay(tenantId)
+  return null
 }
 
-export function openDay() {
-  const existing = getOpenDay()
+export async function openDay(tenantId) {
+  const existing = await getOpenDay(tenantId)
   if (existing) return existing
 
   const openedAt = new Date().toISOString()
   const id = `day-${openedAt}`
-  db.prepare('INSERT INTO days (id, status, opened_at, closed_at) VALUES (?, ?, ?, NULL)').run(
+  await run(`INSERT INTO days (tenant_id, id, status, opened_at, closed_at) VALUES ($1, $2, 'open', $3, NULL)`, [
+    tenantId,
     id,
-    'open',
     openedAt,
-  )
+  ])
   return { id, status: 'open', openedAt }
 }
 
-export function closeDay() {
-  const open = getOpenDay()
+export async function closeDay(tenantId) {
+  const open = await getOpenDay(tenantId)
   if (!open) return null
 
   const closedAt = new Date().toISOString()
-  db.prepare("UPDATE days SET status = 'closed', closed_at = ? WHERE id = ?").run(closedAt, open.id)
+  await run(`UPDATE days SET status = 'closed', closed_at = $1 WHERE tenant_id = $2 AND id = $3`, [
+    closedAt,
+    tenantId,
+    open.id,
+  ])
   return { id: open.id, status: 'closed', openedAt: open.openedAt, closedAt }
 }
 
-export function getCurrentDayState() {
-  const open = getOpenDay()
+export async function getCurrentDayState(tenantId) {
+  const open = await getOpenDay(tenantId)
   if (open) return { status: 'open', openedAt: open.openedAt, closedAt: null, dayId: open.id }
 
-  const lastClosed = db
-    .prepare("SELECT id, opened_at AS openedAt, closed_at AS closedAt FROM days WHERE status = 'closed' ORDER BY closed_at DESC LIMIT 1")
-    .get()
+  const lastClosed = await one(
+    `SELECT id, opened_at AS "openedAt", closed_at AS "closedAt"
+     FROM days WHERE tenant_id = $1 AND status = 'closed' ORDER BY closed_at DESC LIMIT 1`,
+    [tenantId],
+  )
   if (!lastClosed) return { status: 'closed', openedAt: null, closedAt: null, dayId: null }
   return { status: 'closed', openedAt: lastClosed.openedAt, closedAt: lastClosed.closedAt, dayId: lastClosed.id }
 }
 
-export function getMessagesForDay(dayId) {
-  return db
-    .prepare(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE day_id = ? ORDER BY created_at ASC`)
-    .all(dayId)
+export async function getMessagesForDay(tenantId, dayId) {
+  return many(
+    `SELECT ${MESSAGE_COLUMNS} FROM messages WHERE tenant_id = $1 AND day_id = $2 ORDER BY created_at ASC`,
+    [tenantId, dayId],
+  )
 }
 
-export function getOpenMessages() {
-  const open = getOpenDay()
+export async function getOpenMessages(tenantId) {
+  const open = await getOpenDay(tenantId)
   if (!open) return []
-  return getMessagesForDay(open.id)
+  return getMessagesForDay(tenantId, open.id)
 }
 
-export function listClosedDays() {
-  const days = db
-    .prepare("SELECT id, opened_at AS openedAt, closed_at AS closedAt FROM days WHERE status = 'closed' ORDER BY closed_at DESC")
-    .all()
-  return days.map((d) => ({ ...d, messages: getMessagesForDay(d.id) }))
+export async function listClosedDays(tenantId) {
+  const days = await many(
+    `SELECT id, opened_at AS "openedAt", closed_at AS "closedAt"
+     FROM days WHERE tenant_id = $1 AND status = 'closed' ORDER BY closed_at DESC`,
+    [tenantId],
+  )
+
+  // Los mensajes de todos los días cerrados salen en una sola consulta y se
+  // agrupan en memoria. Antes era una consulta por día: con un cliente de
+  // varios meses de historial eso es N+1 contra la base cada vez que alguien
+  // abre el historial.
+  if (days.length === 0) return []
+
+  const mensajes = await many(
+    `SELECT ${MESSAGE_COLUMNS}, day_id AS "dayId" FROM messages
+     WHERE tenant_id = $1 AND day_id = ANY($2) ORDER BY created_at ASC`,
+    [tenantId, days.map((d) => d.id)],
+  )
+
+  const porDia = new Map()
+  for (const { dayId, ...m } of mensajes) {
+    if (!porDia.has(dayId)) porDia.set(dayId, [])
+    porDia.get(dayId).push(m)
+  }
+
+  return days.map((d) => ({ ...d, messages: porDia.get(d.id) ?? [] }))
 }

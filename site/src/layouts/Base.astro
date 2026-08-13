@@ -1,0 +1,104 @@
+---
+import '../index.css'
+import Navbar from '../components/Navbar.astro'
+import Footer from '../components/Footer.jsx'
+
+// Envoltorio común de todas las páginas: cabecera del documento, barra, pie.
+//
+// Reemplaza al Layout.jsx que montaba react-router. Ya no hace falta ningún
+// router: cada archivo de src/pages es una URL y Astro genera un .html de
+// verdad para cada una. De paso se cayó el public/_redirects, que existía solo
+// para que entrar en frío a /privacidad no diera 404 en un hosting estático.
+//
+// El <title> y la descripción los pone cada página. El resto —fuentes, favicon,
+// color de la barra del sistema— es igual en todas y vive acá.
+const { title, description } = Astro.props
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/chrm-monochrome.svg" />
+
+    <!-- El logotipo de la barra se dibuja con esta fuente, así que se pide junto
+         con el HTML y no recién cuando el CSS la descubre. `crossorigin` no es
+         opcional aunque sea del mismo origen: sin él el navegador descarga el
+         archivo dos veces. -->
+    <link rel="preload" href="/fonts/baloo2-latin-800.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Inter la usa todo el texto de la página, así que también se pide de
+         entrada en vez de esperar a que el CSS la descubra. -->
+    <link rel="preload" href="/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <!-- El color con el que Chrome en Android pinta la barra del sistema. Sin
+         esto queda blanca arriba de una página negra. -->
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Vista previa al compartir el enlace (WhatsApp, X, LinkedIn). Ahora cada
+         página trae la suya, que era imposible con una sola SPA: había un juego
+         de etiquetas para las cuatro rutas.
+         Falta og:image, que necesita una URL absoluta y por lo tanto el dominio
+         definido. Sin ella la tarjeta se ve igual, solo que sin miniatura. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Sin JavaScript nadie agrega `is-visible` y todo lo que anima al entrar
+         en pantalla se quedaría invisible para siempre. El contenido nunca
+         depende de que la animación llegue a correr. -->
+    <noscript>
+      <style>
+        .reveal {
+          opacity: 1 !important;
+        }
+      </style>
+    </noscript>
+  </head>
+
+  <body>
+    <div class="flex min-h-full flex-col">
+      {/* Ninguno de los dos lleva directiva `client:`: todo el sitio llega como
+          HTML. Lo poco que es interactivo (el menú de la barra, el acordeón de
+          preguntas) lo resuelven scripts sueltos de unas pocas líneas, y el
+          navegador no descarga React en ninguna página. */}
+      <Navbar />
+      <main class="flex-1">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    <script>
+      // Un solo observer para toda la página, en lugar de uno por bloque como
+      // hacía la versión con React.
+      const elementos = document.querySelectorAll('.reveal')
+
+      if (!('IntersectionObserver' in window)) {
+        // Navegador viejo: no hay animación, pero la página tiene que verse.
+        elementos.forEach((el) => el.classList.add('is-visible'))
+      } else {
+        const observer = new IntersectionObserver(
+          (entradas) => {
+            for (const entrada of entradas) {
+              if (!entrada.isIntersecting) continue
+              entrada.target.classList.add('is-visible')
+              // Se anima una sola vez: una sección que vuelve a desvanecerse
+              // cada vez que pasás por al lado marea.
+              observer.unobserve(entrada.target)
+            }
+          },
+          // El margen negativo abajo retrasa el disparo hasta que la sección
+          // entró de verdad: con el umbral pegado al borde, lo de más abajo se
+          // anima mientras todavía está tapado por el pliegue.
+          { threshold: 0.15, rootMargin: '0px 0px -80px 0px' },
+        )
+
+        elementos.forEach((el) => observer.observe(el))
+      }
+    </script>
+  </body>
+</html>

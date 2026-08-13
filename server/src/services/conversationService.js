@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import db from '../db/index.js'
+import { one, many, run } from '../db/index.js'
 import { getOpenDay } from './dayService.js'
 import { classifyAndDraft } from './ai/classifyAndDraft.js'
 import { getSettings } from './settingsService.js'
@@ -21,94 +21,120 @@ const DELIVERY_RANK = { sent: 1, delivered: 2, read: 3, failed: 4 }
 
 // Los mensajes salientes se identifican con el wamid que devolvió Meta al
 // enviarlos, que es el mismo id que después viaja en el evento de estado.
-export function updateDeliveryStatus(externalId, status, error = null) {
+export async function updateDeliveryStatus(tenantId, externalId, status, error = null) {
   if (!externalId || !DELIVERY_RANK[status]) return null
 
-  const row = db
-    .prepare('SELECT id, delivery_status AS actual FROM messages WHERE external_id = ?')
-    .get(externalId)
+  const row = await one(
+    'SELECT id, delivery_status AS actual FROM messages WHERE tenant_id = $1 AND external_id = $2',
+    [tenantId, externalId],
+  )
   if (!row) return null // no es nuestro, o es un mensaje anterior a esta tabla
 
   const rankActual = DELIVERY_RANK[row.actual] ?? 0
   if (DELIVERY_RANK[status] < rankActual) return null
 
-  db.prepare('UPDATE messages SET delivery_status = ?, delivery_error = ? WHERE id = ?').run(
+  await run('UPDATE messages SET delivery_status = $1, delivery_error = $2 WHERE tenant_id = $3 AND id = $4', [
     status,
     error,
+    tenantId,
     row.id,
-  )
+  ])
   return row.id
 }
 
-function mostRecentDayId() {
-  const open = getOpenDay()
+async function mostRecentDayId(tenantId) {
+  const open = await getOpenDay(tenantId)
   if (open) return open.id
-  const row = db.prepare('SELECT id FROM days ORDER BY opened_at DESC LIMIT 1').get()
+  const row = await one('SELECT id FROM days WHERE tenant_id = $1 ORDER BY opened_at DESC LIMIT 1', [tenantId])
   return row?.id ?? null
 }
 
-export function getConversation(phone) {
-  return db.prepare('SELECT * FROM conversations WHERE phone = ?').get(phone)
+export async function getConversation(tenantId, phone) {
+  return one('SELECT * FROM conversations WHERE tenant_id = $1 AND phone = $2', [tenantId, phone])
 }
 
-export function ensureConversation(phone, { channel = 'whatsapp', customer }) {
-  const existing = getConversation(phone)
-  if (existing) return existing
-
+export async function ensureConversation(tenantId, phone, { channel = 'whatsapp', customer }) {
   const now = new Date().toISOString()
-  db.prepare(
-    `INSERT INTO conversations (phone, channel, customer, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)`,
-  ).run(phone, channel, customer, now, now)
-  return getConversation(phone)
+
+  // Upsert en vez de leer-y-después-insertar: dos mensajes del mismo contacto
+  // entrando a la vez pasaban los dos por el "no existe" y el segundo INSERT
+  // reventaba contra la clave primaria.
+  await run(
+    `INSERT INTO conversations (tenant_id, phone, channel, customer, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $5)
+     ON CONFLICT (tenant_id, phone) DO NOTHING`,
+    [tenantId, phone, channel, customer, now],
+  )
+  return getConversation(tenantId, phone)
 }
 
-function insertMessage(row) {
-  db.prepare(
-    `INSERT INTO messages (id, phone, customer, text, direction, type, status, author, agent_key, external_id, day_id, created_at)
-     VALUES (@id, @phone, @customer, @text, @direction, @type, @status, @author, @agentKey, @externalId, @dayId, @createdAt)`,
-  ).run({ agentKey: null, ...row })
-  return db.prepare(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE id = ?`).get(row.id)
+async function insertMessage(tenantId, row) {
+  const r = { agentKey: null, ...row }
+  await run(
+    `INSERT INTO messages (tenant_id, id, phone, customer, text, direction, type, status, author, agent_key, external_id, day_id, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+    [
+      tenantId,
+      r.id,
+      r.phone,
+      r.customer,
+      r.text,
+      r.direction,
+      r.type,
+      r.status,
+      r.author,
+      r.agentKey,
+      r.externalId,
+      r.dayId,
+      r.createdAt,
+    ],
+  )
+  return one(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE tenant_id = $1 AND id = $2`, [tenantId, r.id])
 }
 
-export function resolveConversation(phone) {
-  const open = getOpenDay()
-  if (!open) return getOpenMessagesForPhone(phone)
+export async function resolveConversation(tenantId, phone) {
+  const open = await getOpenDay(tenantId)
+  if (!open) return getOpenMessagesForPhone(tenantId, phone)
 
-  db.prepare(
+  await run(
     `UPDATE messages SET status = 'resuelto'
-     WHERE phone = ? AND direction = 'in' AND status = 'pendiente' AND day_id = ?`,
-  ).run(phone, open.id)
-  return getOpenMessagesForPhone(phone)
+     WHERE tenant_id = $1 AND phone = $2 AND direction = 'in' AND status = 'pendiente' AND day_id = $3`,
+    [tenantId, phone, open.id],
+  )
+  return getOpenMessagesForPhone(tenantId, phone)
 }
 
-function getOpenMessagesForPhone(phone) {
-  const open = getOpenDay()
+async function getOpenMessagesForPhone(tenantId, phone) {
+  const open = await getOpenDay(tenantId)
   if (!open) return []
-  return db
-    .prepare(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE day_id = ? AND phone = ? ORDER BY created_at ASC`)
-    .all(open.id, phone)
+  return many(
+    `SELECT ${MESSAGE_COLUMNS} FROM messages
+     WHERE tenant_id = $1 AND day_id = $2 AND phone = $3 ORDER BY created_at ASC`,
+    [tenantId, open.id, phone],
+  )
 }
 
-function clearDraft(phone) {
-  db.prepare(
-    "UPDATE conversations SET ai_draft = NULL, ai_draft_created_at = NULL, ai_draft_category = NULL, updated_at = ? WHERE phone = ?",
-  ).run(new Date().toISOString(), phone)
+async function clearDraft(tenantId, phone) {
+  await run(
+    `UPDATE conversations SET ai_draft = NULL, ai_draft_created_at = NULL, ai_draft_category = NULL, updated_at = $1
+     WHERE tenant_id = $2 AND phone = $3`,
+    [new Date().toISOString(), tenantId, phone],
+  )
 }
 
 // Used both for the admin typing a reply by hand and for the AI auto-sending
 // one: same channel adapter, same bookkeeping, only `author` differs.
-export async function sendOutboundMessage(phone, text, author, agentKey = null) {
-  const open = getOpenDay()
+export async function sendOutboundMessage(tenantId, phone, text, author, agentKey = null) {
+  const open = await getOpenDay(tenantId)
   if (!open) throw new Error('No hay un día abierto')
 
-  const conversation = getConversation(phone)
+  const conversation = await getConversation(tenantId, phone)
   if (!conversation) throw new Error(`Conversación desconocida: ${phone}`)
 
   const adapter = resolveAdapter(conversation.channel)
-  const { externalId } = await adapter.sendMessage({ phone, channel: conversation.channel }, text)
+  const { externalId } = await adapter.sendMessage({ tenantId, phone, channel: conversation.channel }, text)
 
-  const message = insertMessage({
+  const message = await insertMessage(tenantId, {
     id: `${author}-${crypto.randomUUID()}`,
     phone,
     customer: conversation.customer,
@@ -125,8 +151,12 @@ export async function sendOutboundMessage(phone, text, author, agentKey = null) 
     createdAt: new Date().toISOString(),
   })
 
-  clearDraft(phone)
-  db.prepare('UPDATE conversations SET updated_at = ? WHERE phone = ?').run(new Date().toISOString(), phone)
+  await clearDraft(tenantId, phone)
+  await run('UPDATE conversations SET updated_at = $1 WHERE tenant_id = $2 AND phone = $3', [
+    new Date().toISOString(),
+    tenantId,
+    phone,
+  ])
   return message
 }
 
@@ -134,35 +164,34 @@ export async function sendOutboundMessage(phone, text, author, agentKey = null) 
 // exige un día abierto, y justamente si estamos cerrados lo más probable es que
 // no lo haya. Un fallo acá no puede tumbar el procesamiento del entrante, así
 // que devuelve null en vez de propagar.
-async function sendAwayMessage(conversation, settings) {
+async function sendAwayMessage(tenantId, conversation, settings) {
   const text = settings?.awayMessage?.trim()
   if (!text) return null
 
-  const dayId = mostRecentDayId()
+  const dayId = await mostRecentDayId(tenantId)
   if (!dayId) return null
 
   // Reserva del aviso en una sola sentencia: si dos mensajes del mismo contacto
-  // entran a la vez, solo uno consigue el UPDATE y el otro sale con changes=0.
+  // entran a la vez, solo uno consigue el UPDATE y el otro sale con 0 filas.
   // Chequear y después escribir por separado dejaba pasar los dos.
   const now = new Date().toISOString()
   const limite = new Date(Date.now() - AWAY_COOLDOWN_MS).toISOString()
-  const reserva = db
-    .prepare(
-      `UPDATE conversations SET away_sent_at = ?, updated_at = ?
-       WHERE phone = ? AND (away_sent_at IS NULL OR away_sent_at < ?)`,
-    )
-    .run(now, now, conversation.phone, limite)
+  const filas = await run(
+    `UPDATE conversations SET away_sent_at = $1, updated_at = $1
+     WHERE tenant_id = $2 AND phone = $3 AND (away_sent_at IS NULL OR away_sent_at < $4)`,
+    [now, tenantId, conversation.phone, limite],
+  )
 
-  if (reserva.changes === 0) return null
+  if (filas === 0) return null
 
   try {
     const adapter = resolveAdapter(conversation.channel)
     const { externalId } = await adapter.sendMessage(
-      { phone: conversation.phone, channel: conversation.channel },
+      { tenantId, phone: conversation.phone, channel: conversation.channel },
       text,
     )
 
-    const message = insertMessage({
+    return await insertMessage(tenantId, {
       id: `ausencia-${crypto.randomUUID()}`,
       phone: conversation.phone,
       customer: conversation.customer,
@@ -175,27 +204,26 @@ async function sendAwayMessage(conversation, settings) {
       dayId,
       createdAt: now,
     })
-
-    return message
   } catch (err) {
     // El envío falló: devolvemos la reserva para que el próximo mensaje del
     // cliente vuelva a intentarlo en vez de quedar 12h sin aviso.
-    db.prepare('UPDATE conversations SET away_sent_at = ? WHERE phone = ?').run(
+    await run('UPDATE conversations SET away_sent_at = $1 WHERE tenant_id = $2 AND phone = $3', [
       conversation.away_sent_at ?? null,
+      tenantId,
       conversation.phone,
-    )
+    ])
     console.error('[ausencia] no se pudo enviar el aviso de fuera de horario:', err)
     return null
   }
 }
 
-export function addNote(phone, text) {
-  const open = getOpenDay()
+export async function addNote(tenantId, phone, text) {
+  const open = await getOpenDay(tenantId)
   if (!open) throw new Error('No hay un día abierto')
-  const conversation = getConversation(phone)
+  const conversation = await getConversation(tenantId, phone)
   if (!conversation) throw new Error(`Conversación desconocida: ${phone}`)
 
-  return insertMessage({
+  return insertMessage(tenantId, {
     id: `nota-${crypto.randomUUID()}`,
     phone,
     customer: conversation.customer,
@@ -210,13 +238,14 @@ export function addNote(phone, text) {
   })
 }
 
-export function setAssignee(phone, assignee) {
-  db.prepare('UPDATE conversations SET assignee = ?, updated_at = ? WHERE phone = ?').run(
+export async function setAssignee(tenantId, phone, assignee) {
+  await run('UPDATE conversations SET assignee = $1, updated_at = $2 WHERE tenant_id = $3 AND phone = $4', [
     assignee,
     new Date().toISOString(),
+    tenantId,
     phone,
-  )
-  return getConversation(phone)
+  ])
+  return getConversation(tenantId, phone)
 }
 
 // Etiquetas libres: se normalizan en minúscula y sin espacios de más para que
@@ -225,45 +254,55 @@ function normalizeTag(raw) {
   return String(raw ?? '').trim().replace(/\s+/g, ' ').toLowerCase()
 }
 
-export function addConversationTag(phone, tag) {
+export async function addConversationTag(tenantId, phone, tag) {
   const clean = normalizeTag(tag)
   if (!clean) return null
-  if (!getConversation(phone)) return null
+  if (!(await getConversation(tenantId, phone))) return null
 
-  // El PRIMARY KEY (phone, tag) ya impide duplicados; el OR IGNORE evita que
-  // etiquetar dos veces lo mismo explote.
-  db.prepare('INSERT OR IGNORE INTO conversation_tags (phone, tag, created_at) VALUES (?, ?, ?)').run(
-    phone,
-    clean,
-    new Date().toISOString(),
+  // La clave (tenant_id, phone, tag) ya impide duplicados; el DO NOTHING evita
+  // que etiquetar dos veces lo mismo explote.
+  await run(
+    `INSERT INTO conversation_tags (tenant_id, phone, tag, created_at) VALUES ($1, $2, $3, $4)
+     ON CONFLICT (tenant_id, phone, tag) DO NOTHING`,
+    [tenantId, phone, clean, new Date().toISOString()],
   )
-  return getConversationTags(phone)
+  return getConversationTags(tenantId, phone)
 }
 
-export function removeConversationTag(phone, tag) {
-  db.prepare('DELETE FROM conversation_tags WHERE phone = ? AND tag = ?').run(phone, normalizeTag(tag))
-  return getConversationTags(phone)
+export async function removeConversationTag(tenantId, phone, tag) {
+  await run('DELETE FROM conversation_tags WHERE tenant_id = $1 AND phone = $2 AND tag = $3', [
+    tenantId,
+    phone,
+    normalizeTag(tag),
+  ])
+  return getConversationTags(tenantId, phone)
 }
 
-export function getConversationTags(phone) {
-  return db
-    .prepare('SELECT tag FROM conversation_tags WHERE phone = ? ORDER BY created_at ASC')
-    .all(phone)
-    .map((r) => r.tag)
+export async function getConversationTags(tenantId, phone) {
+  const rows = await many(
+    'SELECT tag FROM conversation_tags WHERE tenant_id = $1 AND phone = $2 ORDER BY created_at ASC',
+    [tenantId, phone],
+  )
+  return rows.map((r) => r.tag)
 }
 
 // Per-phone lifecycle/agent/assignee, for groupMessagesByPhone on the
 // frontend — it used to read this from the static mockData.contactMeta,
 // now it's real per-conversation state.
-export function getConversationsMeta() {
-  const rows = db.prepare('SELECT phone, lifecycle, agent, assignee FROM conversations').all()
+export async function getConversationsMeta(tenantId) {
+  const rows = await many(
+    'SELECT phone, lifecycle, agent, assignee FROM conversations WHERE tenant_id = $1',
+    [tenantId],
+  )
 
   // Las etiquetas se traen de una sola consulta y se agrupan en memoria: con
   // una por conversación esto sería N+1 contra la base para nada.
   const tagsByPhone = new Map()
-  for (const { phone, tag } of db
-    .prepare('SELECT phone, tag FROM conversation_tags ORDER BY created_at ASC')
-    .all()) {
+  const tags = await many(
+    'SELECT phone, tag FROM conversation_tags WHERE tenant_id = $1 ORDER BY created_at ASC',
+    [tenantId],
+  )
+  for (const { phone, tag } of tags) {
     if (!tagsByPhone.has(phone)) tagsByPhone.set(phone, [])
     tagsByPhone.get(phone).push(tag)
   }
@@ -275,43 +314,44 @@ export function getConversationsMeta() {
 
 // Reasignación manual desde la ficha del contacto: pisa lo que haya decidido el
 // ruteador para los próximos mensajes de esa conversación.
-export function setConversationAgent(phone, agentKey) {
-  const agent = getAgentByKey(agentKey)
+export async function setConversationAgent(tenantId, phone, agentKey) {
+  const agent = await getAgentByKey(tenantId, agentKey)
   if (!agent) return null
-  db.prepare('UPDATE conversations SET agent = ?, updated_at = ? WHERE phone = ?').run(
+  await run('UPDATE conversations SET agent = $1, updated_at = $2 WHERE tenant_id = $3 AND phone = $4', [
     agent.key,
     new Date().toISOString(),
+    tenantId,
     phone,
-  )
-  return getConversation(phone)
+  ])
+  return getConversation(tenantId, phone)
 }
 
-export function getOpenDrafts() {
-  const open = getOpenDay()
+export async function getOpenDrafts(tenantId) {
+  const open = await getOpenDay(tenantId)
   if (!open) return {}
-  const rows = db
-    .prepare(
-      `SELECT phone, ai_draft AS text, ai_draft_created_at AS createdAt, ai_draft_category AS category
-       FROM conversations WHERE ai_draft IS NOT NULL`,
-    )
-    .all()
+  const rows = await many(
+    `SELECT phone, ai_draft AS text, ai_draft_created_at AS "createdAt", ai_draft_category AS category
+     FROM conversations WHERE tenant_id = $1 AND ai_draft IS NOT NULL`,
+    [tenantId],
+  )
   return Object.fromEntries(rows.map(({ phone, ...draft }) => [phone, draft]))
 }
 
-export function discardDraft(phone) {
-  clearDraft(phone)
+export async function discardDraft(tenantId, phone) {
+  await clearDraft(tenantId, phone)
 }
 
 // Central pipeline: an incoming message, wherever it comes from (real Meta
 // webhook or the /dev/simulate-incoming shortcut), goes through the exact
 // same classify -> auto-send-or-draft flow.
-export async function handleIncomingMessage({ phone, channel = 'whatsapp', text, customerName, externalId }) {
-  const dayId = mostRecentDayId()
+export async function handleIncomingMessage(tenantId, { phone, channel = 'whatsapp', text, customerName, externalId }) {
+  const dayId = await mostRecentDayId(tenantId)
   if (!dayId) throw new Error('No hay ningún día registrado todavía')
 
-  const conversation = ensureConversation(phone, { channel, customer: customerName || phone })
+  const conversation = await ensureConversation(tenantId, phone, { channel, customer: customerName || phone })
 
-  const incoming = insertMessage({
+  const now = new Date().toISOString()
+  const incoming = await insertMessage(tenantId, {
     id: `in-${crypto.randomUUID()}`,
     phone,
     customer: conversation.customer,
@@ -322,30 +362,38 @@ export async function handleIncomingMessage({ phone, channel = 'whatsapp', text,
     author: null,
     externalId: externalId ?? null,
     dayId,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
   })
 
-  const settings = getSettings()
+  // Este entrante reabre la ventana de servicio de 24h de WhatsApp. Se guarda
+  // siempre, incluso si después falla todo lo demás: es lo que decide si más
+  // tarde se puede contestar con texto libre o hace falta una plantilla.
+  await run('UPDATE conversations SET last_inbound_at = $1, updated_at = $1 WHERE tenant_id = $2 AND phone = $3', [
+    now,
+    tenantId,
+    phone,
+  ])
+
+  const settings = await getSettings(tenantId)
 
   // Si está cerrado avisamos enseguida, antes de que la IA redacte: el cliente
   // recibe la respuesta al toque. La clasificación sigue igual, así el borrador
   // queda listo para cuando abran.
   const dentroDeHorario = isWithinBusinessHours(settings)
-  const away = dentroDeHorario ? null : await sendAwayMessage(conversation, settings)
+  const away = dentroDeHorario ? null : await sendAwayMessage(tenantId, conversation, settings)
 
-  const products = getProducts()
-  const history = db
-    .prepare(
-      `SELECT text, direction FROM messages
-       WHERE phone = ? AND direction IN ('in', 'out') AND id != ?
-       ORDER BY created_at ASC`,
-    )
-    .all(phone, incoming.id)
+  const products = await getProducts(tenantId)
+  const history = await many(
+    `SELECT text, direction FROM messages
+     WHERE tenant_id = $1 AND phone = $2 AND direction IN ('in', 'out') AND id != $3
+     ORDER BY created_at ASC`,
+    [tenantId, phone, incoming.id],
+  )
 
-  const agents = getEnabledAgents()
+  const agents = await getEnabledAgents(tenantId)
   if (agents.length === 0) {
     console.error('[ai] no hay agentes habilitados, el mensaje queda pendiente')
-    db.prepare("UPDATE messages SET type = 'pendiente' WHERE id = ?").run(incoming.id)
+    await run(`UPDATE messages SET type = 'pendiente' WHERE tenant_id = $1 AND id = $2`, [tenantId, incoming.id])
     return { incoming, outgoing: null, classification: null, away }
   }
 
@@ -360,32 +408,40 @@ export async function handleIncomingMessage({ phone, channel = 'whatsapp', text,
     classification = await classifyAndDraft({ settings, products, agents, currentAgent, history, text })
   } catch (err) {
     console.error('[ai] classifyAndDraft failed, leaving message as pendiente:', err)
-    db.prepare("UPDATE messages SET type = 'pendiente' WHERE id = ?").run(incoming.id)
     // Sin clasificación tampoco hay agente elegido: dejamos el que ya venía
     // atendiendo para que la conversación no quede sin dueño en la bandeja.
     const fallback = currentAgent ?? agents[0]
-    db.prepare('UPDATE messages SET agent_key = ? WHERE id = ?').run(fallback.key, incoming.id)
+    await run(`UPDATE messages SET type = 'pendiente', agent_key = $1 WHERE tenant_id = $2 AND id = $3`, [
+      fallback.key,
+      tenantId,
+      incoming.id,
+    ])
     return { incoming: { ...incoming, agentKey: fallback.key }, outgoing: null, classification: null, away }
   }
 
   const { agent, category, canAutoSend, reply } = classification
 
-  db.prepare('UPDATE conversations SET agent = ?, updated_at = ? WHERE phone = ?').run(
+  await run('UPDATE conversations SET agent = $1, updated_at = $2 WHERE tenant_id = $3 AND phone = $4', [
     agent.key,
     new Date().toISOString(),
+    tenantId,
     phone,
-  )
-  db.prepare('UPDATE messages SET agent_key = ? WHERE id = ?').run(agent.key, incoming.id)
-  db.prepare('UPDATE messages SET type = ? WHERE id = ?').run(category, incoming.id)
+  ])
+  await run('UPDATE messages SET agent_key = $1, type = $2 WHERE tenant_id = $3 AND id = $4', [
+    agent.key,
+    category,
+    tenantId,
+    incoming.id,
+  ])
 
   // Fuera de horario nunca se auto-envía, por más seguro que se haya sentido el
   // modelo: ya se mandó el aviso de ausencia y la respuesta real queda como
   // borrador para que el equipo la mande cuando abra.
-  const open = getOpenDay()
+  const open = await getOpenDay(tenantId)
   if (category === 'automatico' && canAutoSend && open && dentroDeHorario) {
     try {
-      const outgoing = await sendOutboundMessage(phone, reply, 'bot', agent.key)
-      db.prepare("UPDATE messages SET status = 'resuelto' WHERE id = ?").run(incoming.id)
+      const outgoing = await sendOutboundMessage(tenantId, phone, reply, 'bot', agent.key)
+      await run(`UPDATE messages SET status = 'resuelto' WHERE tenant_id = $1 AND id = $2`, [tenantId, incoming.id])
       return {
         incoming: { ...incoming, type: category, status: 'resuelto', agentKey: agent.key },
         outgoing,
@@ -403,9 +459,12 @@ export async function handleIncomingMessage({ phone, channel = 'whatsapp', text,
     }
   }
 
-  db.prepare(
-    'UPDATE conversations SET ai_draft = ?, ai_draft_created_at = ?, ai_draft_category = ?, updated_at = ? WHERE phone = ?',
-  ).run(reply, new Date().toISOString(), category, new Date().toISOString(), phone)
+  const ahora = new Date().toISOString()
+  await run(
+    `UPDATE conversations SET ai_draft = $1, ai_draft_created_at = $2, ai_draft_category = $3, updated_at = $2
+     WHERE tenant_id = $4 AND phone = $5`,
+    [reply, ahora, category, tenantId, phone],
+  )
 
   return { incoming: { ...incoming, type: category, agentKey: agent.key }, outgoing: null, classification, agent, away }
 }

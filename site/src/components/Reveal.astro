@@ -1,0 +1,23 @@
+---
+// Muestra a sus hijos cuando entran en pantalla, para que la landing se sienta
+// viva al scrollear en vez de haberse animado entera arriba de todo, donde
+// nadie la vio.
+//
+// Antes era un componente React con su propio useState y su propio observer por
+// elemento. Ya no: envuelve a medio sitio, y una isla de React alrededor de
+// cada bloque hubiera embarcado la página entera en JavaScript, que es
+// justamente lo que se venía a evitar al pasar a Astro. Ahora esto no es más
+// que un <div> con una clase, y quien observa es un único IntersectionObserver
+// declarado en el layout — uno para toda la página en lugar de veinte.
+const { as: Tag = 'div', variant = 'up', delay = 0, class: className = '', ...rest } = Astro.props
+
+const CLASE_VARIANTE = { up: '', fade: 'reveal-fade', scale: 'reveal-scale' }
+---
+
+<Tag
+  class:list={['reveal', CLASE_VARIANTE[variant] ?? '', className]}
+  style={delay ? `--d: ${delay}ms` : undefined}
+  {...rest}
+>
+  <slot />
+</Tag>

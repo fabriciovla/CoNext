@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro'
+
+// Esta URL se carga en la consola de Meta, así que no se cambia una vez
+// publicada: queda escrita en la configuración de la app y la revisan de nuevo
+// cada tanto. El nombre del archivo es la ruta, así que renombrarlo es
+// cambiarla.
+---
+
+<Base
+  title="Política de privacidad — chrm."
+  description="Qué datos trata chrm., para qué, y cómo pedir que se borren."
+>
+  {/* El ancho de lectura lo pone la página: el layout dejó de imponer uno para
+      que la landing pueda ir de borde a borde. El texto va acá adentro. */}
+  <div class="mx-auto w-full max-w-3xl px-6 py-20"></div>
+</Base>

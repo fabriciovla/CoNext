@@ -1,0 +1,86 @@
+---
+import { IconChevronDown } from '../icons.jsx'
+
+// Preguntas frecuentes. Se abre de a una: con varias abiertas hay que scrollear
+// para encontrar la siguiente pregunta, que es justo lo que se venía a evitar.
+//
+// Era React con un useState. Ahora el estado vive en un `data-abierta` del
+// contenedor y el CSS cuelga de ahí con variantes `group-data-[...]`; el script
+// del final solo mueve ese atributo. Son veinte líneas contra el runtime de
+// React entero.
+//
+// Está hecho con <button> y no con <details>: el plegado nativo salta de golpe
+// y no se puede animar el alto. La contra es que hay que poner a mano el
+// aria-expanded y el aria-controls que <details> trae de fábrica.
+const { preguntas } = Astro.props
+---
+
+<div class="border-t border-border" id="faq">
+  {
+    preguntas.map(({ pregunta, respuesta }, i) => (
+      <div class="group border-b border-border" data-abierta={i === 0 ? 'true' : 'false'}>
+        <h3>
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-6 py-5 text-left"
+            aria-expanded={i === 0 ? 'true' : 'false'}
+            aria-controls={`respuesta-${i}`}
+          >
+            <span class="text-[15.5px] font-medium text-ink-secondary transition-colors duration-200 group-hover:text-ink-primary group-data-[abierta=true]:text-ink-primary">
+              {pregunta}
+            </span>
+            <IconChevronDown
+              size={17}
+              className="shrink-0 text-ink-muted transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[abierta=true]:rotate-180 group-data-[abierta=true]:text-ink-primary"
+            />
+          </button>
+        </h3>
+
+        {/* La grilla de 0fr a 1fr es el truco para animar un alto que no se
+            conoce de antemano. El contenido queda montado y solo se lo tapa, así
+            que hace falta `aria-hidden` para que el lector de pantalla no lea
+            las cinco respuestas de corrido. No se usa `hidden`, que sería lo
+            obvio, porque es `display: none` y mataría la animación; acá adentro
+            no hay nada enfocable, así que aria-hidden alcanza. */}
+        <div
+          id={`respuesta-${i}`}
+          aria-hidden={i === 0 ? 'false' : 'true'}
+          class="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[abierta=true]:grid-rows-[1fr] group-data-[abierta=true]:opacity-100"
+        >
+          <div class="overflow-hidden">
+            <p class="max-w-2xl pb-5 pr-8 text-[14.5px] leading-relaxed text-ink-secondary">
+              {respuesta}
+            </p>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  const items = document.querySelectorAll('#faq > [data-abierta]')
+
+  items.forEach((item) => {
+    const boton = item.querySelector('button')
+    const panel = item.querySelector('[id^="respuesta-"]')
+
+    boton?.addEventListener('click', () => {
+      const abrir = item.getAttribute('data-abierta') !== 'true'
+
+      // Se cierran todas y después se abre la tocada, si correspondía abrirla.
+      // Volver a tocar la que ya estaba abierta la cierra.
+      items.forEach((otro) => {
+        otro.setAttribute('data-abierta', 'false')
+        otro.querySelector('button')?.setAttribute('aria-expanded', 'false')
+        otro.querySelector('[id^="respuesta-"]')?.setAttribute('aria-hidden', 'true')
+      })
+
+      if (abrir) {
+        item.setAttribute('data-abierta', 'true')
+        boton.setAttribute('aria-expanded', 'true')
+        panel?.setAttribute('aria-hidden', 'false')
+      }
+    })
+  })
+</script>

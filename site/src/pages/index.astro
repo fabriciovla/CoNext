@@ -1,0 +1,394 @@
+---
+import Base from '../layouts/Base.astro'
+import Reveal from '../components/Reveal.astro'
+import Titulo from '../components/landing/Titulo.astro'
+import Boton from '../components/Boton.jsx'
+import AppMock from '../components/landing/AppMock.jsx'
+import ControlAgente from '../components/landing/ControlAgente.astro'
+import Faq from '../components/landing/Faq.astro'
+import {
+  IconArrowRight,
+  IconBolt,
+  IconBox,
+  IconChart,
+  IconCheck,
+  IconChevronRight,
+  IconClock,
+  IconInbox,
+  IconShield,
+  IconSparkles,
+  IconTag,
+  IconWhatsApp,
+} from '../components/icons.jsx'
+import { WHATSAPP_URL } from '../config'
+
+// Las funciones que se muestran son las que la app tiene de verdad, una por
+// pantalla o por comportamiento real. Prometer de más en la landing se paga en
+// la primera demo.
+const FUNCIONES = [
+  {
+    Icono: IconInbox,
+    titulo: 'Una sola bandeja',
+    texto:
+      'Todas las conversaciones en un lugar, con carpetas, etiquetas y estado de entrega. Se termina el "¿este ya lo contestó alguien?".',
+  },
+  {
+    Icono: IconSparkles,
+    titulo: 'Agentes de IA',
+    texto:
+      'Creás un agente por tema — ventas, envíos, posventa — y a cada uno le escribís su rol y sus instrucciones en castellano. Sin programar nada.',
+  },
+  {
+    Icono: IconBolt,
+    titulo: 'Automático o borrador',
+    texto:
+      'Cada agente decide si manda su respuesta solo o te la deja escrita para que la revises. Un interruptor, agente por agente.',
+  },
+  {
+    Icono: IconBox,
+    titulo: 'Productos y stock',
+    texto:
+      'Los agentes responden precios y disponibilidad con tu catálogo a la vista, y la pantalla de inicio te avisa qué se está por acabar.',
+  },
+  {
+    Icono: IconClock,
+    titulo: 'Horarios de atención',
+    texto:
+      'Tus días y tu horario, con un mensaje de fuera de hora que contesta a las tres de la mañana para que nadie se quede esperando.',
+  },
+  {
+    Icono: IconChart,
+    titulo: 'El día, medido',
+    texto:
+      'Cuánto respondió la IA y cuánto vos, cuánto tardaste en contestar, a qué hora se te llena de mensajes y qué quedó pendiente.',
+  },
+]
+
+const PASOS = [
+  {
+    titulo: 'Conectás tu número',
+    texto:
+      'Se enlaza tu WhatsApp Business con tu propia cuenta de Meta. El número es tuyo y la cuenta también: si un día te vas, te los llevás.',
+  },
+  {
+    titulo: 'Le contás cómo trabajás',
+    texto:
+      'Cargás tus productos con precio y stock, tus días y horarios, y tus respuestas de siempre. Después armás los agentes que hagan falta.',
+  },
+  {
+    titulo: 'Mirás la bandeja',
+    texto:
+      'Los agentes atienden. Vos entrás cuando algo necesita una persona — y la bandeja te marca exactamente cuáles son.',
+  },
+]
+
+const GARANTIAS = [
+  {
+    Icono: IconShield,
+    titulo: 'Tu número no corre riesgo',
+    texto:
+      'Todo pasa por la API oficial de WhatsApp Business, que es la vía que Meta habilita para automatizar. No hay que clonar una sesión ni dejar un teléfono enchufado en un rincón.',
+  },
+  {
+    Icono: IconTag,
+    titulo: 'Varias personas, un número',
+    texto:
+      'Tu equipo y los agentes trabajan sobre la misma bandeja, cada uno con su usuario. Nadie tiene que pedir prestado el celular del local.',
+  },
+  {
+    Icono: IconCheck,
+    titulo: 'Tus datos son tuyos',
+    texto:
+      'Cada negocio tiene sus conversaciones separadas de las del resto y sus credenciales de WhatsApp guardadas cifradas. Y si querés irte, se borra todo.',
+  },
+]
+
+const PREGUNTAS = [
+  {
+    pregunta: '¿Necesito un número nuevo?',
+    respuesta:
+      'No, podés usar el que ya venís usando — con una condición: un número conectado a la API no puede estar al mismo tiempo en la app de WhatsApp del celular. Si hoy lo atendés a mano desde el teléfono y no querés cortar eso todavía, lo más cómodo es arrancar con un número aparte y mudar el principal cuando te sientas cómodo.',
+  },
+  {
+    pregunta: '¿Y si el agente no sabe algo o mete la pata?',
+    respuesta:
+      'Para eso está el modo borrador: el agente escribe pero no manda hasta que vos lo aprobés. Es lo recomendable las primeras semanas, hasta que veas cómo responde con tus clientes reales. Cuando un tema ya lo maneja bien, le prendés el envío automático solo a ese agente y dejás el resto esperando.',
+  },
+  {
+    pregunta: '¿Mis clientes se dan cuenta de que les contesta una IA?',
+    respuesta:
+      'El mensaje les llega como cualquier otro de tu negocio, y el agente responde con el tono que vos le indiques. Del lado de adentro sí queda registrado quién contestó cada cosa, así podés revisar cualquier conversación después.',
+  },
+  {
+    pregunta: '¿Qué pasa con los datos de mis conversaciones?',
+    respuesta:
+      'Son tuyos y no se mezclan con los de otro negocio: cada cliente tiene su propio espacio en la base. Los tokens de WhatsApp se guardan cifrados. No vendemos datos ni se los pasamos a nadie, y podés pedir que se borre todo cuando quieras.',
+  },
+  {
+    pregunta: '¿Cuánto sale?',
+    respuesta:
+      'El software se paga por mes, según el tamaño de tu operación. Aparte de eso, Meta cobra las conversaciones directamente a tu cuenta y con su tarifa — no le agregamos nada encima ni te lo facturamos nosotros. Escribinos y lo vemos con tus números sobre la mesa.',
+  },
+]
+
+const CONTROL = [
+  'Probalo en borrador las primeras semanas',
+  'Prendé el automático de a un agente por vez',
+  'Cada respuesta queda registrada con quién la mandó',
+]
+
+// Ancho común de todas las secciones. Vive acá y no en el layout porque la
+// landing tiene fondos que van de borde a borde (el resplandor del hero, la
+// franja de la última llamada) y un contenedor más arriba se los cortaría.
+const CONTENEDOR = 'mx-auto w-full max-w-6xl px-6'
+
+const TITULO = 'chrm. — CRM de WhatsApp con agentes de IA'
+const DESCRIPCION =
+  'Atendé el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas, sobre la API oficial de WhatsApp.'
+---
+
+<Base title={TITULO} description={DESCRIPCION}>
+  {/* ---------------------------------------------------------------------- */}
+  {/* Hero                                                                    */}
+  {/* ---------------------------------------------------------------------- */}
+  <section class="relative overflow-hidden pt-14 sm:pt-20">
+    {/* Resplandor de fondo. `overflow-hidden` en la sección es lo que evita que
+        empuje una barra de scroll horizontal en pantallas chicas. */}
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-40 left-1/2 h-[560px] w-[900px] -translate-x-1/2 rounded-full bg-accent-gradient opacity-[0.13] blur-[130px]"
+    >
+    </div>
+
+    {/* Alineado a la izquierda: es la lectura natural, el ojo arranca todos los
+        renglones en el mismo lugar en vez de tener que buscar dónde empieza cada
+        uno. Centrado se banca un titular suelto, pero acá abajo hay subtítulo,
+        botones y una línea de pie, y todos ellos comparten el mismo margen. */}
+    <div class={CONTENEDOR}>
+      {/* Enlace de anuncio, no una etiqueta decorativa: lleva a la sección que
+          explica por qué la vía oficial importa. */}
+      <Reveal
+        as="a"
+        variant="fade"
+        href="#garantias"
+        class="group inline-flex items-center gap-2 text-[14px] text-violet transition-colors duration-200 hover:text-ink-primary"
+      >
+        <IconWhatsApp size={15} className="text-status-good" />
+        Sobre la API oficial de WhatsApp Business
+        <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+      </Reveal>
+
+      {/* Los tres renglones están cortados a mano, no repartidos por el
+          navegador: el corte es parte de cómo se lee el titular.
+          Los <br> solo existen de lg para arriba. El primer renglón mide unos
+          900px a 50px de cuerpo, así que abajo de 1024px no entra y forzarlo ahí
+          daría cinco líneas desparejas en vez de tres. En pantallas chicas manda
+          `text-balance`, que reparte solo; de lg para arriba se lo desactiva con
+          `lg:text-wrap` para que no pelee contra los cortes de acá. */}
+      <Reveal
+        as="h1"
+        delay={80}
+        class="mt-7 max-w-5xl text-balance text-[32px] font-semibold leading-[1.12] tracking-tight text-ink-primary sm:text-[40px] lg:text-[50px] lg:leading-[1.08] lg:text-wrap"
+      >
+        Unifica tus canales de comunicación y
+        <br class="hidden lg:inline" /> potencia cada respuesta con
+        <br class="hidden lg:inline" /> Inteligencia Artificial
+      </Reveal>
+
+      <Reveal as="p" delay={160} class="mt-7 max-w-2xl text-[17px] leading-relaxed text-ink-secondary">
+        <span class="font-medium text-ink-primary">chrm.</span> es el CRM que atiende tu WhatsApp con
+        agentes de inteligencia artificial. Responden precios, stock y envíos con la información de tu
+        negocio — y la última palabra sigue siendo tuya.
+      </Reveal>
+
+      <Reveal delay={240} class="mt-10 flex flex-wrap items-center gap-3">
+        <Boton href={WHATSAPP_URL} tamano="lg">
+          Pedir una demo
+          <IconArrowRight size={17} />
+        </Boton>
+        <Boton href="#como-funciona" variante="secundario" tamano="lg">Ver cómo funciona</Boton>
+      </Reveal>
+
+      <Reveal as="p" delay={320} class="mt-7 text-[13px] leading-relaxed text-ink-muted">
+        Tu número, tu cuenta de Meta. Sin apps no oficiales ni celulares colgados de un cargador.
+      </Reveal>
+    </div>
+
+    {/* La app, abajo del texto y cortada por el borde de la pantalla. Que se vea
+        incompleta es a propósito: da a entender que hay más y empuja a seguir
+        bajando, y de paso evita tener que encoger la interfaz hasta que no se
+        lea nada. */}
+    <Reveal variant="scale" delay={160} class={`${CONTENEDOR} mt-16 sm:mt-20`}>
+      <div class="relative">
+        <AppMock />
+        {/* El degradé de abajo funde la maqueta con el fondo de la página en vez
+            de cortarla con una línea dura. */}
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-surface-page"
+        >
+        </div>
+      </div>
+    </Reveal>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* Funciones                                                               */}
+  {/* ---------------------------------------------------------------------- */}
+  <section id="funciones" class="scroll-mt-24 py-20 sm:py-28">
+    <div class={CONTENEDOR}>
+      <Titulo
+        etiqueta="Qué hace"
+        titulo="Lo que hoy hacés a mano, en un solo lugar."
+        texto="No es un chatbot con un árbol de opciones. Es la bandeja donde trabaja tu negocio, con la IA adentro."
+      />
+
+      {/* El gap de 1px sobre un fondo de color de borde dibuja la grilla sin
+          bordes por tarjeta, que se duplicarían entre vecinas. */}
+      <div
+        class="stagger mt-14 grid gap-px overflow-hidden rounded-3xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {
+          FUNCIONES.map(({ Icono, titulo, texto }) => (
+            <Reveal class="group bg-surface-page p-7 transition-colors duration-300 hover:bg-surface-card">
+              <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-soft text-violet transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105">
+                <Icono size={20} />
+              </span>
+              <h3 class="mt-5 text-[16.5px] font-semibold text-ink-primary">{titulo}</h3>
+              <p class="mt-2.5 text-[14.5px] leading-relaxed text-ink-secondary">{texto}</p>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* El control                                                              */}
+  {/* ---------------------------------------------------------------------- */}
+  <section class="py-20 sm:py-28">
+    <div class={`${CONTENEDOR} grid items-center gap-14 lg:grid-cols-2 lg:gap-20`}>
+      <div>
+        <Titulo
+          etiqueta="El control"
+          titulo="La IA escribe. Vos decidís si sale."
+          texto="Los temas que ya sabés que responde bien, que los atienda sola. Los que tocan plata, un descuento o un cliente enojado, que te esperen. Se cambia de opinión con un clic, agente por agente."
+        />
+        <Reveal delay={120} class="mt-8 space-y-3">
+          {
+            CONTROL.map((linea) => (
+              <p class="flex items-start gap-3 text-[14.5px] text-ink-secondary">
+                <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-status-good/10 text-status-good">
+                  <IconCheck size={12} />
+                </span>
+                {linea}
+              </p>
+            ))
+          }
+        </Reveal>
+      </div>
+
+      <Reveal variant="scale" delay={100}>
+        <ControlAgente />
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* Cómo funciona                                                           */}
+  {/* ---------------------------------------------------------------------- */}
+  <section id="como-funciona" class="scroll-mt-24 py-20 sm:py-28">
+    <div class={CONTENEDOR}>
+      <Titulo etiqueta="Cómo empieza" titulo="Tres pasos y ya está atendiendo." />
+
+      <ol class="stagger mt-14 grid gap-10 sm:grid-cols-3 sm:gap-8">
+        {
+          PASOS.map(({ titulo, texto }, i) => (
+            <Reveal as="li">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[14px] font-semibold tabular-nums text-violet">
+                {i + 1}
+              </span>
+              <h3 class="mt-5 text-[17px] font-semibold text-ink-primary">{titulo}</h3>
+              <p class="mt-2.5 text-[14.5px] leading-relaxed text-ink-secondary">{texto}</p>
+            </Reveal>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* Garantías                                                               */}
+  {/* ---------------------------------------------------------------------- */}
+  <section id="garantias" class="scroll-mt-24 py-20 sm:py-28">
+    <div class={CONTENEDOR}>
+      <Titulo
+        etiqueta="Por qué la vía oficial"
+        titulo="Automatizar WhatsApp sin jugarte el número."
+        texto="Las herramientas que se cuelgan de la app del celular funcionan hasta que Meta las detecta. Esta es la puerta que Meta abre para esto."
+      />
+
+      <div class="stagger mt-14 grid gap-8 sm:grid-cols-3">
+        {
+          GARANTIAS.map(({ Icono, titulo, texto }) => (
+            <Reveal class="rounded-2xl border border-border bg-surface-card p-6">
+              <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.05] text-ink-primary">
+                <Icono size={19} />
+              </span>
+              <h3 class="mt-5 text-[16px] font-semibold text-ink-primary">{titulo}</h3>
+              <p class="mt-2.5 text-[14px] leading-relaxed text-ink-secondary">{texto}</p>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* Preguntas                                                               */}
+  {/* ---------------------------------------------------------------------- */}
+  <section id="preguntas" class="scroll-mt-24 py-20 sm:py-28">
+    <div class={`${CONTENEDOR} max-w-3xl`}>
+      <Titulo etiqueta="Preguntas" titulo="Lo que todos preguntan antes de empezar." />
+      {/* Las respuestas viajan enteras en el HTML, aunque arranquen plegadas:
+          un buscador las lee aunque el JavaScript no llegue nunca. */}
+      <Reveal delay={100} class="mt-12">
+        <Faq preguntas={PREGUNTAS} />
+      </Reveal>
+    </div>
+  </section>
+
+  {/* ---------------------------------------------------------------------- */}
+  {/* Última llamada                                                          */}
+  {/* ---------------------------------------------------------------------- */}
+  <section class="pb-24 pt-4 sm:pb-32">
+    <div class={CONTENEDOR}>
+      <Reveal
+        variant="scale"
+        class="relative overflow-hidden rounded-3xl border border-white/10 bg-surface-card px-8 py-16 text-center sm:px-16 sm:py-20"
+      >
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute -bottom-32 left-1/2 h-72 w-[680px] -translate-x-1/2 rounded-full bg-accent-gradient opacity-20 blur-[110px]"
+        >
+        </div>
+        <div class="relative">
+          <h2
+            class="mx-auto max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-ink-primary sm:text-[40px]"
+          >
+            Contános cómo atendés hoy y te mostramos cómo quedaría.
+          </h2>
+          <p class="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-ink-secondary">
+            Una demo de veinte minutos, con tus productos y tus preguntas de todos los días.
+          </p>
+          <div class="mt-9 flex flex-wrap justify-center gap-3">
+            <Boton href={WHATSAPP_URL} tamano="lg">
+              <IconWhatsApp size={17} />
+              Escribinos por WhatsApp
+            </Boton>
+          </div>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+</Base>

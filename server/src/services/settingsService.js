@@ -1,4 +1,4 @@
-import db from '../db/index.js'
+import { one, run } from '../db/index.js'
 
 function mapRow(row) {
   return {
@@ -12,30 +12,42 @@ function mapRow(row) {
   }
 }
 
-export function getSettings() {
-  const row = db.prepare('SELECT * FROM settings WHERE id = 1').get()
+export async function getSettings(tenantId) {
+  const row = await one('SELECT * FROM settings WHERE tenant_id = $1', [tenantId])
   return row ? mapRow(row) : null
 }
 
-export function updateSettings(changes) {
-  const current = getSettings() ?? {}
+export async function updateSettings(tenantId, changes) {
+  const current = (await getSettings(tenantId)) ?? {}
   const next = { ...current, ...changes }
 
-  db.prepare(
-    `INSERT INTO settings (id, store_name, whatsapp_number, open_time, close_time, days_open, welcome_message, away_message)
-     VALUES (1, @storeName, @whatsappNumber, @openTime, @closeTime, @daysOpen, @welcomeMessage, @awayMessage)
-     ON CONFLICT(id) DO UPDATE SET
-       store_name = excluded.store_name,
-       whatsapp_number = excluded.whatsapp_number,
-       open_time = excluded.open_time,
-       close_time = excluded.close_time,
-       days_open = excluded.days_open,
-       welcome_message = excluded.welcome_message,
-       away_message = excluded.away_message`,
-    // awayMessage puede faltar si el cliente manda un settings parcial de antes
-    // de que existiera el campo: sin el fallback, SQLite corta por parámetro
-    // nombrado ausente.
-  ).run({ ...next, daysOpen: JSON.stringify(next.daysOpen), awayMessage: next.awayMessage ?? '' })
+  // El renglón lo crea provisionTenant en el alta, así que acá alcanzaría un
+  // UPDATE. Se deja el upsert igual para que un tenant cuyo alta quedó a medias
+  // se pueda arreglar guardando la configuración, en vez de fallar en silencio.
+  await run(
+    `INSERT INTO settings (tenant_id, store_name, whatsapp_number, open_time, close_time, days_open, welcome_message, away_message)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     ON CONFLICT (tenant_id) DO UPDATE SET
+       store_name = EXCLUDED.store_name,
+       whatsapp_number = EXCLUDED.whatsapp_number,
+       open_time = EXCLUDED.open_time,
+       close_time = EXCLUDED.close_time,
+       days_open = EXCLUDED.days_open,
+       welcome_message = EXCLUDED.welcome_message,
+       away_message = EXCLUDED.away_message`,
+    [
+      tenantId,
+      next.storeName ?? '',
+      next.whatsappNumber ?? '',
+      next.openTime ?? '09:00',
+      next.closeTime ?? '18:00',
+      JSON.stringify(next.daysOpen ?? []),
+      next.welcomeMessage ?? '',
+      // awayMessage puede faltar si el cliente manda un settings parcial de
+      // antes de que existiera el campo.
+      next.awayMessage ?? '',
+    ],
+  )
 
-  return getSettings()
+  return getSettings(tenantId)
 }

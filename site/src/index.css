@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* La tipografía de la marca, servida por nosotros y no por Google Fonts: sin
+   request a un tercero el sitio no depende de que ese dominio esté arriba ni
+   filtra la IP de quien visita.
+   Es el subconjunto latino del peso 800 (18 KB); alcanza para el logotipo y
+   para cualquier título que quiera la misma voz. Si algún día hace falta otro
+   peso, se baja su .woff2 al mismo directorio y se agrega otro @font-face —
+   este no sirve para interpolar.
+   `block` y no `swap` porque hoy el único que la usa es el logotipo, y su
+   viewBox está calculado contra estas métricas: con `swap` se vería un instante
+   el fallback a Verdana, más ancho, cortado por el borde del SVG. Así queda
+   invisible mientras baja (~100 ms, y va precargada desde index.html) en vez de
+   aparecer mal. Si algún día la fuente pasa a usarse en textos largos, ese
+   criterio se invierte y conviene `swap`. */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('/fonts/baloo2-latin-800.woff2') format('woff2');
+}
+
+/* Inter, la tipografía de todo lo demás. El tema la pedía desde siempre pero
+   nadie la servía: sin esto el sitio caía al primer fallback del stack, que en
+   Windows es Segoe UI y en Android otro distinto — la landing se veía diferente
+   según con qué la abrieran.
+   Es la variable (400 a 700 en un solo archivo, 48 KB): un archivo pesa menos
+   que los cuatro pesos estáticos que usa esta página y además deja disponible
+   cualquier valor intermedio.
+   Acá sí `swap`: son textos largos, y leerlos en Segoe UI 200 ms es mejor que
+   mirar una página en blanco. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* Los enlaces del menú bajan a su sección en vez de teletransportarse, así se
+   entiende que uno sigue en la misma página. Quien pidió menos movimiento lo
+   recupera instantáneo abajo, en el bloque de prefers-reduced-motion. */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-surface-page text-ink-primary antialiased;
+}
+
+::selection {
+  background: rgba(144, 133, 233, 0.35);
+}
+
+/* Sistema de animación
+   ---------------------------------------------------------------------------
+   Mismo criterio que en la dashboard (keyframes en CSS plano, retraso opcional
+   vía `--d`), pero acá las cosas no se animan al cargar sino al entrar en
+   pantalla: una landing se recorre scrolleando y una sección que ya se animó
+   mientras estaba fuera de vista es una sección que el visitante nunca vio
+   moverse. De eso se encarga el observer que declara el layout, que agrega
+   `is-visible` a cada `.reveal` al cruzar el viewport; hasta entonces el
+   contenido está puesto pero quieto. */
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-base: 320ms;
+  --dur-slow: 560ms;
+}
+
+@keyframes ui-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ui-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer utilities {
+  /* El estado de partida se declara en el elemento y no en el keyframe: si la
+     animación nunca llega a correr (JS caído, observer no soportado), lo que
+     manda es `.reveal` — por eso el layout marca todo como visible cuando no
+     hay IntersectionObserver, y trae un <noscript> que hace lo mismo cuando no
+     hay JavaScript en absoluto, en vez de dejar la página invisible. */
+  .reveal {
+    opacity: 0;
+  }
+  .reveal.is-visible {
+    animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) forwards;
+  }
+  .reveal-fade.is-visible {
+    animation-name: ui-fade-in;
+  }
+  .reveal-scale.is-visible {
+    animation-name: ui-scale-in;
+  }
+
+  /* Escalona los hijos directos sin calcular delays en JS. Se combina con
+     `.reveal`: cada hijo arranca al entrar en pantalla y esto reparte el
+     retraso dentro de la grilla. */
+  .stagger > *:nth-child(1) {
+    --d: 0ms;
+  }
+  .stagger > *:nth-child(2) {
+    --d: 70ms;
+  }
+  .stagger > *:nth-child(3) {
+    --d: 140ms;
+  }
+  .stagger > *:nth-child(4) {
+    --d: 210ms;
+  }
+  .stagger > *:nth-child(5) {
+    --d: 280ms;
+  }
+  .stagger > *:nth-child(6) {
+    --d: 350ms;
+  }
+  .stagger > *:nth-child(n + 7) {
+    --d: 420ms;
+  }
+}
+
+/* Nada de todo lo anterior debería marear a quien pidió menos movimiento. El
+   `opacity: 1` no es decorativo: sin él, `.reveal` dejaría la página entera
+   invisible cuando las animaciones duran 0.01 ms y nunca se ven. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

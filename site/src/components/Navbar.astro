@@ -1,0 +1,115 @@
+---
+import Logo from './Logo.jsx'
+import Boton from './Boton.jsx'
+import { WHATSAPP_URL } from '../config'
+
+// Era un componente React hidratado con `client:load`, o sea 134 KB de runtime
+// de React en todas las páginas —incluidas las legales, que no tienen nada
+// interactivo— para poder abrir y cerrar un menú. Ahora es HTML con un script
+// de quince líneas al final, y el sitio no manda React al navegador.
+//
+// Los enlaces viven en un array para que sumar uno sea una línea.
+//
+// Son las secciones de la landing, no las páginas legales: las legales pasaron
+// al pie, que es donde la gente las busca. Acá arriba va lo que ayuda a decidir.
+//
+// Van a `/#seccion` y no a `#seccion` porque la barra está en todas las
+// páginas; desde /terminos un ancla suelta no lleva a ningún lado. Con la barra
+// adelante el navegador vuelve al inicio y baja hasta ahí.
+const ENLACES = [
+  { href: '/#funciones', label: 'Funciones' },
+  { href: '/#como-funciona', label: 'Cómo funciona' },
+  { href: '/#preguntas', label: 'Preguntas' },
+]
+
+const CLASE_ENLACE =
+  'text-[14.5px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary'
+
+// Las dos barras del ícono son el mismo elemento moviéndose, así no hay
+// parpadeo al cambiar de ícono. El estado abierto se lee del `aria-expanded`
+// del botón en vez de una clase aparte: ya hay que mantenerlo para que un
+// lector de pantalla se entere, y así no hay dos fuentes de verdad que se
+// puedan desincronizar.
+const BARRA =
+  'absolute left-0 block h-0.5 w-full rounded-full bg-current transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'
+---
+
+{/* `sticky` y no `fixed`: así no hay que compensar la altura con padding en
+    cada página, que es de donde suelen salir los saltos de layout. */}
+<header class="sticky top-0 z-50 border-b border-border bg-surface-page/80 backdrop-blur-md">
+  <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+    <a href="/" class="text-ink-primary transition-opacity duration-200 hover:opacity-80">
+      {/* La altura la fija el alto; el ancho lo resuelve el viewBox. El logo ya
+          lleva su propio aria-label, así que el enlace se anuncia como
+          "chrm., enlace" sin necesidad de texto adicional. */}
+      <Logo className="h-10 w-auto" />
+    </a>
+
+    {/* Escritorio */}
+    <div class="hidden items-center gap-9 md:flex">
+      <ul class="flex items-center gap-9">
+        {ENLACES.map(({ href, label }) => (
+          <li>
+            <a href={href} class={CLASE_ENLACE}>{label}</a>
+          </li>
+        ))}
+      </ul>
+      <Boton href={WHATSAPP_URL}>Pedir una demo</Boton>
+    </div>
+
+    {/* Móvil */}
+    <button
+      type="button"
+      id="boton-menu"
+      aria-expanded="false"
+      aria-controls="menu-movil"
+      aria-label="Abrir menú"
+      class="group flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]
+        text-ink-primary transition-all duration-200 hover:border-white/25 active:scale-95 md:hidden"
+    >
+      <span class="relative block h-4 w-6">
+        <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
+        <span
+          class={`${BARRA} top-[calc(100%-0.375rem)] group-aria-expanded:top-1/2 group-aria-expanded:-rotate-45`}
+        ></span>
+      </span>
+    </button>
+  </nav>
+
+  {/* Cerrado va con el atributo `hidden`, que es `display: none`: escondido de
+      cualquier otra forma seguiría siendo alcanzable por teclado desde el
+      fondo. */}
+  <div id="menu-movil" hidden class="border-t border-border px-6 pb-6 pt-2 md:hidden">
+    <ul>
+      {ENLACES.map(({ href, label }) => (
+        <li>
+          <a href={href} class={`${CLASE_ENLACE} block py-3.5`}>{label}</a>
+        </li>
+      ))}
+    </ul>
+    <Boton href={WHATSAPP_URL} className="mt-4 w-full">Pedir una demo</Boton>
+  </div>
+</header>
+
+<script>
+  const boton = document.getElementById('boton-menu')
+  const menu = document.getElementById('menu-movil')
+
+  boton?.addEventListener('click', () => {
+    const abierto = boton.getAttribute('aria-expanded') === 'true'
+    boton.setAttribute('aria-expanded', String(!abierto))
+    boton.setAttribute('aria-label', abierto ? 'Abrir menú' : 'Cerrar menú')
+    if (menu) menu.hidden = abierto
+  })
+
+  // Tocar un enlace del menú lo cierra. Los enlaces son anclas dentro de la
+  // misma página, así que sin esto el menú queda tapando lo que se acaba de ir
+  // a ver.
+  menu?.querySelectorAll('a').forEach((enlace) =>
+    enlace.addEventListener('click', () => {
+      menu.hidden = true
+      boton?.setAttribute('aria-expanded', 'false')
+      boton?.setAttribute('aria-label', 'Abrir menú')
+    }),
+  )
+</script>
