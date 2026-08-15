@@ -9,7 +9,13 @@
 import 'dotenv/config'
 import { migrate } from '../src/db/migrate.js'
 import { one, run, closePool } from '../src/db/index.js'
-import { initialMessages, contactMeta, initialProducts, initialSettings } from '../../src/data/mockData.js'
+import {
+  initialMessages,
+  contactMeta,
+  initialProductFolders,
+  initialProducts,
+  initialSettings,
+} from '../../src/data/mockData.js'
 
 const ref = process.argv[2]
 
@@ -57,15 +63,24 @@ await run(
 )
 
 const now = new Date().toISOString()
-for (const p of initialProducts) {
-  await run('INSERT INTO products (tenant_id, id, name, price, stock, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [
+
+// Las carpetas van antes que los productos: la foránea de folder_id no deja
+// colgar un producto de una carpeta que todavía no existe.
+for (const f of initialProductFolders) {
+  await run('INSERT INTO product_folders (tenant_id, id, name, created_at) VALUES ($1, $2, $3, $4)', [
     tenantId,
-    p.id,
-    p.name,
-    p.price,
-    p.stock,
+    f.id,
+    f.name,
     now,
   ])
+}
+
+for (const p of initialProducts) {
+  await run(
+    `INSERT INTO products (tenant_id, id, name, price, stock, folder_id, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [tenantId, p.id, p.name, p.price, p.stock, p.folderId, now],
+  )
 }
 
 const earliest = initialMessages.reduce(
@@ -98,9 +113,9 @@ for (const m of initialMessages) {
 for (const [phone, customer] of customerByPhone) {
   const meta = contactMeta[phone] ?? {}
   await run(
-    `INSERT INTO conversations (tenant_id, phone, channel, customer, lifecycle, agent, assignee, created_at, updated_at)
-     VALUES ($1, $2, 'whatsapp', $3, $4, $5, $6, $7, $7)`,
-    [tenantId, phone, customer, meta.lifecycle ?? 'nuevo', meta.agent ?? 'recepcion', meta.assignee ?? null, earliest],
+    `INSERT INTO conversations (tenant_id, phone, channel, customer, agent, assignee, created_at, updated_at)
+     VALUES ($1, $2, 'whatsapp', $3, $4, $5, $6, $6)`,
+    [tenantId, phone, customer, meta.agent ?? 'recepcion', meta.assignee ?? null, earliest],
   )
 }
 

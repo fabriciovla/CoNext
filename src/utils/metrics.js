@@ -74,6 +74,54 @@ export function messagesByHour(messages, { openTime, closeTime }) {
   return bars
 }
 
+// Los tres números de la fila de KPIs, calculados sobre cualquier lista de
+// mensajes: sirven para el día abierto y también para uno archivado, que es
+// contra lo que se compara la variación. Solo cuentan los entrantes — un
+// saliente es una respuesta nuestra, no actividad del cliente.
+export function dayStats(messages) {
+  const entrantes = messages.filter((m) => m.direction === 'in')
+  return {
+    total: entrantes.length,
+    automaticos: entrantes.filter((m) => m.type === 'automatico').length,
+    pendientes: entrantes.filter((m) => m.status === 'pendiente').length,
+  }
+}
+
+// Serie por hora de cada KPI, para la miniatura de su tarjeta. Cada punto se
+// calcula con los mensajes que había *hasta* esa hora (acumulado), así el
+// último punto es exactamente el número grande que la tarjeta muestra al lado:
+// la línea es cómo se llegó a ese número, no otro dato.
+export function kpiTrends(messages, settings) {
+  const bars = messagesByHour(messages, settings)
+  // Las horas muertas del principio se recortan (queda una sola, para que se
+  // vea de dónde arranca). El rango de `messagesByHour` empieza cuando abre el
+  // negocio, así que un día que se abrió a la tarde dibujaba media línea plana
+  // y después un pico contra el borde: eso no es la forma del día, es el hueco.
+  const primeraActiva = bars.findIndex((b) => b.total > 0)
+  const desde = primeraActiva <= 0 ? 0 : primeraActiva - 1
+  const horas = bars.slice(desde).map((b) => b.hour)
+  const series = { mensajes: [], pendientes: [], automatizacion: [], respuesta: [] }
+
+  for (const hora of horas) {
+    const hasta = messages.filter((m) => new Date(m.createdAt).getHours() <= hora)
+    const { total, automaticos, pendientes } = dayStats(hasta)
+    series.mensajes.push(total)
+    series.pendientes.push(pendientes)
+    series.automatizacion.push(total ? Math.round((automaticos / total) * 100) : 0)
+    series.respuesta.push(averageResponseMinutes(hasta) ?? 0)
+  }
+
+  return series
+}
+
+// Variación porcentual contra el día anterior, redondeada. Devuelve null si no
+// hay con qué comparar (primer día, o el día previo en cero): un "+100%" contra
+// la nada dice menos que no mostrar nada.
+export function percentChange(current, previous) {
+  if (!Number.isFinite(current) || !Number.isFinite(previous) || previous === 0) return null
+  return Math.round(((current - previous) / previous) * 100)
+}
+
 // Estado del horario de atención configurado, comparado con el reloj.
 export function storeSchedule(settings, now = new Date()) {
   const today = DAY_LABELS[now.getDay()]
@@ -97,9 +145,15 @@ export function repliesByAuthor(messages) {
   return { total: salientes.length, bot, admin: salientes.length - bot }
 }
 
+// Debajo de esta cantidad un producto está "bajo". Vive acá y no en cada
+// pantalla porque lo miran dos: las alertas de Inicio y la tabla de Productos.
+// Con el número escrito en los dos lados, cambiarlo en uno dejaba a Inicio
+// avisando por productos que la tabla mostraba como normales.
+export const STOCK_BAJO = 10
+
 // Productos que necesitan atención, del más urgente al menos: primero los que
-// se quedaron sin stock. El umbral es el mismo que usa la tabla de Productos.
-export function stockAlerts(products, threshold = 10) {
+// se quedaron sin stock.
+export function stockAlerts(products, threshold = STOCK_BAJO) {
   return products
     .filter((product) => product.stock <= threshold)
     .sort((a, b) => a.stock - b.stock)

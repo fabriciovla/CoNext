@@ -62,8 +62,18 @@ try {
   // ---------- datos propios de cada uno ----------
   console.log('\n== carga de datos distintos en cada cliente ==')
 
-  await products.addProduct(a.id, { name: 'PRODUCTO-ALFA', price: 100, stock: 5 })
-  await products.addProduct(b.id, { name: 'PRODUCTO-BETA', price: 200, stock: 7 })
+  const carpetaA = (await products.addFolder(a.id, { name: 'CARPETA-ALFA' })).folder
+  const carpetaB = (await products.addFolder(b.id, { name: 'CARPETA-BETA' })).folder
+
+  // El índice que impide carpetas repetidas lleva el tenant adelante: "Ofertas"
+  // es una carpeta que van a tener casi todos los negocios.
+  const ofertasA = await products.addFolder(a.id, { name: 'Ofertas' })
+  const ofertasB = await products.addFolder(b.id, { name: 'Ofertas' })
+  check('la misma carpeta puede existir en los dos clientes', Boolean(ofertasA.folder && ofertasB.folder))
+  check('repetir el nombre dentro del mismo cliente no se puede', (await products.addFolder(a.id, { name: 'ofertas' })).error === 'duplicada')
+
+  await products.addProduct(a.id, { name: 'PRODUCTO-ALFA', price: 100, stock: 5, folderId: carpetaA.id })
+  await products.addProduct(b.id, { name: 'PRODUCTO-BETA', price: 200, stock: 7, folderId: carpetaB.id })
 
   await quickReplies.addQuickReply(a.id, { shortcut: 'saludo', text: 'RESPUESTA-ALFA' })
   await quickReplies.addQuickReply(b.id, { shortcut: 'saludo', text: 'RESPUESTA-BETA' })
@@ -92,6 +102,7 @@ try {
   console.log('\n== capa de servicios: A no puede ver nada de B ==')
 
   check('getProducts', !contiene(await products.getProducts(a.id), 'BETA'))
+  check('getFolders', !contiene(await products.getFolders(a.id), 'BETA'))
   check('getQuickReplies', !contiene(await quickReplies.getQuickReplies(a.id), 'BETA'))
   check('getAgents', !contiene(await agents.getAgents(a.id), 'BETA'))
   check('getEnabledAgents', !contiene(await agents.getEnabledAgents(a.id), 'BETA'))
@@ -109,6 +120,8 @@ try {
   // porque no ve nada de nadie).
   console.log('\n== …y sí ve lo suyo ==')
   check('getProducts trae lo de A', contiene(await products.getProducts(a.id), 'PRODUCTO-ALFA'))
+  check('getFolders trae lo de A', contiene(await products.getFolders(a.id), 'CARPETA-ALFA'))
+  check('el producto de A viene con su carpeta', contiene(await products.getProducts(a.id), 'CARPETA-ALFA'))
   check('getConversationsMeta trae lo de A', contiene(await conversations.getConversationsMeta(a.id), 'ETIQUETA-ALFA'))
   check('getOpenMessages trae lo de A', contiene(await days.getOpenMessages(a.id), 'NOTA-ALFA'))
   check('getSettings trae lo de A', contiene(await settings.getSettings(a.id), 'TIENDA-ALFA'))
@@ -122,6 +135,25 @@ try {
 
   await products.deleteProduct(a.id, productoB.id)
   check('deleteProduct con el id de B no borra nada', contiene(await products.getProducts(b.id), 'PRODUCTO-BETA'))
+
+  // Un producto no puede terminar dentro de la carpeta de otro cliente: la
+  // carpeta ajena no existe para este, así que el producto queda suelto en vez
+  // de pertenecer a los dos.
+  const colado = await products.addProduct(a.id, { name: 'PRODUCTO-COLADO', price: 1, stock: 1, folderId: carpetaB.id })
+  check('addProduct con la carpeta de B deja el producto sin carpeta', colado.folderId === null)
+  const movido = await products.updateProduct(a.id, colado.id, { folderId: carpetaB.id })
+  check('updateProduct con la carpeta de B tampoco lo mueve', movido.folderId === null)
+
+  check('updateFolder con el id de B da not-found', (await products.updateFolder(a.id, carpetaB.id, { name: 'X' })).error === 'not-found')
+  check('deleteFolder con el id de B no borra nada', (await products.deleteFolder(a.id, carpetaB.id)).deleted === false)
+  check('la carpeta de B sigue viva', contiene(await products.getFolders(b.id), 'CARPETA-BETA'))
+
+  // Esto no es aislamiento sino la otra cosa que no tiene arreglo después:
+  // borrar una carpeta no puede llevarse el catálogo que tenía adentro.
+  await products.deleteFolder(a.id, carpetaA.id)
+  const sueltoAhora = (await products.getProducts(a.id)).find((p) => p.name === 'PRODUCTO-ALFA')
+  check('borrar la carpeta no borra sus productos', Boolean(sueltoAhora))
+  check('los productos de la carpeta borrada quedan sueltos', sueltoAhora?.folderId === null)
 
   const agenteB = (await agents.getAgents(b.id))[0]
   check('getAgent con el id de B devuelve null', (await agents.getAgent(a.id, agenteB.id)) === null)
@@ -178,7 +210,7 @@ try {
     return { status: res.status, body: await res.text() }
   }
 
-  for (const ruta of ['/products', '/agents', '/quick-replies', '/settings', '/conversations/meta', '/messages']) {
+  for (const ruta of ['/products', '/products/folders', '/agents', '/quick-replies', '/settings', '/conversations/meta', '/messages']) {
     const rA = await pedir(ruta, a.apiKey)
     check(`GET ${ruta} con la clave de A no filtra nada de B`, rA.status === 200 && !rA.body.includes('BETA'), `status ${rA.status}`)
   }
@@ -202,6 +234,7 @@ try {
   await run('DELETE FROM tenants WHERE id = ANY($1)', [[a.id, b.id]])
   const restos = await one(
     `SELECT (SELECT COUNT(*) FROM products WHERE tenant_id = ANY($1))::int
+          + (SELECT COUNT(*) FROM product_folders WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM messages WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM conversations WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM agents WHERE tenant_id = ANY($1))::int

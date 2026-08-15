@@ -1,4 +1,5 @@
 import Avatar from './ui/Avatar'
+import Logo from './ui/Logo'
 import {
   IconHome,
   IconInbox,
@@ -8,6 +9,8 @@ import {
   IconChevronDown,
   IconSidebarToggle,
   IconSparkles,
+  IconSun,
+  IconMoon,
 } from './ui/icons'
 
 const NAV_ITEMS = [
@@ -25,27 +28,25 @@ export function NavRow({ icon, emoji, label, count, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`group relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px]
-        transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]
-        ${active ? 'bg-white/[0.09] font-medium text-white' : 'text-white/60 hover:bg-white/[0.05] hover:text-white'}`}
+      // El ítem activo se dice solo con el fondo y el peso del texto. Antes
+      // llevaba además una barrita violeta pegada al borde izquierdo: era una
+      // segunda marca para lo mismo, y con una por cada sección, carpeta y
+      // agente, la columna quedaba con una fila de rayitas al costado.
+      className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px]
+        transition-colors duration-150
+        ${active ? 'bg-tint/[0.09] font-medium text-ink-primary' : 'text-ink-muted hover:bg-tint/[0.05] hover:text-ink-primary'}`}
     >
-      {/* Marca vertical del ítem activo: crece desde el centro. */}
-      <span
-        className={`absolute left-0 top-1/2 w-[3px] -translate-y-1/2 rounded-r-full bg-violet transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          active ? 'h-5 opacity-100' : 'h-0 opacity-0'
-        }`}
-      />
       {emoji ? (
         <span className="w-[16px] shrink-0 text-center text-[13.5px] leading-none">{emoji}</span>
       ) : (
-        <span className={`shrink-0 ${active ? 'text-white' : 'text-white/45 group-hover:text-white/80'}`}>
+        <span className={`shrink-0 ${active ? 'text-ink-primary' : 'text-ink-muted group-hover:text-ink-primary'}`}>
           {icon}
         </span>
       )}
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {count != null && (
         <span
-          className={`shrink-0 text-[11.5px] tabular-nums ${active ? 'text-white/80' : 'text-white/35 group-hover:text-white/60'}`}
+          className={`shrink-0 text-[11.5px] tabular-nums ${active ? 'text-ink-primary' : 'text-ink-faint group-hover:text-ink-muted'}`}
         >
           {count}
         </span>
@@ -60,12 +61,12 @@ export function NavSection({ title, open, onToggle, children }) {
   return (
     <div className="mt-3">
       <button onClick={onToggle} className="group flex w-full items-center justify-between gap-2 px-2.5 py-1 text-left">
-        <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-white/35 transition-colors group-hover:text-white/60">
+        <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-ink-faint transition-colors group-hover:text-ink-muted">
           {title}
         </span>
         <IconChevronDown
           size={13}
-          className={`shrink-0 text-white/35 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-white/60 ${
+          className={`shrink-0 text-ink-faint transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-ink-muted ${
             open ? '' : '-rotate-90'
           }`}
         />
@@ -95,24 +96,27 @@ export default function SideNav({
   onLogout,
   pendingCount = 0,
   onCollapse,
+  theme,
+  onToggleTheme,
   children,
   footer,
 }) {
   return (
-    <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0a0a]">
-      <header className="flex shrink-0 items-center gap-2.5 px-3.5 py-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-gradient text-[13px] font-bold text-white">
-          W
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-white">WhatsApp CRM</p>
-          <p className="truncate text-[10.5px] text-white/35">Panel de administración</p>
-        </div>
+    <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav">
+      {/* Solo el logotipo: el cuadrado con la "W" y el "WhatsApp CRM / Panel de
+          administración" decían tres veces dónde estabas parado, en la única
+          pantalla de la que nadie duda. Hereda el color por `currentColor`, así
+          sirve en los dos temas.
+          El logo se centra contra la barra entera y el botón de ocultar va
+          absoluto: en una fila normal, el ancho del botón correría el centro
+          hacia la izquierda y el logo quedaría descentrado por 12px. */}
+      <header className="relative flex shrink-0 items-center justify-center px-3.5 py-4">
+        <Logo className="h-8 w-auto text-ink-primary" />
         {onCollapse && (
           <button
             onClick={onCollapse}
             title="Ocultar barra"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white/40 transition-colors duration-200 hover:bg-white/[0.06] hover:text-white"
+            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
           >
             <IconSidebarToggle size={15} />
           </button>
@@ -138,16 +142,23 @@ export default function SideNav({
 
       {footer}
 
-      <div className="flex shrink-0 items-center gap-2 border-t border-white/[0.07] px-3 py-2.5">
+      <div className="flex shrink-0 items-center gap-2 border-t border-tint/[0.07] px-3 py-2.5">
         <Avatar name={username} size={28} className="!rounded-full !text-[11px]" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[12px] font-medium capitalize text-white/85">{username}</p>
-          <p className="truncate text-[10.5px] text-white/35">Administrador</p>
+          <p className="truncate text-[12px] font-medium capitalize text-ink-primary">{username}</p>
+          <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
         </div>
+        <button
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
+        >
+          {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
+        </button>
         <button
           onClick={onLogout}
           title="Cerrar sesión"
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-white/40 transition-colors duration-200 hover:bg-white/[0.06] hover:text-white"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
         >
           <IconLogOut size={15} />
         </button>

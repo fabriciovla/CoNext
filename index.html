@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/whatsapp.svg" />
+    <link rel="icon" type="image/webp" href="/logowsp.webp" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +11,15 @@
       rel="stylesheet"
     />
     <title>WhatsApp CRM</title>
+    <script>
+      // Antes de pintar nada: si el tema elegido es el oscuro, el atributo tiene
+      // que estar puesto ya, o cada recarga arranca con un fogonazo blanco
+      // (index.css define el tema claro en `:root` pelado) hasta que React monta.
+      try {
+        var t = localStorage.getItem('wsp-crm:theme')
+        if (t === 'dark') document.documentElement.dataset.theme = 'dark'
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

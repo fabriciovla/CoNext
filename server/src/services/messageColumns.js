@@ -8,8 +8,13 @@
 // Los alias van entre comillas dobles porque Postgres, a diferencia de SQLite,
 // pasa a minúscula todo identificador sin comillar: sin ellas `AS agentKey`
 // llega al frontend como `agentkey` y el campo aparece siempre vacío.
+// `media_path` no está y no tiene que estar: es una ruta del disco del server.
+// El frontend pide el archivo por el id del mensaje (GET /messages/media/:id),
+// que es lo único que se puede scopear por tenant.
 export const MESSAGE_COLUMNS = `
   id, customer, phone, text, direction, type, status, author,
   agent_key AS "agentKey", created_at AS "createdAt",
-  delivery_status AS "deliveryStatus", delivery_error AS "deliveryError"
+  delivery_status AS "deliveryStatus", delivery_error AS "deliveryError",
+  media_kind AS "mediaKind", media_mime AS "mediaMime",
+  media_name AS "mediaName", media_size AS "mediaSize"
 `

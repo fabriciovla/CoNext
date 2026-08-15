@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* La tipografía del logotipo, la misma que sirve la landing (`site/`) y servida
+   por nosotros y no por Google Fonts. Es el subconjunto latino del peso 800
+   (18 KB) y acá la usa una sola cosa: el "chrm." de la barra.
+   `block` y no `swap` porque el viewBox del logo está calculado contra estas
+   métricas: con `swap` se vería un instante el fallback a Verdana, más ancho, y
+   saldría cortado por el borde del SVG. Así queda invisible mientras baja en vez
+   de aparecer mal. */
+@font-face {
+  font-family: 'Baloo 2';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('/fonts/baloo2-latin-800.woff2') format('woff2');
+}
+
 /* Sistema de animación
    ---------------------------------------------------------------------------
    Los keyframes viven acá (CSS plano) y no en tailwind.config.js a propósito:
@@ -9,14 +24,103 @@
    retraso opcional vía `--d`, que es lo que permite escalonar (stagger) una
    grilla o una lista pasando `style={{ '--d': '120ms' }}` desde React. */
 
+/* Temas
+   ---------------------------------------------------------------------------
+   Una sola paleta semántica, dos juegos de valores. Los componentes no nombran
+   colores: usan `surface-*`, `ink-*` y `tint`, y el tema decide qué son.
+
+   `--tint` es la clave del asunto: es el blanco de los bordes y los fondos
+   sutiles del tema oscuro (`bg-tint/[0.04]`, `border-tint/10`), y en el claro
+   pasa a ser negro. Con eso, cada superposición de la app se da vuelta sola.
+
+   El tema se aplica con `data-theme` en el <html> (lo pone useTheme). El claro
+   es el que vive en `:root` para que sea también lo que se ve antes de que
+   corra el JS. */
+:root {
+  --tint: 24 24 27;
+  --surface-page: 245 245 247;
+  --surface-card: 255 255 255;
+  --surface-raised: 255 255 255;
+  --surface-hover: 240 240 243;
+  --surface-nav: 250 250 251;
+  /* Escala de texto: cuatro niveles sólidos, no alfa. El texto con alfa sobre
+     fondo claro se lava mucho más que sobre uno oscuro, así que cada nivel se
+     define por tema y se elige para que se lea: hasta el más tenue queda por
+     encima de 4.5:1 contra su fondo. */
+  --ink-primary: 24 24 27;
+  --ink-secondary: 63 63 70;
+  --ink-muted: 90 90 99;
+  --ink-faint: 122 122 133;
+  --ink-inverted: 255 255 255;
+  --border: 24 24 27;
+  --border-strong: 24 24 27;
+  --violet: 84 72 191;
+  --violet-soft: 231 229 251;
+  --status-good: 21 128 61;
+  --status-warning: 180 120 10;
+  --status-serious: 194 91 45;
+  --status-critical: 190 40 40;
+  /* Texto encima de un fondo de estado sólido (el globo de no leídos). */
+  --status-ink: 255 255 255;
+  /* Las tarjetas se apoyan en el borde, no en la sombra: lo que las separa del
+     fondo es la línea de 1px, y la sombra es apenas un susurro para que el
+     blanco sobre gris claro no se vea pegado. La sombra grande se reserva para
+     lo que de verdad flota (modal, menú, tooltip) — ver `--shadow-pop`. */
+  --shadow-card: 0 1px 2px -1px rgba(24, 24, 27, 0.06);
+  --shadow-card-hover: 0 1px 2px -1px rgba(24, 24, 27, 0.08), 0 6px 16px -12px rgba(24, 24, 27, 0.3);
+  --shadow-pop: 0 8px 28px -8px rgba(24, 24, 27, 0.18), 0 2px 8px -4px rgba(24, 24, 27, 0.12);
+  /* Velo del modal. Es la única variable de color que se escribe con su alfa
+     adentro (y no como terna RGB): lo que cambia entre temas no es el color
+     sino cuánto tapa. Sobre una página clara, el mismo negro al 80% que en el
+     tema oscuro apaga la pantalla entera para preguntar si borrás un producto;
+     acá alcanza con retirar el fondo. */
+  --scrim: rgba(24, 24, 27, 0.45);
+  --scrollbar-thumb: rgba(24, 24, 27, 0.18);
+  --scrollbar-thumb-hover: rgba(24, 24, 27, 0.3);
+}
+
+:root[data-theme='dark'] {
+  --tint: 255 255 255;
+  --surface-page: 0 0 0;
+  --surface-card: 13 13 13;
+  --surface-raised: 22 22 22;
+  --surface-hover: 30 30 30;
+  --surface-nav: 10 10 10;
+  --ink-primary: 255 255 255;
+  --ink-secondary: 196 196 202;
+  --ink-muted: 150 150 158;
+  --ink-faint: 114 114 122;
+  --ink-inverted: 0 0 0;
+  --border: 255 255 255;
+  --border-strong: 255 255 255;
+  --violet: 144 133 233;
+  --violet-soft: 46 42 80;
+  --status-good: 12 163 12;
+  --status-warning: 250 178 25;
+  --status-serious: 236 131 90;
+  --status-critical: 208 59 59;
+  --status-ink: 0 0 0;
+  /* Sobre negro una sombra no se ve: lo único que levanta la tarjeta es la
+     línea interior de arriba, que simula el canto iluminado. */
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.03) inset;
+  --shadow-card-hover: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset;
+  --shadow-pop: 0 16px 40px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --scrim: rgba(0, 0, 0, 0.8);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.22);
+}
+
 :root {
   /* Salidas largas y frenado suave: da la sensación "cara" sin rebote. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-pop: cubic-bezier(0.34, 1.28, 0.64, 1);
-  --dur-fast: 180ms;
-  --dur-base: 320ms;
-  --dur-slow: 560ms;
+  /* Tiempos cortos a propósito. Con la escala anterior (base 320 / slow 560, y
+     el escalonado sumando 60ms por hijo) una página tardaba más de un segundo en
+     terminar de aparecer: nada se trababa, pero se sentía lenta. */
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 380ms;
 }
 
 html,
@@ -35,7 +139,7 @@ body {
 }
 
 * {
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
 }
 ::-webkit-scrollbar {
@@ -43,12 +147,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--scrollbar-thumb);
   border-radius: 999px;
   transition: background 200ms ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--scrollbar-thumb-hover);
 }
 
 @keyframes ui-fade-in {
@@ -183,12 +287,12 @@ body {
   }
   .animate-grow-up {
     transform-origin: bottom;
-    animation: ui-grow-up 700ms var(--ease-out-expo) var(--d, 0ms) backwards;
+    animation: ui-grow-up 480ms var(--ease-out-expo) var(--d, 0ms) backwards;
   }
   .animate-draw {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: ui-draw 1200ms var(--ease-out-soft) var(--d, 0ms) forwards;
+    animation: ui-draw 800ms var(--ease-out-soft) var(--d, 0ms) forwards;
   }
   .animate-pulse-ring {
     animation: ui-pulse-ring 2.4s var(--ease-out-soft) infinite;
@@ -204,31 +308,31 @@ body {
     animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) backwards;
   }
   .stagger > *:nth-child(1) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 40ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 20ms);
   }
   .stagger > *:nth-child(2) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 100ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 50ms);
   }
   .stagger > *:nth-child(3) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 160ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 80ms);
   }
   .stagger > *:nth-child(4) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 220ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 110ms);
   }
   .stagger > *:nth-child(5) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 280ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 140ms);
   }
   .stagger > *:nth-child(6) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 340ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 170ms);
   }
   .stagger > *:nth-child(7) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 400ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 200ms);
   }
   .stagger > *:nth-child(8) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 460ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 230ms);
   }
   .stagger > *:nth-child(n + 9) {
-    animation-delay: calc(var(--stagger-base, 0ms) + 520ms);
+    animation-delay: calc(var(--stagger-base, 0ms) + 250ms);
   }
 
   /* Realce compartido de tarjetas: borde y sombra, sin mover el layout. */

@@ -7,3 +7,6 @@ dist-ssr
 .env.*
 !.env.example
 server/data
+# Los adjuntos que se mandan desde el composer. Son datos de cada instalación,
+# no del repo.
+server/uploads

@@ -10,15 +10,20 @@ export default function AnimatedNumber({ value, duration = 900, delay = 0, class
   const raw = match?.[0] ?? ''
   const separator = raw.includes(',') ? ',' : '.'
   const decimals = /[.,]/.test(raw) ? raw.split(/[.,]/)[1].length : 0
-  const animated = useCountUp(parseFloat(raw.replace(',', '.')), { duration, delay, decimals })
+  const ref = useCountUp(parseFloat(raw.replace(',', '.')), {
+    duration,
+    delay,
+    format: (v) => v.toFixed(decimals).replace('.', separator),
+  })
 
   if (!match) return <span className={className}>{text}</span>
 
-  const shown = animated.toFixed(decimals).replace('.', separator)
   return (
     <span className={className}>
       {text.slice(0, match.index)}
-      <span className="tabular-nums">{shown}</span>
+      {/* Va vacío a propósito: el número lo escribe el hook en el DOM. Si lo
+          renderizara React, cada cuadro de la cuenta sería un render más. */}
+      <span ref={ref} className="tabular-nums" />
       {text.slice(match.index + raw.length)}
     </span>
   )

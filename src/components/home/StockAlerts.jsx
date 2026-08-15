@@ -43,7 +43,7 @@ export default function StockAlerts({ products, onNavigate }) {
       )}
 
       <div
-        className="animate-fade-in mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 text-xs"
+        className="animate-fade-in mt-4 flex items-center justify-between border-t border-tint/[0.06] pt-3 text-xs"
         style={{ '--d': '450ms' }}
       >
         <span className="text-ink-muted">

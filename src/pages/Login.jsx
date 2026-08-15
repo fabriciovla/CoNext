@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
+import WhatsappMark from '../components/ui/WhatsappMark'
 
 export default function Login({ onLogin, error }) {
   const [username, setUsername] = useState('')
@@ -21,7 +22,7 @@ export default function Login({ onLogin, error }) {
 
       <div className="relative w-full max-w-[360px]">
         <div className="animate-fade-down mb-7 flex items-center gap-3">
-          <img src="/whatsapp.svg" alt="" className="h-10 w-10 rounded-xl" />
+          <WhatsappMark size={40} />
           <div>
             <p className="text-base font-semibold text-ink-primary">WhatsApp CRM</p>
             <p className="text-xs text-ink-muted">Ingresá para administrar tu tienda</p>
@@ -30,7 +31,7 @@ export default function Login({ onLogin, error }) {
 
         <form
           onSubmit={handleSubmit}
-          className="stagger space-y-4 rounded-2xl border border-white/[0.06] bg-surface-card p-6 shadow-card"
+          className="stagger space-y-4 rounded-2xl border border-tint/[0.06] bg-surface-card p-6 shadow-card"
           style={{ '--stagger-base': '120ms' }}
         >
           <Input

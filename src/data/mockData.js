@@ -153,14 +153,6 @@ export const initialMessages = [
     createdAt: '2026-08-10T09:11:50',
   },
   {
-    id: 'e2',
-    phone: '+54 9 11 2345-6789',
-    customer: 'Laura Gómez',
-    text: 'Etapa **Nuevo lead** actualizada a **Lead caliente** por vos',
-    direction: 'evento',
-    createdAt: '2026-08-10T09:13:10',
-  },
-  {
     id: 'n1',
     phone: '+54 9 11 2345-6789',
     customer: 'Laura Gómez',
@@ -188,37 +180,37 @@ export const initialMessages = [
   },
 ]
 
-// Etapas del ciclo de vida del contacto. El emoji es parte de la etiqueta: es
-// lo que hace que la lista se lea de un vistazo sin depender del color.
-export const LIFECYCLES = [
-  { key: 'nuevo', label: 'Nuevo lead', emoji: '🆕' },
-  { key: 'caliente', label: 'Lead caliente', emoji: '🔥' },
-  { key: 'cliente', label: 'Cliente', emoji: '😊' },
-  { key: 'pago', label: 'Pago', emoji: '💰' },
-  { key: 'frio', label: 'Lead frío', emoji: '🧊' },
-]
-
 // Los agentes ya no viven acá: son configurables y se leen de GET /agents
 // (useAgents). Lo que queda en `contactMeta` es solo la key con la que quedó
 // asociada cada conversación de ejemplo.
 
-// Ficha del contacto: etapa, agente que lo atendió y responsable humano.
+// Ficha del contacto: agente que lo atendió y responsable humano.
 // `assignee: null` = sin asignar (la carpeta que el equipo mira primero).
 export const contactMeta = {
-  '+54 9 11 2345-6789': { lifecycle: 'caliente', agent: 'recepcion', assignee: 'admin' },
-  '+54 9 11 3344-5566': { lifecycle: 'cliente', agent: 'soporte', assignee: 'admin' },
-  '+54 9 11 9988-7766': { lifecycle: 'nuevo', agent: 'recepcion', assignee: null },
-  '+54 9 11 5566-1122': { lifecycle: 'pago', agent: 'soporte', assignee: null },
-  '+54 9 11 7788-3344': { lifecycle: 'cliente', agent: 'ventas', assignee: 'admin' },
-  '+54 9 11 4455-2233': { lifecycle: 'frio', agent: 'ventas', assignee: null },
+  '+54 9 11 2345-6789': { agent: 'recepcion', assignee: 'admin' },
+  '+54 9 11 3344-5566': { agent: 'soporte', assignee: 'admin' },
+  '+54 9 11 9988-7766': { agent: 'recepcion', assignee: null },
+  '+54 9 11 5566-1122': { agent: 'soporte', assignee: null },
+  '+54 9 11 7788-3344': { agent: 'ventas', assignee: 'admin' },
+  '+54 9 11 4455-2233': { agent: 'ventas', assignee: null },
 }
 
+// Carpetas del catálogo de ejemplo. Estos ids son solo para atar los productos
+// de abajo desde el seed; en la base los genera el server.
+export const initialProductFolders = [
+  { id: 'f1', name: 'Indumentaria' },
+  { id: 'f2', name: 'Calzado' },
+  { id: 'f3', name: 'Accesorios' },
+]
+
+// La campera queda a propósito sin carpeta: es el estado en el que nace todo
+// producto, y así la sección arranca mostrando también esa fila.
 export const initialProducts = [
-  { id: 'p1', name: 'Remera básica algodón', price: 12500, stock: 34 },
-  { id: 'p2', name: 'Buzo canguro friza', price: 27900, stock: 12 },
-  { id: 'p3', name: 'Zapatillas urbanas', price: 45900, stock: 0 },
-  { id: 'p4', name: 'Gorra bordada', price: 8900, stock: 21 },
-  { id: 'p5', name: 'Campera impermeable', price: 39900, stock: 5 },
+  { id: 'p1', name: 'Remera básica algodón', price: 12500, stock: 34, folderId: 'f1' },
+  { id: 'p2', name: 'Buzo canguro friza', price: 27900, stock: 12, folderId: 'f1' },
+  { id: 'p3', name: 'Zapatillas urbanas', price: 45900, stock: 0, folderId: 'f2' },
+  { id: 'p4', name: 'Gorra bordada', price: 8900, stock: 21, folderId: 'f3' },
+  { id: 'p5', name: 'Campera impermeable', price: 39900, stock: 5, folderId: null },
 ]
 
 export const initialSettings = {

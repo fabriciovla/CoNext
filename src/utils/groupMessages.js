@@ -9,9 +9,29 @@
 //     cliente, y una traza del sistema ahí no dice nada.
 const ES_MENSAJE = (m) => m.direction === 'in' || m.direction === 'out'
 
+// Un adjunto sin epígrafe no tiene texto, y en la lista quedaba una fila muda:
+// la conversación se veía saltar arriba de todo sin decir por qué. Se nombra lo
+// que se mandó, como hace cualquier chat.
+const NOMBRE_ADJUNTO = {
+  image: 'Foto',
+  audio: 'Audio',
+  video: 'Video',
+  document: 'Archivo',
+}
+
+function vistaPrevia(message) {
+  if (message.text) return message.text
+  if (message.mediaKind) {
+    return message.mediaKind === 'document' && message.mediaName
+      ? message.mediaName
+      : NOMBRE_ADJUNTO[message.mediaKind]
+  }
+  return ''
+}
+
 // `assignments` son los responsables que se cambiaron en vivo desde el chat;
-// lo que no está ahí cae en el responsable que trae `contactsMeta` (lifecycle/
-// agent/assignee por teléfono, servido por GET /conversations/meta).
+// lo que no está ahí cae en el responsable que trae `contactsMeta` (agente,
+// responsable y etiquetas por teléfono, servido por GET /conversations/meta).
 export function groupMessagesByPhone(messages, assignments = {}, contactsMeta = {}) {
   const byPhone = new Map()
 
@@ -33,7 +53,7 @@ export function groupMessagesByPhone(messages, assignments = {}, contactsMeta = 
       phone,
       customer: entrantes[entrantes.length - 1]?.customer ?? last.customer,
       lastAt: last.createdAt,
-      lastText: last.text,
+      lastText: vistaPrevia(last),
       lastFromStore: last.direction === 'out',
       lastFromBot: last.direction === 'out' && last.author === 'bot',
       messages: sorted,
@@ -41,7 +61,6 @@ export function groupMessagesByPhone(messages, assignments = {}, contactsMeta = 
       automaticos: entrantes.filter((m) => m.type === 'automatico').length,
       pendientes: entrantes.filter((m) => m.status === 'pendiente').length,
       notas: sorted.filter((m) => m.direction === 'nota').length,
-      lifecycle: meta.lifecycle ?? 'nuevo',
       tags: meta.tags ?? [],
       agent: meta.agent ?? 'recepcion',
       assignee: phone in assignments ? assignments[phone] : (meta.assignee ?? null),

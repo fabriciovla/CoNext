@@ -17,10 +17,39 @@ function buildRoster(agents) {
     .join('\n')
 }
 
+// El catálogo va agrupado por carpeta. Las carpetas son las categorías con las
+// que el negocio piensa lo que vende, y son lo único que le permite al modelo
+// contestar "¿qué bebidas tienen?" sin deducirlo del nombre de cada producto.
+// Los que no están en ninguna se listan aparte y con su propio encabezado: sin
+// él, colgarían del último grupo y el modelo ofrecería una gaseosa como si
+// fuera un panificado.
+function buildCatalog(products) {
+  if (products.length === 0) return '  (sin productos cargados)'
+
+  const carpetas = new Map()
+  const sueltos = []
+  for (const p of products) {
+    if (!p.folderName) {
+      sueltos.push(p)
+      continue
+    }
+    if (!carpetas.has(p.folderName)) carpetas.set(p.folderName, [])
+    carpetas.get(p.folderName).push(p)
+  }
+
+  if (carpetas.size === 0) return sueltos.map((p) => `  - ${p.name}: $${p.price}, stock: ${p.stock} unidades`).join('\n')
+
+  const linea = (p) => `    - ${p.name}: $${p.price}, stock: ${p.stock} unidades`
+  const bloques = [...carpetas].map(([carpeta, items]) => `  ${carpeta}:\n${items.map(linea).join('\n')}`)
+  if (sueltos.length > 0) bloques.push(`  Sin categoría:\n${sueltos.map(linea).join('\n')}`)
+  return bloques.join('\n')
+}
+
 export function buildSystemPrompt(settings, products, agents, currentAgent, now = new Date()) {
-  const productLines = products
-    .map((p) => `  - ${p.name}: $${p.price}, stock: ${p.stock} unidades`)
-    .join('\n')
+  const productLines = buildCatalog(products)
+  // Sin carpetas cargadas el catálogo sale plano, y anunciarlo como agrupado
+  // sería describirle al modelo algo que no está viendo.
+  const agrupado = products.some((p) => p.folderName)
 
   const continuidad = currentAgent
     ? `La conversación la viene atendiendo "${currentAgent.key}": mantenelo salvo que este último mensaje claramente cambie de tema hacia el criterio de otro (por ejemplo, una consulta de precio que pasa a ser un reclamo).`
@@ -43,8 +72,8 @@ HORARIOS Y DÍAS DE ATENCIÓN (única fuente de verdad — no inventes otros):
 MENSAJE DE BIENVENIDA DE REFERENCIA (para tono, no para copiar literal):
   "${settings.welcomeMessage}"
 
-CATÁLOGO DE PRODUCTOS (única fuente de verdad de stock y precio — no inventes productos, precios ni stock que no estén acá):
-${productLines || '  (sin productos cargados)'}
+CATÁLOGO DE PRODUCTOS${agrupado ? ', agrupado por categoría' : ''} (única fuente de verdad de stock y precio — no inventes productos, precios ni stock que no estén acá):
+${productLines}
 
 TU TAREA: para el último mensaje entrante del cliente, devolvé:
   - agentKey: la key del agente del equipo que tiene que atenderlo.
@@ -58,6 +87,14 @@ TU TAREA: para el último mensaje entrante del cliente, devolvé:
   - reply: la respuesta redactada, lista para enviar tal cual, con la voz del agente que elegiste.
     Tono cercano, argentino, profesional, como el dueño de la tienda respondiendo personalmente.
     Usá el nombre del cliente si lo tenés.
+
+FORMATO DEL MENSAJE — WhatsApp NO entiende Markdown. Escribí con las marcas de WhatsApp:
+  - Negrita: *así*, con UN asterisco de cada lado. Nunca **así**: al cliente le llegan los
+    asteriscos a la vista y queda peor que sin resaltar nada.
+  - Itálica: _así_. Tachado: ~así~.
+  - Listas: una línea por ítem arrancando con "- ". Nunca con "*" ni con "•".
+  - Nada de títulos con #, nada de [texto](link) — los links van pelados — y nada de tablas.
+  - Resaltá poco: un precio o un dato clave. Un mensaje todo en negrita no resalta nada.
 
 REGLAS ESTRICTAS — NUNCA:
   - Inventes stock, precios o productos que no estén en el catálogo de arriba.

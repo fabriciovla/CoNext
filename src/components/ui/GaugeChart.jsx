@@ -38,27 +38,28 @@ export default function GaugeChart({ value, label, subtitle }) {
           role="img"
           aria-label={`${label}: ${clamped}%`}
         >
+          {/* Arco fino y en violeta, sin resplandor: antes era una banda negra de
+              14px con drop-shadow, y pesaba más que el número que envuelve. */}
           <path
             d={arcPath(cx, cy, r, 0, 1)}
             fill="none"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="14"
+            stroke="rgb(var(--tint) / 0.1)"
+            strokeWidth="7"
             strokeLinecap="round"
           />
           <path
             d={arcPath(cx, cy, r, 0, 1)}
             pathLength="1"
             fill="none"
-            stroke="#ffffff"
-            strokeWidth="14"
+            stroke="rgb(var(--violet))"
+            strokeWidth="7"
             strokeLinecap="round"
             strokeDasharray="1"
             strokeDashoffset={1 - progress}
             className="transition-[stroke-dashoffset] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{ filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.28))' }}
           />
         </svg>
-        <p className="pointer-events-none absolute inset-x-0 bottom-0 text-center text-3xl font-semibold text-ink-primary">
+        <p className="pointer-events-none absolute inset-x-0 bottom-0 text-center text-[30px] font-semibold tracking-tight text-ink-primary">
           <AnimatedNumber value={`${clamped}%`} duration={1100} delay={120} />
         </p>
       </div>

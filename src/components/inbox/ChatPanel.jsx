@@ -1,24 +1,20 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import Avatar from '../ui/Avatar'
+import FormattedText, { stripFormat } from '../ui/FormattedText'
 import MessageBubble from './MessageBubble'
-import { LIFECYCLES } from '../../data/mockData'
+import EmojiPicker from './EmojiPicker'
 import { findAgent } from '../../utils/agents'
 import {
   IconSend,
   IconInbox,
-  IconSearch,
-  IconClock,
-  IconPhone,
-  IconCheckCircle,
-  IconDots,
-  IconChevronDown,
   IconSparkles,
   IconSmile,
-  IconPaperclip,
-  IconTemplate,
   IconNote,
+  IconPaperclip,
   IconMic,
-  IconUser,
+  IconStop,
+  IconTrash,
+  IconFile,
+  IconClose,
 } from '../ui/icons'
 
 function formatDayLabel(iso) {
@@ -29,10 +25,6 @@ function formatDayLabel(iso) {
   })
 }
 
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-}
-
 function sameDay(a, b) {
   return new Date(a).toDateString() === new Date(b).toDateString()
 }
@@ -41,40 +33,48 @@ function sameDay(a, b) {
 // que descubrirlo cuando la API lo rechaza.
 const MAX_CARACTERES = 4096
 
-// Los emojis que realmente se usan atendiendo: saludos, confirmaciones y
-// plata. Un picker completo sería una dependencia entera para esto.
-const EMOJIS = [
-  '👋', '😊', '😀', '😅', '🙌', '👍', '🙏', '💪',
-  '✅', '❌', '⏰', '📦', '🚚', '📍', '📎', '📄',
-  '💳', '💰', '🧾', '🏷️', '🔥', '⭐', '🎉', '❤️',
-  '😉', '😍', '🤔', '😕', '😥', '🙈', '👌', '✍️',
-]
+// Tope de la nota de voz. Cinco minutos en opus son ~1 MB, muy lejos de los
+// 16 MB de Meta: el corte es para que un botón que quedó apretado sin querer no
+// grabe media hora.
+const MAX_SEGUNDOS_AUDIO = 5 * 60
 
-// Botón redondeado del header. Todos los de la fila derecha comparten forma y
-// estados, así que se definen una sola vez.
-function HeaderButton({ title, active = false, onClick, children }) {
-  return (
-    <button
-      onClick={onClick}
-      title={title}
-      aria-label={title}
-      className={`flex h-7 w-7 items-center justify-center rounded-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/[0.07] active:scale-95 ${
-        active ? 'bg-white/[0.09] text-white' : 'text-white/45 hover:text-white'
-      }`}
-    >
-      {children}
-    </button>
-  )
+// Formatos de grabación en orden de preferencia. El primero que soporte el
+// navegador es el que se usa: ogg/opus es el de las notas de voz de WhatsApp y
+// sale derecho, y webm/opus (lo único que graba Chrome) lo convierte el server.
+const FORMATOS_GRABACION = ['audio/ogg;codecs=opus', 'audio/webm;codecs=opus', 'audio/mp4', 'audio/webm']
+
+const EXT_AUDIO = { 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3' }
+
+function kindDeMime(mime) {
+  const base = String(mime ?? '').split(';')[0]
+  if (base.startsWith('image/')) return 'image'
+  if (base.startsWith('audio/')) return 'audio'
+  if (base.startsWith('video/')) return 'video'
+  return 'document'
 }
 
+function pesoLegible(bytes) {
+  if (!bytes) return ''
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} kB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+
+function reloj(segundos) {
+  return `${Math.floor(segundos / 60)}:${String(segundos % 60).padStart(2, '0')}`
+}
+
+// 36px y no 28: son los controles que más se tocan de la pantalla y estaban
+// por debajo del mínimo cómodo para apuntarles. Adentro de una isla con
+// esquinas de 24px y texto de 14.5px, además, se veían de otra escala.
 function ComposerButton({ title, onClick, active = false, children }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       title={title}
       aria-label={title}
-      className={`flex h-7 w-7 items-center justify-center rounded-md transition-all duration-200 hover:bg-white/[0.07] active:scale-95 ${
-        active ? 'text-violet' : 'text-white/40 hover:text-white/85'
+      className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors duration-200 hover:bg-tint/[0.07] ${
+        active ? 'text-violet' : 'text-ink-muted hover:text-ink-primary'
       }`}
     >
       {children}
@@ -82,40 +82,47 @@ function ComposerButton({ title, onClick, active = false, children }) {
   )
 }
 
+// El panel es el hilo y el cuadro de respuesta, nada más. Con quién estás
+// hablando, qué se hace con la conversación (asignar, resolver) y el buscador
+// del hilo viven en la ficha de contacto de la derecha, que ahora está siempre
+// a la vista: repetirlo acá arriba era decir dos veces lo mismo.
 export default function ChatPanel({
   group,
   onSend,
+  onSendMedia,
   onAddNote,
-  onResolve,
-  onAssign,
   agents = [],
-  username = 'admin',
   disabled = false,
   disabledMessage = 'El día está cerrado. Abrí un nuevo día para responder.',
   aiDraft,
-  quickReplies = [],
-  onSaveQuickReply,
-  onDeleteQuickReply,
+  // Lo que se esté buscando dentro del hilo. El input vive en la ficha de
+  // contacto, así que el estado es de Inbox y baja por acá para filtrar.
+  search = '',
 }) {
   const [draft, setDraft] = useState('')
   // 'mensaje' se le envía al cliente; 'nota' queda para el equipo. Es el mismo
   // cuadro de texto porque se alterna todo el tiempo mientras se responde.
   const [mode, setMode] = useState('mensaje')
-  const [search, setSearch] = useState('')
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(null) // 'asignar' | 'mas' | null
-  const [summaryOpen, setSummaryOpen] = useState(false)
-  const [quickOpen, setQuickOpen] = useState(false)
-  // Fila resaltada del panel de respuestas rápidas (se mueve con ↑/↓).
-  const [quickIndex, setQuickIndex] = useState(0)
-  // Con "/" escrito, Escape o un click afuera esconden el panel sin borrar el
-  // texto; vuelve a aparecer apenas se sigue tipeando.
-  const [slashSuprimido, setSlashSuprimido] = useState(false)
   const [emojiOpen, setEmojiOpen] = useState(false)
-  // Atajo que se está por guardar: null = no estamos guardando nada.
-  const [nuevoAtajo, setNuevoAtajo] = useState(null)
+  // El texto escrito ocupa más de un renglón. Lo mide el efecto que estira el
+  // cuadro, que ya sabe cuánto creció.
+  const [multilinea, setMultilinea] = useState(false)
+  // La sugerencia se pliega por conversación: plegarla no la borra en el server,
+  // la deja en una línea de la que se puede volver a abrir.
+  const [sugerenciaAbierta, setSugerenciaAbierta] = useState(true)
+  // Archivo elegido y todavía sin mandar. `url` es un objectURL para la vista
+  // previa: se revoca al soltarlo, si no el blob queda vivo hasta recargar.
+  const [adjunto, setAdjunto] = useState(null)
+  const [enviando, setEnviando] = useState(false)
+  const [grabando, setGrabando] = useState(false)
+  const [segundos, setSegundos] = useState(0)
+  // Fallos que son del navegador y no de la API (micrófono denegado, formato
+  // que no se puede grabar): el banner de error de la API no los ve.
+  const [errorMedia, setErrorMedia] = useState(null)
   const threadRef = useRef(null)
   const textareaRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const grabacionRef = useRef(null)
   // Lo escrito y sin enviar en cada conversación, para poder ir y volver de la
   // lista sin perderlo. Vive en un ref: no hace falta re-renderizar por esto.
   const borradores = useRef({})
@@ -124,6 +131,38 @@ export default function ChatPanel({
 
   const phone = group?.phone
   const messageCount = group?.messages.length
+
+  // Reemplaza el adjunto pendiente soltando el objectURL del anterior.
+  const ponerAdjunto = (file) => {
+    setAdjunto((previo) => {
+      if (previo?.url) URL.revokeObjectURL(previo.url)
+      return { file, url: URL.createObjectURL(file), kind: kindDeMime(file.type) }
+    })
+    // Un archivo es para el cliente, no para el equipo: si el cuadro estaba en
+    // nota interna, vuelve solo a mensaje.
+    setMode('mensaje')
+    setErrorMedia(null)
+  }
+
+  const quitarAdjunto = () => {
+    setAdjunto((previo) => {
+      if (previo?.url) URL.revokeObjectURL(previo.url)
+      return null
+    })
+  }
+
+  // Corta la grabación. `descartar` es lo que separa el botón de tirar del de
+  // parar: el `stop` es el mismo, lo que cambia es si el blob termina colgado
+  // del cuadro o en la basura. Va acá arriba, antes de los efectos, porque el
+  // que cambia de conversación la llama.
+  const detenerGrabacion = ({ descartar = false } = {}) => {
+    const actual = grabacionRef.current
+    if (!actual) return
+    actual.descartar = descartar
+    if (actual.recorder.state !== 'inactive') actual.recorder.stop()
+    else actual.stream.getTracks().forEach((t) => t.stop())
+    setGrabando(false)
+  }
 
   // Al abrir otra conversación (o al llegar un mensaje) el hilo se posiciona
   // abajo, que es donde está lo último — igual que cualquier chat.
@@ -154,24 +193,60 @@ export default function ChatPanel({
     const guardado = phone ? borradores.current[phone] : null
     setDraft(guardado?.text ?? '')
     setMode(guardado?.mode ?? 'mensaje')
-    setSearch('')
-    setSearchOpen(false)
-    setMenuOpen(null)
-    setSummaryOpen(false)
-    setQuickOpen(false)
-    setQuickIndex(0)
-    setSlashSuprimido(false)
     setEmojiOpen(false)
-    setNuevoAtajo(null)
+    setSugerenciaAbierta(true)
+    setErrorMedia(null)
+    // El adjunto no se guarda como el texto: es de la conversación en la que se
+    // eligió, y aparecer con la foto de otro chat colgada del cuadro es
+    // exactamente cómo se manda algo al contacto equivocado.
+    setAdjunto((previo) => {
+      if (previo?.url) URL.revokeObjectURL(previo.url)
+      return null
+    })
+    detenerGrabacion({ descartar: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phone])
+
+  // Cronómetro de la nota de voz, con corte automático en el tope.
+  useEffect(() => {
+    if (!grabando) return
+    const t = setInterval(() => {
+      setSegundos((s) => {
+        if (s + 1 >= MAX_SEGUNDOS_AUDIO) detenerGrabacion()
+        return s + 1
+      })
+    }, 1000)
+    return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grabando])
+
+  // Salir de la bandeja con el micrófono abierto tiene que soltarlo: si no, el
+  // navegador se queda mostrando que la pestaña está grabando.
+  useEffect(() => {
+    return () => {
+      grabacionRef.current?.stream.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
 
   // El cuadro crece con lo que se escribe en vez de dejar el texto largo
   // metido en dos renglones con scroll. A partir del tope, scrollea.
+  //
+  // De paso avisa cuándo el texto pasó de un renglón: con dos o tres líneas,
+  // el texto encajonado entre los botones queda angosto y con los íconos
+  // colgando en las esquinas de un bloque alto. Pasado ese punto el texto se
+  // queda con el ancho entero y los controles bajan a su propia fila.
   useEffect(() => {
     const el = textareaRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+
+    // El alto de un renglón sale del propio elemento y no de un número escrito
+    // a mano: si cambia la tipografía o el padding, esto lo sigue.
+    const estilo = getComputedStyle(el)
+    const unRenglon =
+      parseFloat(estilo.lineHeight) + parseFloat(estilo.paddingTop) + parseFloat(estilo.paddingBottom)
+    setMultilinea(el.scrollHeight > unRenglon + 4)
   }, [draft])
 
   // Abrir una conversación deja el cursor listo para responder, que es a lo
@@ -184,9 +259,9 @@ export default function ChatPanel({
 
   if (!group) {
     return (
-      <div className="animate-fade-in flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-3 bg-[#0d0d0d] text-center">
-        <IconInbox size={28} className="animate-pop-in text-white/25" style={{ '--d': '120ms' }} />
-        <p className="animate-fade-up text-[13px] leading-relaxed text-white/35" style={{ '--d': '180ms' }}>
+      <div className="animate-fade-in flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-3 bg-surface-card text-center">
+        <IconInbox size={28} className="animate-pop-in text-ink-faint" style={{ '--d': '120ms' }} />
+        <p className="animate-fade-up text-[13px] leading-relaxed text-ink-faint" style={{ '--d': '180ms' }}>
           Elegí una conversación de la lista
           <br />
           para ver el historial completo.
@@ -195,20 +270,11 @@ export default function ChatPanel({
     )
   }
 
-  const stage = LIFECYCLES.find((s) => s.key === group.lifecycle) ?? LIFECYCLES[0]
   const agent = findAgent(agents, group.agent)
 
-  // Escribir "/" al principio del mensaje abre las respuestas rápidas y filtra
-  // con lo que sigue, igual que en WhatsApp Business. El resto del texto no
-  // dispara nada: solo cuenta si la barra arranca el mensaje.
-  const slashQuery = draft.startsWith('/') ? draft.slice(1).trim().toLowerCase() : null
-  const quickFiltradas = quickReplies.filter(
-    (q) => !slashQuery || q.shortcut.includes(slashQuery) || q.text.toLowerCase().includes(slashQuery),
-  )
-  const quickPanelAbierto = (quickOpen || (slashQuery !== null && !slashSuprimido)) && !disabled
-
   const excedido = draft.length > MAX_CARACTERES
-  const puedeEnviar = Boolean(draft.trim()) && !excedido && !disabled
+  const puedeEnviar = Boolean(draft.trim() || adjunto) && !excedido && !disabled && !enviando
+  const haySugerencia = Boolean(aiDraft) && !disabled
 
   // Devuelve el foco al cuadro dejando el cursor donde corresponde: después de
   // elegir un emoji o una plantilla uno sigue escribiendo, no vuelve al mouse.
@@ -230,47 +296,89 @@ export default function ChatPanel({
     enfocarEn(inicio + texto.length)
   }
 
-  const insertarQuickReply = (quick) => {
-    // Si la plantilla se disparó con "/", el comando es todo el mensaje y se
-    // reemplaza. Si se abrió desde el botón, el texto ya escrito se respeta y
-    // la plantilla entra donde está el cursor.
-    if (slashQuery !== null) {
-      setDraft(quick.text)
-      enfocarEn(quick.text.length)
-    } else {
-      insertarEnCursor(quick.text)
+  const elegirArchivo = (e) => {
+    const file = e.target.files?.[0]
+    // El input se limpia siempre: sin esto, elegir el mismo archivo dos veces
+    // seguidas no dispara el change la segunda vez.
+    e.target.value = ''
+    if (file) ponerAdjunto(file)
+  }
+
+  const empezarGrabacion = async () => {
+    setErrorMedia(null)
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setErrorMedia('Este navegador no puede grabar audio.')
+      return
     }
-    setQuickOpen(false)
-    setQuickIndex(0)
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const formato = FORMATOS_GRABACION.find((f) => MediaRecorder.isTypeSupported(f))
+      const recorder = new MediaRecorder(stream, formato ? { mimeType: formato } : undefined)
+      const partes = []
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size) partes.push(e.data)
+      }
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop())
+        const { descartar } = grabacionRef.current ?? {}
+        grabacionRef.current = null
+        if (descartar || partes.length === 0) return
+
+        const mime = recorder.mimeType || 'audio/webm'
+        const blob = new Blob(partes, { type: mime })
+        const ext = EXT_AUDIO[mime.split(';')[0]] ?? 'webm'
+        // Queda como adjunto pendiente en vez de salir disparada: una nota de
+        // voz se escucha antes de mandarla, y sin ese paso el único arreglo de
+        // un audio mal grabado es mandar otro pidiendo disculpas.
+        ponerAdjunto(new File([blob], `nota-de-voz-${Date.now()}.${ext}`, { type: mime }))
+      }
+
+      grabacionRef.current = { recorder, stream, descartar: false }
+      recorder.start()
+      setSegundos(0)
+      setGrabando(true)
+    } catch {
+      setErrorMedia('No se pudo usar el micrófono. Revisá el permiso del navegador.')
+    }
   }
 
-  const guardarQuickReply = async () => {
-    const atajo = String(nuevoAtajo ?? '').trim()
-    const cuerpo = draft.trim()
-    if (!atajo || !cuerpo || !onSaveQuickReply) return
-    await onSaveQuickReply(atajo, cuerpo)
-    setNuevoAtajo(null)
-  }
-
-  const handleSend = () => {
+  const handleSend = async () => {
     const body = draft.trim()
-    if (!body || disabled || excedido) return
+    if (disabled || excedido || enviando) return
+
+    if (adjunto) {
+      if (!onSendMedia) return
+      setEnviando(true)
+      try {
+        // La nota de voz no acepta epígrafe del lado de Meta, así que lo escrito
+        // sale como un mensaje aparte y no se pierde. En los demás adjuntos va
+        // de epígrafe, que es como se ve del otro lado.
+        const esAudio = adjunto.kind === 'audio'
+        await onSendMedia(group.phone, adjunto.file, esAudio ? '' : body)
+        if (esAudio && body) onSend(group.phone, body)
+        quitarAdjunto()
+        setDraft('')
+        setEmojiOpen(false)
+        delete borradores.current[group.phone]
+        enfocarEn(0)
+      } catch {
+        // El detalle ya lo muestra el banner de error de la API; acá solo hay
+        // que dejar el archivo donde está para poder reintentar.
+      } finally {
+        setEnviando(false)
+      }
+      return
+    }
+
+    if (!body) return
     if (mode === 'nota') onAddNote(group.phone, body)
     else onSend(group.phone, body)
     setDraft('')
-    setQuickOpen(false)
     setEmojiOpen(false)
-    setQuickIndex(0)
     delete borradores.current[group.phone]
     enfocarEn(0)
-  }
-
-  const handleChange = (e) => {
-    setDraft(e.target.value)
-    // Volver a escribir después de esconder el panel con Escape lo trae de
-    // nuevo: la sugerencia sigue siendo útil mientras se tipea el atajo.
-    setSlashSuprimido(false)
-    setQuickIndex(0)
   }
 
   const handleKeyDown = (e) => {
@@ -278,39 +386,14 @@ export default function ChatPanel({
     // interna, sin sacar las manos del teclado ni perder lo escrito.
     if (e.key === '\\' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault()
-      setMode((m) => (m === 'nota' ? 'mensaje' : 'nota'))
+      if (!adjunto) setMode((m) => (m === 'nota' ? 'mensaje' : 'nota'))
       return
     }
-    if (e.key === 'Escape' && (quickPanelAbierto || emojiOpen)) {
-      // Escape esconde el panel y nada más: lo escrito se conserva.
+    if (e.key === 'Escape' && emojiOpen) {
+      // Escape cierra el panel y nada más: lo escrito se conserva.
       e.preventDefault()
-      setQuickOpen(false)
       setEmojiOpen(false)
-      if (slashQuery !== null) setSlashSuprimido(true)
       return
-    }
-
-    // Con el panel abierto, ↑/↓ recorren las plantillas y Enter/Tab insertan
-    // la resaltada, como en cualquier autocompletado.
-    if (quickPanelAbierto && quickFiltradas.length > 0) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault()
-        const paso = e.key === 'ArrowDown' ? 1 : -1
-        setQuickIndex((i) => (i + paso + quickFiltradas.length) % quickFiltradas.length)
-        return
-      }
-      if (e.key === 'Tab') {
-        e.preventDefault()
-        insertarQuickReply(quickFiltradas[quickIndex] ?? quickFiltradas[0])
-        return
-      }
-      // Con el atajo a medio escribir, Enter inserta la respuesta en vez de
-      // enviar: si no, al cliente le llegaría un "/envios" pelado.
-      if (e.key === 'Enter' && !e.shiftKey && slashQuery !== null) {
-        e.preventDefault()
-        insertarQuickReply(quickFiltradas[quickIndex] ?? quickFiltradas[0])
-        return
-      }
     }
 
     // Enter envía, Shift+Enter hace salto de línea.
@@ -320,10 +403,21 @@ export default function ChatPanel({
     }
   }
 
+  // La sugerencia baja al cuadro en modo mensaje: es una respuesta para el
+  // cliente, no una nota, y si el cuadro estaba en nota se enviaría al equipo.
   const usarSugerenciaIA = () => {
     if (!aiDraft) return
+    setMode('mensaje')
     setDraft(aiDraft.text)
+    setSugerenciaAbierta(false)
     enfocarEn(aiDraft.text.length)
+  }
+
+  // Empezar a escribir pliega la sugerencia: si uno ya está redactando, la
+  // propuesta pasa a ser una referencia, no lo primero que se lee.
+  const handleChange = (e) => {
+    setDraft(e.target.value)
+    if (e.target.value.trim()) setSugerenciaAbierta(false)
   }
 
   const query = search.trim().toLowerCase()
@@ -331,209 +425,16 @@ export default function ChatPanel({
     ? group.messages.filter((m) => m.text.toLowerCase().includes(query))
     : group.messages
 
-  const entrantes = group.messages.filter((m) => m.direction === 'in')
-  const primerContacto = entrantes[0]?.createdAt
-
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col bg-[#0d0d0d]">
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-white/[0.07] px-3 py-2">
-        {/* `overflow-hidden` es lo que evita que, con el panel de contacto
-            abierto, el nombre y la etapa se monten sobre los botones de la
-            derecha: acá el contenido se recorta, no se desborda. */}
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden">
-          <Avatar name={group.customer} size={30} className="!rounded-full !text-[11px]" />
-          <p className="max-w-[240px] shrink-0 truncate text-[13.5px] font-semibold text-white">
-            {group.customer}
-          </p>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-white/[0.07] bg-white/[0.04] px-1.5 py-[3px] text-[11px] text-white/65">
-            <span className="leading-none">{stage.emoji}</span>
-            {stage.label}
-          </span>
-          {/* El número es lo primero que cede el espacio: cuando el panel de
-              contacto está abierto el header queda angosto, y el dato ya está
-              ahí y en la lista. El nombre, en cambio, no se achica. */}
-          <span className="hidden min-w-0 truncate text-[11.5px] tabular-nums text-white/30 lg:inline-block">
-            {group.phone}
-          </span>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1">
-          {/* Responsable de la conversación. El menú asigna de verdad: es lo que
-              distingue "alguien lo está viendo" de "nadie lo tomó". */}
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((m) => (m === 'asignar' ? null : 'asignar'))}
-              className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] text-white/60 transition-colors duration-200 hover:bg-white/[0.06] hover:text-white"
-            >
-              {group.assignee ? (
-                <Avatar name={group.assignee} size={18} className="!rounded-full !text-[9px]" />
-              ) : (
-                <IconUser size={14} />
-              )}
-              <span className="max-w-[90px] truncate capitalize">{group.assignee ?? 'Sin asignar'}</span>
-              <IconChevronDown size={11} className={`transition-transform duration-300 ${menuOpen === 'asignar' ? 'rotate-180' : ''}`} />
-            </button>
-            {menuOpen === 'asignar' && (
-              <>
-                <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(null)} />
-                <ul className="animate-scale-in absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-lg border border-white/10 bg-[#161616] py-1 shadow-xl">
-                  <li>
-                    <button
-                      onClick={() => {
-                        onAssign(group.phone, username)
-                        setMenuOpen(null)
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-[12px] text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
-                    >
-                      Asignármela a mí
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        onAssign(group.phone, null)
-                        setMenuOpen(null)
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-[12px] text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
-                    >
-                      Quitar asignación
-                    </button>
-                  </li>
-                </ul>
-              </>
-            )}
-          </div>
-
-          <HeaderButton
-            title="Buscar en la conversación"
-            active={searchOpen}
-            onClick={() => {
-              setSearchOpen((v) => !v)
-              if (searchOpen) setSearch('')
-            }}
-          >
-            <IconSearch size={15} />
-          </HeaderButton>
-          <HeaderButton title="Resumen de la conversación" active={summaryOpen} onClick={() => setSummaryOpen((v) => !v)}>
-            <IconClock size={15} />
-          </HeaderButton>
-          <a
-            href={`tel:${group.phone.replace(/\s/g, '')}`}
-            title="Llamar al contacto"
-            className="flex h-7 w-7 items-center justify-center rounded-md text-white/45 transition-all duration-200 hover:bg-white/[0.07] hover:text-white active:scale-95"
-          >
-            <IconPhone size={15} />
-          </a>
-
-          <button
-            onClick={() => onResolve(group.phone)}
-            disabled={disabled || group.pendientes === 0}
-            className="ml-1 flex items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[12px] font-medium text-white/75
-              transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-white/[0.09] hover:text-white active:scale-[0.97]
-              disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white/[0.04]"
-          >
-            <IconCheckCircle size={13} />
-            Resolver
-          </button>
-
-          <div className="relative">
-            <HeaderButton title="Más acciones" active={menuOpen === 'mas'} onClick={() => setMenuOpen((m) => (m === 'mas' ? null : 'mas'))}>
-              <IconDots size={15} />
-            </HeaderButton>
-            {menuOpen === 'mas' && (
-              <>
-                <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(null)} />
-                <ul className="animate-scale-in absolute right-0 top-full z-30 mt-1 w-52 overflow-hidden rounded-lg border border-white/10 bg-[#161616] py-1 shadow-xl">
-                  <li>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard?.writeText(group.phone)
-                        setMenuOpen(null)
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-[12px] text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
-                    >
-                      Copiar número
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setMode('nota')
-                        setMenuOpen(null)
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-[12px] text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
-                    >
-                      Agregar nota interna
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setSummaryOpen(true)
-                        setMenuOpen(null)
-                      }}
-                      className="w-full px-3 py-1.5 text-left text-[12px] text-white/75 transition-colors duration-150 hover:bg-white/[0.07] hover:text-white"
-                    >
-                      Ver resumen
-                    </button>
-                  </li>
-                </ul>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Buscador dentro del hilo: filtra los globos en vez de saltar de uno en
-          uno, que es lo que sirve cuando buscás "reintegro" en una charla larga. */}
-      <div
-        className={`grid shrink-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          searchOpen ? 'grid-rows-[1fr] border-b border-white/[0.07] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="px-3 py-2">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar en esta conversación..."
-              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[12.5px] text-white placeholder:text-white/30
-                transition-all duration-200 focus:border-white/25 focus:bg-white/[0.07] focus:outline-none"
-            />
-          </div>
-        </div>
-      </div>
-
-      {summaryOpen && (
-        <div className="animate-fade-down shrink-0 border-b border-white/[0.07] bg-white/[0.02] px-4 py-2.5">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[11.5px] text-white/45">
-            <span>
-              <span className="text-white/80">{group.total}</span> mensajes
-            </span>
-            <span>
-              <span className="text-white/80">{group.pendientes}</span> pendientes
-            </span>
-            <span>
-              <span className="text-white/80">{group.automaticos}</span> automáticos
-            </span>
-            <span>
-              Atendida por <span className="text-white/80">{agent.name}</span>
-            </span>
-            {primerContacto && (
-              <span>
-                Primer contacto <span className="text-white/80">{formatTime(primerContacto)}</span>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
+    <div className="flex h-full min-w-0 flex-1 flex-col bg-surface-card">
       {/* El hilo usa el ancho del panel y solo se centra en pantallas muy
           grandes, donde estirarlo de borde a borde dejaría la conversación
-          desparramada. Por debajo de ese tope el padding es el normal. */}
+          desparramada. Por debajo de ese tope el padding es el normal.
+          El tope es 56rem y no el ancho entero: una conversación se lee como
+          una columna, no como una tabla. */}
       <ul
         ref={threadRef}
-        className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-[max(1.25rem,calc((100%-70rem)/2))] py-4"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-[max(1.25rem,calc((100%-56rem)/2))] py-5"
       >
         {visibleMessages.map((message, i) => {
           const prev = visibleMessages[i - 1]
@@ -543,7 +444,7 @@ export default function ChatPanel({
             <Fragment key={message.id}>
               {showDay && (
                 <li className="flex justify-center py-1.5">
-                  <span className="rounded-full border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/40 first-letter:uppercase">
+                  <span className="rounded-full border border-tint/[0.06] bg-tint/[0.03] px-2.5 py-1 text-[11.5px] text-ink-muted first-letter:uppercase">
                     {formatDayLabel(message.createdAt)}
                   </span>
                 </li>
@@ -559,15 +460,97 @@ export default function ChatPanel({
         })}
 
         {visibleMessages.length === 0 && (
-          <li className="animate-fade-in py-10 text-center text-[12.5px] text-white/35">
+          <li className="animate-fade-in py-10 text-center text-[12.5px] text-ink-faint">
             Ningún mensaje coincide con “{search.trim()}”.
           </li>
         )}
       </ul>
 
-      <div className="mx-auto w-full max-w-[70rem] shrink-0 border-t border-white/[0.07] px-4 py-2.5">
+      {/* Más angosto que el hilo (48rem contra 56rem) y centrado: el cuadro se
+          lee como una isla apoyada abajo y no como otro renglón de la
+          conversación. Va con el mismo tope todo lo que es del cuadro — la
+          sugerencia de la IA y los avisos —, así que el bloque de abajo se
+          alinea entero.
+          Sin línea divisoria arriba: lo que separa al composer del hilo es el
+          aire y su propia forma, no una raya cruzando el panel. Esa raya, más
+          el borde del cuadro, eran dos separaciones para lo mismo. */}
+      <div className="mx-auto w-full max-w-[48rem] shrink-0 px-5 pb-4 pt-2">
+        {/* La sugerencia de la IA es una tarjeta propia apoyada arriba del
+            cuadro, no algo metido adentro: el cuadro es lo que uno escribe y
+            esto es lo que propone el bot. Adentro competía con el texto
+            propio y empujaba el composer cada vez que llegaba una. */}
+        {haySugerencia &&
+          (sugerenciaAbierta ? (
+            <div className="animate-fade-up mb-2 overflow-hidden rounded-2xl border border-violet/25 bg-violet-soft">
+              <div className="flex items-start gap-2.5 px-3.5 pt-3">
+                <span className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-violet/15 text-violet">
+                  <IconSparkles size={13} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11.5px] font-medium text-violet">
+                    Respuesta sugerida
+                    <span className="text-ink-muted"> · la escribió {agent.name}</span>
+                  </p>
+                  <div className="mt-1 whitespace-pre-wrap text-[13.5px] leading-snug text-ink-primary">
+                    <FormattedText>{aiDraft.text}</FormattedText>
+                  </div>
+                </div>
+              </div>
+              {/* Las acciones abajo y a la derecha, donde termina de leerse el
+                  texto y del lado del botón de enviar. */}
+              <div className="mt-2.5 flex items-center justify-end gap-1 border-t border-violet/15 px-2.5 py-1.5">
+                <button
+                  onClick={() => setSugerenciaAbierta(false)}
+                  className="rounded-lg px-2.5 py-1 text-[11.5px] text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
+                >
+                  Descartar
+                </button>
+                <button
+                  onClick={usarSugerenciaIA}
+                  className="rounded-lg bg-violet px-2.5 py-1 text-[11.5px] font-medium text-ink-inverted transition-colors duration-200 hover:bg-violet/85"
+                >
+                  Usar y editar
+                </button>
+              </div>
+            </div>
+          ) : (
+            // Plegada queda una sola línea: la sugerencia no se pierde por
+            // haber empezado a escribir, pero tampoco le compite al mensaje.
+            <button
+              onClick={() => setSugerenciaAbierta(true)}
+              className="animate-fade-in mb-2 flex w-full items-center gap-2 rounded-xl border border-violet/20 px-3 py-1.5 text-left text-[11.5px] transition-colors duration-200 hover:bg-violet-soft"
+            >
+              <IconSparkles size={12} className="shrink-0 text-violet" />
+              <span className="min-w-0 flex-1 truncate text-ink-muted">
+                {stripFormat(aiDraft.text)}
+              </span>
+              <span className="shrink-0 font-medium text-violet">Ver sugerencia</span>
+            </button>
+          ))}
+
+        {/* Fallos del navegador, no de la API: el micrófono denegado o un
+            formato que no se puede grabar no pasan por el banner de error. */}
+        {errorMedia && (
+          <p className="mb-2 rounded-xl border border-status-critical/30 bg-status-critical/[0.07] px-3 py-1.5 text-[12px] text-status-critical">
+            {errorMedia}
+          </p>
+        )}
+
+        {/* En modo nota el aviso va arriba de la isla y en una línea. Adentro
+            del cuadro estaba el rótulo del canal, que decía lo mismo en todos
+            los mensajes: que se contesta por WhatsApp ya lo dice la bandeja. */}
+        {mode === 'nota' && !disabled && (
+          <p className="mb-2 flex items-center gap-1.5 px-1 text-[11.5px]">
+            <IconNote size={13} className="shrink-0 text-status-warning" />
+            <span className="text-status-warning">Nota interna</span>
+            <span className="text-ink-faint">· solo la ve el equipo, no se envía</span>
+          </p>
+        )}
+
         {disabled ? (
-          <p className="py-3 text-center text-[12px] text-white/35">{disabledMessage}</p>
+          <p className="rounded-2xl border border-tint/[0.07] py-3.5 text-center text-[12px] text-ink-faint">
+            {disabledMessage}
+          </p>
         ) : (
           <div
             onClick={(e) => {
@@ -575,269 +558,192 @@ export default function ChatPanel({
               // el cursor al texto: el área clickeable es toda la caja.
               if (e.target === e.currentTarget) textareaRef.current?.focus()
             }}
-            className={`relative rounded-xl border transition-colors duration-300 ${
+            // Isla: superficie elevada y bien redondeada, apoyada sobre el hilo
+            // en vez de encajada contra él. En el tema oscuro la levanta el
+            // fondo (`raised` es más claro que `card`); en el claro los dos son
+            // blancos, así que ahí el trabajo lo hacen el borde y la sombra.
+            className={`relative rounded-3xl border shadow-card transition-colors duration-300 ${
               mode === 'nota'
-                ? 'border-status-warning/30 bg-status-warning/[0.05] focus-within:border-status-warning/60'
+                ? // La isla entera se tiñe de ámbar escribiendo una nota. Es lo
+                  // que evita mandarle al cliente algo que era para el equipo:
+                  // el color se ve antes de apretar Enter.
+                  'border-status-warning/30 bg-status-warning/[0.06] focus-within:border-status-warning/60'
                 : excedido
-                  ? 'border-status-critical/50 bg-white/[0.03]'
-                  : 'border-white/10 bg-white/[0.03] focus-within:border-white/25 focus-within:bg-white/[0.05]'
+                  ? 'border-status-critical/50 bg-surface-raised'
+                  : 'border-tint/[0.09] bg-surface-raised focus-within:border-tint/25'
             }`}
           >
-            {/* Respuestas rápidas. Se abre con el botón de plantillas o
-                escribiendo "/" al principio del mensaje. */}
-            {quickPanelAbierto && (
-              <>
-                <div
-                  className="fixed inset-0 z-20"
-                  onClick={() => {
-                    setQuickOpen(false)
-                    if (slashQuery !== null) setSlashSuprimido(true)
-                  }}
-                />
-                <div className="animate-scale-in absolute bottom-full left-0 z-30 mb-2 w-full max-w-md overflow-hidden rounded-xl border border-white/10 bg-[#161616] shadow-xl">
-                  <div className="flex items-center justify-between border-b border-white/[0.07] px-3 py-2">
-                    <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-white/70">
-                      <IconTemplate size={12} />
-                      Respuestas rápidas
-                    </span>
-                    <span className="text-[11px] text-white/30">
-                      {slashQuery !== null ? `filtrando “${slashQuery}”` : '↑↓ para elegir · Tab inserta'}
-                    </span>
-                  </div>
-
-                  <ul className="max-h-60 overflow-y-auto py-1" role="listbox" aria-label="Respuestas rápidas">
-                    {quickFiltradas.map((quick, i) => (
-                      <li
-                        key={quick.id}
-                        role="option"
-                        aria-selected={i === quickIndex}
-                        onMouseEnter={() => setQuickIndex(i)}
-                        className={`group/qr flex items-start gap-2 px-3 py-1.5 transition-colors duration-100 ${
-                          i === quickIndex ? 'bg-white/[0.07]' : ''
-                        }`}
-                      >
-                        <button
-                          onClick={() => insertarQuickReply(quick)}
-                          className="min-w-0 flex-1 text-left"
-                        >
-                          <span className="block text-[11.5px] font-medium text-violet">/{quick.shortcut}</span>
-                          <span className="block truncate text-[12px] text-white/60">{quick.text}</span>
-                        </button>
-                        {onDeleteQuickReply && (
-                          <button
-                            onClick={() => onDeleteQuickReply(quick.id)}
-                            title="Eliminar respuesta rápida"
-                            className="shrink-0 rounded px-1 text-[11px] text-white/25 opacity-0 transition-opacity duration-150 hover:text-status-critical group-hover/qr:opacity-100"
-                          >
-                            Eliminar
-                          </button>
-                        )}
-                      </li>
-                    ))}
-
-                    {quickFiltradas.length === 0 && (
-                      <li className="px-3 py-3 text-center text-[12px] text-white/35">
-                        {quickReplies.length === 0
-                          ? 'Todavía no guardaste ninguna respuesta rápida.'
-                          : 'Ninguna coincide con lo que escribiste.'}
-                      </li>
-                    )}
-                  </ul>
-
-                  {/* Guardar lo que ya está escrito: es cuando más ganas dan de
-                      tener el atajo, justo después de tipear el mensaje. */}
-                  {onSaveQuickReply && draft.trim() && slashQuery === null && (
-                    <div className="border-t border-white/[0.07] px-3 py-2">
-                      {nuevoAtajo === null ? (
-                        <button
-                          onClick={() => setNuevoAtajo('')}
-                          className="text-[11.5px] text-violet transition-colors duration-200 hover:text-violet/80"
-                        >
-                          + Guardar este mensaje como respuesta rápida
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[12px] text-white/40">/</span>
-                          <input
-                            autoFocus
-                            value={nuevoAtajo}
-                            onChange={(e) => setNuevoAtajo(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault()
-                                guardarQuickReply()
-                              }
-                              if (e.key === 'Escape') setNuevoAtajo(null)
-                            }}
-                            placeholder="atajo"
-                            className="min-w-0 flex-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[12px] text-white placeholder:text-white/25 focus:border-white/25 focus:outline-none"
-                          />
-                          <button
-                            onClick={guardarQuickReply}
-                            disabled={!nuevoAtajo.trim()}
-                            className="rounded-md bg-white/[0.09] px-2 py-1 text-[11.5px] text-white/85 transition-colors duration-200 hover:bg-white/[0.14] disabled:opacity-35"
-                          >
-                            Guardar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-            <div className="flex items-center justify-between gap-2 px-3 pt-2">
-              <div className="flex items-center gap-1.5 text-[11.5px]">
-                {mode === 'nota' ? (
-                  <>
-                    <IconNote size={13} className="text-status-warning" />
-                    <span className="text-status-warning">Nota interna</span>
-                    <span className="text-white/30">· solo la ve el equipo</span>
-                  </>
+            {/* El adjunto que se está por mandar va arriba del renglón de
+                escritura, no en una ventana aparte: lo que se tipee abajo es su
+                epígrafe y se manda junto, en el mismo mensaje. */}
+            {adjunto && (
+              <div className="m-1.5 mb-0 flex items-center gap-2.5 rounded-xl border border-tint/10 bg-tint/[0.04] p-1.5">
+                {adjunto.kind === 'image' ? (
+                  <img src={adjunto.url} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                ) : adjunto.kind === 'audio' ? (
+                  // La nota de voz se escucha antes de mandarla: el reproductor
+                  // ocupa el lugar del nombre, que para un audio no dice nada.
+                  <audio src={adjunto.url} controls className="h-9 min-w-0 flex-1" />
                 ) : (
-                  <>
-                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#25d366]">
-                      <svg viewBox="0 0 24 24" className="h-2 w-2 fill-black/80">
-                        <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a12 12 0 0 1-5.9-5.1c-.4-.7-.7-1.5-.7-2.2s.4-1.2.7-1.4c.2-.2.4-.2.6-.2h.4c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.5.9 1.6 1.9 2.6 2.4.2.1.4.1.5 0l.7-.8c.2-.2.3-.2.5-.1l1.7.9c.2.1.3.2.4.3v.8Z" />
-                      </svg>
-                    </span>
-                    <span className="text-white/60">Canal de WhatsApp</span>
-                  </>
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-tint/[0.06] text-ink-muted">
+                    <IconFile size={18} />
+                  </span>
                 )}
-              </div>
-              <button
-                onClick={usarSugerenciaIA}
-                disabled={!aiDraft}
-                className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] text-violet transition-colors duration-200 hover:bg-violet-soft disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <IconSparkles size={12} />
-                Asistente IA
-              </button>
-            </div>
 
-            {/* Sugerencia de la IA: la clasificación no fue lo bastante segura
-                para auto-enviar, así que queda acá para que el admin la revise
-                y la mande con un click (o la edite antes). */}
-            {aiDraft && !draft && (
-              <div className="mx-3 mb-2 rounded-lg border border-violet/25 bg-violet-soft px-3 py-2">
-                <p className="mb-1 flex items-center gap-1 text-[11px] font-medium text-violet">
-                  <IconSparkles size={11} />
-                  Sugerencia de IA
-                </p>
-                <p className="text-[12.5px] leading-snug text-white/80">{aiDraft.text}</p>
-                <button
-                  onClick={usarSugerenciaIA}
-                  className="mt-1.5 rounded-md border border-violet/30 px-2 py-0.5 text-[11px] font-medium text-violet transition-colors duration-200 hover:bg-violet/10"
+                {adjunto.kind !== 'audio' && (
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[12.5px] text-ink-primary">{adjunto.file.name}</span>
+                    <span className="block text-[11px] text-ink-faint">{pesoLegible(adjunto.file.size)}</span>
+                  </span>
+                )}
+
+                <ComposerButton title="Quitar el adjunto" onClick={quitarAdjunto}>
+                  <IconClose size={16} />
+                </ComposerButton>
+              </div>
+            )}
+
+            {grabando ? (
+              // Grabando, el renglón entero es la grabación: no hay nada que
+              // hacer con el cuadro hasta soltar el micrófono, y dejar los
+              // controles de escribir a la vista solo invita a errarle.
+              <div className="flex items-center gap-2 p-1.5">
+                <ComposerButton
+                  title="Descartar la grabación"
+                  onClick={() => detenerGrabacion({ descartar: true })}
                 >
-                  Usar sugerencia
+                  <IconTrash size={18} />
+                </ComposerButton>
+                <span className="flex min-w-0 flex-1 items-center gap-2 text-[13px] text-ink-secondary">
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-status-critical" />
+                  Grabando
+                  <span className="tabular-nums text-ink-muted">{reloj(segundos)}</span>
+                </span>
+                <button
+                  onClick={() => detenerGrabacion()}
+                  title="Terminar la grabación"
+                  aria-label="Terminar la grabación"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-primary text-ink-inverted transition-colors duration-200 hover:bg-ink-primary/85"
+                >
+                  <IconStop size={14} />
                 </button>
               </div>
-            )}
+            ) : (
+              // Con una línea escrita: el texto arranca en el borde izquierdo y
+              // todos los controles van juntos a la derecha. Con varias, el
+              // texto se lleva la fila entera y los controles bajan abajo — lo
+              // hace `flex-wrap` más el `order`, sin duplicar el bloque de
+              // botones para las dos formas.
+              <div className="flex flex-wrap items-end gap-0.5 gap-y-1 p-1.5">
+                <textarea
+                  ref={textareaRef}
+                  rows={1}
+                  value={draft}
+                  onChange={handleChange}
+                  onKeyDown={handleKeyDown}
+                  aria-label={mode === 'nota' ? 'Nota interna' : 'Mensaje para el cliente'}
+                  placeholder={mode === 'nota' ? 'Escribe una nota' : 'Escribe un mensaje'}
+                  className={`max-h-40 min-h-[2.25rem] min-w-0 resize-none overflow-y-auto bg-transparent px-2.5 py-2 text-[14.5px] leading-snug text-ink-primary placeholder:text-ink-faint focus:outline-none
+                    ${multilinea ? 'order-0 basis-full' : 'order-2 flex-1'}`}
+                />
 
-            <textarea
-              ref={textareaRef}
-              rows={1}
-              value={draft}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              aria-label={mode === 'nota' ? 'Nota interna' : 'Mensaje para el cliente'}
-              placeholder={
-                mode === 'nota'
-                  ? 'Escribí una nota para el equipo...'
-                  : 'Escribí un mensaje...  (/ para respuestas rápidas)'
-              }
-              className="max-h-40 min-h-[2.5rem] w-full resize-none overflow-y-auto bg-transparent px-3 py-2 text-[13px] leading-snug text-white placeholder:text-white/30 focus:outline-none"
-            />
-
-            <div className="flex items-center justify-between gap-2 px-2 pb-2">
-              <div className="flex items-center gap-0.5">
-                <div className="relative">
-                  <ComposerButton
-                    title="Emoji"
-                    active={emojiOpen}
-                    onClick={() => setEmojiOpen((v) => !v)}
-                  >
-                    <IconSmile size={15} />
+                {/* Todos los controles van juntos en un contenedor propio, a la
+                    derecha del texto: es lo que los mantiene pegados al borde
+                    (`ml-auto`) cuando el texto se subió a su propia fila y esta
+                    queda medio vacía. `relative` es el ancla del panel de
+                    emojis. */}
+                <div className="relative order-3 ml-auto flex shrink-0 items-center gap-0.5">
+                  <ComposerButton title="Emoji" active={emojiOpen} onClick={() => setEmojiOpen((v) => !v)}>
+                    <IconSmile size={18} />
                   </ComposerButton>
                   {emojiOpen && (
                     <>
                       <div className="fixed inset-0 z-20" onClick={() => setEmojiOpen(false)} />
                       {/* El emoji entra donde está el cursor, no al final: se
                           usa tanto para abrir un saludo como para cerrar. */}
-                      <div className="animate-scale-in absolute bottom-full left-0 z-30 mb-2 grid w-64 grid-cols-8 gap-0.5 rounded-xl border border-white/10 bg-[#161616] p-2 shadow-xl">
-                        {EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            onClick={() => insertarEnCursor(emoji)}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-[15px] leading-none transition-colors duration-150 hover:bg-white/[0.09]"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
+                      <EmojiPicker onPick={insertarEnCursor} onClose={() => setEmojiOpen(false)} />
                     </>
                   )}
-                </div>
-                <ComposerButton title="Adjuntar archivo"><IconPaperclip size={15} /></ComposerButton>
-                <ComposerButton
-                  title="Respuestas rápidas (escribí / en el mensaje)"
-                  active={quickPanelAbierto}
-                  onClick={() => {
-                    setSlashSuprimido(false)
-                    setQuickIndex(0)
-                    setQuickOpen((v) => !v)
-                  }}
-                >
-                  <IconTemplate size={15} />
-                </ComposerButton>
-                <ComposerButton title="Audio"><IconMic size={15} /></ComposerButton>
-                <ComposerButton
-                  title="Cambiar a nota interna (Ctrl + \)"
-                  active={mode === 'nota'}
-                  onClick={() => setMode((m) => (m === 'nota' ? 'mensaje' : 'nota'))}
-                >
-                  <IconNote size={15} />
-                </ComposerButton>
-              </div>
 
-              <div className="flex items-center gap-2">
-                {/* El contador aparece recién cerca del límite: mostrarlo
-                    siempre sería ruido, un mensaje de atención rara vez pasa
-                    de un par de renglones. */}
-                {draft.length > MAX_CARACTERES - 400 && (
-                  <span
-                    className={`text-[11px] tabular-nums ${excedido ? 'text-status-critical' : 'text-white/40'}`}
+                  <ComposerButton title="Adjuntar un archivo" onClick={() => fileInputRef.current?.click()}>
+                    <IconPaperclip size={18} />
+                  </ComposerButton>
+
+                  {/* Con un archivo colgado no se puede pasar a nota: una nota
+                      interna no lleva adjunto, y el botón de enviar mandaría el
+                      archivo al cliente igual. */}
+                  {!adjunto && (
+                    <ComposerButton
+                      title="Cambiar a nota interna (Ctrl + \)"
+                      active={mode === 'nota'}
+                      onClick={() => setMode((m) => (m === 'nota' ? 'mensaje' : 'nota'))}
+                    >
+                      <IconNote size={18} />
+                    </ComposerButton>
+                  )}
+
+                  {/* El contador aparece recién cerca del límite: mostrarlo
+                      siempre sería ruido, un mensaje de atención rara vez pasa de
+                      un par de renglones. */}
+                  {draft.length > MAX_CARACTERES - 400 && (
+                    <span
+                      className={`px-1 text-[11px] tabular-nums ${excedido ? 'text-status-critical' : 'text-ink-muted'}`}
+                    >
+                      {draft.length} / {MAX_CARACTERES}
+                    </span>
+                  )}
+
+                  {/* Subir puede tardar, y sin esto el único cambio visible es
+                      que el botón de enviar se apaga. */}
+                  {enviando && <span className="px-1 text-[11px] text-ink-muted">Enviando…</span>}
+
+                  {/* El micrófono no está en modo nota (una nota interna es texto)
+                      ni con algo ya adjuntado: cada mensaje lleva un archivo. */}
+                  {mode !== 'nota' && !adjunto && !enviando && (
+                    <ComposerButton title="Grabar una nota de voz" onClick={empezarGrabacion}>
+                      <IconMic size={18} />
+                    </ComposerButton>
+                  )}
+
+                  <button
+                    onClick={handleSend}
+                    disabled={!puedeEnviar}
+                    title={
+                      excedido
+                        ? `El mensaje supera los ${MAX_CARACTERES} caracteres`
+                        : mode === 'nota'
+                          ? 'Guardar nota (Enter)'
+                          : 'Enviar mensaje (Enter)'
+                    }
+                    aria-label={mode === 'nota' ? 'Guardar nota' : 'Enviar mensaje'}
+                    // Redondo, como la isla que lo contiene.
+                    //
+                    // Tinta sólida, igual que `<Button variant="primary">`: es el
+                    // botón de acción de la app y tiene que ser el mismo. Antes
+                    // llevaba el degradé de marca y un resplandor violeta —
+                    // `bg-accent-gradient` es la identidad del logo, no un color
+                    // de acción, y no aparece en ningún otro botón de la dash.
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200
+                      disabled:cursor-not-allowed disabled:opacity-35 ${
+                        mode === 'nota'
+                          ? 'bg-status-warning text-status-ink hover:bg-status-warning/85'
+                          : 'bg-ink-primary text-ink-inverted hover:bg-ink-primary/85'
+                      }`}
                   >
-                    {draft.length} / {MAX_CARACTERES}
-                  </span>
-                )}
-                <span className="hidden text-[11px] text-white/25 sm:inline">
-                  {draft.trim()
-                    ? 'Enter envía · Shift + Enter salta línea'
-                    : `Ctrl + \\ para ${mode === 'nota' ? 'volver al mensaje' : 'nota interna'}`}
-                </span>
-                <button
-                  onClick={handleSend}
-                  disabled={!puedeEnviar}
-                  title={
-                    excedido
-                      ? `El mensaje supera los ${MAX_CARACTERES} caracteres`
-                      : mode === 'nota'
-                        ? 'Guardar nota (Enter)'
-                        : 'Enviar mensaje (Enter)'
-                  }
-                  aria-label={mode === 'nota' ? 'Guardar nota' : 'Enviar mensaje'}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]
-                    active:scale-95 disabled:cursor-not-allowed disabled:opacity-35 ${
-                      mode === 'nota'
-                        ? 'bg-status-warning text-black hover:bg-status-warning/85'
-                        : 'bg-accent-gradient text-white hover:shadow-glow'
-                    }`}
-                >
-                  <IconSend size={15} />
-                </button>
+                    <IconSend size={18} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={elegirArchivo}
+              className="hidden"
+              aria-hidden="true"
+              tabIndex={-1}
+            />
           </div>
         )}
       </div>

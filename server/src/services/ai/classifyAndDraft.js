@@ -1,6 +1,7 @@
 import { Type, FunctionCallingConfigMode } from '@google/genai'
 import { getClient, DRAFT_MODEL } from './client.js'
 import { buildSystemPrompt } from './systemPrompt.js'
+import { markdownToWhatsapp } from './whatsappFormat.js'
 
 // Forcing a single function call (ANY mode + one declared function) is the
 // stable way to get JSON-shaped output from Gemini: the model has no choice
@@ -79,5 +80,15 @@ export async function classifyAndDraft({ settings, products, agents, currentAgen
   // El interruptor de envío automático del agente es un techo, no una
   // sugerencia: si está apagado, la respuesta queda como borrador para revisar
   // por más seguro que se haya sentido el modelo.
-  return { agent, category, canAutoSend: canAutoSend && agent?.autoSend !== false, reply }
+  //
+  // La traducción de formato va acá y no en el adapter de WhatsApp porque de
+  // este `reply` salen dos cosas: el mensaje que se manda y el borrador que
+  // queda en `ai_draft`. Traduciendo recién al enviar, el borrador que revisa
+  // una persona seguiría mostrando los asteriscos de Markdown.
+  return {
+    agent,
+    category,
+    canAutoSend: canAutoSend && agent?.autoSend !== false,
+    reply: markdownToWhatsapp(reply),
+  }
 }

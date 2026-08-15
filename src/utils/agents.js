@@ -1,8 +1,8 @@
 // Un mensaje o una conversación pueden apuntar a un agente que ya se borró o
 // que todavía no cargó del server. En vez de romper la vista, se devuelve un
-// agente "fantasma" con la misma forma, así los componentes leen agent.name y
-// agent.emoji sin preguntar nada.
-const UNKNOWN = { key: null, name: 'Sin agente', emoji: '🤖' }
+// agente "fantasma" con la misma forma, así los componentes leen agent.name
+// sin preguntar nada.
+const UNKNOWN = { key: null, name: 'Sin agente' }
 
 export function findAgent(agents, key) {
   if (!agents?.length) return { ...UNKNOWN, key: key ?? null }

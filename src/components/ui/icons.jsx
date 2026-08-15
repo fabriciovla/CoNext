@@ -38,6 +38,15 @@ export const IconBox = (props) => (
   </Svg>
 )
 
+// Carpeta del catálogo. La pestaña sale del borde de arriba y no es un
+// rectángulo aparte: al tamaño al que se usa (15px, en la columna de carpetas)
+// dos formas apiladas se leen como una mancha.
+export const IconFolder = (props) => (
+  <Svg {...props}>
+    <path d="M3.8 8V6.6a1.4 1.4 0 0 1 1.4-1.4h3.3l2 2.4h8.1a1.4 1.4 0 0 1 1.4 1.4v8.4a1.4 1.4 0 0 1-1.4 1.4H5.2a1.4 1.4 0 0 1-1.4-1.4Z" />
+  </Svg>
+)
+
 export const IconHome = (props) => (
   <Svg {...props}>
     <path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.2 1.2 0 0 1-1.2 1.2H4.7A1.2 1.2 0 0 1 3.5 19Z" />
@@ -134,10 +143,17 @@ export const IconFilter = (props) => (
   </Svg>
 )
 
+// El avioncito es el único ícono que no va centrado por su caja: la punta
+// estira el dibujo hacia arriba a la derecha y la cola deja vacío el rincón de
+// abajo a la izquierda, así que con la caja centrada se ve corrido dentro del
+// botón redondo. Va trazado 0.9 unidades a la izquierda y 0.9 abajo, comparado
+// contra el centro real del botón. Corregir hasta el centro de masa del trazo
+// (1.75) lo pasa de largo y queda tirado al otro lado. Si se retoca el dibujo,
+// hay que mirar el corrimiento de nuevo.
 export const IconSend = (props) => (
   <Svg {...props}>
-    <path d="M20.5 3.5 11 13" />
-    <path d="M20.5 3.5 14.5 20.5l-3.5-7.5-7.5-3.5Z" />
+    <path d="M19.6 4.4 10.1 13.9" />
+    <path d="M19.6 4.4 13.6 21.4l-3.5-7.5-7.5-3.5Z" />
   </Svg>
 )
 
@@ -309,9 +325,87 @@ export const IconArrowOut = (props) => (
   </Svg>
 )
 
+// Flechas de variación de las tarjetas de KPI: van al lado del porcentaje, así
+// que la dirección se lee incluso sin distinguir el verde del rojo.
+// Flecha recta y no la línea quebrada de un gráfico: al tamaño al que se usa
+// (al lado de un porcentaje) el zigzag se lee como un garabato, y lo único que
+// tiene que decir es si sube o baja.
+export const IconTrendUp = (props) => (
+  <Svg {...props}>
+    <path d="M6 18 18 6" />
+    <path d="M10.5 6H18v7.5" />
+  </Svg>
+)
+
+export const IconTrendDown = (props) => (
+  <Svg {...props}>
+    <path d="M6 6l12 12" />
+    <path d="M10.5 18H18v-7.5" />
+  </Svg>
+)
+
+export const IconSun = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="4.2" />
+    <path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6" />
+  </Svg>
+)
+
+export const IconMoon = (props) => (
+  <Svg {...props}>
+    <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z" />
+  </Svg>
+)
+
 export const IconSidebarToggle = (props) => (
   <Svg {...props}>
     <rect x="3.6" y="4.8" width="16.8" height="14.4" rx="2" />
     <path d="M9.6 4.8v14.4" />
+  </Svg>
+)
+
+export const IconTrash = (props) => (
+  <Svg {...props}>
+    <path d="M4.5 6.8h15" />
+    <path d="M9.4 6.8V5.2a1.2 1.2 0 0 1 1.2-1.2h2.8a1.2 1.2 0 0 1 1.2 1.2v1.6" />
+    <path d="M6.6 6.8 7.5 19a1.2 1.2 0 0 0 1.2 1.1h6.6a1.2 1.2 0 0 0 1.2-1.1l.9-12.2" />
+  </Svg>
+)
+
+export const IconPencil = (props) => (
+  <Svg {...props}>
+    <path d="M4.5 19.5h3.2L18.4 8.8a1.8 1.8 0 0 0 0-2.5l-.7-.7a1.8 1.8 0 0 0-2.5 0L4.5 16.3Z" />
+    <path d="M14.2 7.1l2.7 2.7" />
+  </Svg>
+)
+
+export const IconDownload = (props) => (
+  <Svg {...props}>
+    <path d="M12 4v10.5" />
+    <path d="M8 11l4 3.7 4-3.7" />
+    <path d="M4.8 17.4v1.4a1.2 1.2 0 0 0 1.2 1.2h12a1.2 1.2 0 0 0 1.2-1.2v-1.4" />
+  </Svg>
+)
+
+export const IconFile = (props) => (
+  <Svg {...props}>
+    <path d="M13.6 3.8H7.4a1.6 1.6 0 0 0-1.6 1.6v13.2a1.6 1.6 0 0 0 1.6 1.6h9.2a1.6 1.6 0 0 0 1.6-1.6V8.4Z" />
+    <path d="M13.6 3.8v4.6h4.6" />
+  </Svg>
+)
+
+// Cuadrado y no dos barras: es el botón de frenar la grabación, y el símbolo de
+// pausa haría pensar que se puede seguir grabando después.
+export const IconStop = (props) => (
+  <Svg {...props}>
+    <rect x="6.4" y="6.4" width="11.2" height="11.2" rx="2" fill="currentColor" stroke="none" />
+  </Svg>
+)
+
+export const IconAlert = (props) => (
+  <Svg {...props}>
+    <path d="M12 4.2 21 19.4H3Z" />
+    <path d="M12 10v3.6" />
+    <path d="M12 16.6h.01" strokeWidth="2.2" />
   </Svg>
 )

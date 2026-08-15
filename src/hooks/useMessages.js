@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { apiGet, apiPost, apiPatch, apiDelete } from '../api/client'
+import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '../api/client'
+import { dayStats } from '../utils/metrics'
 
 const POLL_MS = 6000
 
@@ -21,6 +22,21 @@ export default function useMessages() {
   const [dayStatus, setDayStatus] = useState('closed')
   const [dayOpenedAt, setDayOpenedAt] = useState(null)
   const [dayClosedAt, setDayClosedAt] = useState(null)
+  // Último fallo contra la API. Antes todo esto terminaba en un console.error:
+  // con el server caído o reiniciando, la bandeja se veía igual que una bandeja
+  // vacía y los botones "no hacían nada" sin decir por qué. El estado se limpia
+  // solo en cuanto un poll vuelve a responder.
+  const [apiError, setApiError] = useState(null)
+
+  // Handler de catch con el origen adentro, para no repetir el console.error en
+  // cada mutación y que el mensaje que sube a la UI diga qué se estaba haciendo.
+  const fallo = useCallback(
+    (origen) => (err) => {
+      console.error(`[useMessages] ${origen}`, err)
+      setApiError({ origen, message: err.message })
+    },
+    [],
+  )
 
   const refreshDay = useCallback(async () => {
     const day = await apiGet('/days/current')
@@ -31,6 +47,8 @@ export default function useMessages() {
 
   const refreshOpenMessages = useCallback(async () => {
     setMessages(await apiGet('/messages?day=open'))
+    // El poll es lo que corre siempre: si este pasa, el server volvió.
+    setApiError(null)
   }, [])
 
   const refreshArchivedDays = useCallback(async () => {
@@ -47,14 +65,25 @@ export default function useMessages() {
 
   useEffect(() => {
     Promise.all([refreshDay(), refreshOpenMessages(), refreshArchivedDays(), refreshMeta(), refreshDrafts()]).catch(
-      (err) => console.error('[useMessages] initial load', err),
+      fallo('carga inicial'),
     )
 
     const interval = setInterval(() => {
       if (document.hidden) return
-      refreshOpenMessages().catch((err) => console.error('[useMessages] poll messages', err))
-      refreshDrafts().catch((err) => console.error('[useMessages] poll drafts', err))
-      refreshMeta().catch((err) => console.error('[useMessages] poll meta', err))
+      // El estado del día va en el poll y no solo en la carga inicial. Si esa
+      // primera llamada falla (el server todavía no arrancó, o se reinició en el
+      // medio), `dayStatus` se queda en 'closed', que es el valor inicial — y
+      // como el poll de mensajes sí se recupera y encima limpia el aviso de
+      // error, la dashboard se ve entera y sin ninguna señal de problema
+      // mientras la barra insiste con "Día cerrado". Peor: `sendMessage`,
+      // `addNote` y `resolveConversation` cortan por ese mismo `dayStatus`, así
+      // que los botones dejan de hacer nada aunque el server tenga el día
+      // abierto. `listClosedDays` no entra acá a propósito: trae todos los
+      // mensajes de todo el historial y no cambia solo, únicamente al cerrar.
+      refreshDay().catch(fallo('actualizar el estado del día'))
+      refreshOpenMessages().catch(fallo('actualizar mensajes'))
+      refreshDrafts().catch(fallo('actualizar borradores'))
+      refreshMeta().catch(fallo('actualizar conversaciones'))
     }, POLL_MS)
 
     return () => clearInterval(interval)
@@ -65,7 +94,7 @@ export default function useMessages() {
     if (dayStatus !== 'open') return
     apiPatch(`/conversations/${encodeURIComponent(phone)}/resolve`)
       .then(refreshOpenMessages)
-      .catch((err) => console.error('[useMessages] resolveConversation', err))
+      .catch(fallo('resolver la conversación'))
   }
 
   const sendMessage = (phone, text) => {
@@ -73,7 +102,25 @@ export default function useMessages() {
     if (dayStatus !== 'open' || !body) return
     apiPost('/messages', { phone, text: body })
       .then(() => Promise.all([refreshOpenMessages(), refreshDrafts()]))
-      .catch((err) => console.error('[useMessages] sendMessage', err))
+      .catch(fallo('enviar el mensaje'))
+  }
+
+  // Adjuntos (archivo, foto o nota de voz). Devuelve la promesa, a diferencia
+  // del resto: el composer tiene que saber cuándo terminó para sacar el archivo
+  // de la fila de envío y volver a habilitar el botón — una subida no es
+  // instantánea como mandar texto.
+  const sendMedia = (phone, file, caption = '') => {
+    if (dayStatus !== 'open' || !file) return Promise.resolve(null)
+    const form = new FormData()
+    form.append('phone', phone)
+    form.append('caption', caption)
+    form.append('file', file, file.name)
+    return apiUpload('/messages/media', form)
+      .then((message) => Promise.all([refreshOpenMessages(), refreshDrafts()]).then(() => message))
+      .catch((err) => {
+        fallo('enviar el adjunto')(err)
+        throw err
+      })
   }
 
   const addNote = (phone, text) => {
@@ -81,7 +128,7 @@ export default function useMessages() {
     if (dayStatus !== 'open' || !body) return
     apiPost(`/conversations/${encodeURIComponent(phone)}/notes`, { text: body })
       .then(refreshOpenMessages)
-      .catch((err) => console.error('[useMessages] addNote', err))
+      .catch(fallo('agregar la nota'))
   }
 
   // `user` en null deja la conversación sin asignar, que es un estado válido
@@ -90,7 +137,7 @@ export default function useMessages() {
     setAssignments((prev) => ({ ...prev, [phone]: user }))
     apiPatch(`/conversations/${encodeURIComponent(phone)}/assignee`, { assignee: user })
       .then(refreshMeta)
-      .catch((err) => console.error('[useMessages] assignConversation', err))
+      .catch(fallo('asignar la conversación'))
   }
 
   // Reasignar el agente a mano: pisa lo que decidió el ruteador y es lo que va
@@ -102,7 +149,7 @@ export default function useMessages() {
     }))
     apiPatch(`/conversations/${encodeURIComponent(phone)}/agent`, { agent: agentKey })
       .then(refreshMeta)
-      .catch((err) => console.error('[useMessages] changeConversationAgent', err))
+      .catch(fallo('cambiar el agente'))
   }
 
   // Etiquetas libres de la conversación. Se actualiza el estado local primero
@@ -118,7 +165,7 @@ export default function useMessages() {
     })
     apiPost(`/conversations/${encodeURIComponent(phone)}/tags`, { tag: clean })
       .then(refreshMeta)
-      .catch((err) => console.error('[useMessages] addConversationTag', err))
+      .catch(fallo('agregar la etiqueta'))
   }
 
   const removeConversationTag = (phone, tag) => {
@@ -128,34 +175,33 @@ export default function useMessages() {
     }))
     apiDelete(`/conversations/${encodeURIComponent(phone)}/tags/${encodeURIComponent(tag)}`)
       .then(refreshMeta)
-      .catch((err) => console.error('[useMessages] removeConversationTag', err))
+      .catch(fallo('quitar la etiqueta'))
   }
 
   const closeDay = () => {
     if (dayStatus !== 'open') return
     apiPost('/days/close')
       .then(() => Promise.all([refreshDay(), refreshOpenMessages(), refreshArchivedDays()]))
-      .catch((err) => console.error('[useMessages] closeDay', err))
+      .catch(fallo('cerrar el día'))
   }
 
   const openNewDay = () => {
     if (dayStatus !== 'closed') return
     apiPost('/days/open')
       .then(() => Promise.all([refreshDay(), refreshOpenMessages()]))
-      .catch((err) => console.error('[useMessages] openNewDay', err))
+      .catch(fallo('abrir el día'))
   }
 
-  const entrantes = messages.filter((m) => m.direction === 'in')
-  const stats = {
-    total: entrantes.length,
-    automaticos: entrantes.filter((m) => m.type === 'automatico').length,
-    pendientes: entrantes.filter((m) => m.status === 'pendiente').length,
-  }
+  // Los mismos números salen para un día archivado (la variación de las
+  // tarjetas de KPI lo compara contra este), así que el cálculo vive en
+  // `utils/metrics` y no acá adentro.
+  const stats = dayStats(messages)
 
   return {
     messages,
     resolveConversation,
     sendMessage,
+    sendMedia,
     addNote,
     assignments,
     assignConversation,
@@ -171,5 +217,7 @@ export default function useMessages() {
     archivedDays,
     closeDay,
     openNewDay,
+    apiError,
+    dismissApiError: () => setApiError(null),
   }
 }

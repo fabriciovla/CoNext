@@ -1,4 +1,6 @@
+import fs from 'node:fs/promises'
 import { getWhatsappCredentials } from '../tenantsService.js'
+import { rutaAbsoluta } from '../mediaService.js'
 
 const GRAPH_VERSION = process.env.WA_GRAPH_VERSION || 'v25.0'
 
@@ -66,6 +68,80 @@ export async function sendMessage(conversation, text) {
       to: applyDevRecipientMap(toWaId(conversation.phone)),
       type: 'text',
       text: { preview_url: false, body: text },
+    }),
+  })
+
+  if (!res.ok) {
+    throw new Error(`WhatsApp send failed: ${res.status} ${await res.text()}`)
+  }
+
+  const data = await res.json()
+  return { externalId: data.messages?.[0]?.id ?? null }
+}
+
+// sendMedia(conversation, media) -> Promise<{ externalId: string }>
+//
+// Mandar un adjunto son dos llamadas, no una: primero se sube el archivo a
+// /media y Meta devuelve un id, y recién después se manda el mensaje citando ese
+// id. Meta guarda el binario 30 días; nuestra copia en disco es la que sostiene
+// el hilo después de eso.
+//
+// `media` es lo que devuelve `guardarAdjunto`: { kind, mime, path, name }.
+export async function sendMedia(conversation, media, caption = '') {
+  const { tenantId } = conversation
+  if (!tenantId) throw new Error('sendMedia necesita el tenantId de la conversación')
+
+  const creds = await getWhatsappCredentials(tenantId)
+
+  if (!creds) {
+    console.log(
+      `[DEV][whatsapp] simulated ${media.kind} to ${conversation.phone} (tenant ${tenantId}): ${media.name}`,
+    )
+    return { externalId: `dev-${Date.now()}` }
+  }
+
+  const bytes = await fs.readFile(rutaAbsoluta(media.path))
+
+  const form = new FormData()
+  form.append('messaging_product', 'whatsapp')
+  form.append('type', media.mime)
+  // El tercer argumento es el filename de la parte del multipart. Sin él, Graph
+  // rechaza la subida: no es un campo de texto, tiene que llegar como archivo.
+  form.append('file', new Blob([bytes], { type: media.mime }), media.name)
+
+  const subida = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${creds.phoneNumberId}/media`, {
+    method: 'POST',
+    // Sin Content-Type a mano: lo pone fetch con el boundary del FormData.
+    headers: { Authorization: `Bearer ${creds.accessToken}` },
+    body: form,
+  })
+
+  if (!subida.ok) {
+    throw new Error(`WhatsApp media upload failed: ${subida.status} ${await subida.text()}`)
+  }
+
+  const { id: mediaId } = await subida.json()
+  if (!mediaId) throw new Error('WhatsApp media upload no devolvió un id')
+
+  // El audio no acepta epígrafe (es una nota de voz, no una imagen con texto) y
+  // el documento sí acepta filename, que es el nombre con el que se descarga
+  // del otro lado.
+  const cuerpo = { id: mediaId }
+  if (caption && media.kind !== 'audio') cuerpo.caption = caption
+  if (media.kind === 'document') cuerpo.filename = media.name
+
+  const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${creds.phoneNumberId}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${creds.accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      recipient_type: 'individual',
+      to: applyDevRecipientMap(toWaId(conversation.phone)),
+      type: media.kind,
+      [media.kind]: cuerpo,
     }),
   })
 

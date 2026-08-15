@@ -1,37 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PageHeader from '../components/PageHeader'
+import PageActions from '../components/PageActions'
 import Card from '../components/ui/Card'
-import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import Switch from '../components/ui/Switch'
-import {
-  IconPlus,
-  IconSparkles,
-  IconBolt,
-  IconClock,
-  IconUsers,
-  IconChevronDown,
-} from '../components/ui/icons'
+import { IconPlus, IconChevronDown, IconTrash } from '../components/ui/icons'
 
-const EMPTY = { name: '', emoji: '🤖', role: '', instructions: '', enabled: true, autoSend: true }
-const EMOJI_PICKS = ['🤖', '💼', '🎧', '📦', '💳', '✨', '🛍️', '📣', '🧾', '🚚']
+const EMPTY = { name: '', role: '', instructions: '', enabled: true, autoSend: true }
 
-const TEXTAREA_CLASS = `w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm leading-relaxed text-ink-primary
-  placeholder:text-ink-muted transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-  focus:border-white/40 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-white/10`
+const TEXTAREA_CLASS = `w-full rounded-lg border border-tint/[0.12] bg-transparent px-3 py-2 text-[13px] leading-relaxed text-ink-primary
+  placeholder:text-ink-faint transition-colors duration-150
+  focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30`
 
 function Field({ id, label, hint, children }) {
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink-muted">{label}</span>
+      <span className="mb-1.5 block text-[13px] font-medium text-ink-primary">{label}</span>
+      {hint && <span className="mb-2 block text-[12px] leading-snug text-ink-muted">{hint}</span>}
       {children}
-      {hint && <span className="mt-1.5 block text-[11.5px] leading-snug text-ink-muted">{hint}</span>}
     </label>
   )
 }
 
-function MoveButton({ title, disabled, onClick, rotate = '' }) {
+// Acción de tarjeta: solo ícono, del tamaño del texto, y sin color hasta que el
+// mouse entra. Las tres (subir, bajar, borrar) comparten forma porque ninguna es
+// la acción principal — la principal es tocar la tarjeta, que abre el agente.
+function IconAction({ title, onClick, disabled = false, danger = false, children }) {
   return (
     <button
       type="button"
@@ -39,23 +34,26 @@ function MoveButton({ title, disabled, onClick, rotate = '' }) {
       aria-label={title}
       disabled={disabled}
       onClick={onClick}
-      className="flex h-7 w-6 items-center justify-center rounded-md text-ink-muted transition-all duration-200
-        hover:bg-white/[0.06] hover:text-ink-primary active:scale-95
-        disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:bg-transparent"
+      className={`flex h-7 w-7 items-center justify-center rounded-md text-ink-muted transition-colors duration-150
+        disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-ink-muted
+        ${
+          danger
+            ? 'hover:bg-status-critical/10 hover:text-status-critical'
+            : 'hover:bg-tint/[0.06] hover:text-ink-primary'
+        }`}
     >
-      <IconChevronDown size={13} className={rotate} />
+      {children}
     </button>
   )
 }
 
-function Stat({ Icon, value, label }) {
+// Número del pie de la tarjeta: el rótulo arriba en chico y el dato abajo en
+// grande. Son totales de siempre, no del día abierto.
+function Dato({ label, value, tone = 'text-ink-primary', align = 'left' }) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon size={13} className="shrink-0 text-ink-muted" />
-      <div className="min-w-0 leading-tight">
-        <p className="text-[13px] font-semibold tabular-nums text-ink-primary">{value}</p>
-        <p className="truncate text-[10.5px] text-ink-muted">{label}</p>
-      </div>
+    <div className={align === 'right' ? 'text-right' : ''}>
+      <p className="text-[12px] text-ink-muted">{label}</p>
+      <p className={`text-[16px] font-semibold leading-tight tabular-nums ${tone}`}>{value}</p>
     </div>
   )
 }
@@ -72,66 +70,47 @@ function AgentForm({ agent, onSubmit, onCancel }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex gap-3">
-        <div className="w-[92px] shrink-0">
-          <Field id="emoji" label="Ícono">
-            <input
-              id="emoji"
-              value={draft.emoji}
-              onChange={set('emoji')}
-              maxLength={4}
-              className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-center text-lg
-                transition-all duration-300 focus:border-white/40 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-white/10"
-            />
-          </Field>
-        </div>
-        <div className="min-w-0 flex-1">
-          <Input
-            id="name"
-            label="Nombre"
-            placeholder="Agente de ventas"
-            value={draft.name}
-            onChange={set('name')}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {EMOJI_PICKS.map((emoji) => (
-          <button
-            key={emoji}
-            type="button"
-            onClick={() => setDraft((prev) => ({ ...prev, emoji }))}
-            className={`h-8 w-8 rounded-lg border text-base transition-all duration-200 hover:-translate-y-px ${
-              draft.emoji === emoji
-                ? 'border-white/40 bg-white/10'
-                : 'border-white/[0.07] bg-white/[0.03] hover:border-white/20'
-            }`}
-          >
-            {emoji}
-          </button>
-        ))}
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Input propio y no el compartido: acá las etiquetas son preguntas en
+          lenguaje llano, y el `Input` de la app las escribe en mayúsculas. */}
+      <Field id="name" label="¿Cómo se llama?">
+        <input
+          id="name"
+          value={draft.name}
+          onChange={set('name')}
+          placeholder="Agente de ventas"
+          className="w-full rounded-lg border border-tint/[0.12] bg-transparent px-3 py-2 text-[13px] text-ink-primary
+            placeholder:text-ink-faint transition-colors duration-150
+            focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30"
+        />
+      </Field>
 
       <Field
         id="role"
-        label="Cuándo interviene"
-        hint="Es lo único que lee el ruteador para decidir a quién le toca cada mensaje. Escribilo como una lista de casos concretos."
+        label="¿De qué se encarga?"
+        hint="Los temas que tiene que atender. Con esto se decide a cuál de tus agentes le toca cada mensaje que llega."
       >
-        <textarea id="role" rows={3} value={draft.role} onChange={set('role')} className={TEXTAREA_CLASS} />
+        <textarea
+          id="role"
+          rows={3}
+          value={draft.role}
+          onChange={set('role')}
+          placeholder="Precios, stock, formas de pago y si hacemos envíos."
+          className={TEXTAREA_CLASS}
+        />
       </Field>
 
       <Field
         id="instructions"
-        label="Cómo responde"
-        hint="Se suma al prompt cuando este agente redacta. No puede saltearse las reglas de la tienda (catálogo, horarios, nada de inventar precios)."
+        label="¿Cómo tiene que contestar?"
+        hint="El tono y lo que no puede olvidarse. Los precios, el catálogo y los horarios los saca de tu configuración, no se los inventa."
       >
         <textarea
           id="instructions"
           rows={4}
           value={draft.instructions}
           onChange={set('instructions')}
+          placeholder="Contestá corto y amable, y ofrecé siempre el envío a domicilio."
           className={TEXTAREA_CLASS}
         />
       </Field>
@@ -140,14 +119,14 @@ function AgentForm({ agent, onSubmit, onCancel }) {
         <Switch
           checked={draft.enabled}
           onChange={toggle('enabled')}
-          label="Agente activo"
-          hint="Si está apagado, el ruteador no se lo ofrece y sus conversaciones pasan al primer agente activo."
+          label="Encendido"
+          hint="Apagado, este agente no contesta nada y sus mensajes pasan al primero de la lista."
         />
         <Switch
           checked={draft.autoSend}
           onChange={toggle('autoSend')}
-          label="Envío automático"
-          hint="Apagado, todo lo que redacte queda como borrador para revisar antes de mandarlo."
+          label="Contesta solo"
+          hint="Apagado, escribe la respuesta igual pero te la deja como borrador para que la revises antes de mandarla."
         />
       </div>
 
@@ -161,9 +140,30 @@ function AgentForm({ agent, onSubmit, onCancel }) {
   )
 }
 
-export default function Agents({ agents, stats, error, onAdd, onUpdate, onDelete, onReorder }) {
+export default function Agents({
+  agents,
+  stats,
+  error,
+  focus = null,
+  onFocusHandled,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onReorder,
+}) {
   const [editing, setEditing] = useState(null) // agente | 'nuevo' | null
   const [confirmDelete, setConfirmDelete] = useState(null)
+
+  // La barra de la izquierda entra acá pidiendo un agente puntual (o uno nuevo).
+  // El pedido se consume apenas se abre el formulario: si quedara colgado, cerrar
+  // el modal y volver a tocar el mismo agente no haría nada.
+  useEffect(() => {
+    if (focus == null) return
+    const target = focus === 'nuevo' ? 'nuevo' : agents.find((a) => a.id === focus)
+    if (!target) return // los agentes todavía no llegaron; el efecto vuelve cuando lleguen
+    setEditing(target)
+    onFocusHandled()
+  }, [focus, agents, onFocusHandled])
 
   const move = (index, delta) => {
     const next = [...agents]
@@ -183,107 +183,135 @@ export default function Agents({ agents, stats, error, onAdd, onUpdate, onDelete
       .catch(() => {})
   }
 
+  // El que contesta cuando ningún agente encaja claro. Es el primero *encendido*,
+  // no el primero de la lista, y se marca en su tarjeta para que el orden
+  // signifique algo a simple vista.
+  const porDefecto = agents.find((a) => a.enabled)
+
   return (
     <div>
-      <PageHeader
-        title="Agentes IA"
-        subtitle="Quién atiende cada tipo de mensaje y cómo responde"
-        actions={
-          <Button onClick={() => setEditing('nuevo')}>
-            <IconPlus size={14} />
-            Nuevo agente
-          </Button>
-        }
-      />
+      <PageHeader title="Agentes IA" />
 
-      <Card className="mb-4">
-        <div className="flex items-start gap-3">
-          <IconSparkles size={16} className="mt-0.5 shrink-0 text-ink-muted" />
-          <p className="text-[13px] leading-relaxed text-ink-secondary">
-            Cuando entra un mensaje, primero se decide{' '}
-            <span className="text-ink-primary">qué agente lo toma</span> comparándolo con el “cuándo
-            interviene” de cada uno. Después ese agente redacta la respuesta con sus propias
-            instrucciones y la clasifica en automática o pendiente. El orden de la lista importa: el
-            primero activo es el que se usa como respaldo si el ruteo no encuentra nada claro.
-          </p>
-        </div>
-      </Card>
+      {/* Una línea: la regla del orden ya se ve marcada en la lista, así que no
+          hace falta explicarla en un párrafo arriba de todo. */}
+      <p className="mb-4 text-center text-[12.5px] text-ink-muted">
+        Contesta el agente que mejor encaje con la consulta. Tocá uno para configurarlo.
+      </p>
 
       {error && (
-        <p className="animate-fade-down mb-4 rounded-xl border border-status-critical/25 bg-status-critical/10 px-4 py-2.5 text-[13px] text-status-critical">
+        <p className="mx-auto mb-4 max-w-3xl rounded-xl border border-status-critical/25 bg-status-critical/10 px-4 py-2.5 text-[13px] text-status-critical">
           {error}
         </p>
       )}
 
-      <div className="stagger grid gap-3 md:grid-cols-2" style={{ '--stagger-base': '60ms' }}>
+      {/* Una sola columna y no dos: el orden de la lista decide quién contesta
+          cuando ningún agente encaja claro, y en dos columnas ese orden zigzaguea
+          y deja de leerse. */}
+      {/* `grid-cols-1` explícito y no `grid` a secas: sin columnas declaradas el
+          item toma `min-width: auto` y no baja de su ancho mínimo de contenido,
+          así que un rol largo estiraba la tarjeta más allá del `max-w` y dejaba
+          el interruptor fuera de la pantalla. `grid-cols-1` la declara como
+          `minmax(0, 1fr)`, que sí se deja encoger. */}
+      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-2">
         {agents.map((agent, index) => {
           const s = stats[agent.key] ?? { conversations: 0, handled: 0, automatic: 0, pending: 0 }
+          const esPorDefecto = agent.enabled && porDefecto?.id === agent.id
           return (
-            <Card key={agent.id} bodyClassName="p-4">
-              <div className="flex items-start gap-3">
+            // La tarjeta se lee en tres bandas: arriba en qué estado está, en el
+            // medio quién es y de qué se encarga, y abajo lo que viene haciendo.
+            // Las bandas van con un fondo apenas distinto del cuerpo, que es lo
+            // que las separa sin necesidad de más líneas.
+            <Card key={agent.id} interactive className="group relative overflow-hidden" bodyClassName="p-0">
+              {/* El botón cubre la tarjeta entera en vez de haber uno de "Editar":
+                  abrir el agente es lo único que se hace acá seguido. El resto del
+                  contenido no recibe clicks (`pointer-events-none`) y se los deja
+                  pasar a este; los controles se los devuelven. */}
+              <button
+                type="button"
+                onClick={() => setEditing(agent)}
+                aria-label={`Editar ${agent.name}`}
+                className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2
+                  focus-visible:ring-violet/50"
+              />
+
+              <div className="pointer-events-none relative z-20 flex items-center gap-2 border-b border-tint/[0.06] bg-tint/[0.02] px-4 py-2.5">
+                {/* El punto es el mismo que marca el día abierto en la barra:
+                    verde es que está trabajando. */}
                 <span
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.04] text-lg transition-opacity ${
-                    agent.enabled ? '' : 'opacity-40 grayscale'
-                  }`}
-                >
-                  {agent.emoji}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-semibold text-ink-primary">{agent.name}</h3>
-                    {!agent.enabled && (
-                      <span className="shrink-0 rounded-full border border-white/10 px-2 py-0.5 text-[10.5px] text-ink-muted">
-                        Apagado
-                      </span>
-                    )}
-                    {agent.enabled && !agent.autoSend && (
-                      <span className="shrink-0 rounded-full border border-status-warning/25 bg-status-warning/10 px-2 py-0.5 text-[10.5px] text-status-warning">
-                        Solo borradores
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">
-                    {agent.role || 'Sin criterio de entrada definido.'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-4 gap-2 border-t border-white/[0.06] pt-3">
-                <Stat Icon={IconUsers} value={s.conversations} label="charlas" />
-                <Stat Icon={IconSparkles} value={s.handled} label="atendidos" />
-                <Stat Icon={IconBolt} value={s.automatic} label="autom." />
-                <Stat Icon={IconClock} value={s.pending} label="pendientes" />
-              </div>
-
-              <div className="mt-3 flex items-center justify-between gap-2">
-                <Switch
-                  checked={agent.enabled}
-                  onChange={(enabled) => onUpdate(agent.id, { enabled }).catch(() => {})}
-                  label="Activo"
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${agent.enabled ? 'bg-status-good' : 'bg-tint/30'}`}
                 />
-                <div className="flex shrink-0 items-center gap-2">
-                  {/* Subir/bajar en la lista: el primer agente activo es el que
-                      se usa de respaldo cuando el ruteo no encuentra nada claro. */}
-                  <div className="flex items-center">
-                    <MoveButton
-                      title="Subir"
+                <span className="text-[12px] text-ink-secondary">
+                  {agent.enabled ? 'Encendido' : 'Apagado'}
+                </span>
+                {/* Los estados van como una palabra y no como pastillas de
+                    color: son dos casos puntuales, no etiquetas de todos. */}
+                {esPorDefecto && (
+                  <span className="truncate text-[12px] text-violet" title="Contesta cuando ningún agente encaja">
+                    · por defecto
+                  </span>
+                )}
+                {agent.enabled && !agent.autoSend && (
+                  <span
+                    className="truncate text-[12px] text-status-warning"
+                    title="Escribe la respuesta pero te la deja como borrador"
+                  >
+                    · deja borrador
+                  </span>
+                )}
+
+                {/* Reordenar y borrar aparecen al pasar el mouse: se usan una vez
+                    cada tanto y estaban compitiendo con todo. El contenedor
+                    reserva el lugar igual, para que nada salte. */}
+                <div className="pointer-events-auto ml-auto flex shrink-0 items-center gap-1">
+                  <div className="flex opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
+                    <IconAction
+                      title="Subir en la lista"
                       disabled={index === 0}
                       onClick={() => move(index, -1)}
-                      rotate="rotate-180"
-                    />
-                    <MoveButton
-                      title="Bajar"
+                    >
+                      <IconChevronDown size={13} className="rotate-180" />
+                    </IconAction>
+                    <IconAction
+                      title="Bajar en la lista"
                       disabled={index === agents.length - 1}
                       onClick={() => move(index, 1)}
-                    />
+                    >
+                      <IconChevronDown size={13} />
+                    </IconAction>
+                    <IconAction title={`Borrar ${agent.name}`} danger onClick={() => setConfirmDelete(agent)}>
+                      <IconTrash size={15} />
+                    </IconAction>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => setEditing(agent)}>
-                    Editar
-                  </Button>
-                  <Button size="sm" variant="danger" onClick={() => setConfirmDelete(agent)}>
-                    Borrar
-                  </Button>
+                  <Switch
+                    block={false}
+                    checked={agent.enabled}
+                    onChange={(enabled) => onUpdate(agent.id, { enabled }).catch(() => {})}
+                    title={agent.enabled ? `Apagar ${agent.name}` : `Encender ${agent.name}`}
+                  />
                 </div>
+              </div>
+
+              <div className="pointer-events-none relative px-4 py-4">
+                <h3 className="truncate text-[15px] font-semibold text-ink-primary">{agent.name}</h3>
+                {/* Dos líneas y corta: el rol completo se lee adentro, y una
+                    tarjeta que crece con el texto rompe el ritmo de la lista. */}
+                <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-ink-secondary">
+                  {agent.role || 'Todavía no dijiste de qué se encarga.'}
+                </p>
+              </div>
+
+              <div className="pointer-events-none relative flex items-end justify-between gap-4 border-t border-tint/[0.06] bg-tint/[0.02] px-4 py-3">
+                <div className="flex min-w-0 gap-6">
+                  <Dato label="conversaciones" value={s.conversations} />
+                  <Dato label="mensajes" value={s.handled} />
+                  <Dato label="contestó solo" value={s.automatic} />
+                </div>
+                <Dato
+                  label="para revisar"
+                  value={s.pending}
+                  align="right"
+                  tone={s.pending > 0 ? 'text-status-warning' : 'text-ink-muted'}
+                />
               </div>
             </Card>
           )
@@ -293,11 +321,18 @@ export default function Agents({ agents, stats, error, onAdd, onUpdate, onDelete
       {agents.length === 0 && (
         <Card>
           <p className="py-6 text-center text-[13px] text-ink-muted">
-            No hay agentes cargados. Sin al menos uno activo, los mensajes entrantes quedan
-            pendientes de revisión.
+            No hay agentes cargados. Sin al menos uno encendido, todos los mensajes te quedan a vos
+            para contestar a mano.
           </p>
         </Card>
       )}
+
+      <PageActions>
+        <Button onClick={() => setEditing('nuevo')}>
+          <IconPlus size={14} />
+          Nuevo agente
+        </Button>
+      </PageActions>
 
       {editing && (
         <Modal
@@ -306,6 +341,9 @@ export default function Agents({ agents, stats, error, onAdd, onUpdate, onDelete
           onClose={() => setEditing(null)}
         >
           <AgentForm
+            // El borrador del formulario se arma una sola vez: sin `key`, pasar
+            // de un agente a otro dejaría los datos del anterior.
+            key={editing === 'nuevo' ? 'nuevo' : editing.id}
             agent={editing === 'nuevo' ? null : editing}
             onSubmit={handleSubmit}
             onCancel={() => setEditing(null)}
@@ -317,8 +355,8 @@ export default function Agents({ agents, stats, error, onAdd, onUpdate, onDelete
         <Modal title="Borrar agente" onClose={() => setConfirmDelete(null)}>
           <p className="text-sm leading-relaxed text-ink-secondary">
             Se va a borrar <span className="text-ink-primary">{confirmDelete.name}</span>. Las
-            conversaciones que venía atendiendo pasan al primer agente activo; el historial de
-            mensajes queda como está.
+            conversaciones que venía atendiendo pasan al primer agente encendido; los mensajes que ya
+            mandó quedan como están.
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmDelete(null)}>

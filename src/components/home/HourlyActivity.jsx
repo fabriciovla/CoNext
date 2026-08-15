@@ -1,9 +1,12 @@
 import Card from '../ui/Card'
 import { messagesByHour } from '../../utils/metrics'
 
+// La hora pico va en violeta pleno y el resto en el mismo violeta apagado: así
+// la forma del día se lee de un vistazo sin que cada barra pida atención por
+// separado, y el pico no necesita otro color para destacarse.
 function barColor(total, peak) {
-  if (total === 0) return 'bg-white/[0.06]'
-  return total === peak ? 'bg-white' : 'bg-white/25'
+  if (total === 0) return 'bg-tint/[0.05]'
+  return total === peak ? 'bg-violet' : 'bg-violet/30'
 }
 
 // Barras en HTML (no SVG): el alto sale de un porcentaje, así el texto de las
@@ -37,7 +40,7 @@ export default function HourlyActivity({ messages, settings }) {
                 {/* Cada barra sube desde la base, una detrás de otra de izquierda
                     a derecha, como si el día se fuera llenando. */}
                 <div
-                  className={`animate-grow-up w-full rounded-t-md transition-colors duration-200 group-hover/bar:brightness-125 ${barColor(total, peak)}`}
+                  className={`animate-grow-up w-full rounded-sm transition-colors duration-200 group-hover/bar:brightness-110 ${barColor(total, peak)}`}
                   style={{
                     height: total === 0 ? '2px' : `${(total / peak) * 100}%`,
                     '--d': `${150 + i * 28}ms`,

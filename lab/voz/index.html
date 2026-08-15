@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prueba de voz — Gemini Live</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 24px; font: 15px/1.5 system-ui, sans-serif; background: #111417; color: #e6e8ea; }
+  main { max-width: 720px; margin: 0 auto; display: grid; gap: 16px; }
+  h1 { font-size: 20px; margin: 0; }
+  p.sub { margin: 0; color: #9aa3ab; }
+  label { display: block; font-size: 13px; color: #9aa3ab; margin-bottom: 6px; }
+  input, textarea, select {
+    width: 100%; box-sizing: border-box; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid #2a3138; background: #181c20; color: #e6e8ea; font: inherit;
+  }
+  textarea { min-height: 190px; resize: vertical; font-size: 13px; }
+  .fila { display: flex; gap: 12px; align-items: end; }
+  .fila > div { flex: 1; }
+  button {
+    padding: 12px 24px; border-radius: 8px; border: 0; font: inherit; font-weight: 600;
+    cursor: pointer; background: #2f7d4f; color: #fff;
+  }
+  button.cortar { background: #a33a3a; }
+  button:disabled { opacity: .5; cursor: default; }
+  #estado { font-size: 13px; color: #9aa3ab; min-height: 20px; }
+  #log {
+    background: #181c20; border: 1px solid #2a3138; border-radius: 8px; padding: 12px;
+    min-height: 160px; max-height: 340px; overflow-y: auto; font-size: 13px;
+  }
+  #log div { margin-bottom: 6px; }
+  .yo { color: #7fb3ff; }
+  .ia { color: #8fd9a8; }
+  .sys { color: #6b737a; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <h1>Prueba de voz — Gemini Live</h1>
+    <p class="sub">Hablale por el micrófono como si llamaras a Cell Tuc. No toca nada del CRM.</p>
+  </div>
+
+  <div class="fila">
+    <div>
+      <label for="key">API key de Gemini (la misma del <code>.env</code>)</label>
+      <input id="key" type="password" placeholder="AIza…" autocomplete="off">
+    </div>
+    <div style="flex:0 0 210px">
+      <label for="voz">Voz</label>
+      <select id="voz">
+        <optgroup label="Candidatas para mostrador">
+          <option value="Achird">Achird — amable</option>
+          <option value="Sulafat" selected>Sulafat — cálida</option>
+          <option value="Zubenelgenubi">Zubenelgenubi — informal</option>
+          <option value="Callirrhoe">Callirrhoe — relajada</option>
+          <option value="Kore">Kore — firme</option>
+          <option value="Leda">Leda — joven</option>
+        </optgroup>
+        <optgroup label="Resto">
+          <option value="Zephyr">Zephyr — luminosa</option>
+          <option value="Autonoe">Autonoe — luminosa</option>
+          <option value="Puck">Puck — animada</option>
+          <option value="Laomedeia">Laomedeia — animada</option>
+          <option value="Charon">Charon — informativa</option>
+          <option value="Rasalgethi">Rasalgethi — informativa</option>
+          <option value="Orus">Orus — firme</option>
+          <option value="Alnilam">Alnilam — firme</option>
+          <option value="Fenrir">Fenrir — excitable</option>
+          <option value="Aoede">Aoede — liviana</option>
+          <option value="Umbriel">Umbriel — relajada</option>
+          <option value="Enceladus">Enceladus — susurrada</option>
+          <option value="Iapetus">Iapetus — clara</option>
+          <option value="Erinome">Erinome — clara</option>
+          <option value="Algieba">Algieba — suave</option>
+          <option value="Despina">Despina — suave</option>
+          <option value="Algenib">Algenib — rasposa</option>
+          <option value="Achernar">Achernar — tenue</option>
+          <option value="Schedar">Schedar — pareja</option>
+          <option value="Gacrux">Gacrux — madura</option>
+          <option value="Pulcherrima">Pulcherrima — resuelta</option>
+          <option value="Vindemiatrix">Vindemiatrix — gentil</option>
+          <option value="Sadachbia">Sadachbia — vivaz</option>
+          <option value="Sadaltager">Sadaltager — entendida</option>
+        </optgroup>
+      </select>
+    </div>
+    <div style="flex:0 0 130px">
+      <label for="idioma">Idioma</label>
+      <select id="idioma">
+        <option value="es-US" selected>es-US</option>
+        <option value="es">es</option>
+        <option value="es-ES">es-ES (España)</option>
+      </select>
+    </div>
+  </div>
+
+  <div>
+    <label for="prompt">Instrucciones (esto es lo que hay que ajustar hasta que suene bien)</label>
+    <textarea id="prompt">Sos la recepcionista de Cell Tuc, un local de celulares en San Miguel de Tucumán, Argentina. Estás atendiendo una LLAMADA TELEFÓNICA.
+
+Cómo hablás:
+- Español argentino, de vos. Cordial y directa, como alguien del mostrador.
+- Frases cortas. Es una llamada: la persona no puede releerte.
+- Nada de listas, viñetas, emojis ni markdown. Todo se dice en voz.
+- Los precios decilos en palabras: "ciento veinte mil pesos", no "$120.000".
+- Preguntá una cosa por vez y esperá la respuesta.
+
+Qué hacés:
+- Atendés consultas de precio, stock, horarios y dirección.
+- Tomás el pedido si quieren reservar algo, y pedís nombre y teléfono.
+
+Qué NO hacés:
+- No inventes precios, stock ni plazos. Si no sabés algo, decilo y ofrecé que lo llame alguien del local.
+- No prometas descuentos ni fechas de entrega.
+
+Datos del local:
+- Horario: lunes a viernes de nueve a trece y de diecisiete a veintiuna. Sábados de nueve a trece.
+- Dirección: calle San Martín cuatrocientos cincuenta, centro.
+- Trabajan con Samsung, Motorola y iPhone. Hacen reparación de pantalla y cambio de batería.
+
+Arrancá saludando corto: "Cell Tuc, buenas tardes, ¿en qué te puedo ayudar?"</textarea>
+  </div>
+
+  <div class="fila">
+    <button id="llamar">Llamar</button>
+    <button id="cortar" class="cortar" disabled>Cortar</button>
+    <div id="estado">Listo.</div>
+  </div>
+
+  <div id="log"></div>
+</main>
+
+<script type="module">
+import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai@1'
+
+// Formatos que fija la Live API: entra PCM 16 bits a 16 kHz, sale PCM 16 bits a
+// 24 kHz. No es negociable, así que los AudioContext se crean con esos sample
+// rates y el browser se encarga de resamplear el micrófono.
+const SAMPLE_ENTRADA = 16000
+const SAMPLE_SALIDA = 24000
+const MODELO = 'gemini-3.1-flash-live-preview'
+
+const $ = (id) => document.getElementById(id)
+const log = $('log')
+
+// La key queda en localStorage solo para no repegarla en cada prueba. Es una
+// página local y descartable; nunca subir esto a ningún lado.
+$('key').value = localStorage.getItem('geminiKey') ?? ''
+
+let sesion = null
+let micCtx = null
+let outCtx = null
+let stream = null
+// Los chunks de audio se agendan uno detrás del otro sobre el reloj del
+// AudioContext. Sin esta cola se pisan entre sí y se escucha entrecortado.
+let cursor = 0
+let sonando = []
+
+function escribir(texto, clase = 'sys') {
+  const div = document.createElement('div')
+  div.className = clase
+  div.textContent = texto
+  log.appendChild(div)
+  log.scrollTop = log.scrollHeight
+}
+
+// Las transcripciones llegan de a pedacitos. En vez de una línea por fragmento,
+// se van pegando sobre la última línea del mismo hablante.
+function acumular(clase, texto) {
+  const ultima = log.lastElementChild
+  if (ultima?.classList.contains(clase) && ultima.dataset.abierta === '1') {
+    ultima.textContent += texto
+  } else {
+    const div = document.createElement('div')
+    div.className = clase
+    div.dataset.abierta = '1'
+    div.textContent = (clase === 'yo' ? 'Vos: ' : 'IA: ') + texto
+    log.appendChild(div)
+  }
+  log.scrollTop = log.scrollHeight
+}
+
+function cerrarLineas() {
+  for (const el of log.children) el.dataset.abierta = '0'
+}
+
+function b64ToInt16(b64) {
+  const bin = atob(b64)
+  const bytes = new Uint8Array(bin.length)
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
+  return new Int16Array(bytes.buffer)
+}
+
+function int16ToB64(i16) {
+  const bytes = new Uint8Array(i16.buffer)
+  let bin = ''
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i])
+  return btoa(bin)
+}
+
+function reproducir(i16) {
+  const buf = outCtx.createBuffer(1, i16.length, SAMPLE_SALIDA)
+  const canal = buf.getChannelData(0)
+  for (let i = 0; i < i16.length; i++) canal[i] = i16[i] / 32768
+
+  const nodo = outCtx.createBufferSource()
+  nodo.buffer = buf
+  nodo.connect(outCtx.destination)
+
+  if (cursor < outCtx.currentTime) cursor = outCtx.currentTime
+  nodo.start(cursor)
+  cursor += buf.duration
+  sonando.push(nodo)
+  nodo.onended = () => { sonando = sonando.filter((n) => n !== nodo) }
+}
+
+// Cuando la persona interrumpe, el modelo avisa y hay que callar lo que ya
+// estaba agendado. Sin esto la IA sigue hablando encima del cliente, que es
+// exactamente lo que hace sonar falsa a una llamada automática.
+function callar() {
+  for (const nodo of sonando) { try { nodo.stop() } catch {} }
+  sonando = []
+  cursor = 0
+}
+
+async function llamar() {
+  const apiKey = $('key').value.trim()
+  if (!apiKey) return alert('Falta la API key')
+  localStorage.setItem('geminiKey', apiKey)
+
+  $('llamar').disabled = true
+  $('estado').textContent = 'Conectando…'
+  log.innerHTML = ''
+
+  try {
+    outCtx = new AudioContext({ sampleRate: SAMPLE_SALIDA })
+    const ai = new GoogleGenAI({ apiKey })
+
+    sesion = await ai.live.connect({
+      model: MODELO,
+      config: {
+        responseModalities: [Modality.AUDIO],
+        systemInstruction: $('prompt').value,
+        speechConfig: {
+          languageCode: $('idioma').value,
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: $('voz').value } },
+        },
+        // Las transcripciones son lo que después va a guardarse en el CRM como
+        // mensajes de la conversación. Acá sirven para leer qué pasó.
+        inputAudioTranscription: {},
+        outputAudioTranscription: {},
+      },
+      callbacks: {
+        onopen: () => {
+          $('estado').textContent = 'En llamada — hablá'
+          $('cortar').disabled = false
+          escribir('Conectado. Decí algo.')
+        },
+        onmessage: (msg) => {
+          const contenido = msg.serverContent
+          if (!contenido) return
+
+          if (contenido.interrupted) { callar(); cerrarLineas(); return }
+
+          const entrada = contenido.inputTranscription?.text
+          if (entrada) acumular('yo', entrada)
+
+          const salida = contenido.outputTranscription?.text
+          if (salida) acumular('ia', salida)
+
+          for (const parte of contenido.modelTurn?.parts ?? []) {
+            if (parte.inlineData?.data) reproducir(b64ToInt16(parte.inlineData.data))
+          }
+
+          if (contenido.turnComplete) cerrarLineas()
+        },
+        onerror: (e) => {
+          escribir('Error: ' + (e?.message ?? e))
+          $('estado').textContent = 'Error'
+        },
+        onclose: (e) => {
+          escribir('Sesión cerrada. ' + (e?.reason ?? ''))
+          cortar()
+        },
+      },
+    })
+
+    await abrirMicrofono()
+  } catch (err) {
+    escribir('No se pudo conectar: ' + err.message)
+    $('estado').textContent = 'Falló'
+    $('llamar').disabled = false
+  }
+}
+
+async function abrirMicrofono() {
+  stream = await navigator.mediaDevices.getUserMedia({
+    // Sin cancelación de eco el micrófono se escucha a sí mismo por el parlante
+    // y el modelo se responde solo. Con auriculares no haría falta, pero la
+    // prueba tiene que funcionar también a viva voz.
+    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  })
+
+  micCtx = new AudioContext({ sampleRate: SAMPLE_ENTRADA })
+  const fuente = micCtx.createMediaStreamSource(stream)
+  const proc = micCtx.createScriptProcessor(4096, 1, 1)
+
+  proc.onaudioprocess = (e) => {
+    if (!sesion) return
+    const f32 = e.inputBuffer.getChannelData(0)
+    const i16 = new Int16Array(f32.length)
+    for (let i = 0; i < f32.length; i++) {
+      const s = Math.max(-1, Math.min(1, f32[i]))
+      i16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
+    }
+    sesion.sendRealtimeInput({
+      audio: { data: int16ToB64(i16), mimeType: `audio/pcm;rate=${SAMPLE_ENTRADA}` },
+    })
+  }
+
+  // El ScriptProcessor solo corre si está conectado a la salida, pero mandarlo
+  // al parlante devolvería el micrófono en vivo. Va a un gain en cero.
+  const mudo = micCtx.createGain()
+  mudo.gain.value = 0
+  fuente.connect(proc)
+  proc.connect(mudo)
+  mudo.connect(micCtx.destination)
+}
+
+function cortar() {
+  callar()
+  try { sesion?.close() } catch {}
+  sesion = null
+  stream?.getTracks().forEach((t) => t.stop())
+  stream = null
+  micCtx?.close(); micCtx = null
+  outCtx?.close(); outCtx = null
+  $('llamar').disabled = false
+  $('cortar').disabled = true
+  $('estado').textContent = 'Cortado.'
+}
+
+$('llamar').addEventListener('click', llamar)
+$('cortar').addEventListener('click', cortar)
+</script>
+</body>
+</html>

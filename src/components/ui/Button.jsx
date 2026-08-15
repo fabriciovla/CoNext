@@ -1,17 +1,20 @@
+// Sin salto ni rebote al pasar el mouse: un botón que se mueve solo llama la
+// atención cada vez que el puntero lo cruza de camino a otra cosa. Lo que
+// cambia es el color, que ya alcanza para decir "esto se puede tocar".
 const VARIANTS = {
-  primary:
-    'bg-white text-black hover:bg-white/85 focus-visible:ring-white/40',
+  primary: 'bg-ink-primary text-ink-inverted hover:bg-ink-primary/85 focus-visible:ring-tint/40',
   secondary:
-    'bg-white/5 text-ink-secondary border border-white/10 hover:bg-white/10 hover:text-ink-primary focus-visible:ring-white/20',
+    'border border-tint/[0.12] text-ink-secondary hover:border-tint/25 hover:text-ink-primary focus-visible:ring-tint/20',
+  // El rojo se guarda para el botón que confirma de verdad, dentro del modal.
+  // El que solo *abre* la pregunta va en `ghost`: ver Agentes y Productos.
   danger:
-    'bg-status-critical/10 text-status-critical border border-status-critical/25 hover:bg-status-critical/15 focus-visible:ring-status-critical/40',
-  ghost:
-    'text-ink-muted hover:bg-white/5 hover:text-ink-primary focus-visible:ring-white/20',
+    'bg-status-critical text-status-ink hover:bg-status-critical/85 focus-visible:ring-status-critical/40',
+  ghost: 'text-ink-muted hover:bg-tint/[0.06] hover:text-ink-primary focus-visible:ring-tint/20',
 }
 
 const SIZES = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-4 py-2.5 text-sm',
+  sm: 'h-7 px-2.5 text-[12px]',
+  md: 'h-9 px-3.5 text-[13px]',
 }
 
 export default function Button({
@@ -25,11 +28,10 @@ export default function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-full font-medium
-        transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]
-        hover:-translate-y-px active:translate-y-0 active:scale-[0.97]
+      className={`inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg font-medium
+        transition-colors duration-150
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-page
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:hover:translate-y-0
+        disabled:cursor-not-allowed disabled:opacity-40
         ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...props}
     >

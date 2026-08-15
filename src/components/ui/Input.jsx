@@ -1,16 +1,14 @@
+// La etiqueta va en minúscula y del tamaño del texto normal: en versalitas
+// espaciadas competía con el propio dato que el campo contiene.
 export default function Input({ label, id, className = '', ...props }) {
   return (
     <label htmlFor={id} className="block">
-      {label && (
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink-muted">
-          {label}
-        </span>
-      )}
+      {label && <span className="mb-1.5 block text-[12.5px] text-ink-secondary">{label}</span>}
       <input
         id={id}
-        className={`w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-sm text-ink-primary
-          placeholder:text-ink-muted transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-          focus:border-white/40 focus:bg-white/[0.07] focus:outline-none focus:ring-2 focus:ring-white/10
+        className={`w-full rounded-lg border border-tint/[0.12] bg-transparent px-3 py-2 text-[13px] text-ink-primary
+          placeholder:text-ink-faint transition-colors duration-150
+          focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30
           ${className}`}
         {...props}
       />

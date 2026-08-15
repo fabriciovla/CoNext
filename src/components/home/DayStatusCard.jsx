@@ -2,16 +2,13 @@ import Card from '../ui/Card'
 import Button from '../ui/Button'
 import { IconArchive, IconClock } from '../ui/icons'
 import { storeSchedule } from '../../utils/metrics'
+import { formatTime } from '../../utils/time'
 
 const SCHEDULE_TEXT = {
   abierto: 'Atendiendo ahora',
   'antes-de-abrir': 'Todavía no abriste',
   'ya-cerro': 'Fuera de horario',
   'no-laborable': 'Hoy no se atiende',
-}
-
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
 }
 
 export default function DayStatusCard({

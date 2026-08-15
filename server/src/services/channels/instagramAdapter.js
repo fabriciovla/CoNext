@@ -27,3 +27,11 @@ export async function sendMessage(conversation, text) {
   const data = await res.json()
   return { externalId: data.message_id ?? null }
 }
+
+// Instagram sigue dormido (falta la columna que ata una cuenta de IG a un
+// cliente), pero el resolver de canales pide la función igual: sin esto, mandar
+// un adjunto a una conversación de IG explota con "is not a function" en vez de
+// decir qué falta.
+export async function sendMedia() {
+  throw new Error('El canal de Instagram todavía no manda adjuntos')
+}

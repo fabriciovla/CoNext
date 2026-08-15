@@ -1,21 +1,88 @@
 import Avatar from '../ui/Avatar'
-import { IconBolt, IconDoubleCheck } from '../ui/icons'
+import FormattedText from '../ui/FormattedText'
+import { IconBolt, IconDoubleCheck, IconDownload, IconFile } from '../ui/icons'
+import { mediaUrl } from '../../api/client'
+import { formatTime } from '../../utils/time'
 
-function formatTime(iso) {
-  return new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+function pesoLegible(bytes) {
+  if (!bytes) return null
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} kB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
-// El texto de los eventos permite **negrita** para resaltar las etapas, que es
-// lo único que importa leer de esa línea ("Nuevo lead" → "Lead caliente").
+// El adjunto de un mensaje. La imagen y el video se ven en el hilo, el audio
+// trae el reproductor del navegador y cualquier otra cosa es una fila para
+// descargar: no tiene sentido pelear con la vista previa de un PDF adentro de
+// un globo de 30rem.
+function Adjunto({ message }) {
+  const src = mediaUrl(message.id)
+  const nombre = message.mediaName || 'archivo'
+
+  if (message.mediaKind === 'image') {
+    return (
+      <a href={src} target="_blank" rel="noreferrer" className="block">
+        <img
+          src={src}
+          alt={nombre}
+          // El alto máximo es el que evita que una foto vertical se coma la
+          // pantalla entera del hilo.
+          className="max-h-72 w-full rounded-xl object-cover"
+        />
+      </a>
+    )
+  }
+
+  if (message.mediaKind === 'video') {
+    return <video src={src} controls className="max-h-72 w-full rounded-xl" />
+  }
+
+  if (message.mediaKind === 'audio') {
+    // El reproductor nativo: es el que ya sabe buscar dentro del audio, cambiar
+    // la velocidad y usar la salida de audio elegida en el sistema.
+    return <audio src={src} controls className="w-[16rem] max-w-full" />
+  }
+
+  return (
+    <a
+      href={src}
+      download={nombre}
+      className="flex items-center gap-2.5 rounded-xl border border-tint/10 bg-tint/[0.04] px-3 py-2 transition-colors duration-200 hover:bg-tint/[0.08]"
+    >
+      <IconFile size={20} className="shrink-0 text-ink-muted" />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] text-ink-primary">{nombre}</span>
+        {pesoLegible(message.mediaSize) && (
+          <span className="block text-[11.5px] text-ink-faint">{pesoLegible(message.mediaSize)}</span>
+        )}
+      </span>
+      <IconDownload size={16} className="shrink-0 text-ink-muted" />
+    </a>
+  )
+}
+
+// El texto de los eventos permite **negrita** para resaltar lo único que
+// importa leer de esa línea (quién pasó a atender, por ejemplo).
 function renderStrong(text) {
   return text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
     i % 2 === 1 ? (
-      <strong key={i} className="font-semibold text-white/70">
+      <strong key={i} className="font-semibold text-ink-secondary">
         {part}
       </strong>
     ) : (
       part
     ),
+  )
+}
+
+// La hora va adentro del globo, abajo a la derecha, como en cualquier chat.
+// Flota en vez de ser una línea propia: si la última línea del mensaje deja
+// lugar, la hora entra ahí, y solo baja sola cuando no entra. Como bloque
+// aparte le sumaba un renglón a cada uno de los mensajes del hilo.
+function Hora({ iso }) {
+  return (
+    <span className="float-right ml-3 mt-[7px] select-none text-[11px] leading-none tabular-nums text-ink-faint">
+      {formatTime(iso)}
+    </span>
   )
 }
 
@@ -27,7 +94,7 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
   if (message.direction === 'evento') {
     return (
       <li className="animate-fade-in flex justify-center py-1" style={delay}>
-        <span className="px-3 text-center text-[11.5px] text-white/35">{renderStrong(message.text)}</span>
+        <span className="px-3 text-center text-[11.5px] text-ink-faint">{renderStrong(message.text)}</span>
       </li>
     )
   }
@@ -37,16 +104,15 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
   if (message.direction === 'nota') {
     return (
       <li className="animate-fade-left flex justify-end" style={delay}>
-        <div className="flex max-w-[min(82%,34rem)] flex-col items-end">
-          <div className="rounded-2xl rounded-br-md border border-status-warning/25 bg-status-warning/[0.09] px-3.5 py-2.5">
-            <p className="whitespace-pre-wrap break-words text-[13.5px] leading-relaxed text-white/85">
-              {message.text}
+        <div className="flex max-w-[min(78%,30rem)] flex-col items-end">
+          <div className="rounded-2xl rounded-br-md border border-status-warning/25 bg-status-warning/[0.09] px-4 py-2.5">
+            <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ink-primary">
+              <FormattedText>{message.text}</FormattedText>
+              <Hora iso={message.createdAt} />
             </p>
           </div>
-          <div className="mt-1 flex items-center gap-1.5 px-1 text-[11px] text-white/35">
+          <div className="mt-1 flex items-center gap-1.5 px-1 text-[11.5px] text-ink-faint">
             <span className="text-status-warning">Nota interna</span>
-            <span aria-hidden="true">·</span>
-            <span className="tabular-nums">{formatTime(message.createdAt)}</span>
           </div>
         </div>
       </li>
@@ -63,7 +129,7 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
   const entrega = message.deliveryStatus ?? null
   const falloEnvio = entrega === 'failed'
   const tonoTilde =
-    entrega === 'read' ? 'text-violet' : entrega === 'delivered' ? 'text-white/45' : 'text-white/25'
+    entrega === 'read' ? 'text-violet' : entrega === 'delivered' ? 'text-ink-muted' : 'text-ink-faint'
   const textoEntrega = { sent: 'Enviado', delivered: 'Entregado', read: 'Leído' }[entrega]
 
   return (
@@ -78,8 +144,12 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
       className={`flex flex-col ${isOut ? 'animate-fade-left items-end' : 'animate-fade-right items-start'}`}
       style={delay}
     >
-      <div className="flex max-w-[min(80%,36rem)] items-end gap-2">
-        {!isOut && <Avatar name={customer} size={26} className="!rounded-full !text-[10px]" />}
+      {/* Columna de lectura angosta a propósito: el globo no pasa de 30rem por
+          más ancho que tenga el panel. Con el texto en 15px, una línea más larga
+          que esto obliga a barrer la pantalla con la vista para leer un mensaje
+          de dos renglones. */}
+      <div className="flex max-w-[min(78%,30rem)] items-end gap-2">
+        {!isOut && <Avatar photo name={customer} size={28} className="!rounded-full" />}
 
         {/* La tilde va afuera del globo, a su izquierda, como en la referencia:
             el estado de entrega se lee en la misma columna en todos los mensajes. */}
@@ -100,57 +170,72 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
           ))}
 
         <div
-          className={`min-w-0 rounded-2xl border px-3.5 py-2.5 transition-colors duration-300 ${
+          className={`min-w-0 rounded-2xl border px-4 py-2.5 transition-colors duration-300 ${
             isOut
               ? 'rounded-br-md border-violet/25 bg-violet-soft'
               : isPending
                 ? 'rounded-bl-md border-status-warning/25 bg-status-warning/[0.07]'
-                : 'rounded-bl-md border-white/[0.07] bg-white/[0.055]'
+                : 'rounded-bl-md border-tint/[0.07] bg-tint/[0.055]'
           }`}
         >
-          <p className="whitespace-pre-wrap break-words text-[13.5px] leading-relaxed text-white/90">
-            {message.text}
-          </p>
+          {message.mediaKind && (
+            <div className={message.text ? 'mb-2' : ''}>
+              <Adjunto message={message} />
+            </div>
+          )}
+
+          {/* Un adjunto sin epígrafe no arrastra un párrafo vacío, pero la hora
+              tiene que salir igual: en ese caso va sola en su renglón. */}
+          {message.text ? (
+            <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ink-primary">
+              <FormattedText>{message.text}</FormattedText>
+              <Hora iso={message.createdAt} />
+            </p>
+          ) : (
+            <p className="mt-1.5 text-right text-[11px] leading-none tabular-nums text-ink-faint">
+              {formatTime(message.createdAt)}
+            </p>
+          )}
         </div>
 
         {isOut && (
           <Avatar
             name={isBot ? 'Bot' : 'Admin'}
-            size={26}
+            size={28}
             className={`!rounded-full !text-[10px] ${isBot ? '!border-violet/30 !bg-violet-soft' : ''}`}
           />
         )}
       </div>
 
       {/* Alineada con el globo, no con el avatar: el margen equivale al ancho
-          del avatar más su separación. */}
-      <div className={`mt-1 flex items-center gap-1.5 text-[11px] text-white/35 ${isOut ? 'mr-9' : 'ml-9'}`}>
-        {isBot && (
-          <>
-            <IconBolt size={11} />
-            <span>{agentName}</span>
-            <span aria-hidden="true">·</span>
-          </>
-        )}
-        {isPending && (
-          <>
-            <span className="text-status-warning">Pendiente</span>
-            <span aria-hidden="true">·</span>
-          </>
-        )}
-        {/* Un envío fallido se dice con todas las letras: es el caso en que el
-            cliente no recibió nada y, sin esto, la conversación se ve igual
-            que una contestada. */}
-        {falloEnvio && (
-          <>
-            <span className="text-status-critical">
-              No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
-            </span>
-            <span aria-hidden="true">·</span>
-          </>
-        )}
-        <span className="tabular-nums">{formatTime(message.createdAt)}</span>
-      </div>
+          del avatar más su separación (28px + 8px de gap = 36px = 9).
+          La hora ya no vive acá — se mudó adentro del globo —, así que esta
+          línea solo aparece cuando de verdad hay algo que decir; si no, cada
+          mensaje arrastraba un renglón vacío. */}
+      {(isBot || isPending || falloEnvio) && (
+        <div
+          className={`mt-1 flex items-center gap-1.5 text-[11.5px] text-ink-faint ${isOut ? 'mr-9' : 'ml-9'}`}
+        >
+          {isBot && (
+            <>
+              <IconBolt size={11} />
+              <span>{agentName}</span>
+            </>
+          )}
+          {isPending && <span className="text-status-warning">Pendiente</span>}
+          {/* Un envío fallido se dice con todas las letras: es el caso en que el
+              cliente no recibió nada y, sin esto, la conversación se ve igual
+              que una contestada. */}
+          {falloEnvio && (
+            <>
+              {isBot && <span aria-hidden="true">·</span>}
+              <span className="text-status-critical">
+                No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
+              </span>
+            </>
+          )}
+        </div>
+      )}
     </li>
   )
 }

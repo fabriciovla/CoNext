@@ -7,6 +7,7 @@ import { getProducts } from './productsService.js'
 import { getEnabledAgents, getAgentByKey } from './agentsService.js'
 import { resolveAdapter } from './channels/index.js'
 import { isWithinBusinessHours } from './businessHours.js'
+import { borrarAdjunto } from './mediaService.js'
 import { MESSAGE_COLUMNS } from './messageColumns.js'
 
 // Cada cuánto se repite el aviso de "estamos cerrados" a un mismo contacto.
@@ -69,10 +70,13 @@ export async function ensureConversation(tenantId, phone, { channel = 'whatsapp'
 }
 
 async function insertMessage(tenantId, row) {
-  const r = { agentKey: null, ...row }
+  // `media` es opcional: los mensajes de texto no la traen y las cuatro
+  // columnas quedan en null.
+  const r = { agentKey: null, media: null, ...row }
   await run(
-    `INSERT INTO messages (tenant_id, id, phone, customer, text, direction, type, status, author, agent_key, external_id, day_id, created_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+    `INSERT INTO messages (tenant_id, id, phone, customer, text, direction, type, status, author, agent_key, external_id, day_id, created_at,
+                           media_kind, media_path, media_mime, media_name, media_size)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
     [
       tenantId,
       r.id,
@@ -87,6 +91,11 @@ async function insertMessage(tenantId, row) {
       r.externalId,
       r.dayId,
       r.createdAt,
+      r.media?.kind ?? null,
+      r.media?.path ?? null,
+      r.media?.mime ?? null,
+      r.media?.name ?? null,
+      r.media?.size ?? null,
     ],
   )
   return one(`SELECT ${MESSAGE_COLUMNS} FROM messages WHERE tenant_id = $1 AND id = $2`, [tenantId, r.id])
@@ -158,6 +167,69 @@ export async function sendOutboundMessage(tenantId, phone, text, author, agentKe
     phone,
   ])
   return message
+}
+
+// Envío de un adjunto ya guardado en disco (lo que devuelve `guardarAdjunto`).
+// El epígrafe viaja como el `text` del mensaje: en el hilo se lee igual que
+// cualquier otro, con el archivo arriba.
+//
+// Si algo falla se borra el archivo antes de propagar. Sin esto, cada envío
+// rechazado por Meta (formato, tamaño, ventana de 24h vencida) dejaría un
+// archivo huérfano en el disco al que ninguna fila apunta.
+export async function sendOutboundMedia(tenantId, phone, media, caption = '', author = 'admin') {
+  try {
+    const open = await getOpenDay(tenantId)
+    if (!open) throw new Error('No hay un día abierto')
+
+    const conversation = await getConversation(tenantId, phone)
+    if (!conversation) throw new Error(`Conversación desconocida: ${phone}`)
+
+    const adapter = resolveAdapter(conversation.channel)
+    const { externalId } = await adapter.sendMedia(
+      { tenantId, phone, channel: conversation.channel },
+      media,
+      caption,
+    )
+
+    const message = await insertMessage(tenantId, {
+      id: `${author}-${crypto.randomUUID()}`,
+      phone,
+      customer: conversation.customer,
+      // El audio no lleva epígrafe (Meta no lo acepta en una nota de voz), así
+      // que tampoco se guarda uno que el cliente nunca vio.
+      text: media.kind === 'audio' ? '' : caption,
+      direction: 'out',
+      type: null,
+      status: null,
+      author,
+      externalId: externalId ?? null,
+      dayId: open.id,
+      createdAt: new Date().toISOString(),
+      media,
+    })
+
+    await clearDraft(tenantId, phone)
+    await run('UPDATE conversations SET updated_at = $1 WHERE tenant_id = $2 AND phone = $3', [
+      new Date().toISOString(),
+      tenantId,
+      phone,
+    ])
+    return message
+  } catch (err) {
+    await borrarAdjunto(media?.path)
+    throw err
+  }
+}
+
+// El archivo se sirve por el id del mensaje y no por su ruta: es la forma de
+// que la consulta lleve el tenant adentro y nadie pueda pedir el adjunto de
+// otro cliente conociendo un nombre de archivo.
+export async function getMessageMedia(tenantId, id) {
+  return one(
+    `SELECT media_path AS "path", media_mime AS "mime", media_name AS "name", media_kind AS "kind"
+     FROM messages WHERE tenant_id = $1 AND id = $2 AND media_path IS NOT NULL`,
+    [tenantId, id],
+  )
 }
 
 // Aviso de fuera de horario. No pasa por sendOutboundMessage a propósito: ese
@@ -286,12 +358,16 @@ export async function getConversationTags(tenantId, phone) {
   return rows.map((r) => r.tag)
 }
 
-// Per-phone lifecycle/agent/assignee, for groupMessagesByPhone on the
-// frontend — it used to read this from the static mockData.contactMeta,
-// now it's real per-conversation state.
+// Per-phone agent/assignee, for groupMessagesByPhone on the frontend — it used
+// to read this from the static mockData.contactMeta, now it's real
+// per-conversation state.
+//
+// La columna `lifecycle` sigue existiendo en la tabla pero ya no se sirve: nada
+// la escribía nunca, así que toda conversación quedaba en 'nuevo' para siempre
+// y la etapa que mostraba la dashboard no significaba nada.
 export async function getConversationsMeta(tenantId) {
   const rows = await many(
-    'SELECT phone, lifecycle, agent, assignee FROM conversations WHERE tenant_id = $1',
+    'SELECT phone, agent, assignee FROM conversations WHERE tenant_id = $1',
     [tenantId],
   )
 

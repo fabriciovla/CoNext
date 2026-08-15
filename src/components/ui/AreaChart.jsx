@@ -1,4 +1,5 @@
 import { useId, useRef, useState } from 'react'
+import { smoothPath } from '../../utils/curve'
 
 // El SVG se estira horizontalmente (preserveAspectRatio="none") para llenar el
 // ancho disponible, así que las etiquetas de los ejes van en HTML alrededor del
@@ -8,23 +9,6 @@ const HEIGHT = 220
 const PAD = { top: 10, right: 8, bottom: 8, left: 8 }
 const CHART_W = WIDTH - PAD.left - PAD.right
 const CHART_H = HEIGHT - PAD.top - PAD.bottom
-
-function smoothPath(points) {
-  if (points.length < 2) return ''
-  let d = `M ${points[0].x} ${points[0].y}`
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[i - 1] || points[i]
-    const p1 = points[i]
-    const p2 = points[i + 1]
-    const p3 = points[i + 2] || p2
-    const cp1x = p1.x + (p2.x - p0.x) / 6
-    const cp1y = p1.y + (p2.y - p0.y) / 6
-    const cp2x = p2.x - (p3.x - p1.x) / 6
-    const cp2y = p2.y - (p3.y - p1.y) / 6
-    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`
-  }
-  return d
-}
 
 export default function AreaChart({ data, xKey, series }) {
   const gradientId = useId()
@@ -58,14 +42,14 @@ export default function AreaChart({ data, xKey, series }) {
         <div className="mt-3 overflow-x-auto">
           <table className="w-full min-w-max text-left text-sm">
             <thead>
-              <tr className="border-b border-white/[0.06] text-xs uppercase tracking-wide text-ink-muted">
-                <th className="px-3 py-2 font-medium">Mes</th>
+              <tr className="border-b border-tint/[0.08] text-[12px] text-ink-faint">
+                <th className="px-3 pb-2 font-normal">Mes</th>
                 {series.map((s) => (
-                  <th key={s.key} className="px-3 py-2 font-medium">{s.label}</th>
+                  <th key={s.key} className="px-3 pb-2 font-normal">{s.label}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.05]">
+            <tbody className="divide-y divide-tint/[0.05]">
               {data.map((d) => (
                 <tr key={d[xKey]}>
                   <td className="px-3 py-2 text-ink-secondary">{d[xKey]}</td>
@@ -93,10 +77,10 @@ export default function AreaChart({ data, xKey, series }) {
             >
               {s.dashed ? (
                 <svg width="14" height="2" className="shrink-0">
-                  <line x1="0" y1="1" x2="14" y2="1" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="3 3" />
+                  <line x1="0" y1="1" x2="14" y2="1" stroke="rgb(var(--ink-faint))" strokeWidth="2" strokeDasharray="3 3" />
                 </svg>
               ) : (
-                <span className="h-2 w-2 shrink-0 rounded-full bg-white" />
+                <span className="h-2 w-2 shrink-0 rounded-full bg-violet" />
               )}
               {s.label}
             </div>
@@ -122,9 +106,12 @@ export default function AreaChart({ data, xKey, series }) {
           <div ref={containerRef} className="relative" onMouseMove={handleMove} onMouseLeave={() => setHoverIndex(null)}>
             <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" className="h-[220px] w-full" role="img" aria-label="Actividad de mensajes por mes">
               <defs>
+                {/* La serie principal es la única con color: el violeta de marca.
+                    La secundaria queda en gris punteado, que es justamente lo
+                    que se espera de una referencia. */}
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                  <stop offset="0%" stopColor="rgb(var(--violet))" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="rgb(var(--violet))" stopOpacity="0" />
                 </linearGradient>
               </defs>
 
@@ -135,7 +122,7 @@ export default function AreaChart({ data, xKey, series }) {
                   x2={WIDTH - PAD.right}
                   y1={y(t)}
                   y2={y(t)}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke="rgb(var(--tint) / 0.09)"
                   strokeWidth="1"
                   className="animate-fade-in"
                   style={{ '--d': `${i * 70}ms` }}
@@ -153,8 +140,8 @@ export default function AreaChart({ data, xKey, series }) {
                       key={s.key}
                       d={linePath}
                       fill="none"
-                      stroke="rgba(255,255,255,0.5)"
-                      strokeWidth="2"
+                      stroke="rgb(var(--ink-faint))"
+                      strokeWidth="1.75"
                       strokeDasharray="4 4"
                       strokeLinecap="round"
                       className="animate-fade-in"
@@ -175,8 +162,8 @@ export default function AreaChart({ data, xKey, series }) {
                       d={linePath}
                       pathLength="1"
                       fill="none"
-                      stroke="#ffffff"
-                      strokeWidth="2.5"
+                      stroke="rgb(var(--violet))"
+                      strokeWidth="2"
                       strokeLinecap="round"
                       className="animate-draw"
                     />
@@ -190,31 +177,33 @@ export default function AreaChart({ data, xKey, series }) {
                   x2={x(hoverIndex)}
                   y1={PAD.top}
                   y2={baseline}
-                  stroke="rgba(255,255,255,0.25)"
+                  stroke="rgb(var(--tint) / 0.28)"
                   strokeWidth="1"
                   style={{ transition: 'x1 160ms ease-out, x2 160ms ease-out' }}
                 />
               )}
-              {hoverIndex !== null &&
-                series.map((s, sIdx) => (
-                  <circle
-                    key={s.key}
-                    cx={seriesPoints[sIdx][hoverIndex].x}
-                    cy={seriesPoints[sIdx][hoverIndex].y}
-                    r="4"
-                    fill={s.dashed ? '#000000' : '#ffffff'}
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                    // cx/cy son propiedades CSS animables en SVG2: el punto se
-                    // desliza entre meses en vez de saltar.
-                    style={{ transition: 'cx 160ms ease-out, cy 160ms ease-out' }}
-                  />
-                ))}
             </svg>
+
+            {/* Los puntos van en HTML y no adentro del SVG: con
+                preserveAspectRatio="none" un <circle> se estira junto con el
+                eje X y queda ovalado. Acá el alto del SVG es exactamente
+                HEIGHT, así que x/y se traducen a porcentajes del contenedor. */}
+            {hoverIndex !== null &&
+              series.map((s, sIdx) => (
+                <span
+                  key={s.key}
+                  className="pointer-events-none absolute h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-surface-card transition-[left,top] duration-[160ms] ease-out"
+                  style={{
+                    left: `${(seriesPoints[sIdx][hoverIndex].x / WIDTH) * 100}%`,
+                    top: `${(seriesPoints[sIdx][hoverIndex].y / HEIGHT) * 100}%`,
+                    borderColor: s.dashed ? 'rgb(var(--ink-faint))' : 'rgb(var(--violet))',
+                  }}
+                />
+              ))}
 
             {hoverIndex !== null && (
               <div
-                className="animate-fade-in pointer-events-none absolute top-2 -translate-x-1/2 rounded-lg border border-white/10 bg-surface-raised px-3 py-2 text-xs shadow-card transition-[left] duration-200 ease-out"
+                className="animate-fade-in pointer-events-none absolute top-2 -translate-x-1/2 rounded-lg border border-tint/10 bg-surface-raised px-3 py-2 text-xs shadow-pop transition-[left] duration-200 ease-out"
                 style={{ left: `${Math.min(90, Math.max(10, (x(hoverIndex) / WIDTH) * 100))}%` }}
               >
                 <p className="mb-1 font-medium text-ink-primary">{data[hoverIndex][xKey]}</p>
@@ -222,7 +211,7 @@ export default function AreaChart({ data, xKey, series }) {
                   <p key={s.key} className="flex items-center gap-1.5 text-ink-secondary">
                     <span
                       className="h-1.5 w-1.5 rounded-full"
-                      style={{ background: s.dashed ? 'rgba(255,255,255,0.5)' : '#ffffff' }}
+                      style={{ background: s.dashed ? 'rgb(var(--ink-faint))' : 'rgb(var(--violet))' }}
                     />
                     {s.label}: <span className="font-medium text-ink-primary">{data[hoverIndex][s.key]}</span>
                   </p>
@@ -251,7 +240,7 @@ function ToggleButton({ showTable, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-ink-muted transition-all duration-200 hover:border-white/20 hover:bg-white/10 hover:text-ink-primary active:scale-95"
+      className="rounded-md px-2 py-1 text-[12px] text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
     >
       {showTable ? 'Ver gráfico' : 'Ver tabla'}
     </button>

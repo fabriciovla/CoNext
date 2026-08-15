@@ -42,7 +42,7 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
           Ninguna conversación pendiente: está todo respondido.
         </div>
       ) : (
-        <ul className="divide-y divide-white/[0.05]">
+        <ul className="divide-y divide-tint/[0.05]">
           {groups.map((group, i) => (
             <li
               key={group.phone}
@@ -51,13 +51,9 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
             >
               <button
                 onClick={() => onOpenConversation(group.phone)}
-                className="group/row flex w-full items-center gap-3 py-3 text-left transition-all duration-200 hover:translate-x-1"
+                className="group/row -mx-2 flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors duration-150 hover:bg-tint/[0.04]"
               >
-                <Avatar
-                  name={group.customer}
-                  size={32}
-                  className="transition-transform duration-300 group-hover/row:scale-105"
-                />
+                <Avatar photo name={group.customer} size={30} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="truncate text-sm font-medium text-ink-primary">{group.customer}</p>
@@ -71,7 +67,7 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
                 </div>
                 <IconChevronRight
                   size={15}
-                  className="shrink-0 text-ink-muted transition-all duration-200 group-hover/row:translate-x-0.5 group-hover/row:text-ink-primary"
+                  className="shrink-0 text-ink-faint transition-colors duration-150 group-hover/row:text-ink-primary"
                 />
               </button>
             </li>
