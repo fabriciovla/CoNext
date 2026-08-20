@@ -1,15 +1,98 @@
 ---
-import Base from '../layouts/Base.astro'
+import Legal from '../components/Legal.astro'
+import { EMAIL } from '../config'
 
-// Esta URL se carga en la consola de Meta como "Eliminación de datos", así que
-// no se cambia una vez publicada. El nombre del archivo es la ruta.
+// Esta URL se carga en la consola de Meta como instrucciones de eliminación
+// de datos de usuario. No se cambia una vez publicada: el nombre del archivo
+// es la ruta.
 ---
 
-<Base
+<Legal
   title="Eliminación de datos — conext"
-  description="Cómo pedir que se borren tus datos y los de tus conversaciones en conext."
+  description="Cómo pedir que se borren tu cuenta, tus conversaciones y los datos asociados a Facebook Login en conext."
+  heading="Eliminación de datos de usuario"
+  actualizada="20 de agosto de 2026"
 >
-  {/* El ancho de lectura lo pone la página: el layout dejó de imponer uno para
-      que la landing pueda ir de borde a borde. El texto va acá adentro. */}
-  <div class="mx-auto w-full max-w-3xl px-6 py-20"></div>
-</Base>
+  <p>
+    Puedes pedir que borremos los datos que conext guarda sobre ti o sobre tu negocio. Esta página es
+    también la instrucción que Meta revisa para Facebook Login y WhatsApp Embedded Signup.
+  </p>
+
+  <h2>Cómo pedirlo</h2>
+  <ol>
+    <li>
+      Escribe a <a href={`mailto:${EMAIL}?subject=Eliminar%20datos`}>{EMAIL}</a> con el asunto
+      «Eliminar datos».
+    </li>
+    <li>
+      Incluye el nombre del negocio, el correo o usuario con el que entras, y el número de WhatsApp
+      conectado si lo tienes.
+    </li>
+    <li>
+      Si el pedido es tuyo como persona (no como dueño del negocio), indícalo y deja un dato para
+      identificarte: por ejemplo el número desde el que escribiste.
+    </li>
+  </ol>
+  <p>
+    Si no podemos verificar que el pedido es de quien dice ser, vamos a pedir una confirmación extra
+    antes de borrar.
+  </p>
+
+  <h2>Qué borramos</h2>
+  <p>Cuando el pedido es del dueño de la cuenta, eliminamos de nuestros sistemas:</p>
+  <ul>
+    <li>La cuenta del negocio y sus usuarios en el panel.</li>
+    <li>Conversaciones, mensajes, notas, etiquetas y borradores.</li>
+    <li>Archivos que se hayan enviado desde el CRM.</li>
+    <li>Productos, agentes, horarios y el resto de la configuración.</li>
+    <li>
+      La conexión con WhatsApp: token cifrado, WABA ID y phone number ID. Dejamos de recibir y de
+      enviar mensajes de ese número.
+    </li>
+  </ul>
+  <p>
+    El número de WhatsApp Business y la cuenta en Meta siguen siendo tuyos. Desconectar conext no
+    borra tu portafolio de Meta ni el historial que WhatsApp guarda del otro lado.
+  </p>
+
+  <h2>Si conectaste WhatsApp con Facebook</h2>
+  <p>
+    El permiso se dio en el popup de Meta (Facebook Login for Business). Al borrar la cuenta en
+    conext, eliminamos el token y dejamos de usar ese permiso. También puedes quitar el acceso desde
+    tu cuenta de Facebook, en Configuración → Aplicaciones y sitios web, buscando conext.
+  </p>
+  <p>
+    Quitar la app en Facebook no borra sola la copia que ya teníamos en el CRM: para eso hace falta
+    el correo de arriba, o lo hacemos cuando Meta nos notifique si más adelante hay un callback
+    automático.
+  </p>
+
+  <h2>Si escribiste al WhatsApp de un negocio</h2>
+  <p>
+    Tus mensajes los tiene ese negocio. Pídele a ellos que los borren. Si no responden, escríbenos a
+    <a href={`mailto:${EMAIL}`}>{EMAIL}</a> con el número al que escribiste y el tuyo: localizamos la
+    cuenta y les reenviamos el pedido, o borramos tu hilo si el negocio ya no está activo.
+  </p>
+
+  <h2>Plazos</h2>
+  <p>
+    Confirmamos el pedido en unos días hábiles y completamos el borrado en un máximo de 30 días,
+    salvo que la ley nos obligue a conservar algo (por ejemplo, una factura). Las copias de seguridad
+    pueden tardar un ciclo más en rotar; no se usan para otra cosa que recuperar el servicio.
+  </p>
+  <p>Cuando termine, te avisamos por el mismo correo.</p>
+
+  <h2>Qué no podemos borrar nosotros</h2>
+  <ul>
+    <li>Los datos que Meta guarda en WhatsApp o en tu Business Manager.</li>
+    <li>
+      Lo que Google retenga del procesamiento en Gemini, según sus propios plazos como encargado.
+    </li>
+    <li>Mensajes que el destinatario ya tenga en su teléfono.</li>
+  </ul>
+
+  <p>
+    Más detalle sobre qué datos tratamos está en la
+    <a href="/privacidad">política de privacidad</a>.
+  </p>
+</Legal>

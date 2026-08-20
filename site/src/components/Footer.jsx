@@ -16,7 +16,7 @@ const SECCIONES = [
 const LEGALES = [
   { to: '/privacidad', label: 'Privacidad' },
   { to: '/terminos', label: 'Términos' },
-  { to: '/eliminar-datos', label: 'Eliminar datos' },
+  { to: '/eliminar-datos', label: 'Eliminación de datos' },
 ]
 
 const claseEnlace =

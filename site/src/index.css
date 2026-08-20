@@ -398,6 +398,35 @@ html.pagina-oculta .fondo-seccion::before {
   }
 }
 
+/* Texto corrido de las páginas legales. No es la landing: acá hay que poder
+   leer varios párrafos seguidos, con títulos de sección que no pesen más que
+   el cuerpo. */
+.legal {
+  @apply text-[15px] leading-relaxed text-ink-secondary;
+}
+.legal h2 {
+  @apply mb-3 mt-10 text-[17px] font-semibold text-ink-primary first:mt-0;
+}
+.legal p + p {
+  @apply mt-4;
+}
+.legal ul,
+.legal ol {
+  @apply mt-4 space-y-2 pl-5;
+}
+.legal ul {
+  @apply list-disc;
+}
+.legal ol {
+  @apply list-decimal;
+}
+.legal li::marker {
+  color: rgb(var(--ink-muted));
+}
+.legal a {
+  @apply text-ink-primary underline decoration-tint/25 underline-offset-2 transition-colors duration-200 hover:decoration-violet;
+}
+
 @layer utilities {
   /* El estado de partida se declara en el elemento y no en el keyframe: si la
      animación nunca llega a correr (JS caído, observer no soportado), lo que

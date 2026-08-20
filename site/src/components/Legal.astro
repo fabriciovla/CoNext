@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro'
+
+// Envoltorio de las páginas legales. El texto va en un ancho de lectura; el
+// layout de la landing es de borde a borde y acá no sirve. La fecha de
+// actualización se escribe a mano: si se genera sola, un retoque de CSS
+// cambiaría "última actualización" y parece que la política cambió.
+const { title, description, heading, actualizada } = Astro.props
+---
+
+<Base title={title} description={description}>
+  <article class="mx-auto w-full max-w-3xl px-6 py-16 sm:py-20">
+    <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">Legal</p>
+    <h1 class="mt-3 text-3xl font-semibold leading-[1.15] tracking-tight text-ink-primary sm:text-4xl">
+      {heading}
+    </h1>
+    <p class="mt-3 text-[13px] text-ink-muted">Última actualización: {actualizada}</p>
+    <div class="legal mt-12">
+      <slot />
+    </div>
+  </article>
+</Base>
