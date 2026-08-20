@@ -59,7 +59,12 @@ export default function GaugeChart({ value, label, subtitle }) {
             className="transition-[stroke-dashoffset] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
           />
         </svg>
-        <p className="pointer-events-none absolute inset-x-0 bottom-0 text-center text-[30px] font-semibold tracking-tight text-ink-primary">
+        {/* El número va levantado del piso de la caja: pegado abajo, su mitad
+            de abajo cruzaba la línea del diámetro y las dos puntas del arco le
+            quedaban a la altura de la panza, que es lo que lo hacía ver
+            hundido. Con el 10% queda apoyado adentro del arco. El valor es
+            porcentual para que acompañe si el widget cambia de tamaño. */}
+        <p className="pointer-events-none absolute inset-x-0 bottom-[10%] text-center text-[30px] font-semibold tracking-tight text-ink-primary">
           <AnimatedNumber value={`${clamped}%`} duration={1100} delay={120} />
         </p>
       </div>

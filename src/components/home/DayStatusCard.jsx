@@ -51,7 +51,11 @@ export default function DayStatusCard({
             Horario de atención
           </dt>
           <dd className="tabular-nums text-ink-secondary">
-            {settings.openTime} – {settings.closeTime}
+            {schedule.hours
+              ? `${schedule.hours.openTime} – ${schedule.hours.closeTime}`
+              : schedule.isOpen
+                ? 'Turno del día anterior'
+                : 'Cerrado hoy'}
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">

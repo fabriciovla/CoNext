@@ -14,6 +14,7 @@ import react from '@astrojs/react'
 // línea de JavaScript al navegador; solo los tres que necesitan estado llevan
 // una directiva `client:` y viajan como islas.
 export default defineConfig({
+  site: 'https://conext.lat',
   integrations: [react()],
   server: {
     // 5173 se lo queda la dashboard; así los dos pueden correr a la vez.

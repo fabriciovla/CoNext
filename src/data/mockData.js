@@ -219,6 +219,15 @@ export const initialSettings = {
   openTime: '09:00',
   closeTime: '18:00',
   daysOpen: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'],
+  weeklyHours: {
+    Lun: { openTime: '09:00', closeTime: '18:00' },
+    Mar: { openTime: '09:00', closeTime: '18:00' },
+    Mié: { openTime: '09:00', closeTime: '18:00' },
+    Jue: { openTime: '09:00', closeTime: '18:00' },
+    Vie: { openTime: '09:00', closeTime: '18:00' },
+    Sáb: null,
+    Dom: null,
+  },
   welcomeMessage: '¡Hola! Gracias por escribirnos. En breve te respondemos 😊',
   awayMessage: '¡Hola! Ahora estamos cerrados. Te respondemos apenas abramos 😊',
 }

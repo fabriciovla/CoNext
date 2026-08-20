@@ -33,7 +33,7 @@ function Columna({ titulo, children }) {
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border">
+    <footer className="border-t border-tint/10">
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-xs">
@@ -79,10 +79,10 @@ export default function Footer() {
           </Columna>
         </div>
 
-        <div className="mt-14 flex flex-col gap-3 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-14 flex flex-col gap-3 border-t border-tint/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
           {/* El año sale del reloj y no escrito a mano: un pie que dice 2026 en
               2027 es la señal más barata de que el sitio está abandonado. */}
-          <p className="text-[13px] text-ink-muted">© {new Date().getFullYear()} chrm.</p>
+          <p className="text-[13px] text-ink-muted">© {new Date().getFullYear()} conext</p>
           {/* Atribución de marca, que Meta pide para usar el nombre. Dice solo
               de quién es la marca y no niega ninguna relación: el camino al
               mercado es el programa de Tech Providers, o sea que sí hay una, y

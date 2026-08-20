@@ -15,10 +15,10 @@ import { IconChevronDown } from '../icons.jsx'
 const { preguntas } = Astro.props
 ---
 
-<div class="border-t border-border" id="faq">
+<div class="border-t border-tint/10" id="faq">
   {
     preguntas.map(({ pregunta, respuesta }, i) => (
-      <div class="group border-b border-border" data-abierta={i === 0 ? 'true' : 'false'}>
+      <div class="group border-b border-tint/10" data-abierta={i === 0 ? 'true' : 'false'}>
         <h3>
           <button
             type="button"

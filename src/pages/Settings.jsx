@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import PageHeader from '../components/PageHeader'
-import { IconCheck } from '../components/ui/icons'
+import Card from '../components/ui/Card'
+import { IconCheck, IconChevronDown, IconClock, IconSparkles } from '../components/ui/icons'
 import WhatsappConnection from '../components/WhatsappConnection'
 import { weekDays } from '../data/mockData'
+import { storeSchedule } from '../utils/metrics'
 
 // Configuración no es un formulario: es una lista de cosas que ya están puestas
 // y que se pueden tocar. Por eso no hay botón de "Guardar" ni campos con caja —
@@ -13,41 +15,270 @@ import { weekDays } from '../data/mockData'
 
 // Los únicos campos que esta página edita. Se usan para no mandar un PUT cuando
 // se entró y se salió de un campo sin tocar nada.
-const CAMPOS = ['openTime', 'closeTime', 'welcomeMessage', 'awayMessage']
+const CAMPOS = ['welcomeMessage', 'awayMessage']
+
+function horariosDe(settings) {
+  const guardados = settings.weeklyHours ?? {}
+  if (Object.keys(guardados).length > 0) {
+    return Object.fromEntries(weekDays.map((day) => [day, guardados[day] ?? null]))
+  }
+
+  const abiertos = new Set(settings.daysOpen ?? [])
+  return Object.fromEntries(
+    weekDays.map((day) => [
+      day,
+      abiertos.has(day)
+        ? {
+            openTime: settings.openTime || '09:00',
+            closeTime: settings.closeTime || '18:00',
+          }
+        : null,
+    ]),
+  )
+}
 
 function sinCambios(a, b) {
-  const diasA = a.daysOpen ?? []
-  const diasB = b.daysOpen ?? []
   return (
     CAMPOS.every((campo) => (a[campo] ?? '') === (b[campo] ?? '')) &&
-    diasA.length === diasB.length &&
-    diasA.every((dia) => diasB.includes(dia))
+    JSON.stringify(horariosDe(a)) === JSON.stringify(horariosDe(b))
   )
 }
 
-function Seccion({ title, children }) {
-  return (
-    <section className="mx-auto max-w-xl">
-      <h2 className="mb-1.5 px-1 text-[12px] text-ink-muted">{title}</h2>
-      <div className="divide-y divide-tint/[0.06] rounded-xl border border-tint/[0.08] bg-surface-card px-5 shadow-card">
-        {children}
-      </div>
-    </section>
-  )
+const ESTADO_HORARIO = {
+  abierto: 'Atendiendo ahora',
+  'antes-de-abrir': 'Abre más tarde',
+  'ya-cerro': 'Fuera de horario',
+  'no-laborable': 'Hoy no se atiende',
 }
 
-// Fila de ajuste: a la izquierda qué es, a la derecha el control. `stacked` es
-// para los que no entran al lado del rótulo (los mensajes largos) y bajan a la
-// línea de abajo.
-function Fila({ label, hint, stacked = false, children }) {
+// La clave que se guarda sigue siendo `Lun`/`Mar`: es la misma que usa el
+// server y `businessHours`. Acá solo cambia lo que se lee en pantalla.
+const NOMBRES_DIA = {
+  Lun: 'Lunes',
+  Mar: 'Martes',
+  Mié: 'Miércoles',
+  Jue: 'Jueves',
+  Vie: 'Viernes',
+  Sáb: 'Sábado',
+  Dom: 'Domingo',
+}
+
+const HORAS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const MINUTOS = ['00', '15', '30', '45']
+
+function partesDe(hhmm) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm ?? ''))
+  if (!m) return { hh: '09', mm: '00' }
+  return { hh: m[1].padStart(2, '0'), mm: m[2] }
+}
+
+// Selector propio: el `input type="time"` lo dibuja el sistema y no hay forma
+// de vestirlo. Acá la hora se elige en una grilla (las 24) y los minutos en
+// cuartos: se ve entero, sin el reloj nativo ni un desplegable de 96 filas.
+function TimePicker({ value, onChange, ariaLabel }) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState(null)
+  const triggerRef = useRef(null)
+  const { hh, mm } = partesDe(value)
+  const minutos = MINUTOS.includes(mm) ? MINUTOS : [...MINUTOS, mm].sort()
+
+  const abrir = () => {
+    const rect = triggerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const alto = 248
+    const ancho = 280
+    const haciaArriba = rect.bottom + alto > window.innerHeight - 8
+    const left = Math.min(rect.left, window.innerWidth - ancho - 8)
+    setPos(
+      haciaArriba
+        ? { left, bottom: window.innerHeight - rect.top + 6 }
+        : { left, top: rect.bottom + 6 },
+    )
+    setOpen(true)
+  }
+
+  const cerrar = () => setOpen(false)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        cerrar()
+        triggerRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
   return (
-    <div className={stacked ? 'py-4' : 'flex items-start justify-between gap-6 py-4'}>
-      <div className="min-w-0">
-        <p className="text-[13px] text-ink-primary">{label}</p>
-        {hint && <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">{hint}</p>}
-      </div>
-      <div className={stacked ? 'mt-2.5' : 'shrink-0'}>{children}</div>
+    <div className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={ariaLabel}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+        onClick={() => (open ? cerrar() : abrir())}
+        className={`flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[13px] font-medium tabular-nums
+          transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet/30
+          ${
+            open
+              ? 'border-violet/60 bg-violet-soft text-violet'
+              : 'border-tint/[0.1] bg-tint/[0.03] text-ink-primary hover:border-tint/25'
+          }`}
+      >
+        {hh}:{mm}
+        <IconChevronDown
+          size={12}
+          className={`text-ink-faint transition-transform duration-200 ${open ? 'rotate-180 text-violet' : ''}`}
+        />
+      </button>
+
+      {open && pos && (
+        <>
+          {/* Fijo al viewport: la tarjeta recorta con overflow-hidden, y un
+              `absolute` nacería cortado por el borde redondeado. */}
+          <div className="fixed inset-0 z-20" onClick={cerrar} />
+          <div
+            role="dialog"
+            aria-label={ariaLabel}
+            className="animate-scale-in fixed z-30 w-[17.5rem] rounded-xl border border-tint/10 bg-surface-raised p-2.5 shadow-pop"
+            style={pos}
+          >
+            <div className="grid grid-cols-6 gap-0.5">
+              {HORAS.map((h) => {
+                const activa = h === hh
+                return (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => onChange(`${h}:${mm}`)}
+                    className={`h-8 rounded-md text-[12.5px] tabular-nums transition-colors duration-100
+                      ${
+                        activa
+                          ? 'bg-violet-soft font-medium text-violet'
+                          : 'text-ink-secondary hover:bg-tint/[0.06] hover:text-ink-primary'
+                      }`}
+                  >
+                    {h}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="mt-2 grid grid-cols-4 gap-0.5">
+              {minutos.map((m) => {
+                const activa = m === mm
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => {
+                      onChange(`${hh}:${m}`)
+                      setOpen(false)
+                    }}
+                    className={`h-8 rounded-md text-[12.5px] tabular-nums transition-colors duration-100
+                      ${
+                        activa
+                          ? 'bg-violet-soft font-medium text-violet'
+                          : 'text-ink-secondary hover:bg-tint/[0.06] hover:text-ink-primary'
+                      }`}
+                  >
+                    :{m}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
+  )
+}
+
+function FilaDia({ day, horario, onToggle, onEditarHora, className = '' }) {
+  const nombre = NOMBRES_DIA[day]
+  return (
+    <div className={`flex min-h-12 items-center justify-center gap-2.5 py-2 ${className}`}>
+      {horario ? (
+        <>
+          <p className="w-[6.75rem] shrink-0 text-[13px] font-medium text-ink-primary">{nombre}</p>
+          <TimePicker
+            value={horario.openTime}
+            ariaLabel={`Hora de apertura del ${nombre}`}
+            onChange={(value) => onEditarHora('openTime', value)}
+          />
+          <span className="text-[12px] text-ink-faint">a</span>
+          <TimePicker
+            value={horario.closeTime}
+            ariaLabel={`Hora de cierre del ${nombre}`}
+            onChange={(value) => onEditarHora('closeTime', value)}
+          />
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-[12px] text-ink-faint transition-colors duration-150 hover:text-ink-primary
+              focus-visible:outline-none focus-visible:text-ink-primary"
+          >
+            Cerrar
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={onToggle}
+          className="flex items-center gap-2.5 text-left focus-visible:outline-none focus-visible:text-ink-primary"
+        >
+          <span className="w-[6.75rem] shrink-0 text-[13px] text-ink-muted">{nombre}</span>
+          <span className="text-[13px] text-ink-faint transition-colors duration-150 hover:text-ink-primary">
+            Cerrado
+          </span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+// Encabezado en banda, como las tarjetas de Agentes: el riel de al lado
+// estiraba la columna del título a la altura del contenido y dejaba un
+// rectángulo vacío. Acá el encabezado mide lo que dice, y el cuerpo usa el
+// ancho entero.
+function Seccion({ icon, title, description, meta, children, className = '' }) {
+  return (
+    <Card className={`min-w-0 overflow-hidden ${className}`} bodyClassName="p-0">
+      <div className="flex items-start gap-3 border-b border-tint/[0.06] bg-tint/[0.02] px-5 py-3.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-soft text-violet">
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[13.5px] font-semibold text-ink-primary">{title}</h2>
+          <p className="mt-0.5 text-[12px] leading-relaxed text-ink-muted">{description}</p>
+        </div>
+        {meta && <div className="shrink-0 pt-0.5 text-right">{meta}</div>}
+      </div>
+      {children}
+    </Card>
+  )
+}
+
+function CampoMensaje({ label, hint, placeholder, rows, value, onChange, onBlur }) {
+  return (
+    <label className="block min-w-0">
+      <span className="text-[13px] font-medium text-ink-primary">{label}</span>
+      <textarea
+        rows={rows}
+        aria-label={label}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        className={`mt-1.5 ${CAMPO_TEXTO}`}
+      />
+      <span className="mt-1.5 flex items-start justify-between gap-3">
+        <span className="text-[12px] leading-relaxed text-ink-muted">{hint}</span>
+        <span className="shrink-0 text-[11px] tabular-nums text-ink-faint">{value.length}</span>
+      </span>
+    </label>
   )
 }
 
@@ -62,7 +293,6 @@ const CAMPO_BASE = `rounded-lg border border-transparent text-[13px] text-ink-pr
 // Los mensajes sí llevan un fondo apenas marcado. Sin él, un campo largo y
 // vacío es un hueco: no se ve dónde termina ni que se puede escribir ahí.
 const CAMPO_TEXTO = `${CAMPO_BASE} w-full resize-none bg-tint/[0.03] px-3 py-2 leading-relaxed`
-const CAMPO_HORA = `${CAMPO_BASE} bg-transparent px-2 py-1 tabular-nums`
 
 export default function Settings({ settings, onUpdate }) {
   const [draft, setDraft] = useState(settings)
@@ -98,106 +328,42 @@ export default function Settings({ settings, onUpdate }) {
   }
 
   const toggleDay = (day) => {
-    const dias = draft.daysOpen ?? []
+    const horarios = horariosDe(draft)
     guardar({
-      daysOpen: dias.includes(day) ? dias.filter((d) => d !== day) : [...dias, day],
+      weeklyHours: {
+        ...horarios,
+        [day]: horarios[day]
+          ? null
+          : {
+              openTime: draft.openTime || '09:00',
+              closeTime: draft.closeTime || '18:00',
+            },
+      },
     })
   }
 
+  const editarHora = (day, field, value) => {
+    const horarios = horariosDe(draft)
+    guardar({
+      weeklyHours: {
+        ...horarios,
+        [day]: { ...horarios[day], [field]: value },
+      },
+    })
+  }
+
+  const horarios = horariosDe(draft)
+  const diasConfigurados = weekDays.filter((day) => horarios[day]).length
+  const estadoHorario =
+    diasConfigurados > 0 ? storeSchedule({ ...draft, weeklyHours: horarios }) : null
+
   return (
-    <div className="stagger space-y-5" style={{ '--stagger-base': '60ms' }}>
+    <div className="stagger" style={{ '--stagger-base': '60ms' }}>
       <PageHeader title="Configuración" />
 
-      <WhatsappConnection />
-
-      <Seccion title="Atención">
-        <Fila label="Horario">
-          <div className="flex items-center gap-1">
-            <input
-              type="time"
-              aria-label="Hora de apertura"
-              value={draft.openTime ?? ''}
-              onChange={(e) => editar({ openTime: e.target.value })}
-              onBlur={() => guardar()}
-              className={CAMPO_HORA}
-            />
-            <span className="text-[12px] text-ink-faint">a</span>
-            <input
-              type="time"
-              aria-label="Hora de cierre"
-              value={draft.closeTime ?? ''}
-              onChange={(e) => editar({ closeTime: e.target.value })}
-              onBlur={() => guardar()}
-              className={CAMPO_HORA}
-            />
-          </div>
-        </Fila>
-
-        <Fila label="Días abiertos">
-          <div className="flex flex-wrap justify-end gap-1.5">
-            {weekDays.map((day) => {
-              const activo = (draft.daysOpen ?? []).includes(day)
-              return (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleDay(day)}
-                  aria-pressed={activo}
-                  className={`h-8 w-10 rounded-lg border text-[12px] font-medium transition-colors duration-150 ${
-                    activo
-                      ? 'border-violet/60 bg-violet-soft text-violet'
-                      : 'border-tint/[0.1] text-ink-muted hover:border-tint/25 hover:text-ink-primary'
-                  }`}
-                >
-                  {day}
-                </button>
-              )
-            })}
-          </div>
-        </Fila>
-      </Seccion>
-
-      <Seccion title="Lo que responde el bot">
-        <Fila
-          stacked
-          label="Tono de la casa"
-          // El nombre viejo ("Mensaje de bienvenida") prometía algo que no pasa:
-          // este texto no se envía nunca. Va al prompt como ejemplo de cómo
-          // habla el negocio, y de ahí sale el tono de todas las respuestas.
-          hint="No se envía: es el ejemplo con el que la IA aprende cómo habla tu negocio."
-        >
-          <textarea
-            rows={3}
-            aria-label="Tono de la casa"
-            placeholder="¡Hola! Gracias por escribirnos 😊 ¿En qué te podemos ayudar?"
-            value={draft.welcomeMessage ?? ''}
-            onChange={(e) => editar({ welcomeMessage: e.target.value })}
-            onBlur={() => guardar()}
-            className={CAMPO_TEXTO}
-          />
-        </Fila>
-
-        <Fila
-          stacked
-          label="Fuera de horario"
-          hint="Se envía tal cual cuando escriben fuera de horario, una vez cada 12 h. En ese rato el bot no responde solo: deja borrador. Vacío = no se manda nada."
-        >
-          <textarea
-            rows={2}
-            aria-label="Mensaje fuera de horario"
-            placeholder="Ahora no estamos atendiendo. Te respondemos apenas abrimos."
-            value={draft.awayMessage ?? ''}
-            onChange={(e) => editar({ awayMessage: e.target.value })}
-            onBlur={() => guardar()}
-            className={CAMPO_TEXTO}
-          />
-        </Fila>
-      </Seccion>
-
-      {/* Sin botón de guardar, hay que decir que se guarda solo — si no, se
-          busca uno. El aviso ocupa el mismo lugar prendido o apagado, para que
-          la página no salte cuando aparece. */}
-      <p className="flex h-5 items-center justify-center gap-1.5 text-[12px] text-ink-muted">
+      {/* El aviso ocupa siempre la misma línea: confirma el auto-guardado sin
+          empujar las tarjetas cuando cambia el texto. */}
+      <p className="mb-4 flex h-5 items-center justify-center gap-1.5 text-[12px] text-ink-muted">
         {guardado ? (
           <span className="animate-pop-in flex items-center gap-1.5 font-medium text-status-good">
             <IconCheck size={13} />
@@ -207,6 +373,88 @@ export default function Settings({ settings, onUpdate }) {
           'Los cambios se guardan solos.'
         )}
       </p>
+
+      <div className="mx-auto max-w-4xl space-y-3">
+        <WhatsappConnection className="w-full" />
+
+        <Seccion
+            icon={<IconClock size={16} />}
+            title="Horario de atención"
+            description="Define cuándo puede responder la IA y cuándo se envía el aviso de ausencia."
+            meta={
+              <span
+                className={`flex items-center justify-end gap-1.5 text-[12px] font-medium ${
+                  estadoHorario?.isOpen ? 'text-status-good' : 'text-ink-secondary'
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    estadoHorario?.isOpen ? 'bg-status-good' : 'bg-tint/30'
+                  }`}
+                />
+                {estadoHorario ? ESTADO_HORARIO[estadoHorario.reason] : 'Sin horario'}
+              </span>
+            }
+          >
+            <div className="p-5">
+              <div className="grid grid-cols-1 border-t border-tint/[0.06] sm:grid-cols-2 sm:gap-x-8">
+                {weekDays.slice(0, 6).map((day) => (
+                  <FilaDia
+                    key={day}
+                    day={day}
+                    horario={horarios[day]}
+                    onToggle={() => toggleDay(day)}
+                    onEditarHora={(field, value) => editarHora(day, field, value)}
+                    className="border-b border-tint/[0.06]"
+                  />
+                ))}
+                {/* Domingo abajo, a caballo de las dos columnas. */}
+                <FilaDia
+                  day="Dom"
+                  horario={horarios.Dom}
+                  onToggle={() => toggleDay('Dom')}
+                  onEditarHora={(field, value) => editarHora('Dom', field, value)}
+                  className="border-b border-tint/[0.06] sm:col-span-2"
+                />
+              </div>
+              <p className="mt-3 text-center text-[12px] leading-relaxed text-ink-muted">
+                {estadoHorario
+                  ? `${diasConfigurados} día${diasConfigurados === 1 ? '' : 's'} configurado${
+                      diasConfigurados === 1 ? '' : 's'
+                    }. Cada uno puede tener su propio horario.`
+                  : 'Activá al menos un día para que la IA sepa cuándo puede responder automáticamente.'}
+              </p>
+            </div>
+          </Seccion>
+
+          <Seccion
+            icon={<IconSparkles size={16} />}
+            title="Respuestas automáticas"
+            description="Ajusta cómo habla la IA y qué recibe quien escribe cuando el negocio está cerrado."
+          >
+            <div className="grid min-w-0 grid-cols-1 gap-x-8 gap-y-5 p-5 sm:grid-cols-2">
+              <CampoMensaje
+                label="Tono de la casa"
+                hint="Es el ejemplo con el que la IA aprende cómo habla tu negocio. No se envía como mensaje."
+                rows={4}
+                placeholder="¡Hola! Gracias por escribirnos 😊 ¿En qué te podemos ayudar?"
+                value={draft.welcomeMessage ?? ''}
+                onChange={(e) => editar({ welcomeMessage: e.target.value })}
+                onBlur={() => guardar()}
+              />
+
+              <CampoMensaje
+                label="Mensaje fuera de horario"
+                hint="Se envía como máximo una vez cada 12 h. Si queda vacío, no se manda ningún aviso."
+                rows={4}
+                placeholder="Ahora no estamos atendiendo. Te respondemos apenas abrimos."
+                value={draft.awayMessage ?? ''}
+                onChange={(e) => editar({ awayMessage: e.target.value })}
+                onBlur={() => guardar()}
+              />
+            </div>
+          </Seccion>
+      </div>
     </div>
   )
 }

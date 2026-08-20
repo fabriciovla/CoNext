@@ -1,285 +1,439 @@
 import Logo from '../Logo'
 import {
+  IconArrowIn,
+  IconArrowOut,
   IconBolt,
   IconBox,
   IconChart,
-  IconCheck,
-  IconChevronDown,
+  IconClock,
+  IconCompose,
+  IconContactCard,
+  IconHome,
   IconInbox,
+  IconMic,
+  IconNote,
+  IconPaperclip,
+  IconPhone,
+  IconPlus,
   IconSearch,
+  IconSend,
   IconSettings,
+  IconSmile,
   IconSparkles,
+  IconUser,
+  IconUsers,
 } from '../icons'
 
-// La app, dibujada con divs en vez de fotografiada.
+// La bandeja, dibujada con divs en vez de fotografiada.
 //
-// Es una maqueta y no una captura de pantalla por tres razones: no se
-// desactualiza cada vez que cambia un color de la dashboard, se ve nítida en
-// cualquier pantalla sin mandar un PNG de dos megas, y no expone conversaciones
-// de nadie. Lo que muestra sí es la app real: las mismas cuatro columnas
-// (barra, lista, conversación, contacto) y el mismo comportamiento — abajo de
-// todo, el borrador que un agente dejó esperando aprobación.
-//
-// Los datos son inventados y están puestos para que se entienda el producto de
-// un vistazo. Ningún teléfono de acá existe.
+// La captura de `public/` servía de referencia del layout real (cuatro
+// columnas, carpetas, composer en isla, ficha del contacto) pero en el hero se
+// veía opaca: recorte, compresión y el fondo de la página comiéndose los
+// bordes. Acá se redibuja nítida, con la paleta de la landing, y se deja a la
+// vista lo que esa foto no mostraba — el borrador de un agente esperando
+// aprobación, que es lo que diferencia al producto.
 
 const NAV = [
-  { Icono: IconChart, label: 'Inicio' },
-  { Icono: IconInbox, label: 'Bandeja', cuenta: '12', activo: true },
+  { Icono: IconHome, label: 'Inicio' },
+  { Icono: IconInbox, label: 'Bandeja', cuenta: '1', activo: true },
   { Icono: IconSparkles, label: 'Agentes IA' },
   { Icono: IconBox, label: 'Productos' },
   { Icono: IconSettings, label: 'Configuración' },
 ]
 
+const CARPETAS = [
+  { Icono: IconInbox, label: 'Todas', cuenta: '8', activa: true },
+  { Icono: IconUser, label: 'Mías', cuenta: '3' },
+  { Icono: IconUsers, label: 'Sin asignar', cuenta: '2' },
+  { Icono: IconClock, label: 'Pendientes', cuenta: '1' },
+]
+
+const AGENTES = [
+  { label: 'Recepcionista', cuenta: '4', on: true },
+  { label: 'Ventas', cuenta: '3', on: true },
+  { label: 'Envíos', cuenta: '1', on: false },
+]
+
 const CONVERSACIONES = [
   {
-    nombre: 'Sofía Martínez',
-    ultimo: '¿Les queda la campera de jean en talle M?',
+    nombre: 'Martín Ríos',
+    ultimo: '¿Aceptan transferencia?',
     hora: '2 min',
-    etiqueta: 'ventas',
-    sinLeer: true,
+    entrada: true,
+    pendiente: 1,
     activa: true,
   },
   {
-    nombre: 'Julián Rossi',
-    ultimo: 'Listo, ya hice la transferencia 👍',
-    hora: '14 min',
-    etiqueta: 'pagos',
+    nombre: 'Laura Gómez',
+    ultimo: 'Perfecto, lo retiro mañana',
+    hora: '18 min',
+    entrada: false,
   },
   {
-    nombre: 'Carla Gómez',
-    ultimo: '¿Hacen envíos a Córdoba capital?',
+    nombre: 'Nicolás Paz',
+    ultimo: '¿Hacen envíos a Córdoba?',
     hora: '1 h',
-    etiqueta: 'envíos',
+    entrada: true,
   },
   {
-    nombre: 'Martín Quiroga',
-    ultimo: 'Gracias! Cualquier cosa te escribo',
+    nombre: 'Carla Vega',
+    ultimo: 'Gracias! Cualquier cosa escribo',
     hora: '3 h',
+    entrada: false,
   },
 ]
 
-function Avatar({ nombre, size = 26 }) {
+function Foto({ size = 38 }) {
   return (
-    <span
+    <img
+      src="/IconoSinFoto.webp"
+      alt=""
+      draggable={false}
+      decoding="async"
+      className="shrink-0 rounded-full object-cover"
       style={{ width: size, height: size }}
-      className="flex shrink-0 items-center justify-center rounded-full bg-white/[0.09] text-[10px] font-semibold text-white/80"
+    />
+  )
+}
+
+function AvatarCanal({ size = 38 }) {
+  return (
+    <div className="relative shrink-0">
+      <Foto size={size} />
+      <img
+        src="/logowsp.webp"
+        alt=""
+        draggable={false}
+        decoding="async"
+        className="absolute -bottom-0.5 -right-0.5"
+        style={{ width: 14, height: 14 }}
+      />
+    </div>
+  )
+}
+
+function FilaNav({ icon, emoji, label, cuenta, activa, punto }) {
+  return (
+    <div
+      className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12.5px] ${
+        activa ? 'bg-tint/[0.09] font-medium text-ink-primary' : 'text-ink-muted'
+      }`}
     >
-      {nombre.charAt(0)}
-    </span>
+      {punto ? (
+        <span className="flex w-4 justify-center">
+          <span className={`h-1.5 w-1.5 rounded-full ${punto === 'on' ? 'bg-status-good' : 'bg-tint/30'}`} />
+        </span>
+      ) : emoji ? (
+        <span className="w-4 text-center text-[13px] leading-none">{emoji}</span>
+      ) : (
+        <span className={activa ? 'text-ink-primary' : 'text-ink-muted'}>{icon}</span>
+      )}
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      {cuenta != null && (
+        <span className={`text-[11px] tabular-nums ${activa ? 'text-ink-primary' : 'text-ink-faint'}`}>
+          {cuenta}
+        </span>
+      )}
+    </div>
+  )
+}
+
+function Seccion({ titulo, children }) {
+  return (
+    <div className="mt-3">
+      <p className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">{titulo}</p>
+      <div className="space-y-px pt-0.5">{children}</div>
+    </div>
   )
 }
 
 export default function AppMock() {
   return (
-    // aria-hidden porque es decoración: cada dato de acá adentro es inventado y
-    // leerlo en voz alta de corrido no le aporta nada a quien no ve la imagen.
-    // Lo que la página tiene para decir está en el texto de al lado.
+    // El marco lo pone la card de afuera. Acá adentro la bandeja se dibuja un
+    // poco más grande y se escala: así la ventana no cambia de tamaño y la
+    // interfaz se lee como un escritorio, no como una UI inflada al ancho.
     <div
       aria-hidden="true"
-      className="flex h-[480px] w-full overflow-hidden rounded-t-2xl border border-white/10 bg-surface-page text-left sm:h-[560px]"
+      className="relative h-[500px] w-full transform-gpu overflow-hidden bg-surface-page text-left sm:h-[600px]"
     >
-      {/* ---------------------------------------------------------------- */}
-      {/* Barra lateral                                                     */}
-      {/* ---------------------------------------------------------------- */}
-      <aside className="hidden w-[188px] shrink-0 flex-col border-r border-white/[0.07] bg-[#0a0a0a] md:flex">
-        <header className="flex items-center gap-2 px-3 py-3.5">
-          <Logo className="h-4 w-auto text-white" />
+      <div className="absolute left-1/2 top-0 flex h-[114%] w-[114%] origin-top -translate-x-1/2 scale-[0.88]">
+      {/* ------------------------------------------------------------------ */}
+      {/* Barra                                                               */}
+      {/* ------------------------------------------------------------------ */}
+      <aside className="hidden w-[200px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav md:flex">
+        <header className="flex items-center justify-center px-3 py-3.5">
+          <Logo className="h-7 w-auto text-ink-primary" />
         </header>
 
-        <div className="flex-1 px-2">
+        <div className="min-h-0 flex-1 overflow-hidden px-2">
           {NAV.map(({ Icono, label, cuenta, activo }) => (
-            <div
-              key={label}
-              className={`relative mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[11.5px] ${
-                activo ? 'bg-white/[0.09] font-medium text-white' : 'text-white/55'
-              }`}
-            >
-              {activo && (
-                <span className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-violet" />
-              )}
-              <Icono size={14} className={activo ? 'text-white' : 'text-white/40'} />
-              <span className="flex-1 truncate">{label}</span>
-              {cuenta && <span className="text-[10px] tabular-nums text-white/40">{cuenta}</span>}
-            </div>
+            <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activo} />
           ))}
 
-          <p className="mt-5 px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-wider text-white/30">
-            Agentes
-          </p>
-          {[
-            { emoji: '🛍️', label: 'Ventas', cuenta: '8' },
-            { emoji: '🚚', label: 'Envíos', cuenta: '3' },
-            { emoji: '💳', label: 'Pagos', cuenta: '1' },
-          ].map(({ emoji, label, cuenta }) => (
-            <div
-              key={label}
-              className="mb-px flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[11.5px] text-white/55"
-            >
-              <span className="w-[14px] text-center text-[11px] leading-none">{emoji}</span>
-              <span className="flex-1 truncate">{label}</span>
-              <span className="text-[10px] tabular-nums text-white/40">{cuenta}</span>
-            </div>
-          ))}
+          <Seccion titulo="Carpetas">
+            {CARPETAS.map(({ Icono, label, cuenta, activa }) => (
+              <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activa} />
+            ))}
+          </Seccion>
+
+          <Seccion titulo="Agentes IA">
+            {AGENTES.map(({ label, cuenta, on }) => (
+              <FilaNav key={label} label={label} cuenta={cuenta} punto={on ? 'on' : 'off'} />
+            ))}
+            <FilaNav icon={<IconPlus size={15} />} label="Nuevo agente" />
+          </Seccion>
         </div>
 
-        <div className="flex items-center gap-2 border-t border-white/[0.07] px-3 py-2.5">
-          <Avatar nombre="F" size={22} />
+        <div className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
+          <div className="mb-2 flex items-center justify-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-status-good shadow-[0_0_8px_rgba(12,163,12,0.7)]" />
+            <p className="text-[12px] font-medium text-ink-primary">Día abierto</p>
+            <span className="text-[10.5px] text-ink-faint">desde 9:12</span>
+          </div>
+          <div className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-center text-[12px] font-medium text-ink-secondary">
+            Cerrar día
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 border-t border-tint/[0.07] px-3 py-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-tint/15 bg-tint/10 text-[11px] font-semibold text-ink-primary">
+            A
+          </span>
           <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-[10.5px] font-medium text-white/85">Tienda Aurora</p>
-            <p className="truncate text-[9px] text-white/35">Administrador</p>
+            <p className="truncate text-[12px] font-medium text-ink-primary">Admin</p>
+            <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
           </div>
         </div>
       </aside>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Lista de conversaciones                                           */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="hidden w-[262px] shrink-0 flex-col border-r border-white/[0.07] bg-surface-card lg:flex">
-        <header className="border-b border-white/[0.07] px-3.5 py-3">
-          <div className="flex items-center gap-2 rounded-lg bg-white/[0.05] px-2.5 py-1.5">
-            <IconSearch size={13} className="text-white/35" />
-            <span className="text-[11px] text-white/35">Buscar conversación</span>
+      {/* ------------------------------------------------------------------ */}
+      {/* Lista                                                               */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="hidden w-[252px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-card lg:flex">
+        <header className="shrink-0 px-3 pt-2.5">
+          <div className="flex items-center justify-between border-b border-tint/[0.07]">
+            <div className="flex items-center gap-4">
+              <span className="relative pb-2.5 pt-1 text-[13px] font-medium text-violet">
+                Chats
+                <span className="absolute -bottom-px left-0 h-[2px] w-full rounded-full bg-violet" />
+              </span>
+              <span className="pb-2.5 pt-1 text-[13px] font-medium text-ink-muted">Llamadas</span>
+            </div>
+            <div className="flex gap-0.5 pb-1.5 text-ink-muted">
+              <span className="flex h-7 w-7 items-center justify-center">
+                <IconCompose size={14} />
+              </span>
+              <span className="flex h-7 w-7 items-center justify-center">
+                <IconSearch size={14} />
+              </span>
+            </div>
           </div>
-          <div className="mt-3 flex items-center gap-4 text-[11px]">
-            <span className="border-b-2 border-violet pb-1.5 font-medium text-white">Todas 24</span>
-            <span className="pb-1.5 text-white/45">Sin responder 3</span>
-          </div>
+          <p className="py-2 text-[12px] text-ink-muted">Abiertas, recientes</p>
         </header>
 
-        <div className="flex-1">
-          {CONVERSACIONES.map(({ nombre, ultimo, hora, etiqueta, sinLeer, activa }) => (
+        <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2">
+          {CONVERSACIONES.map(({ nombre, ultimo, hora, entrada, pendiente, etiqueta, activa }) => (
             <div
               key={nombre}
-              className={`flex gap-2.5 border-b border-white/[0.04] px-3.5 py-3 ${activa ? 'bg-white/[0.05]' : ''}`}
+              className={`flex items-start gap-2.5 rounded-lg px-2 py-2 ${activa ? 'bg-violet-soft' : ''}`}
             >
-              <Avatar nombre={nombre} />
+              <AvatarCanal size={36} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className={`truncate text-[11.5px] ${sinLeer ? 'font-semibold text-white' : 'text-white/75'}`}>
-                    {nombre}
-                  </p>
-                  <span className="shrink-0 text-[9.5px] text-white/35">{hora}</span>
+                  <p className="truncate text-[13px] font-medium text-ink-primary">{nombre}</p>
+                  <span className="shrink-0 text-[11px] tabular-nums text-ink-faint">{hora}</span>
                 </div>
-                <p className={`mt-0.5 truncate text-[10.5px] ${sinLeer ? 'text-white/70' : 'text-white/40'}`}>
-                  {ultimo}
-                </p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  {entrada ? (
+                    <IconArrowIn size={12} className="shrink-0 text-[#25d366]" />
+                  ) : (
+                    <IconArrowOut size={12} className="shrink-0 text-ink-faint" />
+                  )}
+                  <p className="min-w-0 flex-1 truncate text-[12px] text-ink-muted">{ultimo}</p>
+                  {pendiente > 0 && (
+                    <span className="flex h-[17px] min-w-[17px] shrink-0 items-center justify-center rounded-full bg-status-warning px-1 text-[10px] font-bold text-status-ink">
+                      {pendiente}
+                    </span>
+                  )}
+                </div>
                 {etiqueta && (
-                  <span className="mt-1.5 inline-block rounded-full bg-violet-soft px-1.5 py-0.5 text-[9px] text-violet">
+                  <span className="mt-1 inline-block max-w-[110px] truncate rounded-full border border-violet/20 bg-violet-soft px-1.5 py-px text-[10.5px] text-violet">
                     {etiqueta}
                   </span>
                 )}
               </div>
-              {sinLeer && <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet" />}
             </div>
           ))}
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Conversación                                                      */}
-      {/* ---------------------------------------------------------------- */}
-      <section className="flex min-w-0 flex-1 flex-col bg-surface-page">
-        <header className="flex items-center gap-2.5 border-b border-white/[0.07] px-4 py-2.5">
-          <Avatar nombre="Sofía" size={28} />
-          <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-[12px] font-medium text-white">Sofía Martínez</p>
-            <p className="truncate text-[10px] text-white/40">+54 9 11 5555-0142</p>
-          </div>
-          <span className="hidden items-center gap-1.5 rounded-full bg-violet-soft px-2.5 py-1 text-[10px] font-medium text-violet sm:flex">
-            <IconBolt size={11} />
-            Ventas
-          </span>
-          <span className="hidden items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1 text-[10.5px] text-white/70 sm:flex">
-            Resolver
-            <IconChevronDown size={11} />
-          </span>
-        </header>
+      {/* ------------------------------------------------------------------ */}
+      {/* Conversación                                                        */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="flex min-w-0 flex-1 flex-col bg-surface-card">
+        <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 py-4">
+          <p className="mb-1 text-center text-[11.5px] text-ink-faint">Viernes, 14 de agosto</p>
 
-        <div className="flex flex-1 flex-col justify-end gap-2.5 px-4 py-4">
-          <Burbuja>¡Hola! ¿Les queda la campera de jean en talle M?</Burbuja>
-          <Burbuja propio>
-            ¡Hola Sofía! Sí, nos queda una en M. Sale $48.900 y si la pedís hoy sale para tu casa mañana 🙌
+          <Burbuja>
+            Hola, ¿tienen la campera de jean en talle M?
+          </Burbuja>
+          <Burbuja propio bot>
+            Sí, nos queda una en M. Sale $48.900 y si la pides hoy sale para tu casa mañana.
           </Burbuja>
           <Burbuja>Buenísimo. ¿Aceptan transferencia?</Burbuja>
         </div>
 
-        {/* El borrador esperando aprobación. Es lo que diferencia al producto de
-            un bot suelto, así que es lo que la maqueta muestra abajo de todo,
-            que es donde termina de leerse la imagen. */}
-        <footer className="border-t border-white/[0.07] bg-white/[0.02] px-4 py-3">
-          <div className="flex items-center gap-2">
-            <IconBolt size={12} className="shrink-0 text-violet" />
-            <p className="text-[10px] font-medium uppercase tracking-wide text-violet">
-              Borrador de Ventas
-            </p>
+        <div className="mx-auto w-full max-w-[36rem] shrink-0 px-4 pb-4 pt-1">
+          <div className="mb-2 overflow-hidden rounded-2xl border border-violet/25 bg-violet-soft">
+            <div className="flex items-start gap-2.5 px-3.5 pt-3">
+              <span className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-violet/15 text-violet">
+                <IconSparkles size={13} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11.5px] font-medium text-violet">
+                  Respuesta sugerida
+                  <span className="text-ink-muted"> · la escribió Ventas</span>
+                </p>
+                <p className="mt-1 text-[13px] leading-snug text-ink-primary">
+                  Sí, aceptamos transferencia. Te paso los datos de la cuenta y en cuanto me envíes el comprobante lo despacho.
+                </p>
+              </div>
+            </div>
+            <div className="mt-2.5 flex items-center justify-end gap-1 border-t border-violet/15 px-2.5 py-1.5">
+              <span className="rounded-lg px-2.5 py-1 text-[11.5px] text-ink-muted">Descartar</span>
+              <span className="rounded-lg bg-violet px-2.5 py-1 text-[11.5px] font-medium text-ink-inverted">
+                Usar y editar
+              </span>
+            </div>
           </div>
-          <p className="mt-2 text-[11.5px] leading-relaxed text-white/75">
-            Sí, aceptamos transferencia. Te paso el CBU y en cuanto me mandes el comprobante lo despacho.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <span className="flex items-center gap-1.5 rounded-lg bg-accent-gradient px-2.5 py-1.5 text-[10.5px] font-medium text-white">
-              <IconCheck size={11} />
-              Aprobar y enviar
-            </span>
-            <span className="rounded-lg border border-white/10 px-2.5 py-1.5 text-[10.5px] text-white/70">
-              Editar
+
+          <div className="flex items-end gap-1 rounded-3xl border border-tint/[0.09] bg-surface-raised p-1.5 shadow-card">
+            <span className="min-w-0 flex-1 px-2.5 py-2 text-[13.5px] text-ink-faint">Escribe un mensaje</span>
+            <span className="flex shrink-0 items-center gap-0.5 pr-0.5 text-ink-muted">
+              <span className="flex h-8 w-8 items-center justify-center">
+                <IconSmile size={16} />
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center">
+                <IconPaperclip size={16} />
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center">
+                <IconMic size={16} />
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-primary text-ink-inverted">
+                <IconSend size={14} />
+              </span>
             </span>
           </div>
-        </footer>
+        </div>
       </section>
 
-      {/* ---------------------------------------------------------------- */}
-      {/* Ficha del contacto                                                */}
-      {/* ---------------------------------------------------------------- */}
-      <aside className="hidden w-[212px] shrink-0 flex-col border-l border-white/[0.07] bg-surface-card px-4 py-4 xl:flex">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-white/35">Contacto</p>
-        <div className="mt-4 flex flex-col items-center text-center">
-          <Avatar nombre="Sofía" size={48} />
-          <p className="mt-2.5 text-[12.5px] font-medium text-white">Sofía Martínez</p>
-          <p className="mt-0.5 text-[10px] text-white/40">Cliente desde marzo 2025</p>
+      {/* ------------------------------------------------------------------ */}
+      {/* Ficha                                                               */}
+      {/* ------------------------------------------------------------------ */}
+      <aside className="hidden shrink-0 border-l border-tint/[0.07] bg-surface-nav xl:flex">
+        <div className="w-[248px] overflow-hidden p-4">
+          <div className="flex flex-col items-center gap-2 text-center">
+            <Foto size={56} />
+            <div>
+              <p className="text-[14.5px] font-semibold text-ink-primary">Martín Ríos</p>
+              <p className="text-[12px] tabular-nums text-ink-muted">+54 9 11 5555-0142</p>
+            </div>
+            <div className="mt-1 flex gap-2">
+              <span className="flex items-center gap-1.5 rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-[12px] text-ink-secondary">
+                <IconPhone size={13} />
+                Llamar
+              </span>
+              <span className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-[12px] text-ink-secondary">
+                Copiar
+              </span>
+            </div>
+          </div>
+
+          <div className="relative mt-4">
+            <IconSearch
+              size={13}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-faint"
+            />
+            <div className="truncate whitespace-nowrap rounded-lg border border-tint/10 bg-tint/[0.04] py-2 pl-8 pr-3 text-[12px] text-ink-faint">
+              Buscar en la conversación
+            </div>
+          </div>
+
+          <dl className="mt-4 space-y-3 border-t border-tint/[0.07] pt-3">
+            {[
+              ['Atendida por', 'Ventas'],
+              ['Responsable', 'Admin'],
+              ['Canal', 'WhatsApp'],
+            ].map(([clave, valor]) => (
+              <div key={clave}>
+                <dt className="text-[12px] text-ink-faint">{clave}</dt>
+                <dd className="mt-1 text-[13px] text-ink-primary">{valor}</dd>
+              </div>
+            ))}
+            <div>
+              <p className="text-[12px] text-ink-faint">Etiquetas</p>
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                <span className="rounded-full border border-tint/10 bg-tint/[0.05] px-2.5 py-[3px] text-[11.5px] text-ink-secondary">
+                  ventas
+                </span>
+                <span className="rounded-full border border-dashed border-tint/15 px-2.5 py-[3px] text-[11.5px] text-ink-muted">
+                  + etiqueta
+                </span>
+              </div>
+            </div>
+          </dl>
         </div>
 
-        <dl className="mt-5 space-y-3 border-t border-white/[0.07] pt-4">
-          {[
-            ['Teléfono', '+54 9 11 5555-0142'],
-            ['Compras', '4 pedidos'],
-            ['Última compra', '$32.400'],
-          ].map(([clave, valor]) => (
-            <div key={clave}>
-              <dt className="text-[9.5px] uppercase tracking-wide text-white/35">{clave}</dt>
-              <dd className="mt-0.5 text-[11px] text-white/75">{valor}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="mt-5 border-t border-white/[0.07] pt-4">
-          <p className="text-[9.5px] uppercase tracking-wide text-white/35">Etiquetas</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {['ventas', 'mayorista'].map((e) => (
-              <span key={e} className="rounded-full bg-white/[0.07] px-2 py-0.5 text-[9.5px] text-white/65">
-                {e}
-              </span>
-            ))}
-          </div>
+        <div className="flex w-11 shrink-0 flex-col items-center gap-1 border-l border-tint/[0.07] py-3 text-ink-muted">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-tint/[0.09] text-ink-primary">
+            <IconContactCard size={15} />
+          </span>
+          <span className="flex h-8 w-8 items-center justify-center">
+            <IconChart size={15} />
+          </span>
+          <span className="flex h-8 w-8 items-center justify-center">
+            <IconNote size={15} />
+          </span>
         </div>
       </aside>
+      </div>
     </div>
   )
 }
 
-function Burbuja({ propio, children }) {
+function Burbuja({ propio, bot, children }) {
   return (
     <div className={`flex ${propio ? 'justify-end' : 'justify-start'}`}>
-      <p
-        className={`max-w-[78%] rounded-2xl px-3 py-2 text-[11.5px] leading-relaxed ${
-          propio
-            ? 'rounded-br-md bg-accent-gradient text-white'
-            : 'rounded-bl-md bg-white/[0.07] text-white/85'
-        }`}
-      >
-        {children}
-      </p>
+      <div className={`flex max-w-[78%] items-end gap-2 ${propio ? 'flex-row-reverse' : ''}`}>
+        {propio ? (
+          <span
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold ${
+              bot ? 'border-violet/30 bg-violet-soft text-violet' : 'border-tint/15 bg-tint/10 text-ink-primary'
+            }`}
+          >
+            {bot ? 'V' : 'A'}
+          </span>
+        ) : (
+          <Foto size={28} />
+        )}
+        <div>
+          <p
+            className={`rounded-2xl border px-3.5 py-2 text-[13px] leading-relaxed text-ink-primary ${
+              propio
+                ? 'rounded-br-md border-violet/25 bg-violet-soft'
+                : 'rounded-bl-md border-tint/[0.07] bg-tint/[0.055]'
+            }`}
+          >
+            {children}
+          </p>
+          {bot && (
+            <p className="mt-1 flex items-center justify-end gap-1 text-[11px] text-ink-faint">
+              <IconBolt size={11} />
+              Ventas
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

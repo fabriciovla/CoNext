@@ -10,6 +10,15 @@ function toMinutes(time) {
   return (hours || 0) * 60 + (minutes || 0)
 }
 
+export function getDayHours(settings, day) {
+  if (settings?.weeklyHours && Object.prototype.hasOwnProperty.call(settings.weeklyHours, day)) {
+    return settings.weeklyHours[day]
+  }
+  return settings?.daysOpen?.includes(day)
+    ? { openTime: settings.openTime, closeTime: settings.closeTime }
+    : null
+}
+
 // Formatea una duración en minutos para mostrarla: 0,5 → "<1 min", 95 → "1 h 35 min".
 export function formatDuration(minutes) {
   if (minutes === null || minutes === undefined || Number.isNaN(minutes)) return '—'
@@ -55,7 +64,7 @@ export function averageResponseMinutes(messages) {
 
 // Entrantes por hora del día. El rango arranca en el horario de atención y se
 // estira si entraron mensajes fuera de ese horario, para no esconderlos.
-export function messagesByHour(messages, { openTime, closeTime }) {
+export function messagesByHour(messages, settings) {
   const counts = new Map()
   for (const message of messages) {
     if (message.direction !== 'in') continue
@@ -64,8 +73,17 @@ export function messagesByHour(messages, { openTime, closeTime }) {
   }
 
   const activeHours = [...counts.keys()]
-  const from = Math.min(Math.floor(toMinutes(openTime) / 60), ...activeHours)
-  const to = Math.max(Math.ceil(toMinutes(closeTime) / 60) - 1, ...activeHours)
+  const configured = settings.weeklyHours
+    ? Object.values(settings.weeklyHours).filter(Boolean)
+    : [{ openTime: settings.openTime, closeTime: settings.closeTime }]
+  const openHours = configured.map((slot) => Math.floor(toMinutes(slot.openTime) / 60))
+  const closeHours = configured.map((slot) => {
+    const open = toMinutes(slot.openTime)
+    const close = toMinutes(slot.closeTime)
+    return close <= open ? 23 : Math.ceil(close / 60) - 1
+  })
+  const from = Math.min(...(openHours.length ? openHours : [9]), ...activeHours)
+  const to = Math.max(...(closeHours.length ? closeHours : [17]), ...activeHours)
 
   const bars = []
   for (let hour = from; hour <= to; hour++) {
@@ -124,18 +142,31 @@ export function percentChange(current, previous) {
 
 // Estado del horario de atención configurado, comparado con el reloj.
 export function storeSchedule(settings, now = new Date()) {
-  const today = DAY_LABELS[now.getDay()]
-  const isBusinessDay = settings.daysOpen.includes(today)
+  const todayIndex = now.getDay()
+  const today = DAY_LABELS[todayIndex]
+  const slot = getDayHours(settings, today)
+  const previousSlot = getDayHours(settings, DAY_LABELS[(todayIndex + 6) % 7])
   const minutesNow = now.getHours() * 60 + now.getMinutes()
-  const opensAt = toMinutes(settings.openTime)
-  const closesAt = toMinutes(settings.closeTime)
+  const opensAt = slot ? toMinutes(slot.openTime) : null
+  const closesAt = slot ? toMinutes(slot.closeTime) : null
+  const previousOpen = previousSlot ? toMinutes(previousSlot.openTime) : null
+  const previousClose = previousSlot ? toMinutes(previousSlot.closeTime) : null
 
-  let reason = 'abierto'
-  if (!isBusinessDay) reason = 'no-laborable'
+  const sigueTurnoAnterior =
+    previousOpen !== null &&
+    previousClose !== null &&
+    previousClose <= previousOpen &&
+    minutesNow < previousClose
+
+  let reason
+  if (sigueTurnoAnterior) reason = 'abierto'
+  else if (!slot) reason = 'no-laborable'
+  else if (closesAt <= opensAt) reason = minutesNow >= opensAt ? 'abierto' : 'antes-de-abrir'
   else if (minutesNow < opensAt) reason = 'antes-de-abrir'
   else if (minutesNow >= closesAt) reason = 'ya-cerro'
+  else reason = 'abierto'
 
-  return { today, isBusinessDay, isOpen: reason === 'abierto', reason }
+  return { today, hours: slot, isBusinessDay: Boolean(slot), isOpen: reason === 'abierto', reason }
 }
 
 // Respuestas salientes separadas por quién las escribió.

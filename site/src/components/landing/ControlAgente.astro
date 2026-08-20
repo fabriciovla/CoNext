@@ -18,10 +18,10 @@ import { IconBolt, IconCheck } from '../icons.jsx'
 // opacidad: así el alto no salta al cambiar de estado y la que no corresponde
 // igual queda escrita para quien lea el código fuente.
 const PANEL =
-  'absolute inset-0 flex gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'
+  'absolute inset-0 flex gap-3 rounded-2xl border border-tint/[0.07] bg-tint/[0.02] p-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]'
 ---
 
-<div class="group rounded-3xl border border-white/10 bg-surface-card p-5 shadow-card sm:p-6">
+<div class="group rounded-3xl border border-tint/10 bg-surface-card p-5 shadow-card sm:p-6">
   <div class="flex items-start gap-3">
     <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-soft text-[17px]">
       🛍️
@@ -33,7 +33,7 @@ const PANEL =
   </div>
 
   <label
-    class="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3.5"
+    class="mt-5 flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-tint/[0.07] bg-tint/[0.03] px-4 py-3.5"
   >
     <span class="min-w-0">
       <span class="block text-[13.5px] font-medium text-ink-primary">Envío automático</span>
@@ -49,7 +49,7 @@ const PANEL =
     <span class="relative shrink-0">
       <input type="checkbox" checked class="peer sr-only" />
       <span
-        class="block h-6 w-11 rounded-full bg-white/15 transition-colors duration-300 peer-checked:bg-accent-gradient peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet"
+        class="block h-6 w-11 rounded-full bg-tint/15 transition-colors duration-300 peer-checked:bg-accent-gradient peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet"
       ></span>
       <span
         class="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] peer-checked:translate-x-5"
@@ -80,8 +80,8 @@ const PANEL =
       <div class="min-w-0">
         <p class="text-[13px] font-medium text-ink-primary">Borrador listo</p>
         <p class="mt-1 text-[12.5px] leading-relaxed text-ink-muted">
-          El mensaje te espera escrito en la conversación. Lo mandás como está, lo corregís, o lo
-          borrás y escribís vos.
+          El mensaje te espera escrito en la conversación. Lo envías como está, lo corriges, o lo
+          borras y escribes tú.
         </p>
       </div>
     </div>

@@ -126,6 +126,106 @@ export const IconTag = (props) => (
   </Svg>
 )
 
+export const IconHome = (props) => (
+  <Svg {...props}>
+    <path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.2 1.2 0 0 1-1.2 1.2H4.7A1.2 1.2 0 0 1 3.5 19Z" />
+    <path d="M9.5 20.2v-6h5v6" />
+  </Svg>
+)
+
+export const IconUser = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="8.2" r="3.4" />
+    <path d="M4.8 20c1-3.6 3.9-5.6 7.2-5.6s6.2 2 7.2 5.6" />
+  </Svg>
+)
+
+export const IconUsers = (props) => (
+  <Svg {...props}>
+    <circle cx="9.6" cy="8.6" r="3.1" />
+    <path d="M3.8 19.2c.9-3 3.2-4.7 5.8-4.7s4.9 1.7 5.8 4.7" />
+    <path d="M16.2 5.9a3.1 3.1 0 0 1 0 5.6" />
+    <path d="M17.4 14.9c1.6.6 2.8 2.1 3.3 4.3" />
+  </Svg>
+)
+
+export const IconPlus = (props) => (
+  <Svg {...props}>
+    <path d="M12 4.5v15M4.5 12h15" />
+  </Svg>
+)
+
+export const IconPhone = (props) => (
+  <Svg {...props}>
+    <path d="M8.4 4.5 10 8.1l-1.9 1.7a11 11 0 0 0 6.1 6.1l1.7-1.9 3.6 1.6v3.2c0 .8-.7 1.4-1.5 1.3C10.8 19.4 4.6 13.2 4 6c-.1-.8.5-1.5 1.3-1.5h3.1Z" />
+  </Svg>
+)
+
+export const IconCompose = (props) => (
+  <Svg {...props}>
+    <path d="M4.5 19.5h3l9.6-9.6a2.1 2.1 0 0 0-3-3L4.5 16.5Z" />
+    <path d="M14.4 5.4 18.6 9.6" />
+  </Svg>
+)
+
+export const IconSmile = (props) => (
+  <Svg {...props}>
+    <circle cx="12" cy="12" r="8.3" />
+    <path d="M8.8 14.2a4 4 0 0 0 6.4 0" />
+    <path d="M9.3 9.6h.01M14.7 9.6h.01" strokeWidth="2" />
+  </Svg>
+)
+
+export const IconPaperclip = (props) => (
+  <Svg {...props}>
+    <path d="M19 11.5 12.4 18a4 4 0 0 1-5.7-5.7l7-7a2.7 2.7 0 0 1 3.8 3.8l-7 7a1.3 1.3 0 0 1-1.9-1.9l6.3-6.3" />
+  </Svg>
+)
+
+export const IconMic = (props) => (
+  <Svg {...props}>
+    <rect x="9.4" y="3.5" width="5.2" height="10.4" rx="2.6" />
+    <path d="M5.8 11.6a6.2 6.2 0 0 0 12.4 0" />
+    <path d="M12 17.8v2.7" />
+  </Svg>
+)
+
+export const IconSend = (props) => (
+  <Svg {...props}>
+    <path d="M19.6 4.4 10.1 13.9" />
+    <path d="M19.6 4.4 13.6 21.4l-3.5-7.5-7.5-3.5Z" />
+  </Svg>
+)
+
+export const IconArrowIn = (props) => (
+  <Svg {...props}>
+    <path d="M17.5 6.5 6.5 17.5" />
+    <path d="M6.5 10.4v7.1h7.1" />
+  </Svg>
+)
+
+export const IconArrowOut = (props) => (
+  <Svg {...props}>
+    <path d="M6.5 17.5 17.5 6.5" />
+    <path d="M17.5 13.6V6.5H10.4" />
+  </Svg>
+)
+
+export const IconContactCard = (props) => (
+  <Svg {...props}>
+    <rect x="3.5" y="5" width="17" height="14" rx="2" />
+    <circle cx="9.2" cy="11.2" r="2.1" />
+    <path d="M13.2 10.2h4.4M13.2 13.8h3.2" />
+  </Svg>
+)
+
+export const IconNote = (props) => (
+  <Svg {...props}>
+    <path d="M7 4.5h7.2L20 10.3V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 6 19V6a1.5 1.5 0 0 1 1-1.5Z" />
+    <path d="M14.2 4.6v4.7H20" />
+  </Svg>
+)
+
 // El único de relleno y no de línea: es la marca de WhatsApp, y su silueta solo
 // se reconoce maciza. Va con viewBox propio porque el trazado original no está
 // dibujado en la grilla de 24 de los demás.

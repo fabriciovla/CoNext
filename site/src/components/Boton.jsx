@@ -4,12 +4,12 @@
 // `as="button"` — hoy no existe y un componente que soporta los dos casos sin
 // necesitarlos es código que nadie prueba.
 //
-// El primario usa el degradé de marca; el secundario es un borde que se aclara
-// al pasar por encima. No hay un tercero a propósito: dos jerarquías alcanzan
-// para que se entienda cuál es la acción principal.
+// El primario es tinta sólida, no el degradé de marca: ese violeta→magenta
+// era el único color con voz y le competía al titular. El secundario sigue
+// siendo un borde que se aclara al pasar por encima.
 const VARIANTES = {
-  primario: `bg-accent-gradient text-white shadow-glow hover:brightness-110`,
-  secundario: `border border-white/15 bg-white/[0.04] text-ink-primary hover:border-white/30 hover:bg-white/[0.07]`,
+  primario: `bg-ink-primary text-ink-inverted hover:bg-ink-primary/85`,
+  secundario: `border border-tint/15 bg-tint/[0.04] text-ink-primary hover:border-tint/30 hover:bg-tint/[0.07]`,
 }
 
 const TAMANOS = {

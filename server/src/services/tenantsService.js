@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { one, many, run, tx } from '../db/index.js'
 import { encrypt, decrypt, hashApiKey, generateApiKey } from './secrets.js'
+import { normalizeWeeklyHours, weeklyHoursFromLegacy } from './settingsService.js'
 
 // Los agentes y las respuestas rápidas por defecto vivían dentro de las
 // migraciones, cuando había un solo negocio y "aplicar la migración" y "dar de
@@ -75,6 +76,13 @@ export async function provisionTenant({ name, storeName, whatsappNumber, setting
   const id = `tenant-${crypto.randomUUID()}`
   const apiKey = generateApiKey()
   const now = new Date().toISOString()
+  const openTime = settings.openTime ?? '09:00'
+  const closeTime = settings.closeTime ?? '18:00'
+  const daysOpen = settings.daysOpen ?? ['Lun', 'Mar', 'Mié', 'Jue', 'Vie']
+  const weeklyHours = normalizeWeeklyHours(
+    settings.weeklyHours,
+    weeklyHoursFromLegacy({ daysOpen, openTime, closeTime }),
+  )
 
   // El slug tiene que ser único: si dos clientes se llaman parecido, se
   // desempata con un sufijo corto en vez de fallar el alta.
@@ -91,15 +99,16 @@ export async function provisionTenant({ name, storeName, whatsappNumber, setting
     )
 
     await client.query(
-      `INSERT INTO settings (tenant_id, store_name, whatsapp_number, open_time, close_time, days_open, welcome_message)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO settings (tenant_id, store_name, whatsapp_number, open_time, close_time, days_open, weekly_hours, welcome_message)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         id,
         storeName ?? name,
         whatsappNumber ?? '',
-        settings.openTime ?? '09:00',
-        settings.closeTime ?? '18:00',
-        JSON.stringify(settings.daysOpen ?? ['lun', 'mar', 'mie', 'jue', 'vie']),
+        openTime,
+        closeTime,
+        JSON.stringify(daysOpen),
+        JSON.stringify(weeklyHours),
         settings.welcomeMessage ?? '¡Hola! Gracias por escribirnos 😊 ¿En qué te podemos ayudar?',
       ],
     )

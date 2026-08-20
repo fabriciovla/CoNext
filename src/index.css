@@ -4,7 +4,7 @@
 
 /* La tipografía del logotipo, la misma que sirve la landing (`site/`) y servida
    por nosotros y no por Google Fonts. Es el subconjunto latino del peso 800
-   (18 KB) y acá la usa una sola cosa: el "chrm." de la barra.
+   (18 KB) y acá la usa una sola cosa: el "conext" de la barra.
    `block` y no `swap` porque el viewBox del logo está calculado contra estas
    métricas: con `swap` se vería un instante el fallback a Verdana, más ancho, y
    saldría cortado por el borde del SVG. Así queda invisible mientras baja en vez

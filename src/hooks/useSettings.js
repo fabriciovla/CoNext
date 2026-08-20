@@ -10,7 +10,9 @@ const EMPTY_SETTINGS = {
   openTime: '',
   closeTime: '',
   daysOpen: [],
+  weeklyHours: {},
   welcomeMessage: '',
+  awayMessage: '',
 }
 
 export default function useSettings() {
@@ -29,10 +31,17 @@ export default function useSettings() {
   }
 
   const toggleDay = (day) => {
+    const current = settings.weeklyHours?.[day]
     updateSettings({
-      daysOpen: settings.daysOpen.includes(day)
-        ? settings.daysOpen.filter((d) => d !== day)
-        : [...settings.daysOpen, day],
+      weeklyHours: {
+        ...settings.weeklyHours,
+        [day]: current
+          ? null
+          : {
+              openTime: settings.openTime || '09:00',
+              closeTime: settings.closeTime || '18:00',
+            },
+      },
     })
   }
 

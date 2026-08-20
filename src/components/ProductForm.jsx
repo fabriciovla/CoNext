@@ -37,7 +37,15 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="stagger space-y-4">
-      <Input id="name" label="Nombre" value={form.name} onChange={handleChange('name')} required />
+      <Input
+        id="name"
+        label="Nombre"
+        autoFocus
+        placeholder="Coca-Cola 1.5 L"
+        value={form.name}
+        onChange={handleChange('name')}
+        required
+      />
 
       {/* Sin carpetas cargadas el campo no existe: sería un desplegable con una
           sola opción que dice que no hay nada para elegir. */}
@@ -63,6 +71,7 @@ export default function ProductForm({
           type="number"
           min="0"
           step="0.01"
+          placeholder="0"
           value={form.price}
           onChange={handleChange('price')}
         />
@@ -71,6 +80,7 @@ export default function ProductForm({
           label="Stock"
           type="number"
           min="0"
+          placeholder="0"
           value={form.stock}
           onChange={handleChange('stock')}
         />

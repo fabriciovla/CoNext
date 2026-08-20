@@ -49,14 +49,15 @@ if (alreadySeeded) {
 // de ejemplo.
 await run(
   `UPDATE settings SET store_name = $1, whatsapp_number = $2, open_time = $3, close_time = $4,
-     days_open = $5, welcome_message = $6
-   WHERE tenant_id = $7`,
+     days_open = $5, weekly_hours = $6, welcome_message = $7
+   WHERE tenant_id = $8`,
   [
     initialSettings.storeName,
     initialSettings.whatsappNumber,
     initialSettings.openTime,
     initialSettings.closeTime,
     JSON.stringify(initialSettings.daysOpen),
+    JSON.stringify(initialSettings.weeklyHours),
     initialSettings.welcomeMessage,
     tenantId,
   ],

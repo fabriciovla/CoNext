@@ -56,20 +56,311 @@ body {
   @apply bg-surface-page text-ink-primary antialiased;
 }
 
+/* La barra arranca a todo el ancho. Al bajar, el padding lateral la recoge
+   hacia el mismo techo que el contenido (`max-w-6xl`) y el bloque de adentro
+   se redondea: queda una isla flotando, no una franja pegada al borde.
+   El fondo va en `.barra-isla` y no en el sticky: si no, el aire de los
+   costados también se pintaría y la isla no se leería como isla. */
+.barra {
+  top: 0;
+  padding-inline: 0;
+  transition:
+    top var(--dur-base) var(--ease-out-soft),
+    padding var(--dur-base) var(--ease-out-soft);
+}
+
+.barra-isla {
+  background: rgb(var(--surface-page) / 0.95);
+  /* El borde transparente de los otros tres lados reserva el pixel: al pasar
+     a isla no salta un 1px porque aparece un borde que antes no estaba. */
+  border: 1px solid transparent;
+  border-bottom-color: rgb(var(--tint) / 0.1);
+  border-radius: 0;
+  box-shadow: 0 0 0 0 transparent;
+  transition:
+    border-color var(--dur-base) var(--ease-out-soft),
+    border-radius var(--dur-base) var(--ease-out-soft),
+    box-shadow var(--dur-base) var(--ease-out-soft);
+}
+
+.barra.is-isla {
+  top: 0.75rem;
+  padding-inline: max(0.75rem, calc((100% - 72rem) / 2));
+}
+
+.barra.is-isla .barra-isla {
+  border-color: rgb(var(--tint) / 0.1);
+  border-radius: 2rem;
+  box-shadow: var(--shadow-pop);
+}
+
+/* Fondo ambiental detrás del contenido. Los resplandores violetas le dan
+   profundidad a la hoja sin competir con el texto y la trama de puntos evita
+   que las zonas blancas se sientan vacías. */
+.fondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 82% 5%, rgb(var(--violet) / 0.24), transparent 28rem),
+    radial-gradient(circle at 4% 42%, rgb(var(--violet) / 0.14), transparent 24rem),
+    radial-gradient(circle at 76% 84%, rgb(var(--violet) / 0.12), transparent 28rem),
+    rgb(var(--surface-page));
+}
+
+.fondo::before {
+  content: '';
+  position: absolute;
+  top: -23rem;
+  right: -15rem;
+  width: 54rem;
+  height: 54rem;
+  border: 1px solid rgb(var(--violet) / 0.2);
+  border-radius: 999px;
+  background: radial-gradient(
+    circle at 42% 58%,
+    rgb(var(--violet) / 0.17),
+    rgb(var(--violet) / 0.05) 42%,
+    transparent 68%
+  );
+  box-shadow:
+    0 0 0 5rem rgb(var(--violet) / 0.035),
+    0 0 0 10rem rgb(var(--violet) / 0.018);
+}
+
+.fondo::after {
+  content: '';
+  position: absolute;
+  top: 36%;
+  left: -15rem;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgb(var(--violet) / 0.14),
+    rgb(var(--violet) / 0.04) 45%,
+    transparent 70%
+  );
+}
+
+.fondo-cuadricula {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgb(var(--tint) / 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+  opacity: 0.72;
+}
+
+/* La landing reparte el fondo entre sus secciones. El fondo general queda para
+   las páginas legales, que no tienen estos bloques decorados. */
+body:has(.fondo-seccion) > .fondo {
+  display: none;
+}
+
+.fondo-seccion {
+  position: relative;
+  overflow: hidden;
+  /* Recorta el resplandor sin crear un stacking context compartido: con
+     `isolation` el blob animado y la trama enmascarada se recompositaban juntos
+     en cada cuadro. */
+  contain: paint;
+}
+
+.fondo-seccion > * {
+  position: relative;
+  z-index: 1;
+}
+
+.fondo-seccion::before {
+  --fondo-transform-base: translate3d(0, 0, 0);
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: 8%;
+  right: -16rem;
+  width: 38rem;
+  height: 38rem;
+  border: 1px solid rgb(var(--violet) / 0.16);
+  border-radius: 999px;
+  transform: var(--fondo-transform-base);
+  transform-origin: center;
+  /* Arranca pausada. `will-change` permanente + animar opacity/scale de un
+     círculo de ~70rem con sombras grandes era lo que tironeaba el scroll:
+     el compositor mantenía capas enormes vivas aunque la sección no se viera.
+     El observer del layout pone `.fondo-vivo` solo cuando entra en pantalla. */
+  animation: fondo-respirar 16s ease-in-out infinite;
+  animation-play-state: paused;
+  /* El halo iba en box-shadow (spread de 4–8rem) y agrandaba la capa. Ahora
+     es parte del mismo degradé, así el blob no pinta más allá de su caja. */
+  background: radial-gradient(
+    circle,
+    rgb(var(--violet) / 0.16),
+    rgb(var(--violet) / 0.055) 46%,
+    rgb(var(--violet) / 0.028) 68%,
+    transparent 78%
+  );
+}
+
+.fondo-seccion.fondo-vivo::before {
+  animation-play-state: running;
+}
+
+html.pagina-oculta .fondo-seccion::before {
+  animation-play-state: paused;
+}
+
+.fondo-seccion::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-image: radial-gradient(circle, rgb(var(--tint) / 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  /* `-webkit-` primero: Chrome pinta la máscara en GPU. Sin prefijo algunos
+     motores recaen a software y el scroll se siente a tirones. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
+  opacity: 0.55;
+}
+
+.fondo-seccion:nth-of-type(even)::before {
+  right: auto;
+  left: -18rem;
+  animation-direction: alternate-reverse;
+}
+
+/* El control: el círculo va del lado del texto, no del de la tarjeta. Las
+   tarjetas son `surface-card` opaco y se comían media circunferencia; acá abajo
+   pasa lo mismo con las de garantías. Sobre el texto se ve entera, y de paso
+   alterna el lado con el resplandor del hero en vez de repetirlo. */
+.fondo-seccion:nth-of-type(3n)::before {
+  top: 50%;
+  right: auto;
+  /* Anclado al contenedor (72rem, centrado) y no al borde de la ventana: su
+     centro cae justo afuera de la columna de texto, así el resplandor entra al
+     contenido y el arco se lee en el margen. Contra el borde de la ventana, en
+     una pantalla ancha quedaba un blob solo en la esquina. El `max` es el piso
+     para cuando ya no hay margen que aprovechar. */
+  left: max(-40vw, calc(50% - 52rem));
+  width: min(76vw, 34rem);
+  height: min(76vw, 34rem);
+  --fondo-transform-base: translateY(-50%);
+  animation-delay: -6s;
+}
+
+.fondo-seccion:first-of-type::before {
+  top: -28rem;
+  right: -10rem;
+  width: 72rem;
+  height: 72rem;
+  animation-name: fondo-principal-respirar;
+  animation-duration: 12s;
+  background: radial-gradient(
+    circle at 42% 58%,
+    rgb(var(--violet) / 0.23),
+    rgb(var(--violet) / 0.07) 44%,
+    rgb(var(--violet) / 0.035) 62%,
+    transparent 74%
+  );
+}
+
+/* En garantías se repite el gesto grande del hero, pero entra completo dentro
+   de la sección en vez de quedar recortado por sus bordes. Va contra el borde
+   derecho: el título es corto y está alineado a la izquierda, así que ese es el
+   hueco de la sección — del otro lado la circunferencia le cruzaba el titular
+   por encima. */
+.fondo-seccion:nth-of-type(5) {
+  min-height: min(82vw, 52rem);
+  display: flex;
+  align-items: center;
+}
+
+.fondo-seccion:nth-of-type(5)::before {
+  top: 50%;
+  left: auto;
+  right: clamp(0.75rem, 3vw, 3rem);
+  width: min(72vw, 46rem);
+  height: min(72vw, 46rem);
+  --fondo-transform-base: translateY(-50%);
+  animation-delay: -4s;
+  /* El foco del degradé mira hacia adentro de la página, no hacia el borde. */
+  background: radial-gradient(
+    circle at 42% 58%,
+    rgb(var(--violet) / 0.23),
+    rgb(var(--violet) / 0.07) 44%,
+    rgb(var(--violet) / 0.035) 62%,
+    transparent 74%
+  );
+}
+
+@keyframes fondo-respirar {
+  0%,
+  100% {
+    transform: var(--fondo-transform-base) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: var(--fondo-transform-base) translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes fondo-principal-respirar {
+  0%,
+  100% {
+    transform: var(--fondo-transform-base) translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: var(--fondo-transform-base) translate3d(-18px, 14px, 0) scale(1.035);
+  }
+}
+
 ::selection {
   background: rgba(144, 133, 233, 0.35);
 }
 
-/* Sistema de animación
+/* Paleta
    ---------------------------------------------------------------------------
-   Mismo criterio que en la dashboard (keyframes en CSS plano, retraso opcional
-   vía `--d`), pero acá las cosas no se animan al cargar sino al entrar en
-   pantalla: una landing se recorre scrolleando y una sección que ya se animó
-   mientras estaba fuera de vista es una sección que el visitante nunca vio
-   moverse. De eso se encarga el observer que declara el layout, que agrega
-   `is-visible` a cada `.reveal` al cruzar el viewport; hasta entonces el
-   contenido está puesto pero quieto. */
+   Los nombres (`surface-*`, `ink-*`, `tint`) salen del tailwind.config de la
+   raíz, que apunta a variables CSS. Esos valores viven en el CSS de la
+   dashboard; este sitio no lo importa, así que hay que definirlos acá.
+   Es el tema claro de la app: hoja blanca, tarjetas blancas, tinta oscura.
+   El cuadriculado vive en el `body`, no en las tarjetas. `--tint` es negro,
+   para que `border-tint/10` dibuje líneas suaves sobre el blanco. */
 :root {
+  --tint: 24 24 27;
+  --surface-page: 255 255 255;
+  --surface-card: 255 255 255;
+  --surface-raised: 255 255 255;
+  --surface-hover: 240 240 243;
+  --surface-nav: 250 250 251;
+  --ink-primary: 24 24 27;
+  --ink-secondary: 63 63 70;
+  --ink-muted: 90 90 99;
+  --ink-faint: 122 122 133;
+  --ink-inverted: 255 255 255;
+  --border: 24 24 27;
+  --border-strong: 24 24 27;
+  --violet: 84 72 191;
+  --violet-soft: 231 229 251;
+  --status-good: 21 128 61;
+  --status-warning: 180 120 10;
+  --status-serious: 194 91 45;
+  --status-critical: 190 40 40;
+  --status-ink: 255 255 255;
+  --shadow-card: 0 1px 2px -1px rgba(24, 24, 27, 0.06);
+  --shadow-card-hover: 0 1px 2px -1px rgba(24, 24, 27, 0.08), 0 6px 16px -12px rgba(24, 24, 27, 0.3);
+  --shadow-pop: 0 8px 28px -8px rgba(24, 24, 27, 0.18), 0 2px 8px -4px rgba(24, 24, 27, 0.12);
+
+  /* Sistema de animación. Mismo criterio que en la dashboard (keyframes en CSS
+     plano, retraso opcional vía `--d`), pero acá las cosas no se animan al
+     cargar sino al entrar en pantalla: una landing se recorre scrolleando y
+     una sección que ya se animó mientras estaba fuera de vista es una sección
+     que el visitante nunca vio moverse. De eso se encarga el observer que
+     declara el layout, que agrega `is-visible` a cada `.reveal` al cruzar el
+     viewport; hasta entonces el contenido está puesto pero quieto. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-base: 320ms;

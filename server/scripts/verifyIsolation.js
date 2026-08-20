@@ -84,6 +84,22 @@ try {
 
   await settings.updateSettings(a.id, { storeName: 'TIENDA-ALFA' })
   await settings.updateSettings(b.id, { storeName: 'TIENDA-BETA' })
+  await settings.updateSettings(a.id, {
+    weeklyHours: {
+      Lun: { openTime: '09:00', closeTime: '18:00' },
+      Mar: { openTime: '09:00', closeTime: '18:00' },
+      Mié: { openTime: '09:00', closeTime: '18:00' },
+      Jue: { openTime: '09:00', closeTime: '18:00' },
+      Vie: { openTime: '09:00', closeTime: '18:00' },
+      Sáb: { openTime: '06:00', closeTime: '09:00' },
+      Dom: null,
+    },
+  })
+  check(
+    'cada cliente puede tener horarios distintos por día',
+    (await settings.getSettings(a.id)).weeklyHours.Sáb?.openTime === '06:00' &&
+      (await settings.getSettings(b.id)).weeklyHours.Sáb === null,
+  )
 
   // El mismo teléfono en los dos clientes: es el caso que rompía de frente con
   // la clave primaria global anterior.

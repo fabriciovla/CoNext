@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EMOJI_CATEGORIES, EMOJI_INDEX } from '../../data/emojis'
 
-const RECIENTES_KEY = 'chrm.emojis.recientes'
+const RECIENTES_KEY = 'conext.emojis.recientes'
 const MAX_RECIENTES = 24
 
 function leerRecientes() {

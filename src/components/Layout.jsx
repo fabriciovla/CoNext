@@ -8,6 +8,10 @@ import { IconSidebarToggle } from './ui/icons'
 // usuario ya está al pie de la barra izquierda.
 export default function Layout({ current, nav, navOpen = true, onExpandNav, children }) {
   const ownsChrome = current === 'inbox'
+  // Productos llena la altura: el listado scrollea adentro de la tarjeta.
+  // Si `main` scrolleara, con muchos ítems se iban el título, las carpetas y
+  // el pie, y había que volver arriba para buscar o cambiar de carpeta.
+  const fillsViewport = current === 'products'
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-page">
@@ -48,8 +52,17 @@ export default function Layout({ current, nav, navOpen = true, onExpandNav, chil
                 el techo, en un monitor ancho la página se estira de borde a borde
                 y las tarjetas quedan pegadas a la izquierda. El `w-full` es lo
                 que hace que el `mx-auto` centre en pantallas chicas también. */}
-            <main className="flex-1 overflow-y-auto px-6 py-5">
-              <div key={current} className="animate-fade-in mx-auto w-full max-w-[1100px]">
+            <main
+              className={`flex-1 px-6 py-5 ${
+                fillsViewport ? 'flex min-h-0 flex-col overflow-hidden' : 'overflow-y-auto'
+              }`}
+            >
+              <div
+                key={current}
+                className={`animate-fade-in mx-auto w-full max-w-[1100px] ${
+                  fillsViewport ? 'flex min-h-0 min-w-0 flex-1 flex-col' : ''
+                }`}
+              >
                 {children}
               </div>
             </main>

@@ -1,6 +1,26 @@
-import { isWithinBusinessHours } from '../businessHours.js'
+import {
+  getDayHours,
+  getNextBusinessOpening,
+  isWithinBusinessHours,
+} from '../businessHours.js'
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+const SEMANA = [
+  ['Lun', 'lunes'],
+  ['Mar', 'martes'],
+  ['Mié', 'miércoles'],
+  ['Jue', 'jueves'],
+  ['Vie', 'viernes'],
+  ['Sáb', 'sábado'],
+  ['Dom', 'domingo'],
+]
+
+function buildSchedule(settings) {
+  return SEMANA.map(([key, label]) => {
+    const slot = getDayHours(settings, key)
+    return `  ${label}: ${slot ? `${slot.openTime} a ${slot.closeTime}` : 'cerrado'}`
+  }).join('\n')
+}
 
 // El equipo entero va en el prompt porque el modelo elige agente y redacta en
 // la misma llamada. Cada agente aporta dos cosas distintas: `role` es cuándo
@@ -54,6 +74,8 @@ export function buildSystemPrompt(settings, products, agents, currentAgent, now 
   const continuidad = currentAgent
     ? `La conversación la viene atendiendo "${currentAgent.key}": mantenelo salvo que este último mensaje claramente cambie de tema hacia el criterio de otro (por ejemplo, una consulta de precio que pasa a ser un reclamo).`
     : 'La conversación todavía no tiene agente asignado.'
+  const abierto = isWithinBusinessHours(settings, now)
+  const proximaApertura = abierto ? null : getNextBusinessOpening(settings, now)
 
   return `Sos el asistente de atención al cliente de "${settings.storeName}", una tienda que vende por WhatsApp/Instagram.
 
@@ -64,8 +86,9 @@ ${buildRoster(agents)}
   Si ninguno encaja con claridad, elegí el primero de la lista.
 
 HORARIOS Y DÍAS DE ATENCIÓN (única fuente de verdad — no inventes otros):
-  Atendemos: ${settings.daysOpen.join(', ')}, de ${settings.openTime} a ${settings.closeTime}.
-  Ahora mismo es ${DIAS[now.getDay()]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} y el local está ${isWithinBusinessHours(settings, now) ? 'ABIERTO' : 'CERRADO'}.
+${buildSchedule(settings)}
+  Ahora mismo es ${DIAS[now.getDay()]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} y el local está ${abierto ? 'ABIERTO' : 'CERRADO'}.
+  ${proximaApertura ? `La próxima apertura es el ${proximaApertura.day} a las ${proximaApertura.openTime}.` : ''}
   Si está cerrado no prometas atención inmediata ni digas que alguien va a responder "ahora":
   decí cuándo volvemos a atender.
 
