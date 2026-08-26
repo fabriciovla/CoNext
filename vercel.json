@@ -1,5 +1,6 @@
 {
   "framework": null,
+  "installCommand": "npm install && npm install --include=dev --prefix site",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [{ "source": "/app/:path*", "destination": "/app/index.html" }]

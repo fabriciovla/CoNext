@@ -20,9 +20,13 @@ function run(command, args, cwd) {
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
 
-if (!fs.existsSync(path.join(site, 'node_modules', 'astro'))) {
-  run('npm', ['install'], site)
-}
+// Las deps del sitio viven en site/package.json, no en el de la raíz. El
+// `npm install` de Vercel solo llena node_modules de arriba. Si acá
+// preguntábamos "¿está astro?" y había cache de un deploy viejo, se saltaba
+// el install y @astrojs/sitemap (u otra integración nueva) no existía.
+// `--include=dev`: con NODE_ENV=production npm se salta Tailwind y PostCSS,
+// que el build de Astro necesita igual.
+run('npm', ['install', '--include=dev'], site)
 
 run('npm', ['run', 'build', '--', '--outDir', '../dist'], site)
 run('npx', ['vite', 'build', '--outDir', 'dist/app', '--base', '/app/'], root)
