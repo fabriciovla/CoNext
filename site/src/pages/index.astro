@@ -4,7 +4,7 @@ import Reveal from '../components/Reveal.astro'
 import Titulo from '../components/landing/Titulo.astro'
 import Boton from '../components/Boton.jsx'
 import AppMock from '../components/landing/AppMock.jsx'
-import ControlAgente from '../components/landing/ControlAgente.astro'
+import ControlFilm from '../components/landing/ControlFilm.astro'
 import Faq from '../components/landing/Faq.astro'
 import {
   IconArrowRight,
@@ -149,12 +149,6 @@ const PREGUNTAS = [
   },
 ]
 
-const CONTROL = [
-  'Pruébalo en borrador las primeras semanas',
-  'Activa el automático de un agente a la vez',
-  'Cada respuesta queda registrada con quién la envió',
-]
-
 // Ancho común de todas las secciones. Vive acá y no en el layout porque la
 // landing tiene fondos que van de borde a borde (el resplandor del hero, la
 // franja de la última llamada) y un contenedor más arriba se los cortaría.
@@ -166,12 +160,27 @@ const CONTENEDOR = 'mx-auto w-full max-w-6xl px-6'
 // alinearse con él como una tarjeta más.
 const CONTENEDOR_MUESTRA = 'mx-auto w-full max-w-7xl px-6'
 
-const TITULO = 'conext — CRM de WhatsApp con agentes de IA'
+const TITULO = 'conext · unifica tus canales. Cada respuesta, con IA'
 const DESCRIPCION =
   'Atiende el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas, sobre la API oficial de WhatsApp.'
+
+// Datos estructurados para el buscador: qué es el producto, en qué idioma y
+// dónde vive. Solo en la portada — las legales y /login no son "la aplicación".
+// Sin precio a propósito: no hay precios públicos y schema.org no lo exige.
+const ESQUEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'conext',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description: DESCRIPCION,
+  url: Astro.site?.href,
+  inLanguage: 'es',
+}
 ---
 
 <Base title={TITULO} description={DESCRIPCION}>
+  <script type="application/ld+json" set:html={JSON.stringify(ESQUEMA)} />
   {/* ---------------------------------------------------------------------- */}
   {/* Hero                                                                    */}
   {/* ---------------------------------------------------------------------- */}
@@ -184,16 +193,17 @@ const DESCRIPCION =
     <div class={CONTENEDOR}>
       {/* Enlace de anuncio, no una etiqueta decorativa: lleva a la sección que
           explica por qué la vía oficial importa. */}
-      <Reveal
-        as="a"
-        variant="fade"
+      {/* El hero anima al cargar, no al scrollear: ya está en pantalla, y
+          esperar al observer retrasaba la primera lectura. Abajo del pliegue
+          sigue `.reveal`. */}
+      <a
         href="#garantias"
-        class="group inline-flex items-center gap-2 text-[14px] text-violet transition-colors duration-200 hover:text-ink-primary"
+        class="animate-in-fade group inline-flex items-center gap-2 text-[14px] text-violet transition-colors duration-200 hover:text-ink-primary"
       >
         <IconWhatsApp size={15} className="text-status-good" />
         Sobre la API oficial de WhatsApp Business
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-      </Reveal>
+      </a>
 
       {/* Los tres renglones están cortados a mano, no repartidos por el
           navegador: el corte es parte de cómo se lee el titular.
@@ -202,33 +212,35 @@ const DESCRIPCION =
           daría cinco líneas desparejas en vez de tres. En pantallas chicas manda
           `text-balance`, que reparte solo; de lg para arriba se lo desactiva con
           `lg:text-wrap` para que no pelee contra los cortes de acá. */}
-      <Reveal
-        as="h1"
-        delay={80}
-        class="mt-7 max-w-5xl text-balance text-[32px] font-semibold leading-[1.12] tracking-tight text-ink-primary sm:text-[40px] lg:text-[50px] lg:leading-[1.08] lg:text-wrap"
+      <h1
+        class="animate-in mt-7 max-w-5xl text-balance text-[32px] font-semibold leading-[1.12] tracking-tight text-ink-primary sm:text-[40px] lg:text-[50px] lg:leading-[1.08] lg:text-wrap"
+        style="--d: 80ms"
       >
         Unifica tus canales de comunicación y
         <br class="hidden lg:inline" /> potencia cada respuesta con
         <br class="hidden lg:inline" /> Inteligencia Artificial
-      </Reveal>
+      </h1>
 
-      <Reveal as="p" delay={160} class="mt-7 max-w-2xl text-[17px] leading-relaxed text-ink-secondary">
+      <p
+        class="animate-in mt-7 max-w-2xl text-[17px] leading-relaxed text-ink-secondary"
+        style="--d: 160ms"
+      >
         <span class="font-medium text-ink-primary">conext</span> es el CRM que atiende tu WhatsApp con
         agentes de inteligencia artificial. Responden precios, stock y envíos con la información de tu
         negocio — y la última palabra sigue siendo tuya.
-      </Reveal>
+      </p>
 
-      <Reveal delay={240} class="mt-10 flex flex-wrap items-center gap-3">
+      <div class="animate-in mt-10 flex flex-wrap items-center gap-3" style="--d: 240ms">
         <Boton href={WHATSAPP_URL} tamano="lg">
           Pedir una demo
           <IconArrowRight size={17} />
         </Boton>
         <Boton href="#como-funciona" variante="secundario" tamano="lg">Ver cómo funciona</Boton>
-      </Reveal>
+      </div>
 
-      <Reveal as="p" delay={320} class="mt-7 text-[13px] leading-relaxed text-ink-muted">
+      <p class="animate-in-fade mt-7 text-[13px] leading-relaxed text-ink-muted" style="--d: 320ms">
         Tu número, tu cuenta de Meta. Sin apps no oficiales ni teléfonos conectados a un cargador.
-      </Reveal>
+      </p>
     </div>
 
     {/* La app, abajo del texto y cortada por el borde de la pantalla. Que se vea
@@ -278,7 +290,7 @@ const DESCRIPCION =
                 grupo > 0 && 'border-t border-tint/10',
               ]}
             >
-              <Reveal class="py-7 sm:py-8 lg:pr-10">
+              <Reveal delay={0} class="py-7 sm:py-8 lg:pr-10">
                 <span class="text-[12px] font-semibold text-violet">0{grupo + 1}</span>
                 <h3 class="mt-3 text-[17px] font-semibold text-ink-primary">{nombre}</h3>
                 <p class="mt-1.5 text-[13px] leading-relaxed text-ink-muted">{bajada}</p>
@@ -286,6 +298,7 @@ const DESCRIPCION =
 
               {funciones.map(({ Icono, titulo, texto }, funcion) => (
                 <Reveal
+                  delay={(funcion + 1) * 70}
                   class:list={[
                     'group min-w-0 border-t border-tint/10 py-7 sm:py-8 lg:border-l lg:border-t-0 lg:px-8',
                     funcion === 1 && 'lg:pr-0',
@@ -311,32 +324,28 @@ const DESCRIPCION =
   {/* ---------------------------------------------------------------------- */}
   {/* El control                                                              */}
   {/* ---------------------------------------------------------------------- */}
-  <section class="fondo-seccion py-20 sm:py-28">
-    <div class={`${CONTENEDOR} grid items-center gap-14 lg:grid-cols-2 lg:gap-20`}>
-      <div>
-        <Titulo
-          etiqueta="El control"
-          titulo="La IA escribe. Tú decides si se envía."
-          texto="Los temas que ya sabes que responde bien, que los atienda sola. Los que tocan dinero, un descuento o un cliente enojado, que te esperen. Se cambia de opinión con un clic, agente por agente."
-        />
-        <Reveal delay={120} class="mt-8 space-y-3">
-          {
-            CONTROL.map((linea) => (
-              <p class="flex items-start gap-3 text-[14.5px] text-ink-secondary">
-                <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-status-good/10 text-status-good">
-                  <IconCheck size={12} />
-                </span>
-                {linea}
-              </p>
-            ))
-          }
-        </Reveal>
-      </div>
-
-      <Reveal variant="scale" delay={100}>
-        <ControlAgente />
-      </Reveal>
+  <section class="scroll-mt-24 pt-20 sm:pt-28">
+    <div class={CONTENEDOR}>
+      <Titulo
+        etiqueta="El control"
+        titulo="La IA escribe. Tú decides si se envía."
+        texto="Los temas que ya sabes que responde bien, que los atienda sola. Los que tocan dinero, un descuento o un cliente enojado, que te esperen. Se cambia de opinión con un clic, agente por agente."
+      />
     </div>
+
+    {/* El mismo marco que el hero, pero la ventana entera y no cortada abajo:
+        acá lo que hay que ver está justo en el borde inferior — el borrador del
+        agente y el botón de enviar. El degradé del hero se los tapaba. */}
+    <Reveal variant="scale" delay={80} class={`${CONTENEDOR_MUESTRA} mt-14 sm:mt-16`}>
+      <div class="relative contain-paint overflow-hidden rounded-2xl border border-tint/10 bg-surface-nav shadow-pop">
+        <div class="flex items-center gap-1.5 border-b border-tint/[0.07] px-4 py-2.5">
+          <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+        </div>
+        <ControlFilm />
+      </div>
+    </Reveal>
   </section>
 
   {/* ---------------------------------------------------------------------- */}

@@ -8,6 +8,7 @@ import conversationsRouter from './routes/conversations.js'
 import agentsRouter from './routes/agents.js'
 import quickRepliesRouter from './routes/quickReplies.js'
 import onboardingRouter from './routes/onboarding.js'
+import membersRouter from './routes/members.js'
 import webhooksRouter from './routes/webhooks.js'
 import devRouter from './routes/dev.js'
 import { errorHandler } from './middleware/errorHandler.js'
@@ -42,6 +43,7 @@ export function createApp() {
   app.use('/conversations', conversationsRouter)
   app.use('/agents', agentsRouter)
   app.use('/quick-replies', quickRepliesRouter)
+  app.use('/members', membersRouter)
   // Va después de resolveTenant: el cliente ya está adentro de su dashboard y
   // el número que conecta se ata a *su* tenant. Es el único dato de la cuenta
   // de Meta que el CRM escribe desde la UI.

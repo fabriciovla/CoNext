@@ -1,7 +1,8 @@
 ---
 import Logo from './Logo.jsx'
 import Boton from './Boton.jsx'
-import { WHATSAPP_URL } from '../config'
+import { IconGitHub } from './icons.jsx'
+import { GITHUB_URL } from '../config'
 
 // Era un componente React hidratado con `client:load`, o sea 134 KB de runtime
 // de React en todas las páginas —incluidas las legales, que no tienen nada
@@ -25,6 +26,11 @@ const ENLACES = [
 const CLASE_ENLACE =
   'text-[14.5px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary'
 
+// Solo el isotipo: el nombre ya lo dice el aria-label. Misma caja que el
+// hamburguesa para que en móvil los dos botones de la derecha alineen.
+const CLASE_GITHUB =
+  'inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
+
 // Las dos barras del ícono son el mismo elemento moviéndose, así no hay
 // parpadeo al cambiar de ícono. El estado abierto se lee del `aria-expanded`
 // del botón en vez de una clase aparte: ya hay que mantenerlo para que un
@@ -40,17 +46,25 @@ const BARRA =
     se achica y el bloque de adentro queda como una isla redondeada. Sin
     `backdrop-blur`: desenfocar lo que pasa detrás de una barra pegada fuerza
     un recálculo por cuadro. */}
-<header id="barra" class="barra sticky z-50">
+<header id="barra" class="animate-in-down barra sticky z-50">
   <div class="barra-isla">
     <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-      <a href="/" class="text-ink-primary transition-opacity duration-200 hover:opacity-80">
-        {/* La altura la fija el alto; el ancho lo resuelve el viewBox. El logo ya
-            lleva su propio aria-label, así que el enlace se anuncia como
-            "conext, enlace" sin necesidad de texto adicional. */}
-        <Logo className="h-10 w-auto" />
+      {/* `view-transition-name` es lo que hace viajar el logo hasta /login:
+          el de la barra y el del panel de ingreso comparten el mismo nombre. */}
+      <a
+        href="/"
+        class="text-ink-primary transition-opacity duration-200 hover:opacity-80"
+        style="view-transition-name: conext-logo"
+      >
+        {/* La altura la fija el alto; el ancho lo saca del viewBox. El logo ya
+            lleva su propio `aria-label`, así que el enlace se anuncia como
+            "conext, enlace" sin necesidad de texto adicional. El color se lo da
+            el `text-ink-primary` de este enlace. */}
+        <Logo className="h-5 w-auto" />
       </a>
 
-      {/* Escritorio */}
+      {/* Escritorio: secciones, GitHub (solo el logito) e inicio de sesión.
+          El "Pedir una demo" se queda en el hero. */}
       <div class="hidden items-center gap-9 md:flex">
         <ul class="flex items-center gap-9">
           {ENLACES.map(({ href, label }) => (
@@ -59,26 +73,51 @@ const BARRA =
             </li>
           ))}
         </ul>
-        <Boton href={WHATSAPP_URL}>Pedir una demo</Boton>
+        <div class="flex items-center gap-2">
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="GitHub"
+            title="GitHub"
+            class={CLASE_GITHUB}
+          >
+            <IconGitHub size={20} />
+          </a>
+          <Boton href="/login">Iniciar sesión</Boton>
+        </div>
       </div>
 
-      {/* Móvil */}
-      <button
-        type="button"
-        id="boton-menu"
-        aria-expanded="false"
-        aria-controls="menu-movil"
-        aria-label="Abrir menú"
-        class="group flex h-11 w-11 items-center justify-center rounded-full border border-tint/10 bg-tint/[0.04]
-          text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95 md:hidden"
-      >
-        <span class="relative block h-4 w-6">
-          <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
-          <span
-            class={`${BARRA} top-[calc(100%-0.375rem)] group-aria-expanded:top-1/2 group-aria-expanded:-rotate-45`}
-          ></span>
-        </span>
-      </button>
+      {/* Móvil: el GitHub queda a la vista; el menú guarda las secciones y el
+          inicio de sesión, que en escritorio van juntos a la derecha. */}
+      <div class="flex items-center gap-1 md:hidden">
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub"
+          title="GitHub"
+          class={CLASE_GITHUB}
+        >
+          <IconGitHub size={20} />
+        </a>
+        <button
+          type="button"
+          id="boton-menu"
+          aria-expanded="false"
+          aria-controls="menu-movil"
+          aria-label="Abrir menú"
+          class="group flex h-11 w-11 items-center justify-center rounded-full border border-tint/10 bg-tint/[0.04]
+            text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95"
+        >
+          <span class="relative block h-4 w-6">
+            <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
+            <span
+              class={`${BARRA} top-[calc(100%-0.375rem)] group-aria-expanded:top-1/2 group-aria-expanded:-rotate-45`}
+            ></span>
+          </span>
+        </button>
+      </div>
     </nav>
 
     {/* Cerrado va con el atributo `hidden`, que es `display: none`: escondido de
@@ -93,7 +132,7 @@ const BARRA =
           </li>
         ))}
       </ul>
-      <Boton href={WHATSAPP_URL} className="mt-4 w-full">Pedir una demo</Boton>
+      <Boton href="/login" className="mt-4 w-full">Iniciar sesión</Boton>
     </div>
   </div>
 </header>

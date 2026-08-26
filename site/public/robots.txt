@@ -1,0 +1,6 @@
+# /login no se prohíbe acá a propósito: la página lleva noindex, y para que
+# el buscador lo lea tiene que poder rastrearla. Un Disallow se lo impediría.
+User-agent: *
+Allow: /
+
+Sitemap: https://conext.lat/sitemap-index.xml

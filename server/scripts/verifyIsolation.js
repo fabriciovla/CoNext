@@ -13,6 +13,7 @@ import 'dotenv/config'
 import { migrate } from '../src/db/migrate.js'
 import { one, run, closePool } from '../src/db/index.js'
 import { provisionTenant, getTenantByApiKey, getTenantByPhoneNumberId, setWhatsappCredentials, getWhatsappCredentials } from '../src/services/tenantsService.js'
+import * as members from '../src/services/membersService.js'
 import { createApp } from '../src/app.js'
 
 import * as products from '../src/services/productsService.js'
@@ -114,6 +115,13 @@ try {
   await conversations.addNote(a.id, telefonoCompartido, 'NOTA-ALFA')
   await conversations.addNote(b.id, telefonoCompartido, 'NOTA-BETA')
 
+  const userA = (await members.ensureUser({ email: 'ana.alfa@example.com', displayName: 'Ana Alfa' })).user
+  const userB = (await members.ensureUser({ email: 'beto.beta@example.com', displayName: 'Beto Beta' })).user
+  await members.addMember(a.id, { userId: userA.id, role: 'owner' })
+  await members.addMember(b.id, { userId: userB.id, role: 'owner' })
+  await members.addMember(a.id, { email: 'operador.alfa@example.com', role: 'operador' })
+  await members.addMember(b.id, { email: 'operador.beta@example.com', role: 'operador' })
+
   // ---------- capa de servicios ----------
   console.log('\n== capa de servicios: A no puede ver nada de B ==')
 
@@ -131,6 +139,9 @@ try {
   check('getCurrentDayState', !contiene(await days.getCurrentDayState(a.id), 'BETA'))
   check('getConversation', !contiene(await conversations.getConversation(a.id, telefonoCompartido), 'BETA'))
   check('getOpenDrafts', !contiene(await conversations.getOpenDrafts(a.id), 'BETA'))
+  check('listMembers', !contiene(await members.listMembers(a.id), 'BETA'))
+  check('listInvites', !contiene(await members.listInvites(a.id), 'BETA'))
+  check('listTenantsForUser de Ana no incluye a B', !contiene(await members.listTenantsForUser(userA.id), b.id))
 
   // …y que sí vea lo suyo (si no, "no ve nada de B" se cumple trivialmente
   // porque no ve nada de nadie).
@@ -141,6 +152,9 @@ try {
   check('getConversationsMeta trae lo de A', contiene(await conversations.getConversationsMeta(a.id), 'ETIQUETA-ALFA'))
   check('getOpenMessages trae lo de A', contiene(await days.getOpenMessages(a.id), 'NOTA-ALFA'))
   check('getSettings trae lo de A', contiene(await settings.getSettings(a.id), 'TIENDA-ALFA'))
+  check('listMembers trae a Ana', contiene(await members.listMembers(a.id), 'ana.alfa@example.com'))
+  check('listInvites trae la invitación de A', contiene(await members.listInvites(a.id), 'operador.alfa@example.com'))
+  check('listTenantsForUser de Ana trae a A', contiene(await members.listTenantsForUser(userA.id), a.id))
 
   // ---------- escrituras cruzadas ----------
   console.log('\n== escrituras cruzadas: A no puede modificar ni borrar lo de B ==')
@@ -190,6 +204,12 @@ try {
   check('setAssignee no pisa la conversación homónima de B', convB.assignee === null)
   check('setAssignee sí escribió la de A', (await conversations.getConversation(a.id, telefonoCompartido)).assignee === 'OPERADOR-ALFA')
 
+  const sacado = await members.removeMember(a.id, userB.id)
+  check('removeMember con el user de B no borra nada', sacado.deleted === false && sacado.reason === 'not-found')
+  check('Beto sigue en B', contiene(await members.listMembers(b.id), 'beto.beta@example.com'))
+  const ultimo = await members.removeMember(a.id, userA.id)
+  check('no se puede sacar al único owner', ultimo.deleted === false && ultimo.reason === 'ultimo-owner')
+
   await conversations.removeConversationTag(a.id, telefonoCompartido, 'ETIQUETA-BETA')
   check('removeConversationTag no borra la etiqueta de B', contiene(await conversations.getConversationTags(b.id, telefonoCompartido), 'etiqueta-beta'))
 
@@ -226,7 +246,7 @@ try {
     return { status: res.status, body: await res.text() }
   }
 
-  for (const ruta of ['/products', '/products/folders', '/agents', '/quick-replies', '/settings', '/conversations/meta', '/messages']) {
+  for (const ruta of ['/products', '/products/folders', '/agents', '/quick-replies', '/settings', '/conversations/meta', '/messages', '/members']) {
     const rA = await pedir(ruta, a.apiKey)
     check(`GET ${ruta} con la clave de A no filtra nada de B`, rA.status === 200 && !rA.body.includes('BETA'), `status ${rA.status}`)
   }
@@ -254,7 +274,9 @@ try {
           + (SELECT COUNT(*) FROM messages WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM conversations WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM agents WHERE tenant_id = ANY($1))::int
-          + (SELECT COUNT(*) FROM conversation_tags WHERE tenant_id = ANY($1))::int AS n`,
+          + (SELECT COUNT(*) FROM conversation_tags WHERE tenant_id = ANY($1))::int
+          + (SELECT COUNT(*) FROM tenant_members WHERE tenant_id = ANY($1))::int
+          + (SELECT COUNT(*) FROM tenant_invites WHERE tenant_id = ANY($1))::int AS n`,
     [[a.id, b.id]],
   )
   check('borrar el tenant se lleva todos sus datos (cascade)', restos.n === 0, `quedaron ${restos.n} filas`)

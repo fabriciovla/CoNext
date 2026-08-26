@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; }
+</style>
+</helmet>
+<div style="background: oklch(0.98 0.004 254); min-height: 100%; padding: 64px 48px; font-family: Arial, Helvetica, sans-serif; color: oklch(0.24 0.035 254); display: flex; flex-direction: column; gap: 56px;">
+
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Identidad de marca</div>
+    <h1 style="font-size: 32px; font-weight: 700; margin: 0; letter-spacing: -0.01em;">CHRM — Logo y favicon</h1>
+  </div>
+
+  <!-- Primary wordmark -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Isologo principal</div>
+    <div style="background: oklch(0.995 0.002 254); border: 1px solid oklch(0.9 0.005 254); border-radius: 4px; padding: 72px 48px; display: flex; align-items: center; justify-content: center;">
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <div style="font-size: 64px; font-weight: 800; font-family: 'Baloo 2', sans-serif; background: linear-gradient(135deg, #d9e84a 0%, #3fcf9e 55%, #38c6e0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18));">conext.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark version -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Versión sobre fondo oscuro</div>
+    <div style="background: oklch(0.22 0.03 254); border-radius: 4px; padding: 72px 48px; display: flex; align-items: center; justify-content: center;">
+      <div style="display: flex; align-items: center; gap: 18px;">
+        <div style="font-size: 64px; font-weight: 800; font-family: 'Baloo 2', sans-serif; background: linear-gradient(135deg, #d9e84a 0%, #3fcf9e 55%, #38c6e0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 8px rgba(0,0,0,0.35));">conext.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monochrome -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Versión monocromática</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="background: oklch(0.995 0.002 254); border: 1px solid oklch(0.9 0.005 254); border-radius: 4px; padding: 56px; display: flex; align-items: center; justify-content: center;">
+        <div id="chrm-mono-export" style="font-size: 52px; font-weight: 800; font-family: 'Baloo 2', sans-serif; color: #111;">conext.</div>
+      </div>
+      <div style="background: #111; border-radius: 4px; padding: 56px; display: flex; align-items: center; justify-content: center;">
+        <div style="font-size: 52px; font-weight: 800; font-family: 'Baloo 2', sans-serif; color: #fff;">conext.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Isotype alone -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Isotipo solo</div>
+    <div style="display: flex; gap: 24px; align-items: center;">
+      <img src="assets/icon-512.png" alt="Isotipo CHRM" style="width: 120px; height: 120px; border-radius: 26px;" />
+      <img src="assets/icon-512.png" alt="Isotipo CHRM chico" style="width: 64px; height: 64px; border-radius: 14px;" />
+      <img src="assets/icon-512.png" alt="Isotipo CHRM chico" style="width: 40px; height: 40px; border-radius: 9px;" />
+    </div>
+  </div>
+
+  <!-- Favicon preview -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Favicon</div>
+    <div style="background: oklch(0.995 0.002 254); border: 1px solid oklch(0.9 0.005 254); border-radius: 4px; padding: 32px 48px; display: flex; flex-direction: column; gap: 28px;">
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: oklch(0.93 0.005 254); border-radius: 8px 8px 0 0; padding: 10px 16px; width: fit-content;">
+        <img src="assets/favicon-16.png" alt="favicon" style="width: 16px; height: 16px; border-radius: 3px;" />
+        <span style="font-size: 13px; color: #333;">CHRM — CRM</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 32px;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <img src="assets/favicon-16.png" alt="16px" style="width: 16px; height: 16px; border-radius: 3px;" />
+          <div style="font-size: 12px; color: oklch(0.5 0.02 254);">16×16</div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <img src="assets/favicon-32.png" alt="32px" style="width: 32px; height: 32px; border-radius: 6px;" />
+          <div style="font-size: 12px; color: oklch(0.5 0.02 254);">32×32</div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <img src="assets/apple-touch-icon-180.png" alt="180px" style="width: 48px; height: 48px; border-radius: 10px;" />
+          <div style="font-size: 12px; color: oklch(0.5 0.02 254);">180×180</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App icons -->
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">App icon</div>
+    <div style="display: flex; gap: 40px; align-items: center;">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <img src="assets/icon-192.png" alt="iOS icon" style="width: 96px; height: 96px; border-radius: 22px; box-shadow: 0 2px 12px oklch(0.24 0.035 254 / 0.15);" />
+        <div style="font-size: 12px; color: oklch(0.5 0.02 254);">iOS</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <img src="assets/icon-192.png" alt="Android icon" style="width: 96px; height: 96px; border-radius: 50%; box-shadow: 0 2px 12px oklch(0.24 0.035 254 / 0.15);" />
+        <div style="font-size: 12px; color: oklch(0.5 0.02 254);">Android</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files -->
+  <div style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid oklch(0.9 0.005 254); padding-top: 32px;">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.5 0.02 254);">Archivos</div>
+    <div style="font-size: 13px; color: oklch(0.4 0.02 254); line-height: 1.7;">
+      favicon.svg (escalable) · favicon-16.png · favicon-32.png · apple-touch-icon-180.png · icon-192.png · icon-512.png<br/>
+      Para el &lt;head&gt; del sitio: &lt;link rel="icon" href="favicon.svg" type="image/svg+xml"&gt; y &lt;link rel="apple-touch-icon" href="apple-touch-icon-180.png"&gt; como respaldo.
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { one, many, run, tx } from '../db/index.js'
 import { encrypt, decrypt, hashApiKey, generateApiKey } from './secrets.js'
+import { addOwner } from './membersService.js'
 import { normalizeWeeklyHours, weeklyHoursFromLegacy } from './settingsService.js'
 
 // Los agentes y las respuestas rápidas por defecto vivían dentro de las
@@ -72,7 +73,7 @@ function slugify(name) {
 //
 // Devuelve la API key en texto plano **una sola vez**: en la base solo queda el
 // hash, así que si se pierde hay que regenerarla.
-export async function provisionTenant({ name, storeName, whatsappNumber, settings = {} }) {
+export async function provisionTenant({ name, storeName, whatsappNumber, settings = {}, ownerUserId } = {}) {
   const id = `tenant-${crypto.randomUUID()}`
   const apiKey = generateApiKey()
   const now = new Date().toISOString()
@@ -136,6 +137,14 @@ export async function provisionTenant({ name, storeName, whatsappNumber, setting
       [id, `day-${now}`, now],
     )
   })
+
+  // El dueño se ata después de la transacción: addOwner habla con el pool, no
+  // con el cliente de la tx, y el tenant ya está commiteado. Si esto fallara,
+  // el negocio igual existe — se puede reinvitar. Al revés (miembro sin tenant)
+  // no se puede.
+  if (ownerUserId) {
+    await addOwner(id, ownerUserId)
+  }
 
   return { id, name, slug, apiKey }
 }

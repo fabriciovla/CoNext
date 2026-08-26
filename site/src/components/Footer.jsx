@@ -33,11 +33,11 @@ function Columna({ titulo, children }) {
 
 export default function Footer() {
   return (
-    <footer className="border-t border-tint/10">
+    <footer className="reveal border-t border-tint/10">
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="max-w-xs">
-            <Logo className="h-8 w-auto text-ink-primary" />
+            <Logo className="h-6 w-auto text-ink-primary" />
             <p className="mt-4 text-[14px] leading-relaxed text-ink-muted">
               El CRM que atiende el WhatsApp de tu negocio con agentes de IA, sobre la API oficial de
               WhatsApp Business.

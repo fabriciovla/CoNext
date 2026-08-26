@@ -111,7 +111,7 @@ export default function SideNav({
           absoluto: en una fila normal, el ancho del botón correría el centro
           hacia la izquierda y el logo quedaría descentrado por 12px. */}
       <header className="relative flex shrink-0 items-center justify-center px-3.5 py-4">
-        <Logo className="h-8 w-auto text-ink-primary" />
+        <Logo className="h-6 w-auto text-ink-primary" />
         {onCollapse && (
           <button
             onClick={onCollapse}

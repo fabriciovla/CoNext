@@ -12,7 +12,26 @@ import Footer from '../components/Footer.jsx'
 //
 // El <title> y la descripción los pone cada página. El resto —fuentes, favicon,
 // color de la barra del sistema— es igual en todas y vive acá.
-const { title, description } = Astro.props
+//
+// `pantallaCompleta` es para /login, la única página que se adueña del alto
+// entero: sin barra ni pie (el logo del panel es el que vuelve al inicio) y sin
+// el fondo con cuadrícula, porque esa página dibuja el suyo.
+//
+// `noindex` es para las páginas que no tienen nada que hacer en un buscador
+// (/login es un formulario sin contenido); las saca del índice sin sacarlas
+// del sitio.
+const { title, description, pantallaCompleta = false, noindex = false } = Astro.props
+
+// La URL canónica sale del dominio de astro.config más la ruta de la página.
+// Astro.site ya está definido ahí; sin canónica, el mismo HTML servido con y
+// sin barra final (o detrás de otro dominio) cuenta como contenido duplicado.
+const canonica = new URL(Astro.url.pathname, Astro.site)
+
+// La imagen de la vista previa necesita URL absoluta: los scrapers de WhatsApp
+// y compañía no resuelven rutas relativas. El 512 es cuadrado, por eso la
+// tarjeta de Twitter va como `summary` y no `summary_large_image` — ese formato
+// espera 1200×630 y con un cuadrado recorta la marca.
+const imagenOg = new URL('/icon-512.png', Astro.site)
 ---
 
 <!doctype html>
@@ -20,31 +39,52 @@ const { title, description } = Astro.props
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/conext-monochrome.svg" />
+    <!-- El SVG primero: un favicon se dibuja a 16 px y a ese tamaño un raster se
+         ve mordido. El PNG de 32 es el respaldo para lo que no acepta favicon
+         vectorial.
+         El logotipo toma `currentColor`, pero el favicon no puede: lo dibuja
+         el navegador en su barra de pestañas, fuera de nuestro documento. Por
+         eso `conext-mark.svg` resuelve el tema con `prefers-color-scheme`
+         adentro del archivo — y sigue al tema del navegador, no al del sitio,
+         porque la barra de pestañas es oscura aunque la página sea clara.
+         El PNG no puede cambiar de color, así que va en la variante clara.
+         El apple-touch-icon va aparte y con fondo blanco propio, porque iOS
+         compone la transparencia sobre negro. -->
+    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- El manifiesto existe solo para que Android encuentre los íconos de 192 y
+         512 que vinieron con el diseño; va con `display: browser` porque esto es
+         una landing y no una app para instalar. -->
+    <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- El logotipo de la barra se dibuja con esta fuente, así que se pide junto
-         con el HTML y no recién cuando el CSS la descubre. `crossorigin` no es
+    <!-- Inter la usa todo el texto de la página, así que se pide de entrada
+         en vez de esperar a que el CSS la descubra. `crossorigin` no es
          opcional aunque sea del mismo origen: sin él el navegador descarga el
          archivo dos veces. -->
-    <link rel="preload" href="/fonts/baloo2-latin-800.woff2" as="font" type="font/woff2" crossorigin />
-    <!-- Inter la usa todo el texto de la página, así que también se pide de
-         entrada en vez de esperar a que el CSS la descubra. -->
     <link rel="preload" href="/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin />
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonica} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <!-- El color con el que Chrome en Android pinta la barra del sistema. -->
     <meta name="theme-color" content="#ffffff" />
 
     <!-- Vista previa al compartir el enlace (WhatsApp, X, LinkedIn). Ahora cada
          página trae la suya, que era imposible con una sola SPA: había un juego
-         de etiquetas para las cuatro rutas.
-         Falta og:image, que necesita una URL absoluta y por lo tanto el dominio
-         definido. Sin ella la tarjeta se ve igual, solo que sin miniatura. -->
+         de etiquetas para las cuatro rutas. -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="conext" />
+    <meta property="og:locale" content="es_LA" />
+    <meta property="og:url" content={canonica} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:image" content={imagenOg} />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="El isotipo de conext" />
+    <meta name="twitter:card" content="summary" />
 
     <!-- Sin JavaScript nadie agrega `is-visible` y todo lo que anima al entrar
          en pantalla se quedaría invisible para siempre. El contenido nunca
@@ -59,25 +99,36 @@ const { title, description } = Astro.props
   </head>
 
   <body>
-    {/* Cuadrícula fija detrás de la página. El contenido va encima con z-10. */}
-    <div class="fondo" aria-hidden="true">
-      <div class="fondo-cuadricula"></div>
-    </div>
-    <div class="relative z-10 flex min-h-full flex-col">
-      {/* Ninguno de los dos lleva directiva `client:`: todo el sitio llega como
-          HTML. Lo poco que es interactivo (el menú de la barra, el acordeón de
-          preguntas) lo resuelven scripts sueltos de unas pocas líneas, y el
-          navegador no descarga React en ninguna página. */}
-      <Navbar />
-      <main class="flex-1">
+    {pantallaCompleta ? (
+      <main>
         <slot />
       </main>
-      <Footer />
-    </div>
+    ) : (
+      <Fragment>
+        {/* Cuadrícula fija detrás de la página. El contenido va encima con z-10. */}
+        <div class="fondo" aria-hidden="true">
+          <div class="fondo-cuadricula"></div>
+        </div>
+        <div class="relative z-10 flex min-h-full flex-col">
+          {/* Ninguno de los dos lleva directiva `client:`: todo el sitio llega como
+              HTML. Lo poco que es interactivo (el menú de la barra, el acordeón de
+              preguntas) lo resuelven scripts sueltos de unas pocas líneas, y el
+              navegador no descarga React en ninguna página. */}
+          <Navbar />
+          <main class="flex-1">
+            <slot />
+          </main>
+          <Footer />
+        </div>
+      </Fragment>
+    )}
 
     <script>
       // Un solo observer para toda la página, en lugar de uno por bloque como
-      // hacía la versión con React.
+      // hacía la versión con React. Lo que ya está en pantalla se anima ya:
+      // el margen negativo de abajo es para lo que entra scrolleando, y si se
+      // aplicara también a lo visible, el pie de una página corta (o el de
+      // /login, que no scrollea) nunca cruzaría el umbral.
       const elementos = document.querySelectorAll('.reveal')
 
       if (!('IntersectionObserver' in window)) {
@@ -100,7 +151,15 @@ const { title, description } = Astro.props
           { threshold: 0.15, rootMargin: '0px 0px -80px 0px' },
         )
 
-        elementos.forEach((el) => observer.observe(el))
+        const alto = window.innerHeight
+        elementos.forEach((el) => {
+          const caja = el.getBoundingClientRect()
+          if (caja.top < alto && caja.bottom > 0) {
+            el.classList.add('is-visible')
+            return
+          }
+          observer.observe(el)
+        })
       }
 
       // Los resplandores se pausan fuera de pantalla y con la pestaña oculta:

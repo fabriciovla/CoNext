@@ -2,28 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* La tipografía de la marca, servida por nosotros y no por Google Fonts: sin
-   request a un tercero el sitio no depende de que ese dominio esté arriba ni
-   filtra la IP de quien visita.
-   Es el subconjunto latino del peso 800 (18 KB); alcanza para el logotipo y
-   para cualquier título que quiera la misma voz. Si algún día hace falta otro
-   peso, se baja su .woff2 al mismo directorio y se agrega otro @font-face —
-   este no sirve para interpolar.
-   `block` y no `swap` porque hoy el único que la usa es el logotipo, y su
-   viewBox está calculado contra estas métricas: con `swap` se vería un instante
-   el fallback a Verdana, más ancho, cortado por el borde del SVG. Así queda
-   invisible mientras baja (~100 ms, y va precargada desde index.html) en vez de
-   aparecer mal. Si algún día la fuente pasa a usarse en textos largos, ese
-   criterio se invierte y conviene `swap`. */
-@font-face {
-  font-family: 'Baloo 2';
-  font-style: normal;
-  font-weight: 800;
-  font-display: block;
-  src: url('/fonts/baloo2-latin-800.woff2') format('woff2');
+/* Wordmark: un SVG en línea que se pinta con `currentColor` (ver `Logo.jsx`).
+   Acá no hay ninguna regla de color y no es un olvido: el color se lo da el
+   `text-ink-primary` de quien lo contiene, que es #18181b en el tema claro y
+   #ffffff en el oscuro. Así el logotipo sigue al fondo sobre el que cae sin que
+   ningún componente nombre un color, igual que el resto de la paleta.
+   `display: block` es para que no arrastre el hueco de la línea base que deja
+   un elemento en línea debajo del glifo. */
+.logo-marca {
+  display: block;
+  width: auto;
+  max-width: 100%;
 }
 
-/* Inter, la tipografía de todo lo demás. El tema la pedía desde siempre pero
+/* Inter, la tipografía del sitio. El tema la pedía desde siempre pero
    nadie la servía: sin esto el sitio caía al primer fallback del stack, que en
    Windows es Segoe UI y en Android otro distinto — la landing se veía diferente
    según con qué la abrieran.
@@ -233,25 +225,6 @@ html.pagina-oculta .fondo-seccion::before {
   animation-direction: alternate-reverse;
 }
 
-/* El control: el círculo va del lado del texto, no del de la tarjeta. Las
-   tarjetas son `surface-card` opaco y se comían media circunferencia; acá abajo
-   pasa lo mismo con las de garantías. Sobre el texto se ve entera, y de paso
-   alterna el lado con el resplandor del hero en vez de repetirlo. */
-.fondo-seccion:nth-of-type(3n)::before {
-  top: 50%;
-  right: auto;
-  /* Anclado al contenedor (72rem, centrado) y no al borde de la ventana: su
-     centro cae justo afuera de la columna de texto, así el resplandor entra al
-     contenido y el arco se lee en el margen. Contra el borde de la ventana, en
-     una pantalla ancha quedaba un blob solo en la esquina. El `max` es el piso
-     para cuando ya no hay margen que aprovechar. */
-  left: max(-40vw, calc(50% - 52rem));
-  width: min(76vw, 34rem);
-  height: min(76vw, 34rem);
-  --fondo-transform-base: translateY(-50%);
-  animation-delay: -6s;
-}
-
 .fondo-seccion:first-of-type::before {
   top: -28rem;
   right: -10rem;
@@ -378,6 +351,17 @@ html.pagina-oculta .fondo-seccion::before {
   }
 }
 
+@keyframes ui-fade-down {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes ui-fade-in {
   from {
     opacity: 0;
@@ -390,11 +374,74 @@ html.pagina-oculta .fondo-seccion::before {
 @keyframes ui-scale-in {
   from {
     opacity: 0;
-    transform: scale(0.97) translate3d(0, 12px, 0);
+    transform: scale(0.96) translate3d(0, 12px, 0);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes ui-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Transición entre páginas (landing ↔ login). Es CSS nativo, sin un router
+   de Astro: el clic recarga de verdad y el navegador anima el cambio. El
+   documento entero no se funde a propósito — ver el comentario de
+   `::view-transition-old(root)` más abajo. El logotipo viaja al entrar
+   porque comparte `view-transition-name` en la barra y en /login; al
+   salir, /login le saca el nombre antes del snapshot (si no, el grande
+   se achica sobre la landing). */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  /* Si el root se fundiera, el snapshot del login capturaría los campos
+     todavía en opacity 0 (el `animate-in` con `backwards`) y la transición
+     sería una página en blanco. Sin animación acá, el logo morphs y el
+     resto entra con el stagger de siempre. */
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(conext-logo),
+::view-transition-new(conext-logo) {
+  animation: none;
+  mix-blend-mode: normal;
+  /* El morph interpola tamaño y posición; sin esto el SVG se recorta
+     mientras crece de la barra al panel. */
+  overflow: visible;
+}
+
+/* /login pinta el logo dos veces (panel grande y versión chica) y el nombre
+   de la transición tiene que ser único. Se apaga el que no se ve.
+
+   El nombre se declara acá y no en un `style="…"` del elemento: inline le gana
+   a la hoja, así que con el nombre puesto a mano estas dos reglas no apagaban
+   nada. El `view-transition-name: none` que pone el script al salir sí va
+   inline a propósito — ahí se busca justamente que gane. */
+.logo-vt-escritorio,
+.logo-vt-movil {
+  view-transition-name: conext-logo;
+}
+@media (max-width: 1023px) {
+  .logo-vt-escritorio {
+    view-transition-name: none;
+  }
+}
+@media (min-width: 1024px) {
+  .logo-vt-movil {
+    view-transition-name: none;
   }
 }
 
@@ -446,6 +493,27 @@ html.pagina-oculta .fondo-seccion::before {
     animation-name: ui-scale-in;
   }
 
+  /* Entrada al cargar, no al scrollear. Para el hero y para /login, que no
+     tienen un pliegue que cruzar: si usaran `.reveal`, el observer con margen
+     negativo dejaría el pie del login invisible para siempre.
+     `backwards` aplica el keyframe `from` durante el retraso, así el stagger
+     no muestra el elemento y después lo esconde. */
+  .animate-in {
+    animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-in-fade {
+    animation: ui-fade-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-in-down {
+    animation: ui-fade-down var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-in-scale {
+    animation: ui-scale-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-in-pop {
+    animation: ui-pop-in 260ms cubic-bezier(0.34, 1.28, 0.64, 1) var(--d, 0ms) backwards;
+  }
+
   /* Escalona los hijos directos sin calcular delays en JS. Se combina con
      `.reveal`: cada hijo arranca al entrar en pantalla y esto reparte el
      retraso dentro de la grilla. */
@@ -478,6 +546,10 @@ html.pagina-oculta .fondo-seccion::before {
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
+  }
+
+  @view-transition {
+    navigation: none;
   }
 
   *,

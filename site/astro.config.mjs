@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config'
 import react from '@astrojs/react'
+import sitemap from '@astrojs/sitemap'
 
 // Reemplaza a vite.config.js: Astro trae Vite adentro y lo configura solo.
 //
@@ -15,7 +16,15 @@ import react from '@astrojs/react'
 // una directiva `client:` y viajan como islas.
 export default defineConfig({
   site: 'https://conext.lat',
-  integrations: [react()],
+  integrations: [
+    react(),
+    // Genera /sitemap-index.xml en el build (robots.txt lo referencia).
+    // /login se queda afuera: está con noindex y listarla en el sitemap
+    // sería pedirle al buscador dos cosas contradictorias.
+    sitemap({
+      filter: (pagina) => !pagina.includes('/login'),
+    }),
+  ],
   server: {
     // 5173 se lo queda la dashboard; así los dos pueden correr a la vez.
     port: 5174,

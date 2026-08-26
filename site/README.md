@@ -26,8 +26,8 @@ durante el build. Además:
 
 - **El navegador no descarga React.** Ningún componente se hidrata; lo poco
   interactivo que hay (el menú de la barra, el acordeón de preguntas) son
-  scripts sueltos de unas quince líneas, y el interruptor de la sección "El
-  control" no tiene ni eso: es CSS colgado de un `:checked`.
+  scripts sueltos de unas quince líneas, y la película de "El control" es CSS
+  sobre la captura de la bandeja.
 - **Se cayó `react-router-dom`** y con él `public/_redirects`, que existía solo
   para que entrar en frío a `/privacidad` no diera 404. Ahora ese archivo
   existe.

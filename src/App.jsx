@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Login from './pages/Login'
 import Layout from './components/Layout'
 import AppNav from './components/AppNav'
@@ -18,8 +18,16 @@ import useAgents from './hooks/useAgents'
 import useTheme from './hooks/useTheme'
 import { groupMessagesByPhone } from './utils/groupMessages'
 
+const TITULO_APP = {
+  home: 'Inicio · conext',
+  inbox: 'Bandeja · conext',
+  agents: 'Agentes · conext',
+  products: 'Productos · conext',
+  settings: 'Configuración · conext',
+}
+
 export default function App() {
-  const { user, isAuthenticated, error, login, logout } = useAuth()
+  const { user, isAuthenticated, error, login, logout, clearError } = useAuth()
   const {
     messages,
     resolveConversation,
@@ -139,8 +147,20 @@ export default function App() {
     setConfirmClose(false)
   }
 
+  useEffect(() => {
+    document.title = isAuthenticated ? (TITULO_APP[page] ?? 'conext') : 'Entrar · conext'
+  }, [isAuthenticated, page])
+
   if (!isAuthenticated) {
-    return <Login onLogin={login} error={error} />
+    return (
+      <Login
+        onLogin={login}
+        error={error}
+        onClearError={clearError}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    )
   }
 
   return (

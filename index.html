@@ -2,7 +2,20 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/webp" href="/logowsp.webp" />
+    <!-- El SVG primero: un favicon se dibuja a 16 px y a ese tamaño un raster se
+         ve mordido. El PNG de 32 es el respaldo para lo que no acepta favicon
+         vectorial.
+         El logotipo toma `currentColor`, pero el favicon no puede: lo dibuja
+         el navegador en su barra de pestañas, fuera de nuestro documento. Por
+         eso `conext-mark.svg` resuelve el tema con `prefers-color-scheme`
+         adentro del archivo — y sigue al tema del navegador, no al del sitio,
+         porque la barra de pestañas es oscura aunque la página sea clara.
+         El PNG no puede cambiar de color, así que va en la variante clara.
+         El apple-touch-icon va aparte y con fondo blanco propio, porque iOS
+         compone la transparencia sobre negro. -->
+    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,7 +23,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>WhatsApp CRM</title>
+    <title>conext</title>
     <script>
       // Antes de pintar nada: si el tema elegido es el oscuro, el atributo tiene
       // que estar puesto ya, o cada recarga arranca con un fogonazo blanco

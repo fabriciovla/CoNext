@@ -83,7 +83,7 @@ const CONVERSACIONES = [
   },
 ]
 
-function Foto({ size = 38 }) {
+export function Foto({ size = 38 }) {
   return (
     <img
       src="/IconoSinFoto.webp"
@@ -96,7 +96,7 @@ function Foto({ size = 38 }) {
   )
 }
 
-function AvatarCanal({ size = 38 }) {
+export function AvatarCanal({ size = 38 }) {
   return (
     <div className="relative shrink-0">
       <Foto size={size} />
@@ -147,6 +147,58 @@ function Seccion({ titulo, children }) {
   )
 }
 
+// La barra sale aparte porque la usa también la película de "El control": es la
+// misma app, y dos copias de la barra empiezan iguales y terminan distintas.
+export function BarraMock({ className = 'hidden w-[200px] md:flex' }) {
+  return (
+    <aside className={`shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav ${className}`}>
+      <header className="flex items-center justify-center px-3 py-3.5">
+        <Logo className="h-5 w-auto text-ink-primary" />
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-hidden px-2">
+        {NAV.map(({ Icono, label, cuenta, activo }) => (
+          <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activo} />
+        ))}
+
+        <Seccion titulo="Carpetas">
+          {CARPETAS.map(({ Icono, label, cuenta, activa }) => (
+            <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activa} />
+          ))}
+        </Seccion>
+
+        <Seccion titulo="Agentes IA">
+          {AGENTES.map(({ label, cuenta, on }) => (
+            <FilaNav key={label} label={label} cuenta={cuenta} punto={on ? 'on' : 'off'} />
+          ))}
+          <FilaNav icon={<IconPlus size={15} />} label="Nuevo agente" />
+        </Seccion>
+      </div>
+
+      <div className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
+        <div className="mb-2 flex items-center justify-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-status-good shadow-[0_0_8px_rgba(12,163,12,0.7)]" />
+          <p className="text-[12px] font-medium text-ink-primary">Día abierto</p>
+          <span className="text-[10.5px] text-ink-faint">desde 9:12</span>
+        </div>
+        <div className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-center text-[12px] font-medium text-ink-secondary">
+          Cerrar día
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 border-t border-tint/[0.07] px-3 py-2.5">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-tint/15 bg-tint/10 text-[11px] font-semibold text-ink-primary">
+          A
+        </span>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-[12px] font-medium text-ink-primary">Admin</p>
+          <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
 export default function AppMock() {
   return (
     // El marco lo pone la card de afuera. Acá adentro la bandeja se dibuja un
@@ -160,51 +212,7 @@ export default function AppMock() {
       {/* ------------------------------------------------------------------ */}
       {/* Barra                                                               */}
       {/* ------------------------------------------------------------------ */}
-      <aside className="hidden w-[200px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav md:flex">
-        <header className="flex items-center justify-center px-3 py-3.5">
-          <Logo className="h-7 w-auto text-ink-primary" />
-        </header>
-
-        <div className="min-h-0 flex-1 overflow-hidden px-2">
-          {NAV.map(({ Icono, label, cuenta, activo }) => (
-            <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activo} />
-          ))}
-
-          <Seccion titulo="Carpetas">
-            {CARPETAS.map(({ Icono, label, cuenta, activa }) => (
-              <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activa} />
-            ))}
-          </Seccion>
-
-          <Seccion titulo="Agentes IA">
-            {AGENTES.map(({ label, cuenta, on }) => (
-              <FilaNav key={label} label={label} cuenta={cuenta} punto={on ? 'on' : 'off'} />
-            ))}
-            <FilaNav icon={<IconPlus size={15} />} label="Nuevo agente" />
-          </Seccion>
-        </div>
-
-        <div className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
-          <div className="mb-2 flex items-center justify-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-status-good shadow-[0_0_8px_rgba(12,163,12,0.7)]" />
-            <p className="text-[12px] font-medium text-ink-primary">Día abierto</p>
-            <span className="text-[10.5px] text-ink-faint">desde 9:12</span>
-          </div>
-          <div className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-center text-[12px] font-medium text-ink-secondary">
-            Cerrar día
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 border-t border-tint/[0.07] px-3 py-2.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-tint/15 bg-tint/10 text-[11px] font-semibold text-ink-primary">
-            A
-          </span>
-          <div className="min-w-0 flex-1 leading-tight">
-            <p className="truncate text-[12px] font-medium text-ink-primary">Admin</p>
-            <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
-          </div>
-        </div>
-      </aside>
+      <BarraMock />
 
       {/* ------------------------------------------------------------------ */}
       {/* Lista                                                               */}

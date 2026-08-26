@@ -2,19 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* La tipografía del logotipo, la misma que sirve la landing (`site/`) y servida
-   por nosotros y no por Google Fonts. Es el subconjunto latino del peso 800
-   (18 KB) y acá la usa una sola cosa: el "conext" de la barra.
-   `block` y no `swap` porque el viewBox del logo está calculado contra estas
-   métricas: con `swap` se vería un instante el fallback a Verdana, más ancho, y
-   saldría cortado por el borde del SVG. Así queda invisible mientras baja en vez
-   de aparecer mal. */
-@font-face {
-  font-family: 'Baloo 2';
-  font-style: normal;
-  font-weight: 800;
-  font-display: block;
-  src: url('/fonts/baloo2-latin-800.woff2') format('woff2');
+/* Wordmark: un SVG en línea que se pinta con `currentColor` (ver `Logo.jsx`).
+   Acá no hay ninguna regla de color y no es un olvido: el color se lo da el
+   `text-ink-primary` de quien lo contiene, que es #18181b en el tema claro y
+   #ffffff en el oscuro. Así el logotipo sigue al fondo sobre el que cae sin que
+   ningún componente nombre un color, igual que el resto de la paleta.
+   `display: block` es para que no arrastre el hueco de la línea base que deja
+   un elemento en línea debajo del glifo. */
+.logo-marca {
+  display: block;
+  width: auto;
+  max-width: 100%;
 }
 
 /* Sistema de animación
