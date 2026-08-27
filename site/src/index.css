@@ -15,21 +15,22 @@
   max-width: 100%;
 }
 
-/* Inter, la tipografía del sitio. El tema la pedía desde siempre pero
-   nadie la servía: sin esto el sitio caía al primer fallback del stack, que en
-   Windows es Segoe UI y en Android otro distinto — la landing se veía diferente
-   según con qué la abrieran.
-   Es la variable (400 a 700 en un solo archivo, 48 KB): un archivo pesa menos
-   que los cuatro pesos estáticos que usa esta página y además deja disponible
-   cualquier valor intermedio.
-   Acá sí `swap`: son textos largos, y leerlos en Segoe UI 200 ms es mejor que
-   mirar una página en blanco. */
+/* Satoshi, la tipografía del sitio, en su versión variable: 300 a 900 en un
+   solo archivo de 42 KB. Un archivo pesa menos que los cuatro pesos estáticos
+   que usa esta página y además deja disponible cualquier valor intermedio.
+   Se sirve desde acá y no desde un CDN: sin esto el sitio caería al primer
+   fallback del stack, que en Windows es Segoe UI y en Android otro distinto, y
+   la landing se vería diferente según con qué la abrieran.
+   `swap`: son textos largos, y leerlos 200 ms en la del sistema es mejor que
+   mirar una página en blanco.
+   La declaración es igual en `src/index.css` de la dashboard: es la misma
+   marca, y el archivo está copiado en los dos `public/fonts/`. */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Satoshi';
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 300 900;
   font-display: swap;
-  src: url('/fonts/inter-latin-var.woff2') format('woff2');
+  src: url('/fonts/satoshi-var.woff2') format('woff2');
 }
 
 html,
@@ -48,42 +49,336 @@ body {
   @apply bg-surface-page text-ink-primary antialiased;
 }
 
-/* La barra arranca a todo el ancho. Al bajar, el padding lateral la recoge
-   hacia el mismo techo que el contenido (`max-w-6xl`) y el bloque de adentro
-   se redondea: queda una isla flotando, no una franja pegada al borde.
-   El fondo va en `.barra-isla` y no en el sticky: si no, el aire de los
-   costados también se pintaría y la isla no se leería como isla. */
+/* La barra: una franja blanca de 76px pegada arriba, con una sola línea de 1px
+   abajo. Es la de dock.us, que es la referencia que se pidió seguir.
+
+   Antes se encogía al scrollear y quedaba como una isla flotante y redondeada.
+   Se fue por dos motivos. Uno, que el gesto no era gratis: es la barra que está
+   fija arriba de todo, y transicionarle `padding`, `border-radius` y una
+   `box-shadow` grande la hace repintar mientras la página scrollea, que es
+   justamente cuando no hay cuadros de sobra. Dos, que una isla flotante es un
+   elemento más pidiendo atención arriba de todo; una franja lisa desaparece y
+   deja que la página empiece en el titular.
+
+   Sigue siendo `sticky` y no `fixed` como la de dock.us: `fixed` la saca del
+   flujo y obliga a compensar los 76px con un padding en cada página, que es de
+   donde salen los saltos de layout cuando alguien cambia la altura de la barra
+   y se olvida del padding. `sticky` los reserva sola. */
 .barra {
   top: 0;
-  padding-inline: 0;
+  background: rgb(var(--surface-page));
+  border-bottom: 1px solid rgb(var(--tint) / 0.08);
+}
+
+/* El ancho del contenido, en un solo lugar. Antes era la cadena
+   `mx-auto w-full max-w-6xl px-6` repetida en la barra, el pie, /ayuda y cada
+   sección de la landing: cuatro copias de una medida que tiene que ser una.
+
+   1440px contra los 1152 de `max-w-6xl`. Es de dock.us (1448) y es la mitad
+   grande de por qué esa clase de página se ve "en grande": no es que los
+   elementos sean más nítidos, es que hay más hoja debajo de ellos, así que a
+   igual tamaño de letra el texto ocupa una fracción menor del ancho y sobra
+   aire. El padding de 2rem a cada lado es el `calc(100% - 64px)` de ellos. */
+.contenedor {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .contenedor {
+    padding-inline: 2rem;
+  }
+}
+
+/* El marco de las muestras de producto. En dock.us lo que sostiene la página
+   son capturas grandes de la app, y lo que las hace ver nítidas no es la imagen
+   sino el encuadre: una línea de 1px que se ve de verdad, un anillo interior
+   claro que despega la interfaz del borde, y una sombra corta y definida en vez
+   de un halo.
+
+   La nuestra no es una captura sino una maqueta en HTML (`AppMock`), que a
+   estos anchos juega a favor: no hay un raster que se agrande y se empaste, se
+   redibuja a la resolución de la pantalla.
+
+   Tres sombras y no una: la de contacto pegada al borde, la media que le da
+   volumen y la larga y muy suave que la apoya sobre la hoja. Una sola sombra
+   grande y difusa es exactamente lo que hace que una tarjeta se vea barata.
+   El `inset` blanco es el anillo interior. */
+.marco-producto {
+  background: rgb(var(--surface-nav));
+  border: 1px solid rgb(var(--tint) / 0.14);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.6),
+    0 1px 2px rgb(var(--tint) / 0.06),
+    0 8px 20px -8px rgb(var(--tint) / 0.14),
+    0 32px 64px -32px rgb(var(--tint) / 0.28);
+}
+
+/* Tabla de comparación de planes. Cinco columnas: el nombre de la fila y
+   los cuatro planes. Premium es la cuarta y lleva un fondo azul pálido de
+   la cabecera al pie, que es lo que la destaca sin un borde ni una sombra.
+
+   Es una <table> de verdad: para un lector de pantalla un grid de divs
+   recita las celdas sin relación, y el `nth-child(4)` pinta la columna
+   entera sin repetir una clase en cada fila. `border-separate` y no
+   `collapse`: con collapse el fondo de la columna Premium se recorta en
+   cada línea y el sticky de la primera columna deja de pegarse. */
+.tabla-precios-wrap {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  /* La hoja opaca de las celdas arma un rectángulo. Sin radio, la esquina
+     queda a 90° contra el resplandor y la cuadrícula de `.fondo`. */
+  border-radius: 1.25rem;
+  background: rgb(var(--surface-page));
+}
+
+.tabla-precios {
+  width: 100%;
+  min-width: 56rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Primera columna fija; las cuatro de planes se parten el resto a partes
+   iguales. Sin esto el auto-layout le daba a Gratis ~198px y a Empresa
+   ~306px, y la tira pegajosa (cuatro `1fr`) no podía coincidir. */
+.tabla-precios .col-funcion {
+  width: 18rem;
+}
+
+.tabla-precios caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* El aire de arriba es lo que despega el distintivo del borde redondeado de
+   la columna de Premium: con `padding-top: 0` la píldora arrancaba pegada al
+   filo del tinte. Va en todas las columnas para que los nombres sigan
+   alineados entre sí. */
+.tabla-precios thead th {
+  vertical-align: top;
+  font-weight: 400;
+  text-align: center;
+  padding: 1.25rem 0.85rem 2rem;
+}
+
+.tabla-precios thead th:first-child {
+  padding-left: 0;
+  padding-right: 1.25rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.tabla-precios tbody th,
+.tabla-precios tbody td {
+  padding: 0.9rem 0.85rem;
+  font-size: 14.5px;
+  line-height: 1.4;
+  border-bottom: 1px solid rgb(var(--tint) / 0.08);
+  vertical-align: middle;
+}
+
+.tabla-precios tbody th {
+  text-align: left;
+  font-weight: 400;
+  color: rgb(var(--ink-primary));
+  padding-left: 1rem;
+  min-width: 13rem;
+}
+
+.tabla-precios tbody td {
+  text-align: center;
+  color: rgb(var(--ink-primary));
+}
+
+/* Hoja opaca bajo cada celda. Sin esto el resplandor de `.fondo` se veía
+   a través (el tinte de Premium era alfa pura) y las letras salían lavadas. */
+.tabla-precios thead th,
+.tabla-precios tbody th,
+.tabla-precios tbody td {
+  background: rgb(var(--surface-page));
+}
+
+/* Columna Premium: vacío, gratis, estándar, *premium*, empresa.
+   `color-mix` deja el mismo violeta pálido, pero tapado: alfa sobre el
+   resplandor de la página se leía como un glow encima del texto. */
+.tabla-precios tr > :nth-child(4) {
+  background: color-mix(in srgb, rgb(var(--violet)) 5.5%, rgb(var(--surface-page)));
+}
+
+.tabla-precios tbody tr:not(.fila-grupo) > :nth-child(4) {
+  border-bottom-color: rgb(var(--violet) / 0.12);
+}
+
+/* La última fila cierra sin línea. Antes se le sacaba el borde solo a la
+   celda de Premium, así que abajo quedaba una raya cortada a la mitad. */
+.tabla-precios tbody:last-child tr:last-child > * {
+  border-bottom: none;
+}
+
+.tabla-precios .fila-grupo th,
+.tabla-precios .fila-grupo td {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: none;
+}
+
+/* La franja de categoría va de un solo tono. Antes el rótulo iba en crema
+   (`surface-nav`) y la celda de Premium se quedaba con su violeta, así que la
+   banda se partía en dos colores a mitad de camino. El gris sale de `--tint`,
+   que es el azul de la tinta: al lado del violeta de la columna se lee como la
+   misma familia y no como una mancha aparte. */
+.tabla-precios .fila-grupo > * {
+  background: color-mix(in srgb, rgb(var(--tint)) 3.5%, rgb(var(--surface-page)));
+}
+
+/* La columna se sigue viendo cruzar la banda —el mismo violeta, un punto más
+   oscuro— en vez de cortarla. */
+.tabla-precios .fila-grupo > :nth-child(4) {
+  background: color-mix(in srgb, rgb(var(--violet)) 8.5%, rgb(var(--surface-page)));
+}
+
+/* Primera columna pega a la izquierda cuando la tabla se scrollea en
+   móvil. El fondo tiene que ser opaco: si no, las celdas de los planes
+   se leen a través del nombre. */
+.tabla-precios thead th:first-child,
+.tabla-precios tbody tr:not(.fila-grupo) > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: rgb(var(--surface-page));
+}
+
+.tabla-precios .fila-grupo > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: color-mix(in srgb, rgb(var(--tint)) 3.5%, rgb(var(--surface-page)));
+}
+
+/* La píldora del plan más elegido. **No va anidada bajo `.tabla-precios`**: el
+   mismo distintivo se dibuja en las tarjetas de móvil, que están fuera de la
+   tabla, y anidada ahí quedaba como texto pelado sin píldora ni versalitas. */
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  background: rgb(var(--ink-primary));
+  color: rgb(var(--ink-inverted));
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Tira de precios que sigue a la barra. Sin `transform`: al promoverla a
+   capa de GPU el raster de Satoshi salía borroso (sobre todo los montos).
+   Entra y sale solo con opacidad. Cada celda se posiciona en JS sobre su
+   <th>: un grid de `1fr` no calza con el ancho real de las columnas. */
+.precios-pegajosa {
+  position: fixed;
+  top: 76px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  overflow: hidden;
+  background: rgb(var(--surface-page));
+  border-bottom: 1px solid rgb(var(--tint) / 0.08);
+  box-shadow: 0 6px 16px -12px rgb(var(--tint) / 0.28);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
   transition:
-    top var(--dur-base) var(--ease-out-soft),
-    padding var(--dur-base) var(--ease-out-soft);
+    opacity 180ms var(--ease-out-soft),
+    visibility 180ms var(--ease-out-soft);
+  -webkit-font-smoothing: antialiased;
 }
 
-.barra-isla {
-  background: rgb(var(--surface-page) / 0.95);
-  /* El borde transparente de los otros tres lados reserva el pixel: al pasar
-     a isla no salta un 1px porque aparece un borde que antes no estaba. */
-  border: 1px solid transparent;
-  border-bottom-color: rgb(var(--tint) / 0.1);
-  border-radius: 0;
-  box-shadow: 0 0 0 0 transparent;
-  transition:
-    border-color var(--dur-base) var(--ease-out-soft),
-    border-radius var(--dur-base) var(--ease-out-soft),
-    box-shadow var(--dur-base) var(--ease-out-soft);
+.precios-pegajosa.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
-.barra.is-isla {
-  top: 0.75rem;
-  padding-inline: max(0.75rem, calc((100% - 72rem) / 2));
+.precios-pegajosa-grid {
+  position: relative;
+  height: 3.25rem;
 }
 
-.barra.is-isla .barra-isla {
-  border-color: rgb(var(--tint) / 0.1);
-  border-radius: 2rem;
-  box-shadow: var(--shadow-pop);
+.precios-pegajosa-grid > * {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  box-sizing: border-box;
+}
+
+.precios-pegajosa-grid > :not(:first-child) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+}
+
+.precios-pegajosa-grid > .is-destacado {
+  background: color-mix(in srgb, rgb(var(--violet)) 5.5%, rgb(var(--surface-page)));
+}
+
+.precios-pegajosa-nombre {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgb(var(--ink-muted));
+}
+
+.precios-pegajosa-precio {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.15rem;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgb(var(--ink-primary));
+}
+
+/* Abajo de lg la tabla es solo la comparación (los planes ya están arriba en
+   tarjetas), así que la cabecera es un rótulo y no una ficha: sin el precio ni
+   el botón no hace falta reservarle 2.75rem de aire abajo. El ancho mínimo más
+   corto es cuánto hay que deslizar para llegar a la última columna. */
+@media (max-width: 1023px) {
+  .tabla-precios {
+    min-width: 44rem;
+  }
+
+  .tabla-precios thead th {
+    padding: 0 0.6rem 1.1rem;
+  }
+
+  .tabla-precios tbody th {
+    min-width: 11rem;
+  }
 }
 
 /* Fondo ambiental detrás del contenido. Los resplandores violetas le dan
@@ -95,46 +390,74 @@ body {
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  /* Los tres resplandores de la hoja. Van con escalones intermedios y no
+     `color → transparent`: entre dos paradas la interpolación es recta, y una
+     rampa recta que muere de golpe deja ver la circunferencia donde termina.
+     Las paradas son en rem y no en %, porque acá el degradé se mide contra la
+     caja de la página entera y un % daría un radio distinto en cada pantalla. */
   background:
-    radial-gradient(circle at 82% 5%, rgb(var(--violet) / 0.24), transparent 28rem),
-    radial-gradient(circle at 4% 42%, rgb(var(--violet) / 0.14), transparent 24rem),
-    radial-gradient(circle at 76% 84%, rgb(var(--violet) / 0.12), transparent 28rem),
+    radial-gradient(
+      circle at 84% 0%,
+      rgb(var(--violet) / 0.17),
+      rgb(var(--violet) / 0.075) 16rem,
+      rgb(var(--violet) / 0.026) 27rem,
+      rgb(var(--violet) / 0.007) 38rem,
+      transparent 50rem
+    ),
+    radial-gradient(
+      circle at 0% 38%,
+      rgb(var(--violet) / 0.1),
+      rgb(var(--violet) / 0.042) 13rem,
+      rgb(var(--violet) / 0.015) 22rem,
+      rgb(var(--violet) / 0.005) 32rem,
+      transparent 44rem
+    ),
+    radial-gradient(
+      circle at 80% 88%,
+      rgb(var(--violet) / 0.09),
+      rgb(var(--violet) / 0.038) 15rem,
+      rgb(var(--violet) / 0.014) 25rem,
+      rgb(var(--violet) / 0.005) 36rem,
+      transparent 48rem
+    ),
     rgb(var(--surface-page));
 }
 
 .fondo::before {
   content: '';
   position: absolute;
-  top: -23rem;
-  right: -15rem;
-  width: 54rem;
-  height: 54rem;
-  border: 1px solid rgb(var(--violet) / 0.2);
+  top: -30rem;
+  right: -18rem;
+  width: 72rem;
+  height: 72rem;
   border-radius: 999px;
   background: radial-gradient(
-    circle at 42% 58%,
-    rgb(var(--violet) / 0.17),
-    rgb(var(--violet) / 0.05) 42%,
-    transparent 68%
+    circle at 44% 56%,
+    rgb(var(--violet) / 0.15),
+    rgb(var(--violet) / 0.08) 24%,
+    rgb(var(--violet) / 0.04) 42%,
+    rgb(var(--violet) / 0.016) 60%,
+    rgb(var(--violet) / 0.005) 78%,
+    transparent 100%
   );
-  box-shadow:
-    0 0 0 5rem rgb(var(--violet) / 0.035),
-    0 0 0 10rem rgb(var(--violet) / 0.018);
 }
 
 .fondo::after {
   content: '';
   position: absolute;
-  top: 36%;
-  left: -15rem;
-  width: 34rem;
-  height: 34rem;
+  top: 30%;
+  left: -26rem;
+  width: 72rem;
+  height: 44rem;
   border-radius: 999px;
   background: radial-gradient(
-    circle,
-    rgb(var(--violet) / 0.14),
-    rgb(var(--violet) / 0.04) 45%,
-    transparent 70%
+    closest-side,
+    rgb(var(--violet) / 0.1),
+    rgb(var(--violet) / 0.055) 24%,
+    rgb(var(--violet) / 0.026) 42%,
+    rgb(var(--violet) / 0.011) 60%,
+    rgb(var(--violet) / 0.004) 78%,
+    transparent 100%
   );
 }
 
@@ -167,17 +490,45 @@ body:has(.fondo-seccion) > .fondo {
   z-index: 1;
 }
 
+/* El gesto de fondo del sitio: luz, no un objeto. Está acá, en una regla sola,
+   porque lo dibujan dos cosas distintas — el `::before` de cada sección de la
+   landing y los `.orbe` sueltos del panel de /login —, y son el mismo dibujo:
+   si se retoca, se retocan los dos de una.
+   Tenía un anillo de 1px y eso era todo el problema: con la circunferencia a la
+   vista el fondo deja de ser un resplandor y pasa a ser una pelota apoyada
+   atrás del texto, que es una forma más peleando por la atención. Sin borde y
+   con el degradé apagándose en cuatro escalones no hay dónde termina, solo de
+   dónde viene la luz. El halo tampoco va en box-shadow (spread de 4–8rem
+   agrandaba la capa): el apagado vive adentro del mismo degradé. */
+.fondo-seccion::before,
+.orbe {
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--violet) / 0.15),
+    rgb(var(--violet) / 0.085) 24%,
+    rgb(var(--violet) / 0.042) 42%,
+    rgb(var(--violet) / 0.017) 60%,
+    rgb(var(--violet) / 0.005) 78%,
+    transparent 100%
+  );
+}
+
+/* Ojo con el alto: la sección lleva `contain: paint`, así que todo lo que
+   sobre por arriba o por abajo se corta con una recta que cruza la página de
+   lado a lado — y una recta se ve, por tenue que sea el violeta. A los costados
+   no pasa: ahí el corte cae en el borde de la pantalla. La regla es que el
+   resplandor entre en el alto del bloque; el degradé ya es transparente en el
+   20% de afuera de su caja, así que ese es todo el margen que hay. */
 .fondo-seccion::before {
   --fondo-transform-base: translate3d(0, 0, 0);
   content: '';
   position: absolute;
   z-index: 0;
-  top: 8%;
-  right: -16rem;
-  width: 38rem;
-  height: 38rem;
-  border: 1px solid rgb(var(--violet) / 0.16);
-  border-radius: 999px;
+  top: -6rem;
+  right: -30rem;
+  width: 74rem;
+  height: 46rem;
   transform: var(--fondo-transform-base);
   transform-origin: center;
   /* Arranca pausada. `will-change` permanente + animar opacity/scale de un
@@ -186,22 +537,40 @@ body:has(.fondo-seccion) > .fondo {
      El observer del layout pone `.fondo-vivo` solo cuando entra en pantalla. */
   animation: fondo-respirar 16s ease-in-out infinite;
   animation-play-state: paused;
-  /* El halo iba en box-shadow (spread de 4–8rem) y agrandaba la capa. Ahora
-     es parte del mismo degradé, así el blob no pinta más allá de su caja. */
-  background: radial-gradient(
-    circle,
-    rgb(var(--violet) / 0.16),
-    rgb(var(--violet) / 0.055) 46%,
-    rgb(var(--violet) / 0.028) 68%,
-    transparent 78%
-  );
+}
+
+/* Los del panel de /login. Van sueltos y no en un `::before` porque son dos, y
+   el tamaño y la posición de cada uno los pone la página.
+
+   Acá no hay observer que los encienda —esa página no tiene `.fondo-seccion`—
+   ni scroll que proteger: son dos círculos quietos en una pantalla que no se
+   mueve, así que arrancan corriendo.
+
+   La entrada va en la misma declaración que el latido y no en una clase aparte:
+   `animation` es una sola propiedad, y `.animate-in-fade` encima de esto le
+   pisaría el `fondo-respirar`. Ojo también con el otro lado de eso: el orbe no
+   lleva ninguna clase de `opacity`. El alfa está adentro del degradé, que es
+   justamente lo que antes no pasaba — el resplandor tenía `opacity-[0.12]` y
+   una entrada que animaba la opacidad hasta 1, así que aparecía a pleno, se
+   apagaba de golpe al terminar el keyframe y parecía un parpadeo rosa. */
+.orbe {
+  --fondo-transform-base: translate3d(0, 0, 0);
+  position: absolute;
+  z-index: 0;
+  transform: var(--fondo-transform-base);
+  transform-origin: center;
+  pointer-events: none;
+  animation:
+    ui-fade-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards,
+    fondo-respirar 16s ease-in-out infinite;
 }
 
 .fondo-seccion.fondo-vivo::before {
   animation-play-state: running;
 }
 
-html.pagina-oculta .fondo-seccion::before {
+html.pagina-oculta .fondo-seccion::before,
+html.pagina-oculta .orbe {
   animation-play-state: paused;
 }
 
@@ -221,52 +590,73 @@ html.pagina-oculta .fondo-seccion::before {
 
 .fondo-seccion:nth-of-type(even)::before {
   right: auto;
-  left: -18rem;
+  left: -30rem;
   animation-direction: alternate-reverse;
 }
 
-.fondo-seccion:first-of-type::before {
-  top: -28rem;
-  right: -10rem;
-  width: 72rem;
-  height: 72rem;
-  animation-name: fondo-principal-respirar;
-  animation-duration: 12s;
+/* El control es la tercera sección, así que la regla de `even` no la agarra:
+   el zigzag se lo pone esta. Va más apagado que el del hero — abajo tiene la
+   muestra de la app, que ya es la mancha de ese bloque. */
+.fondo-seccion:nth-of-type(3)::before {
+  top: 2rem;
+  right: auto;
+  left: -30rem;
+  width: 90rem;
+  height: 42rem;
+  animation-delay: -6s;
   background: radial-gradient(
-    circle at 42% 58%,
-    rgb(var(--violet) / 0.23),
-    rgb(var(--violet) / 0.07) 44%,
-    rgb(var(--violet) / 0.035) 62%,
-    transparent 74%
+    closest-side,
+    rgb(var(--violet) / 0.12),
+    rgb(var(--violet) / 0.07) 24%,
+    rgb(var(--violet) / 0.032) 42%,
+    rgb(var(--violet) / 0.013) 60%,
+    rgb(var(--violet) / 0.004) 78%,
+    transparent 100%
   );
 }
 
-/* En garantías se repite el gesto grande del hero, pero entra completo dentro
-   de la sección en vez de quedar recortado por sus bordes. Va contra el borde
-   derecho: el título es corto y está alineado a la izquierda, así que ese es el
-   hueco de la sección — del otro lado la circunferencia le cruzaba el titular
-   por encima. */
-.fondo-seccion:nth-of-type(5) {
-  min-height: min(82vw, 52rem);
-  display: flex;
-  align-items: center;
+.fondo-seccion:first-of-type::before {
+  top: -30rem;
+  right: -26rem;
+  width: 120rem;
+  height: 64rem;
+  animation-name: fondo-principal-respirar;
+  animation-duration: 12s;
+  background: radial-gradient(
+    closest-side,
+    rgb(var(--violet) / 0.17),
+    rgb(var(--violet) / 0.095) 24%,
+    rgb(var(--violet) / 0.045) 42%,
+    rgb(var(--violet) / 0.018) 60%,
+    rgb(var(--violet) / 0.005) 78%,
+    transparent 100%
+  );
 }
 
+/* En garantías se repite el gesto grande del hero, del lado derecho: el título
+   es corto y alineado a la izquierda, así que ese es el hueco de la sección.
+   La sección tenía un `min-height` de 52rem con el contenido centrado, y eso
+   era andamiaje del dibujo anterior — el círculo entraba entero y había que
+   darle alto para que no lo recortaran los bordes. Con un resplandor que se
+   sale de cuadro no hay nada que contener, y ese alto quedaba como un hueco
+   blanco entre dos bloques. */
 .fondo-seccion:nth-of-type(5)::before {
   top: 50%;
   left: auto;
-  right: clamp(0.75rem, 3vw, 3rem);
-  width: min(72vw, 46rem);
-  height: min(72vw, 46rem);
+  right: -24rem;
+  width: min(140vw, 96rem);
+  height: min(60vw, 36rem);
   --fondo-transform-base: translateY(-50%);
   animation-delay: -4s;
   /* El foco del degradé mira hacia adentro de la página, no hacia el borde. */
   background: radial-gradient(
-    circle at 42% 58%,
-    rgb(var(--violet) / 0.23),
-    rgb(var(--violet) / 0.07) 44%,
-    rgb(var(--violet) / 0.035) 62%,
-    transparent 74%
+    closest-side,
+    rgb(var(--violet) / 0.17),
+    rgb(var(--violet) / 0.095) 24%,
+    rgb(var(--violet) / 0.045) 42%,
+    rgb(var(--violet) / 0.018) 60%,
+    rgb(var(--violet) / 0.005) 78%,
+    transparent 100%
   );
 }
 
@@ -290,8 +680,154 @@ html.pagina-oculta .fondo-seccion::before {
   }
 }
 
+/* Última llamada. Es la tarjeta de dock.us: hoja azul muy pálida, la marca
+   centrada arriba y un gesto recortado en la esquina inferior derecha. Adentro
+   se pisa `--violet` al azul rey de esa referencia (#0061FE) para que el botón,
+   la marca y los arcos salgan del mismo pozo sin nombrar un hex en el markup. */
+.llamada {
+  --violet: 0 97 254;
+  --llamada-hoja: 248 250 255;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: rgb(var(--llamada-hoja));
+}
+
+.llamada > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* La ola de la esquina inferior derecha. Antes eran dos círculos de azul
+   saturado superpuestos con `multiply`: entraban enteros en la tarjeta, así
+   que se leían como dos globos pegados y no como el gesto de la referencia.
+   La diferencia no es el color sino el radio y el centro. Los tres círculos
+   comparten un centro que cae **afuera** de la tarjeta (abajo a la derecha) y
+   son mucho más grandes que ella, así que de cada uno se ve solo un tramo de
+   arco cruzando la esquina — que es lo que hace que se lean como capas de una
+   misma ola y no como manchas sueltas.
+   Van de afuera hacia adentro: el más grande es el celeste que se apaga contra
+   la hoja, y el más chico el azul rey del fondo del pozo. Los hex son
+   literales y no salen de la paleta a propósito: es una ilustración de una
+   tarjeta, no un color semántico que algún componente tenga que heredar. */
+.llamada > .llamada-arcos {
+  position: absolute;
+  z-index: 0;
+  /* El centro de los tres arcos, medido desde la esquina de la tarjeta. */
+  right: -5rem;
+  bottom: -30rem;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.llamada-arcos span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--s);
+  height: var(--s);
+  /* Los centra en el punto de arriba: el tamaño manda y la posición no se
+     recalcula arco por arco. */
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 999px;
+  /* El corte del degradé cae en el tramo que se ve. Del círculo entra en la
+     tarjeta el cuarto de arriba a la izquierda, así que con el salto al 100%
+     la banda visible salía de un solo tono y las tres se aplanaban. */
+  background: linear-gradient(135deg, rgb(var(--claro)) 0%, rgb(var(--oscuro)) 62%);
+}
+
+.llamada-arcos span:nth-child(1) {
+  --s: 84rem;
+  --claro: 226 244 255;
+  --oscuro: 137 210 247;
+}
+
+.llamada-arcos span:nth-child(2) {
+  --s: 76rem;
+  --claro: 116 205 246;
+  --oscuro: 32 137 241;
+}
+
+.llamada-arcos span:nth-child(3) {
+  --s: 70rem;
+  --claro: 34 128 250;
+  --oscuro: 0 85 232;
+}
+
+/* El hover del botón sólido está clavado a `violet-strong` (#2f45d6), que no
+   hereda el `--violet` pisado. Sin esto, al pasar el mouse el píldora salta
+   de rey a índigo. */
+.llamada .bg-violet:hover {
+  background-color: rgb(0 78 220);
+}
+
+@media (max-width: 640px) {
+  /* La tarjeta se achica pero los arcos no pueden achicarse en proporción:
+     lo que manda es que el centro siga afuera y el radio le siga ganando a la
+     diagonal de la esquina. Con la escala de escritorio el arco más chico
+     ni llegaba a asomar. */
+  .llamada > .llamada-arcos {
+    right: -2.5rem;
+    bottom: -6rem;
+  }
+
+  .llamada-arcos span:nth-child(1) {
+    --s: 26.5rem;
+  }
+
+  .llamada-arcos span:nth-child(2) {
+    --s: 22rem;
+  }
+
+  .llamada-arcos span:nth-child(3) {
+    --s: 18.5rem;
+  }
+}
+
+/* La rueda de funciones (`landing/Orbita.astro`). Acá viven solo las dos capas
+   que no se pueden escribir con clases: la trama y el halo del núcleo.
+
+   La trama es la misma de `.fondo-seccion::after` pero un punto más marcada,
+   porque adentro de la tarjeta cae sobre `surface-nav` y no sobre la hoja. No
+   se enmascara contra los bordes: la tarjeta ya tiene un borde que la corta, y
+   una trama que se desvanece antes de llegar deja la esquina lavada. */
+.orbita::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgb(var(--tint) / 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.orbita > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* El halo del núcleo hace dos cosas de una: da la profundidad de la esfera y
+   **borra la trama** justo abajo de la marca, que si no le pasa por atrás y la
+   ensucia. De ahí que sean dos degradés y no uno — el de la hoja tapa los
+   puntos, el violeta pone la luz. Los dos mueren adentro de la caja
+   (`closest-side`), así que no hay circunferencia a la vista. */
+.orbita-halo {
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      closest-side,
+      rgb(var(--violet) / 0.1),
+      rgb(var(--violet) / 0.05) 46%,
+      rgb(var(--violet) / 0.018) 68%,
+      transparent 100%
+    ),
+    radial-gradient(closest-side, rgb(var(--surface-nav)) 42%, rgb(var(--surface-nav) / 0) 82%);
+}
+
 ::selection {
-  background: rgba(144, 133, 233, 0.35);
+  background: rgba(64, 88, 255, 0.25);
 }
 
 /* Paleta
@@ -300,40 +836,55 @@ html.pagina-oculta .fondo-seccion::before {
    raíz, que apunta a variables CSS. Esos valores viven en el CSS de la
    dashboard; este sitio no lo importa, así que hay que definirlos acá.
    Es el tema claro de la app: hoja blanca, tarjetas blancas, tinta oscura.
-   El cuadriculado vive en el `body`, no en las tarjetas. `--tint` es negro,
-   para que `border-tint/10` dibuje líneas suaves sobre el blanco. */
+   El cuadriculado vive en el `body`, no en las tarjetas. `--tint` es la tinta,
+   para que `border-tint/10` dibuje líneas suaves sobre el blanco.
+
+   La tinta no es un gris neutro sino un azul muy oscuro (#121722) y el acento
+   es azul rey (#4058ff). Los dos salen de la paleta de dock.us, que es la
+   referencia que se pidió seguir. Cambian la temperatura de la página entera:
+   los bordes y las superficies grises heredan ese azul por `--tint`, y es
+   parte de por qué esa clase de página se ve nítida en vez de apagada — un gris
+   neutro al lado de un acento saturado se lee como suciedad.
+
+   Cada nivel de `ink-*` está elegido para pasar 4.5:1 contra su fondo, y el
+   `faint` se mide contra `--surface-nav` (#faf9f7, el más claro sobre el que
+   cae) y no contra el blanco: ahí da 4.92, y el #777c86 del original daba 3.98.
+
+   Los títulos van en `--ink-primary` (#121722). En dock.us los párrafos son
+   ese mismo color al 80% (`#121722cc`) y el cuerpo suelto al 70% (`#121722b3`).
+   Acá el texto no lleva alfa — el mismo valor sobre blanco y sobre una tarjeta
+   no se lee igual — así que se aplastan a sólido: secondary es el 80% y muted
+   el 70%. La fuente de allá es Roobert, que es comercial; acá se queda Satoshi,
+   que es la geométrica que ya servimos, con los mismos pesos (500 el título,
+   400 el párrafo). */
 :root {
-  --tint: 24 24 27;
+  --tint: 18 23 34;
   --surface-page: 255 255 255;
   --surface-card: 255 255 255;
   --surface-raised: 255 255 255;
-  --surface-hover: 240 240 243;
-  --surface-nav: 250 250 251;
-  --ink-primary: 24 24 27;
-  --ink-secondary: 63 63 70;
-  --ink-muted: 90 90 99;
-  --ink-faint: 122 122 133;
+  --surface-hover: 242 241 238;
+  --surface-nav: 250 249 247;
+  --ink-primary: 18 23 34;
+  --ink-secondary: 65 69 78;
+  --ink-muted: 89 93 100;
+  --ink-faint: 104 109 122;
   --ink-inverted: 255 255 255;
-  --border: 24 24 27;
-  --border-strong: 24 24 27;
-  --violet: 84 72 191;
-  --violet-soft: 231 229 251;
+  --border: 18 23 34;
+  --border-strong: 18 23 34;
+  --violet: 64 88 255;
+  --violet-soft: 230 236 252;
   --status-good: 21 128 61;
   --status-warning: 180 120 10;
   --status-serious: 194 91 45;
   --status-critical: 190 40 40;
   --status-ink: 255 255 255;
-  --shadow-card: 0 1px 2px -1px rgba(24, 24, 27, 0.06);
-  --shadow-card-hover: 0 1px 2px -1px rgba(24, 24, 27, 0.08), 0 6px 16px -12px rgba(24, 24, 27, 0.3);
-  --shadow-pop: 0 8px 28px -8px rgba(24, 24, 27, 0.18), 0 2px 8px -4px rgba(24, 24, 27, 0.12);
+  --shadow-card: 0 1px 2px -1px rgba(18, 23, 34, 0.06);
+  --shadow-card-hover: 0 1px 2px -1px rgba(18, 23, 34, 0.08), 0 6px 16px -12px rgba(18, 23, 34, 0.3);
+  --shadow-pop: 0 8px 28px -8px rgba(18, 23, 34, 0.18), 0 2px 8px -4px rgba(18, 23, 34, 0.12);
 
   /* Sistema de animación. Mismo criterio que en la dashboard (keyframes en CSS
-     plano, retraso opcional vía `--d`), pero acá las cosas no se animan al
-     cargar sino al entrar en pantalla: una landing se recorre scrolleando y
-     una sección que ya se animó mientras estaba fuera de vista es una sección
-     que el visitante nunca vio moverse. De eso se encarga el observer que
-     declara el layout, que agrega `is-visible` a cada `.reveal` al cruzar el
-     viewport; hasta entonces el contenido está puesto pero quieto. */
+     plano, retraso opcional vía `--d`). Las entradas son al cargar —hero y
+     /login— no al scrollear: el resto de la página se muestra quieto. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-base: 320ms;
@@ -416,7 +967,12 @@ html.pagina-oculta .fondo-seccion::before {
 
 ::view-transition-old(conext-logo),
 ::view-transition-new(conext-logo) {
-  animation: none;
+  /* Acá sí se cruzan las opacidades, al revés que el root: la barra tiene el
+     logotipo entero y el panel de /login solo la marca, así que los dos
+     snapshots no tienen ni la misma forma ni la misma proporción. Sin el cruce
+     quedarían los dos opacos y estirados uno encima del otro. Mientras fueron
+     el mismo dibujo esto iba en `animation: none`, que para dos imágenes
+     idénticas era mejor: no hay nada que fundir. */
   mix-blend-mode: normal;
   /* El morph interpola tamaño y posición; sin esto el SVG se recorta
      mientras crece de la barra al panel. */
@@ -452,7 +1008,7 @@ html.pagina-oculta .fondo-seccion::before {
   @apply text-[15px] leading-relaxed text-ink-secondary;
 }
 .legal h2 {
-  @apply mb-3 mt-10 text-[17px] font-semibold text-ink-primary first:mt-0;
+  @apply mb-3 mt-10 text-[17px] font-medium text-ink-primary first:mt-0;
 }
 .legal p + p {
   @apply mt-4;
@@ -470,34 +1026,14 @@ html.pagina-oculta .fondo-seccion::before {
 .legal li::marker {
   color: rgb(var(--ink-muted));
 }
-.legal a {
+.legal a,
+.ayuda-respuesta a {
   @apply text-ink-primary underline decoration-tint/25 underline-offset-2 transition-colors duration-200 hover:decoration-violet;
 }
 
 @layer utilities {
-  /* El estado de partida se declara en el elemento y no en el keyframe: si la
-     animación nunca llega a correr (JS caído, observer no soportado), lo que
-     manda es `.reveal` — por eso el layout marca todo como visible cuando no
-     hay IntersectionObserver, y trae un <noscript> que hace lo mismo cuando no
-     hay JavaScript en absoluto, en vez de dejar la página invisible. */
-  .reveal {
-    opacity: 0;
-  }
-  .reveal.is-visible {
-    animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) forwards;
-  }
-  .reveal-fade.is-visible {
-    animation-name: ui-fade-in;
-  }
-  .reveal-scale.is-visible {
-    animation-name: ui-scale-in;
-  }
-
-  /* Entrada al cargar, no al scrollear. Para el hero y para /login, que no
-     tienen un pliegue que cruzar: si usaran `.reveal`, el observer con margen
-     negativo dejaría el pie del login invisible para siempre.
-     `backwards` aplica el keyframe `from` durante el retraso, así el stagger
-     no muestra el elemento y después lo esconde. */
+  /* Entrada al cargar. `backwards` aplica el keyframe `from` durante el
+     retraso, así el stagger no muestra el elemento y después lo esconde. */
   .animate-in {
     animation: ui-fade-up var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards;
   }
@@ -513,41 +1049,93 @@ html.pagina-oculta .fondo-seccion::before {
   .animate-in-pop {
     animation: ui-pop-in 260ms cubic-bezier(0.34, 1.28, 0.64, 1) var(--d, 0ms) backwards;
   }
+}
 
-  /* Escalona los hijos directos sin calcular delays en JS. Se combina con
-     `.reveal`: cada hijo arranca al entrar en pantalla y esto reparte el
-     retraso dentro de la grilla. */
-  .stagger > *:nth-child(1) {
-    --d: 0ms;
+/* Alta (/empezar). Una pregunta por pantalla, sin scroll de página.
+   El movimiento es avanzar / volver. `empezar-vivo` lo pone el script
+   de la vista: si ya contestó, redirige y esta hoja no se llega a ver. */
+.empezar-pagina {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: rgb(var(--surface-page));
+  opacity: 0;
+}
+
+html.empezar-vivo .empezar-pagina {
+  opacity: 1;
+}
+
+html.empezar-vivo,
+html.empezar-vivo body,
+html.empezar-vivo main {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.empezar-progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: 2px;
+  background: rgb(var(--tint) / 0.08);
+  pointer-events: none;
+}
+
+.empezar-progreso > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: rgb(var(--violet));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 480ms var(--ease-out-expo);
+}
+
+@keyframes paso-in-adelante {
+  from {
+    opacity: 0;
+    transform: translate3d(1.75rem, 0, 0);
   }
-  .stagger > *:nth-child(2) {
-    --d: 70ms;
-  }
-  .stagger > *:nth-child(3) {
-    --d: 140ms;
-  }
-  .stagger > *:nth-child(4) {
-    --d: 210ms;
-  }
-  .stagger > *:nth-child(5) {
-    --d: 280ms;
-  }
-  .stagger > *:nth-child(6) {
-    --d: 350ms;
-  }
-  .stagger > *:nth-child(n + 7) {
-    --d: 420ms;
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* Nada de todo lo anterior debería marear a quien pidió menos movimiento. El
-   `opacity: 1` no es decorativo: sin él, `.reveal` dejaría la página entera
-   invisible cuando las animaciones duran 0.01 ms y nunca se ven. */
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
+@keyframes paso-in-atras {
+  from {
+    opacity: 0;
+    transform: translate3d(-1.75rem, 0, 0);
   }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 
+.paso-in-adelante {
+  animation: paso-in-adelante 520ms var(--ease-out-expo) both;
+}
+
+.paso-in-atras {
+  animation: paso-in-atras 520ms var(--ease-out-expo) both;
+}
+
+.empezar-opcion {
+  animation: ui-fade-up 420ms var(--ease-out-expo) calc(40ms + var(--i, 0) * 35ms) backwards;
+}
+
+.empezar-opcion[aria-checked='true'] {
+  animation: ui-pop-in 280ms cubic-bezier(0.34, 1.28, 0.64, 1);
+}
+
+/* Nada de todo lo anterior debería marear a quien pidió menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
   @view-transition {
     navigation: none;
   }

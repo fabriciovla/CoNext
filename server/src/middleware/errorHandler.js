@@ -1,4 +1,6 @@
 export function errorHandler(err, req, res, next) {
   console.error(err)
-  res.status(500).json({ error: err.message || 'Error interno del servidor' })
+  res.status(err.status && err.status >= 400 && err.status < 600 ? err.status : 500).json({
+    error: err.message || 'Error interno del servidor',
+  })
 }

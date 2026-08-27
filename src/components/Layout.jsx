@@ -1,12 +1,10 @@
-import { IconSidebarToggle } from './ui/icons'
-
 // La barra de la izquierda es una sola y vive acá: se arma en App (`nav`) y no
 // cambia de forma al navegar. Lo que sí cambia es el marco de la derecha — la
 // bandeja arma sus propias columnas y ocupa la pantalla entera, sin padding; el
 // resto de las páginas usan el margen de siempre. Ya no hay barra superior: el
 // buscador global no filtraba nada fuera de la bandeja (que tiene el suyo) y el
 // usuario ya está al pie de la barra izquierda.
-export default function Layout({ current, nav, navOpen = true, onExpandNav, children }) {
+export default function Layout({ current, nav, children }) {
   const ownsChrome = current === 'inbox'
   // Productos llena la altura: el listado scrollea adentro de la tarjeta.
   // Si `main` scrolleara, con muchos ítems se iban el título, las carpetas y
@@ -15,16 +13,7 @@ export default function Layout({ current, nav, navOpen = true, onExpandNav, chil
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface-page">
-      {/* La barra se colapsa animando el ancho del contenedor: desmontarla
-          cortaría la transición en seco. Animar el ancho relayoutea la página
-          entera en cada cuadro, así que la transición es corta a propósito. */}
-      <div
-        className={`shrink-0 overflow-hidden transition-[width] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          navOpen ? 'w-[248px]' : 'w-0'
-        }`}
-      >
-        {nav}
-      </div>
+      {nav}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {ownsChrome ? (
@@ -34,39 +23,24 @@ export default function Layout({ current, nav, navOpen = true, onExpandNav, chil
             {children}
           </main>
         ) : (
-          <>
-            {/* Con la barra plegada hace falta una forma de traerla de vuelta.
-                En la bandeja ese botón lo pone la lista de conversaciones. */}
-            {!navOpen && (
-              <div className="px-6 pt-5">
-                <button
-                  onClick={onExpandNav}
-                  title="Mostrar barra"
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
-                >
-                  <IconSidebarToggle size={15} />
-                </button>
-              </div>
-            )}
-            {/* El contenido va en una columna centrada y con techo de ancho: sin
-                el techo, en un monitor ancho la página se estira de borde a borde
-                y las tarjetas quedan pegadas a la izquierda. El `w-full` es lo
-                que hace que el `mx-auto` centre en pantallas chicas también. */}
-            <main
-              className={`flex-1 px-6 py-5 ${
-                fillsViewport ? 'flex min-h-0 flex-col overflow-hidden' : 'overflow-y-auto'
+          // El contenido va en una columna centrada y con techo de ancho: sin
+          // el techo, en un monitor ancho la página se estira de borde a borde
+          // y las tarjetas quedan pegadas a la izquierda. El `w-full` es lo
+          // que hace que el `mx-auto` centre en pantallas chicas también.
+          <main
+            className={`flex-1 px-6 py-5 ${
+              fillsViewport ? 'flex min-h-0 flex-col overflow-hidden' : 'overflow-y-auto'
+            }`}
+          >
+            <div
+              key={current}
+              className={`animate-fade-in mx-auto w-full max-w-[1100px] ${
+                fillsViewport ? 'flex min-h-0 min-w-0 flex-1 flex-col' : ''
               }`}
             >
-              <div
-                key={current}
-                className={`animate-fade-in mx-auto w-full max-w-[1100px] ${
-                  fillsViewport ? 'flex min-h-0 min-w-0 flex-1 flex-col' : ''
-                }`}
-              >
-                {children}
-              </div>
-            </main>
-          </>
+              {children}
+            </div>
+          </main>
         )}
       </div>
     </div>

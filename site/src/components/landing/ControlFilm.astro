@@ -12,6 +12,7 @@ import {
   IconSmile,
   IconSparkles,
 } from '../icons.jsx'
+import { t } from '../../i18n/utils'
 
 // Película de la bandeja: la IA deja el borrador, una persona lo manda.
 //
@@ -26,10 +27,12 @@ import {
 // hay coordenada escrita a mano en ninguna parte: le acierta al botón a
 // cualquier ancho, y el texto se lee nítido porque es texto.
 
+const { lang = 'es' } = Astro.props
+const m = t(lang).mock
+
 const RESPUESTAS = {
-  martin:
-    'Sí, aceptamos transferencia. Te paso los datos y en cuanto me envíes el comprobante lo despacho.',
-  laura: 'Sí, las dos juntas quedan en $102.000. Si te cierra te armo el pedido.',
+  martin: m.martinDraftCorto,
+  laura: m.lauraDraft,
 }
 
 // Tres chats, dos modos: Martín y Laura tocan plata y esperan que alguien
@@ -41,47 +44,47 @@ const HILOS = [
     clave: 'martin',
     nombre: 'Martín Ríos',
     telefono: '+54 9 11 5555-0142',
-    agente: 'Ventas',
-    modo: 'borrador',
+    agente: m.ventas,
+    modo: m.modoBorrador,
     respuesta: RESPUESTAS.martin,
     mensajes: [
       // `viejo` es lo que se cae abajo de lg: sin la lista al costado la
       // columna queda angosta, cada burbuja pasa a tres renglones y el hilo
       // entero no entra. El pedido y la respuesta son los que cuentan.
-      { de: 'cliente', viejo: true, texto: 'Hola, ¿tienen la campera de jean en talle M?' },
+      { de: 'cliente', viejo: true, texto: m.martinMsg1 },
       {
         de: 'agente',
-        autor: 'Ventas',
+        autor: m.ventas,
         viejo: true,
-        texto: 'Sí, nos queda una en M. Sale $48.900 y si la pides hoy sale para tu casa mañana.',
+        texto: m.martinMsg2,
       },
-      { de: 'cliente', texto: 'Buenísimo. ¿Aceptan transferencia?' },
+      { de: 'cliente', texto: m.martinMsg3 },
     ],
   },
   {
     clave: 'laura',
     nombre: 'Laura Gómez',
     telefono: '+54 9 11 4444-0087',
-    agente: 'Ventas',
-    modo: 'borrador',
+    agente: m.ventas,
+    modo: m.modoBorrador,
     respuesta: RESPUESTAS.laura,
     mensajes: [
-      { de: 'cliente', texto: 'Quiero la de jean y la de cuero. ¿Me hacen precio por las dos?' },
+      { de: 'cliente', texto: m.lauraMsg },
     ],
   },
   {
     clave: 'nicolas',
     nombre: 'Nicolás Paz',
     telefono: '+54 9 351 444-0198',
-    agente: 'Envíos',
-    modo: 'automático',
+    agente: m.envios,
+    modo: m.modoAuto,
     mensajes: [
-      { de: 'cliente', texto: 'Hola! ¿Hacen envíos a Córdoba?' },
+      { de: 'cliente', texto: m.nicolasMsg },
       {
         de: 'agente',
-        autor: 'Envíos',
-        nota: 'enviado solo',
-        texto: 'Sí, enviamos a todo el país por Andreani. A Córdoba llega en 48 h y el envío sale $6.200.',
+        autor: m.envios,
+        nota: m.enviadoSolo,
+        texto: m.nicolasReply,
       },
     ],
   },
@@ -89,7 +92,7 @@ const HILOS = [
 
 // Una sola fila quieta al fondo: con cuatro nombres la lista se lee como
 // bandeja y no como el guión de la película.
-const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Gracias! Cualquier cosa escribo' }]
+const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.carlaUltimo }]
 ---
 
 <div
@@ -102,7 +105,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
   aria-hidden="true"
 >
   <div class="flex h-full">
-    <BarraMock className="hidden w-[212px] lg:flex" />
+    <BarraMock className="hidden w-[212px] lg:flex" lang={lang} />
 
     {/* ------------------------------------------------------------------ */}
     {/* Lista                                                               */}
@@ -112,17 +115,17 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
         <div class="flex items-center justify-between border-b border-tint/[0.07]">
           <div class="flex items-center gap-4">
             <span class="relative pb-2.5 pt-1 text-[13.5px] font-medium text-violet">
-              Chats
+              {m.chats}
               <span class="absolute -bottom-px left-0 h-[2px] w-full rounded-full bg-violet"></span>
             </span>
-            <span class="pb-2.5 pt-1 text-[13.5px] font-medium text-ink-muted">Llamadas</span>
+            <span class="pb-2.5 pt-1 text-[13.5px] font-medium text-ink-muted">{m.llamadas}</span>
           </div>
           <div class="flex gap-0.5 pb-1.5 text-ink-muted">
             <span class="flex h-7 w-7 items-center justify-center"><IconCompose size={15} /></span>
             <span class="flex h-7 w-7 items-center justify-center"><IconSearch size={15} /></span>
           </div>
         </div>
-        <p class="py-2 text-[12.5px] text-ink-muted">Abiertas, recientes</p>
+        <p class="py-2 text-[12.5px] text-ink-muted">{m.abiertas}</p>
       </header>
 
       <div class="min-h-0 flex-1 space-y-px overflow-hidden px-2 pb-2">
@@ -136,11 +139,11 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
             <div class="flex items-baseline justify-between gap-2">
               <p class="truncate text-[13.5px] font-medium text-ink-primary">Martín Ríos</p>
               <span class="film-antes shrink-0 text-[11.5px] tabular-nums text-ink-faint">2 min</span>
-              <span class="film-despues shrink-0 text-[11.5px] tabular-nums text-ink-faint">ahora</span>
+              <span class="film-despues shrink-0 text-[11.5px] tabular-nums text-ink-faint">{m.ahora}</span>
             </div>
             <div class="film-antes mt-0.5 flex items-center gap-1.5">
               <IconArrowIn size={12} className="shrink-0 text-[#25d366]" />
-              <p class="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">¿Aceptan transferencia?</p>
+              <p class="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">{m.martinUltimo}</p>
               <span
                 class="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-status-warning px-1 text-[10.5px] font-bold text-status-ink"
               >
@@ -160,11 +163,11 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
             <div class="flex items-baseline justify-between gap-2">
               <p class="truncate text-[13.5px] font-medium text-ink-primary">Laura Gómez</p>
               <span class="film-antes shrink-0 text-[11.5px] tabular-nums text-ink-faint">9 min</span>
-              <span class="film-despues shrink-0 text-[11.5px] tabular-nums text-ink-faint">ahora</span>
+              <span class="film-despues shrink-0 text-[11.5px] tabular-nums text-ink-faint">{m.ahora}</span>
             </div>
             <div class="film-antes mt-0.5 flex items-center gap-1.5">
               <IconArrowIn size={12} className="shrink-0 text-[#25d366]" />
-              <p class="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">¿Me hacen precio por las dos?</p>
+              <p class="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">{m.lauraPregunta}</p>
               <span
                 class="flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-status-warning px-1 text-[10.5px] font-bold text-status-ink"
               >
@@ -188,7 +191,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
             <div class="mt-0.5 flex items-center gap-1.5">
               <IconArrowOut size={12} className="shrink-0 text-ink-faint" />
               <p class="min-w-0 flex-1 truncate text-[12.5px] text-ink-muted">
-                Sí, enviamos a todo el país por Andreani.
+                {m.nicolasLista}
               </p>
             </div>
           </div>
@@ -246,7 +249,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
               <div
                 class="flex min-h-0 flex-1 flex-col justify-end gap-3 overflow-hidden px-4 pb-1 pt-4 sm:gap-3.5 sm:px-6"
               >
-                <p class="text-center text-[12px] text-ink-faint">Viernes, 14 de agosto</p>
+                <p class="text-center text-[12px] text-ink-faint">{m.fecha}</p>
 
                 {mensajes.map(({ de, autor, nota, texto, viejo }) => (
                   <div
@@ -333,8 +336,8 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
               </span>
               <div class="min-w-0 flex-1">
                 <p class="text-[12px] font-medium text-violet">
-                  Respuesta sugerida
-                  <span class="text-ink-muted"> · la escribió Ventas</span>
+                  {m.sugerida}
+                  <span class="text-ink-muted">{m.laEscribio}</span>
                 </p>
                 <p class="film-sug-texto mt-1 text-[13px] leading-snug text-ink-primary sm:text-[13.5px]">
                   {RESPUESTAS.martin}
@@ -342,12 +345,12 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
               </div>
             </div>
             <div class="mt-2.5 flex items-center justify-end gap-1 border-t border-violet/15 px-2.5 py-1.5">
-              <span class="rounded-lg px-2.5 py-1 text-[12px] text-ink-muted">Descartar</span>
+              <span class="rounded-lg px-2.5 py-1 text-[12px] text-ink-muted">{m.descartar}</span>
               <span
                 class="rounded-lg bg-violet px-2.5 py-1 text-[12px] font-medium text-ink-inverted"
                 data-t="usar"
               >
-                Usar y editar
+                {m.usarEditar}
               </span>
             </div>
           </div>
@@ -367,7 +370,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
             class="film-cuadro relative flex min-w-0 max-h-20 flex-1 flex-col justify-end overflow-hidden px-2.5 py-2 text-[13.5px] leading-relaxed sm:text-[14px]"
           >
             <span class="film-campo text-ink-primary"></span><span class="film-ph text-ink-faint"
-              >Escribe un mensaje</span
+              >{m.escribe}</span
             >
           </span>
           <span class="flex shrink-0 items-center gap-0.5 pr-0.5 text-ink-muted">
@@ -375,7 +378,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: 'Grac
             <span class="flex h-8 w-8 items-center justify-center"><IconPaperclip size={17} /></span>
             <span class="flex h-8 w-8 items-center justify-center"><IconMic size={17} /></span>
             <span
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-ink-primary text-ink-inverted"
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-violet text-ink-inverted"
               data-t="enviar"
             >
               <IconSend size={15} />

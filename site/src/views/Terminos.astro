@@ -1,0 +1,214 @@
+---
+import Legal from '../components/Legal.astro'
+import { EMAIL } from '../config'
+import { getLocale, t, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const copy = t(lang).legal
+const privacidad = pathFor(lang, '/privacidad')
+const eliminar = pathFor(lang, '/eliminar-datos')
+---
+
+<Legal
+  title={copy.terminosTitle}
+  description={copy.terminosDescription}
+  heading={copy.terminosHeading}
+  actualizada={copy.terminosFecha}
+>
+  {
+    lang === 'en' ? (
+      <>
+        <p>
+          These terms govern the use of <strong>conext</strong> (<a href="https://conext.lat">conext.lat</a>),
+          the CRM that connects a business WhatsApp Business to AI agents. By creating an account,
+          connecting a number, or using the dashboard, you accept these conditions and the
+          <a href={privacidad}>privacy policy</a>.
+        </p>
+
+        <h2>The service</h2>
+        <p>
+          conext receives and sends messages through the official WhatsApp Business API (Meta),
+          classifies and drafts replies with AI, and gives you an inbox so a person can review what
+          should not go out on its own. The number and the WhatsApp account are yours: if you leave,
+          you take them with you.
+        </p>
+        <p>
+          The product evolves. Features in trial may change or go away without that being a breach.
+        </p>
+
+        <h2>Your account</h2>
+        <p>
+          You are responsible for whoever signs in with your credentials and for what is sent from
+          your number. The service is meant for businesses, not for anyone under 18.
+        </p>
+        <p>
+          Connecting WhatsApp requires a Meta Business account and accepting Meta’s and WhatsApp
+          Business terms. conext does not replace that contract: it is a channel on top of that API.
+        </p>
+
+        <h2>Artificial intelligence</h2>
+        <p>
+          Agents can be wrong: invent a price, misread a request, or send a tone you did not want.
+          That is why draft mode exists. You decide what is sent automatically and what is reviewed.
+          We do not promise that a reply is correct, complete, or appropriate for every customer.
+        </p>
+        <p>
+          Message text is sent to a Google model (Gemini) to classify and draft, as explained in the
+          privacy policy.
+        </p>
+
+        <h2>Acceptable use</h2>
+        <p>You may not use conext for:</p>
+        <ul>
+          <li>Spam, phishing, fraud, or any illegal content.</li>
+          <li>Circumventing WhatsApp Business or Meta policies.</li>
+          <li>Trying to access another customer’s data.</li>
+          <li>Probing, overloading, or breaking the service.</li>
+        </ul>
+        <p>If you do, we may suspend or close the account.</p>
+
+        <h2>Price</h2>
+        <p>
+          The software is billed according to the agreement we have (today, monthly and based on the
+          size of the operation). Separately, Meta charges WhatsApp conversations to your Meta
+          account, at their rate. We do not invoice that charge or add a markup.
+        </p>
+
+        <h2>Availability</h2>
+        <p>
+          We work to keep the service up, but it depends on Meta, Google, and hosting. A WhatsApp
+          outage, an API rejection, or an infrastructure drop is not a breach on our part. There is
+          no written SLA unless we agree one separately.
+        </p>
+
+        <h2>Liability</h2>
+        <p>
+          conext is offered “as is”. To the extent the law allows, we are not liable for lost
+          profits, lost messages, or indirect damages, nor for what an agent sends if you turned on
+          auto-send. Our total liability, if any, does not exceed what you paid for the service in
+          the three months before the claim.
+        </p>
+        <p>Nothing here limits rights that Argentine law does not allow to be limited.</p>
+
+        <h2>Data</h2>
+        <p>
+          Personal data processing is governed by the
+          <a href={privacidad}>privacy policy</a>. To delete the account and what is tied to it,
+          follow <a href={eliminar}>Data deletion</a>.
+        </p>
+
+        <h2>Trademarks</h2>
+        <p>
+          WhatsApp is a registered trademark of Meta Platforms, Inc. conext is not part of Meta and
+          is not endorsed by Meta, beyond using its API as a technology provider.
+        </p>
+
+        <h2>Law and contact</h2>
+        <p>
+          These terms are governed by the laws of the Argentine Republic. For any notice:
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        </p>
+        <p>
+          We may update these terms. The date above changes with each version. If the change is
+          material, we notify by email or in the dashboard.
+        </p>
+      </>
+    ) : (
+      <>
+        <p>
+          Estos términos rigen el uso de <strong>conext</strong> (<a href="https://conext.lat">conext.lat</a>),
+          el CRM que conecta el WhatsApp Business de un negocio con agentes de IA. Al crear una cuenta, conectar
+          un número o usar el panel, aceptas estas condiciones y la
+          <a href={privacidad}>política de privacidad</a>.
+        </p>
+
+        <h2>El servicio</h2>
+        <p>
+          conext recibe y envía mensajes por la API oficial de WhatsApp Business (Meta), clasifica y redacta
+          respuestas con inteligencia artificial, y te deja una bandeja para que una persona revise lo que
+          no deba salir solo. El número y la cuenta de WhatsApp son tuyos: si te vas, te los llevas.
+        </p>
+        <p>
+          El producto evoluciona. Funciones en prueba pueden cambiar o salir sin que eso sea un incumplimiento.
+        </p>
+
+        <h2>Tu cuenta</h2>
+        <p>
+          Eres responsable de quien entra con tus credenciales y de lo que se envía desde tu número. El
+          servicio está pensado para negocios, no para menores de 18 años.
+        </p>
+        <p>
+          Para conectar WhatsApp hace falta una cuenta de Meta Business y aceptar las condiciones de Meta
+          y de WhatsApp Business. conext no reemplaza ese contrato: es un canal sobre esa API.
+        </p>
+
+        <h2>Inteligencia artificial</h2>
+        <p>
+          Los agentes pueden equivocarse: inventar un precio, malinterpretar un pedido o mandar un tono que
+          no querías. Por eso existe el modo borrador. Eres tú quien decide qué se envía en automático y
+          qué se revisa. No prometemos que una respuesta sea correcta, completa ni adecuada a cada cliente.
+        </p>
+        <p>
+          El texto de los mensajes se envía a un modelo de Google (Gemini) para clasificar y redactar, como
+          se explica en la política de privacidad.
+        </p>
+
+        <h2>Uso aceptable</h2>
+        <p>No puedes usar conext para:</p>
+        <ul>
+          <li>Spam, phishing, fraude o cualquier contenido ilegal.</li>
+          <li>Eludir las políticas de WhatsApp Business o de Meta.</li>
+          <li>Intentar acceder a datos de otro cliente.</li>
+          <li>Sondear, sobrecargar o romper el servicio.</li>
+        </ul>
+        <p>Si lo haces, podemos suspender o cerrar la cuenta.</p>
+
+        <h2>Precio</h2>
+        <p>
+          El software se paga según el acuerdo que tengamos (hoy, por mes y según el tamaño de la operación).
+          Aparte, Meta cobra las conversaciones de WhatsApp a tu cuenta de Meta, con su tarifa. Ese cobro no
+          lo facturamos nosotros ni le agregamos un margen.
+        </p>
+
+        <h2>Disponibilidad</h2>
+        <p>
+          Nos esforzamos por mantener el servicio arriba, pero depende de Meta, de Google y del hosting.
+          Un corte de WhatsApp, un rechazo de la API o una caída de infraestructura no es un incumplimiento
+          nuestro. No hay SLA escrito salvo que lo pactemos aparte.
+        </p>
+
+        <h2>Responsabilidad</h2>
+        <p>
+          conext se ofrece «tal cual». En la medida que permita la ley, no respondemos por lucro cesante,
+          pérdida de mensajes o daños indirectos, ni por lo que un agente envíe si tú activaste el envío
+          automático. Nuestra responsabilidad total, si la hubiera, no supera lo que hayas pagado por el
+          servicio en los tres meses anteriores al reclamo.
+        </p>
+        <p>Nada de esto limita derechos que la ley argentina no deje limitar.</p>
+
+        <h2>Datos</h2>
+        <p>
+          El tratamiento de datos personales se rige por la
+          <a href={privacidad}>política de privacidad</a>. Para borrar la cuenta y lo asociado, sigue
+          <a href={eliminar}>Eliminación de datos</a>.
+        </p>
+
+        <h2>Marcas</h2>
+        <p>
+          WhatsApp es una marca registrada de Meta Platforms, Inc. conext no es parte de Meta ni está
+          respaldada por Meta, más allá de usar su API como proveedor tecnológico.
+        </p>
+
+        <h2>Ley y contacto</h2>
+        <p>
+          Estos términos se rigen por las leyes de la República Argentina. Para cualquier aviso:
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        </p>
+        <p>
+          Podemos actualizar estos términos. La fecha de arriba cambia con cada versión. Si el cambio es
+          sustancial, avisamos por correo o en el panel.
+        </p>
+      </>
+    )
+  }
+</Legal>

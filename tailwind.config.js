@@ -36,13 +36,13 @@ export default {
           DEFAULT: token('--border'),
           strong: token('--border-strong'),
         },
-        // Acento violeta → magenta (identidad de marca, usado en degradés).
-        // El violeta también varía: el de marca (#9085e9) sobre un fondo claro
-        // no llega a contrastar como texto, así que en el tema claro se oscurece.
-        // El degradé de `accent-gradient` sí queda fijo: es la identidad.
+        // El acento. Sigue llamándose `violet` por el nombre de la clase, que
+        // está escrito en medio proyecto, pero desde que se adoptó la paleta de
+        // dock.us es azul rey: #4058ff en el tema claro y #7b95ff en el oscuro,
+        // porque el mismo azul sobre negro se apaga.
         violet: {
           DEFAULT: token('--violet'),
-          strong: '#7166d1',
+          strong: '#2f45d6',
           soft: 'rgb(var(--violet-soft) / <alpha-value>)',
         },
         magenta: {
@@ -60,9 +60,18 @@ export default {
           ink: token('--status-ink'),
         },
       },
+      // Satoshi, en su versión variable (300 a 900 en un archivo de 42 KB). Se
+      // sirve desde `public/fonts/` en los dos proyectos — no hay pedido a
+      // Google Fonts ni a ningún CDN.
+      //
+      // Reemplazó a Inter, que era una grotesca de interfaz, neutra a
+      // propósito. Satoshi es geométrica y tiene más carácter: es lo que hace
+      // que un bloque de texto se lea como producto y no como panel de control.
+      // El stack de respaldo sigue siendo el del sistema, para los 100 ms que
+      // tarda en llegar el archivo.
       fontFamily: {
         sans: [
-          'Inter',
+          'Satoshi',
           '-apple-system',
           'BlinkMacSystemFont',
           'Segoe UI',
@@ -76,7 +85,7 @@ export default {
         sm: ['0.8125rem', { lineHeight: '1.25rem' }],
       },
       boxShadow: {
-        glow: '0 8px 24px -6px rgba(144,133,233,0.55)',
+        glow: '0 8px 24px -6px rgba(64,88,255,0.45)',
         card: 'var(--shadow-card)',
         'card-hover': 'var(--shadow-card-hover)',
         // Para lo que de verdad flota sobre la página (modal, menú, tooltip).
@@ -84,7 +93,7 @@ export default {
         pop: 'var(--shadow-pop)',
       },
       backgroundImage: {
-        'accent-gradient': 'linear-gradient(135deg, #9085e9 0%, #d55181 100%)',
+        'accent-gradient': 'linear-gradient(135deg, #4058ff 0%, #408cff 100%)',
       },
     },
   },

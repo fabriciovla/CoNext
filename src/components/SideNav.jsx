@@ -7,7 +7,6 @@ import {
   IconSettings,
   IconLogOut,
   IconChevronDown,
-  IconSidebarToggle,
   IconSparkles,
   IconSun,
   IconMoon,
@@ -95,7 +94,6 @@ export default function SideNav({
   username,
   onLogout,
   pendingCount = 0,
-  onCollapse,
   theme,
   onToggleTheme,
   children,
@@ -106,21 +104,9 @@ export default function SideNav({
       {/* Solo el logotipo: el cuadrado con la "W" y el "WhatsApp CRM / Panel de
           administración" decían tres veces dónde estabas parado, en la única
           pantalla de la que nadie duda. Hereda el color por `currentColor`, así
-          sirve en los dos temas.
-          El logo se centra contra la barra entera y el botón de ocultar va
-          absoluto: en una fila normal, el ancho del botón correría el centro
-          hacia la izquierda y el logo quedaría descentrado por 12px. */}
-      <header className="relative flex shrink-0 items-center justify-center px-3.5 py-4">
-        <Logo className="h-6 w-auto text-ink-primary" />
-        {onCollapse && (
-          <button
-            onClick={onCollapse}
-            title="Ocultar barra"
-            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
-          >
-            <IconSidebarToggle size={15} />
-          </button>
-        )}
+          sirve en los dos temas. */}
+      <header className="flex shrink-0 items-center justify-center px-3.5 pb-5 pt-3.5">
+        <Logo className="h-4 w-auto text-ink-primary" />
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">

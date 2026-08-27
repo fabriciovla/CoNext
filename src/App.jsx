@@ -27,7 +27,8 @@ const TITULO_APP = {
 }
 
 export default function App() {
-  const { user, isAuthenticated, error, login, logout, clearError } = useAuth()
+  const { user, isAuthenticated, listo, error, login, loginCon, oauthPending, social, logout, clearError } =
+    useAuth()
   const {
     messages,
     resolveConversation,
@@ -79,11 +80,10 @@ export default function App() {
   // Inicio). La navegación normal del sidebar lo deja en null.
   const [focusPhone, setFocusPhone] = useState(null)
   // Lo que muestra la barra de la izquierda vive acá y no en la bandeja: la
-  // barra es la misma en todas las páginas, así que el filtro, el día que se
-  // está mirando y el plegado le sobreviven al cambio de página.
+  // barra es la misma en todas las páginas, así que el filtro y el día que se
+  // está mirando le sobreviven al cambio de página.
   const [filter, setFilter] = useState({ type: 'todos', value: null })
   const [viewingDayId, setViewingDayId] = useState(null)
-  const [navOpen, setNavOpen] = useState(true)
   const [confirmClose, setConfirmClose] = useState(false)
   // Agente que se pidió abrir desde la barra: el id de uno existente o 'nuevo'.
   // La página de Agentes lo consume y lo suelta enseguida, así volver a tocar el
@@ -151,10 +151,17 @@ export default function App() {
     document.title = isAuthenticated ? (TITULO_APP[page] ?? 'conext') : 'Entrar · conext'
   }, [isAuthenticated, page])
 
+  if (!listo) {
+    return <div className="min-h-dvh bg-surface-page" />
+  }
+
   if (!isAuthenticated) {
     return (
       <Login
         onLogin={login}
+        onOAuth={loginCon}
+        oauthPending={oauthPending}
+        social={social}
         error={error}
         onClearError={clearError}
         theme={theme}
@@ -168,8 +175,6 @@ export default function App() {
       <ApiErrorBanner error={apiError} onDismiss={dismissApiError} />
       <Layout
         current={page}
-        navOpen={navOpen}
-        onExpandNav={() => setNavOpen(true)}
         nav={
           <AppNav
             current={page}
@@ -191,7 +196,6 @@ export default function App() {
             dayClosedAt={dayClosedAt}
             onCloseDay={() => setConfirmClose(true)}
             onOpenNewDay={openNewDay}
-            onCollapse={() => setNavOpen(false)}
             theme={theme}
             onToggleTheme={toggleTheme}
           />
@@ -230,8 +234,6 @@ export default function App() {
             onSendMedia={sendMedia}
             onAddNote={addNote}
             dayStatus={dayStatus}
-            navOpen={navOpen}
-            onExpandNav={() => setNavOpen(true)}
           />
         )}
         {page === 'products' && (

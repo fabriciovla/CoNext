@@ -33,55 +33,11 @@ import {
 // vista lo que esa foto no mostraba — el borrador de un agente esperando
 // aprobación, que es lo que diferencia al producto.
 
-const NAV = [
-  { Icono: IconHome, label: 'Inicio' },
-  { Icono: IconInbox, label: 'Bandeja', cuenta: '1', activo: true },
-  { Icono: IconSparkles, label: 'Agentes IA' },
-  { Icono: IconBox, label: 'Productos' },
-  { Icono: IconSettings, label: 'Configuración' },
-]
+import { ui } from '../../i18n/ui'
 
-const CARPETAS = [
-  { Icono: IconInbox, label: 'Todas', cuenta: '8', activa: true },
-  { Icono: IconUser, label: 'Mías', cuenta: '3' },
-  { Icono: IconUsers, label: 'Sin asignar', cuenta: '2' },
-  { Icono: IconClock, label: 'Pendientes', cuenta: '1' },
-]
-
-const AGENTES = [
-  { label: 'Recepcionista', cuenta: '4', on: true },
-  { label: 'Ventas', cuenta: '3', on: true },
-  { label: 'Envíos', cuenta: '1', on: false },
-]
-
-const CONVERSACIONES = [
-  {
-    nombre: 'Martín Ríos',
-    ultimo: '¿Aceptan transferencia?',
-    hora: '2 min',
-    entrada: true,
-    pendiente: 1,
-    activa: true,
-  },
-  {
-    nombre: 'Laura Gómez',
-    ultimo: 'Perfecto, lo retiro mañana',
-    hora: '18 min',
-    entrada: false,
-  },
-  {
-    nombre: 'Nicolás Paz',
-    ultimo: '¿Hacen envíos a Córdoba?',
-    hora: '1 h',
-    entrada: true,
-  },
-  {
-    nombre: 'Carla Vega',
-    ultimo: 'Gracias! Cualquier cosa escribo',
-    hora: '3 h',
-    entrada: false,
-  },
-]
+function mock(lang) {
+  return ui[lang]?.mock ?? ui.es.mock
+}
 
 export function Foto({ size = 38 }) {
   return (
@@ -149,7 +105,10 @@ function Seccion({ titulo, children }) {
 
 // La barra sale aparte porque la usa también la película de "El control": es la
 // misma app, y dos copias de la barra empiezan iguales y terminan distintas.
-export function BarraMock({ className = 'hidden w-[200px] md:flex' }) {
+export function BarraMock({ className = 'hidden w-[200px] md:flex', lang = 'es' }) {
+  const m = mock(lang)
+  const navIconos = [IconHome, IconInbox, IconSparkles, IconBox, IconSettings]
+  const carpetaIconos = [IconInbox, IconUser, IconUsers, IconClock]
   return (
     <aside className={`shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav ${className}`}>
       <header className="flex items-center justify-center px-3 py-3.5">
@@ -157,32 +116,44 @@ export function BarraMock({ className = 'hidden w-[200px] md:flex' }) {
       </header>
 
       <div className="min-h-0 flex-1 overflow-hidden px-2">
-        {NAV.map(({ Icono, label, cuenta, activo }) => (
-          <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activo} />
-        ))}
+        {m.nav.map(({ label, cuenta, activo }, i) => {
+          const NavIcono = navIconos[i]
+          return (
+            <FilaNav key={label} icon={<NavIcono size={15} />} label={label} cuenta={cuenta} activa={activo} />
+          )
+        })}
 
-        <Seccion titulo="Carpetas">
-          {CARPETAS.map(({ Icono, label, cuenta, activa }) => (
-            <FilaNav key={label} icon={<Icono size={15} />} label={label} cuenta={cuenta} activa={activa} />
-          ))}
+        <Seccion titulo={m.seccionCarpetas}>
+          {m.carpetas.map(({ label, cuenta, activa }, i) => {
+            const CarpetaIcono = carpetaIconos[i]
+            return (
+              <FilaNav
+                key={label}
+                icon={<CarpetaIcono size={15} />}
+                label={label}
+                cuenta={cuenta}
+                activa={activa}
+              />
+            )
+          })}
         </Seccion>
 
-        <Seccion titulo="Agentes IA">
-          {AGENTES.map(({ label, cuenta, on }) => (
+        <Seccion titulo={m.seccionAgentes}>
+          {m.agentes.map(({ label, cuenta, on }) => (
             <FilaNav key={label} label={label} cuenta={cuenta} punto={on ? 'on' : 'off'} />
           ))}
-          <FilaNav icon={<IconPlus size={15} />} label="Nuevo agente" />
+          <FilaNav icon={<IconPlus size={15} />} label={m.nuevoAgente} />
         </Seccion>
       </div>
 
       <div className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
         <div className="mb-2 flex items-center justify-center gap-2">
           <span className="h-2 w-2 rounded-full bg-status-good shadow-[0_0_8px_rgba(12,163,12,0.7)]" />
-          <p className="text-[12px] font-medium text-ink-primary">Día abierto</p>
-          <span className="text-[10.5px] text-ink-faint">desde 9:12</span>
+          <p className="text-[12px] font-medium text-ink-primary">{m.diaAbierto}</p>
+          <span className="text-[10.5px] text-ink-faint">{m.desde}</span>
         </div>
         <div className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-center text-[12px] font-medium text-ink-secondary">
-          Cerrar día
+          {m.cerrarDia}
         </div>
       </div>
 
@@ -192,14 +163,21 @@ export function BarraMock({ className = 'hidden w-[200px] md:flex' }) {
         </span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[12px] font-medium text-ink-primary">Admin</p>
-          <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
+          <p className="truncate text-[10.5px] text-ink-faint">{m.adminRol}</p>
         </div>
       </div>
     </aside>
   )
 }
 
-export default function AppMock() {
+export default function AppMock({ lang = 'es' }) {
+  const m = mock(lang)
+  const conversaciones = [
+    { nombre: 'Martín Ríos', ultimo: m.martinUltimo, hora: '2 min', entrada: true, pendiente: 1, activa: true },
+    { nombre: 'Laura Gómez', ultimo: m.lauraUltimo, hora: '18 min', entrada: false },
+    { nombre: 'Nicolás Paz', ultimo: m.nicolasUltimo, hora: '1 h', entrada: true },
+    { nombre: 'Carla Vega', ultimo: m.carlaUltimo, hora: '3 h', entrada: false },
+  ]
   return (
     // El marco lo pone la card de afuera. Acá adentro la bandeja se dibuja un
     // poco más grande y se escala: así la ventana no cambia de tamaño y la
@@ -212,7 +190,7 @@ export default function AppMock() {
       {/* ------------------------------------------------------------------ */}
       {/* Barra                                                               */}
       {/* ------------------------------------------------------------------ */}
-      <BarraMock />
+      <BarraMock lang={lang} />
 
       {/* ------------------------------------------------------------------ */}
       {/* Lista                                                               */}
@@ -222,10 +200,10 @@ export default function AppMock() {
           <div className="flex items-center justify-between border-b border-tint/[0.07]">
             <div className="flex items-center gap-4">
               <span className="relative pb-2.5 pt-1 text-[13px] font-medium text-violet">
-                Chats
+                {m.chats}
                 <span className="absolute -bottom-px left-0 h-[2px] w-full rounded-full bg-violet" />
               </span>
-              <span className="pb-2.5 pt-1 text-[13px] font-medium text-ink-muted">Llamadas</span>
+              <span className="pb-2.5 pt-1 text-[13px] font-medium text-ink-muted">{m.llamadas}</span>
             </div>
             <div className="flex gap-0.5 pb-1.5 text-ink-muted">
               <span className="flex h-7 w-7 items-center justify-center">
@@ -236,11 +214,11 @@ export default function AppMock() {
               </span>
             </div>
           </div>
-          <p className="py-2 text-[12px] text-ink-muted">Abiertas, recientes</p>
+          <p className="py-2 text-[12px] text-ink-muted">{m.abiertas}</p>
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2">
-          {CONVERSACIONES.map(({ nombre, ultimo, hora, entrada, pendiente, etiqueta, activa }) => (
+          {conversaciones.map(({ nombre, ultimo, hora, entrada, pendiente, etiqueta, activa }) => (
             <div
               key={nombre}
               className={`flex items-start gap-2.5 rounded-lg px-2 py-2 ${activa ? 'bg-violet-soft' : ''}`}
@@ -280,15 +258,15 @@ export default function AppMock() {
       {/* ------------------------------------------------------------------ */}
       <section className="flex min-w-0 flex-1 flex-col bg-surface-card">
         <div className="flex min-h-0 flex-1 flex-col justify-end gap-3 px-5 py-4">
-          <p className="mb-1 text-center text-[11.5px] text-ink-faint">Viernes, 14 de agosto</p>
+          <p className="mb-1 text-center text-[11.5px] text-ink-faint">{m.fecha}</p>
 
-          <Burbuja>
-            Hola, ¿tienen la campera de jean en talle M?
+          <Burbuja agente={m.ventas}>
+            {m.martinMsg1}
           </Burbuja>
-          <Burbuja propio bot>
-            Sí, nos queda una en M. Sale $48.900 y si la pides hoy sale para tu casa mañana.
+          <Burbuja propio bot agente={m.ventas}>
+            {m.martinMsg2}
           </Burbuja>
-          <Burbuja>Buenísimo. ¿Aceptan transferencia?</Burbuja>
+          <Burbuja agente={m.ventas}>{m.martinMsg3}</Burbuja>
         </div>
 
         <div className="mx-auto w-full max-w-[36rem] shrink-0 px-4 pb-4 pt-1">
@@ -299,24 +277,24 @@ export default function AppMock() {
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-[11.5px] font-medium text-violet">
-                  Respuesta sugerida
-                  <span className="text-ink-muted"> · la escribió Ventas</span>
+                  {m.sugerida}
+                  <span className="text-ink-muted">{m.laEscribio}</span>
                 </p>
                 <p className="mt-1 text-[13px] leading-snug text-ink-primary">
-                  Sí, aceptamos transferencia. Te paso los datos de la cuenta y en cuanto me envíes el comprobante lo despacho.
+                  {m.martinDraft}
                 </p>
               </div>
             </div>
             <div className="mt-2.5 flex items-center justify-end gap-1 border-t border-violet/15 px-2.5 py-1.5">
-              <span className="rounded-lg px-2.5 py-1 text-[11.5px] text-ink-muted">Descartar</span>
+              <span className="rounded-lg px-2.5 py-1 text-[11.5px] text-ink-muted">{m.descartar}</span>
               <span className="rounded-lg bg-violet px-2.5 py-1 text-[11.5px] font-medium text-ink-inverted">
-                Usar y editar
+                {m.usarEditar}
               </span>
             </div>
           </div>
 
           <div className="flex items-end gap-1 rounded-3xl border border-tint/[0.09] bg-surface-raised p-1.5 shadow-card">
-            <span className="min-w-0 flex-1 px-2.5 py-2 text-[13.5px] text-ink-faint">Escribe un mensaje</span>
+            <span className="min-w-0 flex-1 px-2.5 py-2 text-[13.5px] text-ink-faint">{m.escribe}</span>
             <span className="flex shrink-0 items-center gap-0.5 pr-0.5 text-ink-muted">
               <span className="flex h-8 w-8 items-center justify-center">
                 <IconSmile size={16} />
@@ -327,7 +305,7 @@ export default function AppMock() {
               <span className="flex h-8 w-8 items-center justify-center">
                 <IconMic size={16} />
               </span>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink-primary text-ink-inverted">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet text-ink-inverted">
                 <IconSend size={14} />
               </span>
             </span>
@@ -349,10 +327,10 @@ export default function AppMock() {
             <div className="mt-1 flex gap-2">
               <span className="flex items-center gap-1.5 rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-[12px] text-ink-secondary">
                 <IconPhone size={13} />
-                Llamar
+                {m.llamar}
               </span>
               <span className="rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-[12px] text-ink-secondary">
-                Copiar
+                {m.copiar}
               </span>
             </div>
           </div>
@@ -363,15 +341,15 @@ export default function AppMock() {
               className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-faint"
             />
             <div className="truncate whitespace-nowrap rounded-lg border border-tint/10 bg-tint/[0.04] py-2 pl-8 pr-3 text-[12px] text-ink-faint">
-              Buscar en la conversación
+              {m.buscar}
             </div>
           </div>
 
           <dl className="mt-4 space-y-3 border-t border-tint/[0.07] pt-3">
             {[
-              ['Atendida por', 'Ventas'],
-              ['Responsable', 'Admin'],
-              ['Canal', 'WhatsApp'],
+              [m.atendidaPor, m.ventas],
+              [m.responsable, 'Admin'],
+              [m.canal, 'WhatsApp'],
             ].map(([clave, valor]) => (
               <div key={clave}>
                 <dt className="text-[12px] text-ink-faint">{clave}</dt>
@@ -379,13 +357,13 @@ export default function AppMock() {
               </div>
             ))}
             <div>
-              <p className="text-[12px] text-ink-faint">Etiquetas</p>
+              <p className="text-[12px] text-ink-faint">{m.etiquetas}</p>
               <div className="mt-1.5 flex flex-wrap gap-1">
                 <span className="rounded-full border border-tint/10 bg-tint/[0.05] px-2.5 py-[3px] text-[11.5px] text-ink-secondary">
-                  ventas
+                  {m.etiquetaVentas}
                 </span>
                 <span className="rounded-full border border-dashed border-tint/15 px-2.5 py-[3px] text-[11.5px] text-ink-muted">
-                  + etiqueta
+                  {m.masEtiqueta}
                 </span>
               </div>
             </div>
@@ -409,7 +387,7 @@ export default function AppMock() {
   )
 }
 
-function Burbuja({ propio, bot, children }) {
+function Burbuja({ propio, bot, agente, children }) {
   return (
     <div className={`flex ${propio ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex max-w-[78%] items-end gap-2 ${propio ? 'flex-row-reverse' : ''}`}>
@@ -419,7 +397,7 @@ function Burbuja({ propio, bot, children }) {
               bot ? 'border-violet/30 bg-violet-soft text-violet' : 'border-tint/15 bg-tint/10 text-ink-primary'
             }`}
           >
-            {bot ? 'V' : 'A'}
+            {bot ? (agente?.charAt(0) ?? 'V') : 'A'}
           </span>
         ) : (
           <Foto size={28} />
@@ -437,7 +415,7 @@ function Burbuja({ propio, bot, children }) {
           {bot && (
             <p className="mt-1 flex items-center justify-end gap-1 text-[11px] text-ink-faint">
               <IconBolt size={11} />
-              Ventas
+              {agente}
             </p>
           )}
         </div>

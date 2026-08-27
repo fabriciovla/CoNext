@@ -32,8 +32,6 @@ export default function Inbox({
   onSendMedia,
   onAddNote,
   dayStatus,
-  navOpen = true,
-  onExpandNav,
 }) {
   const [unreplied, setUnreplied] = useState(false)
   const [orden, setOrden] = useState('recientes')
@@ -151,7 +149,6 @@ export default function Inbox({
           onOrdenChange={setOrden}
           search={search}
           onSearchChange={setSearch}
-          onExpandNav={navOpen ? null : onExpandNav}
         />
         <ChatPanel
           group={selected}

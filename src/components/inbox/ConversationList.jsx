@@ -12,7 +12,6 @@ import {
   IconArrowOut,
   IconBolt,
   IconNote,
-  IconSidebarToggle,
 } from '../ui/icons'
 
 const TABS = [
@@ -47,7 +46,6 @@ export default function ConversationList({
   onOrdenChange,
   search,
   onSearchChange,
-  onExpandNav = null,
 }) {
   const [tab, setTab] = useState('chats')
   const [searchOpen, setSearchOpen] = useState(false)
@@ -57,17 +55,6 @@ export default function ConversationList({
       <header className="shrink-0 px-3 pt-2.5">
         <div className="flex items-center justify-between gap-2 border-b border-tint/[0.07]">
           <div className="flex items-center gap-4">
-            {/* Con las carpetas plegadas, el botón para traerlas de vuelta vive
-                acá: flotando sobre la columna tapaba las pestañas. */}
-            {onExpandNav && (
-              <button
-                onClick={onExpandNav}
-                title="Mostrar carpetas"
-                className="animate-fade-in -ml-0.5 mb-1.5 flex h-7 w-7 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
-              >
-                <IconSidebarToggle size={15} />
-              </button>
-            )}
             {TABS.map((t) => {
               const active = tab === t.key
               return (

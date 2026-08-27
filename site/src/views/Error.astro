@@ -1,0 +1,87 @@
+---
+// 404, 500 y lo que venga: una sola vista, con la barra y el pie del resto
+// del sitio. El host estático sirve un único `404.html` para cualquier ruta
+// perdida — también `/en/lo-que-sea` — así que el idioma del titular no puede
+// salir de `getLocale` en el build. Un script en el <head> mira el pathname
+// y pone `data-error-en` antes de pintar el cuerpo.
+import Base from '../layouts/Base.astro'
+import Boton from '../components/Boton.jsx'
+import ErrorIlustracion from '../components/ErrorIlustracion.astro'
+import { ui } from '../i18n/ui'
+
+const { codigo = 404 } = Astro.props
+const clave = codigo === 500 ? 500 : 404
+const es = ui.es.error
+const en = ui.en.error
+const paginaEs = es[clave]
+const paginaEn = en[clave]
+---
+
+<Base title={paginaEs.title} description={paginaEs.description} noindex>
+  <script
+    slot="head"
+    is:inline
+    set:html={`
+      (function () {
+        var p = location.pathname;
+        if (p !== '/en' && p.indexOf('/en/') !== 0) return;
+        document.documentElement.lang = 'en';
+        document.documentElement.setAttribute('data-error-en', '');
+        document.title = ${JSON.stringify(paginaEn.title)};
+        var m = document.querySelector('meta[name="description"]');
+        if (m) m.setAttribute('content', ${JSON.stringify(paginaEn.description)});
+      })();
+    `}
+  />
+
+  <section class="fondo-seccion flex flex-1 flex-col items-center justify-center px-5 py-16 sm:py-24">
+    <div class="relative w-full max-w-lg text-center">
+      <div class="animate-in-scale" style="--d: 40ms">
+        <ErrorIlustracion codigo={clave} />
+      </div>
+
+      <h1
+        class="animate-in mt-10 text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[36px]"
+        style="--d: 140ms"
+      >
+        <span class="error-es">{paginaEs.titulo}</span>
+        <span class="error-en">{paginaEn.titulo}</span>
+      </h1>
+      <p
+        class="animate-in mx-auto mt-3 max-w-[42ch] text-[15px] leading-relaxed text-ink-muted sm:text-[16px]"
+        style="--d: 200ms"
+      >
+        <span class="error-es">{paginaEs.bajada}</span>
+        <span class="error-en">{paginaEn.bajada}</span>
+      </p>
+      <div class="animate-in mt-8" style="--d: 280ms">
+        <span class="error-es">
+          <Boton href="/" variante="suave">{es.ir}</Boton>
+        </span>
+        <span class="error-en">
+          <Boton href="/en/" variante="suave">{en.ir}</Boton>
+        </span>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* El HTML sale siempre en los dos idiomas. Sin JS gana el español (el
+     default del sitio). Con `data-error-en` en <html>, que pone el script
+     del head, se invierte antes del primer paint. `!important` es contra
+     el `inline-flex` de Tailwind en el botón, que si no gana por orden. */
+  .error-en {
+    display: none !important;
+  }
+  :global(html[data-error-en]) .error-es {
+    display: none !important;
+  }
+  :global(html[data-error-en]) .error-en {
+    display: inline-flex !important;
+  }
+  :global(html[data-error-en]) h1 .error-en,
+  :global(html[data-error-en]) p .error-en {
+    display: inline !important;
+  }
+</style>

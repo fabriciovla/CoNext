@@ -23,6 +23,10 @@ export default defineConfig(() => {
 
   return {
     plugins: [react()],
+    // Las VITE_* del login social viven en server/.env junto al resto, para no
+    // tener dos archivos. Vite solo expone al browser las que empiezan con
+    // VITE_; DATABASE_URL y las claves de Meta no salen.
+    envDir: path.join(__dirname, 'server'),
     server: {
       proxy: {
         '/api': {

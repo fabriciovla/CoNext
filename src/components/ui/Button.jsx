@@ -1,8 +1,13 @@
 // Sin salto ni rebote al pasar el mouse: un botón que se mueve solo llama la
 // atención cada vez que el puntero lo cruza de camino a otra cosa. Lo que
 // cambia es el color, que ya alcanza para decir "esto se puede tocar".
+//
+// El primario es el azul de marca, no la tinta: es el mismo criterio que
+// `Boton` del sitio. El hover va a `/90` y no a `violet-strong` porque
+// `violet-strong` es un hex fijo; en el tema oscuro el acento se aclara y
+// ese azul oscuro con `ink-inverted` (negro) no contrasta.
 const VARIANTS = {
-  primary: 'bg-ink-primary text-ink-inverted hover:bg-ink-primary/85 focus-visible:ring-tint/40',
+  primary: 'bg-violet text-ink-inverted hover:bg-violet/90 focus-visible:ring-violet/40',
   secondary:
     'border border-tint/[0.12] text-ink-secondary hover:border-tint/25 hover:text-ink-primary focus-visible:ring-tint/20',
   // El rojo se guarda para el botón que confirma de verdad, dentro del modal.

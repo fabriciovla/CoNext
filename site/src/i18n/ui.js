@@ -1,0 +1,1225 @@
+import { productoEn, productoEs } from './producto'
+
+export const ui = {
+  es: {
+    htmlLang: 'es',
+    ogLocale: 'es_LA',
+    ogImageAlt: 'El isotipo de conext',
+    nav: {
+      producto: 'Producto',
+      funciones: 'Funciones',
+      funcionesBajada: 'Qué hace el CRM con cada mensaje',
+      comoFunciona: 'Cómo funciona',
+      comoFuncionaBajada: 'Del primer mensaje a la respuesta',
+      precios: 'Precios',
+      clientes: 'Clientes',
+      recursos: 'Recursos',
+      preguntas: 'Preguntas',
+      preguntasBajada: 'Lo que se pregunta antes de contratar',
+      ayuda: 'Ayuda',
+      ayudaBajada: 'Puesta en marcha y uso diario',
+      githubBajada: 'El código del proyecto',
+      iniciarSesion: 'Iniciar sesión',
+      pedirDemo: 'Pedir una demo',
+      empezarGratis: 'Empezar gratis',
+      abrirMenu: 'Abrir menú',
+      cerrarMenu: 'Cerrar menú',
+      megaAtencion: 'Atención',
+      megaInteligencia: 'Inteligencia',
+      megaOperacion: 'Operación',
+      megaPlataforma: 'Plataforma',
+    },
+    footer: {
+      nav: 'Pie de página',
+      idioma: 'Idioma',
+      copyright: 'Todos los derechos reservados.',
+      meta: 'WhatsApp es una marca registrada de Meta Platforms, Inc.',
+      columnas: {
+        producto: 'Producto',
+        atencion: 'Atención',
+        inteligencia: 'Inteligencia',
+        operacion: 'Operación',
+        recursos: 'Recursos',
+        general: 'General',
+      },
+      links: {
+        funciones: 'Funciones',
+        comoFunciona: 'Cómo funciona',
+        garantias: 'Garantías',
+        bandeja: 'Una sola bandeja',
+        horarios: 'Horarios de atención',
+        agentes: 'Agentes de IA',
+        automatico: 'Automático o borrador',
+        productos: 'Productos y stock',
+        dia: 'El día, medido',
+        preguntas: 'Preguntas',
+        ayuda: 'Centro de ayuda',
+        facturacion: 'Facturación',
+        cuentas: 'Cuentas',
+        seguridad: 'Seguridad',
+        datos: 'Datos',
+        precios: 'Precios',
+        demo: 'Pedir una demo',
+        login: 'Iniciar sesión',
+        legalesAyuda: 'Ayuda',
+        privacidad: 'Privacidad',
+        terminos: 'Términos',
+        eliminar: 'Eliminación de datos',
+      },
+    },
+    landing: {
+      title: 'conext · unifica tus canales. Cada respuesta, con IA',
+      description:
+        'Atiende el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas, sobre la API oficial de WhatsApp.',
+      anuncio: 'Sobre la API oficial de WhatsApp Business',
+      heroLineas: [
+        'Unifica tus canales de comunicación y',
+        'potencia cada respuesta con',
+        'Inteligencia Artificial',
+      ],
+      heroBajada:
+        'es el CRM que atiende tu WhatsApp con agentes de inteligencia artificial. Responden precios, stock y envíos con la información de tu negocio — y la última palabra sigue siendo tuya.',
+      pedirDemo: 'Pedir una demo',
+      verComo: 'Ver cómo funciona',
+      pieHero: 'Tu número, tu cuenta de Meta. Sin apps no oficiales ni teléfonos conectados a un cargador.',
+      funcionesEtiqueta: 'Qué hace',
+      funcionesTitulo: 'Lo que hoy haces a mano, en un solo lugar.',
+      funcionesTexto:
+        'No es un chatbot con un árbol de opciones. Es la bandeja donde trabaja tu negocio, con la IA adentro.',
+      funciones: [
+        {
+          id: 'bandeja',
+          titulo: 'Una sola bandeja',
+          texto:
+            'Todas las conversaciones en un lugar, con carpetas, etiquetas y estado de entrega. Se termina el "¿este ya lo contestó alguien?".',
+        },
+        {
+          id: 'agentes',
+          titulo: 'Agentes de IA',
+          texto:
+            'Creas un agente por tema — ventas, envíos, posventa — y a cada uno le escribes su rol y sus instrucciones en español. Sin programar nada.',
+        },
+        {
+          id: 'automatico',
+          titulo: 'Automático o borrador',
+          texto:
+            'Cada agente decide si manda su respuesta solo o te la deja escrita para que la revises. Un interruptor, agente por agente.',
+        },
+        {
+          id: 'productos',
+          titulo: 'Productos y stock',
+          texto:
+            'Los agentes responden precios y disponibilidad con tu catálogo a la vista, y la pantalla de inicio te avisa qué se está por acabar.',
+        },
+        {
+          id: 'horarios',
+          titulo: 'Horarios de atención',
+          texto:
+            'Tus días y tu horario, con un mensaje de fuera de hora que contesta a las tres de la mañana para que nadie se quede esperando.',
+        },
+        {
+          id: 'dia',
+          titulo: 'El día, medido',
+          texto:
+            'Cuánto respondió la IA y cuánto tú, cuánto tardaste en contestar, a qué hora se te llena de mensajes y qué quedó pendiente.',
+        },
+      ],
+      grupos: [
+        { nombre: 'Atención', bajada: 'Cada conversación, en su lugar.', ids: ['bandeja', 'horarios'] },
+        { nombre: 'Inteligencia', bajada: 'Responde con tus reglas.', ids: ['agentes', 'automatico'] },
+        { nombre: 'Operación', bajada: 'La información del negocio, a mano.', ids: ['productos', 'dia'] },
+      ],
+      controlEtiqueta: 'El control',
+      controlTitulo: 'La IA escribe. Tú decides si se envía.',
+      controlTexto:
+        'Los temas que ya sabes que responde bien, que los atienda sola. Los que tocan dinero, un descuento o un cliente enojado, que te esperen. Se cambia de opinión con un clic, agente por agente.',
+      pasosEtiqueta: 'Cómo empieza',
+      pasosTitulo: 'Tres pasos y ya está atendiendo.',
+      pasos: [
+        {
+          titulo: 'Conectas tu número',
+          texto:
+            'Se enlaza tu WhatsApp Business con tu propia cuenta de Meta. El número es tuyo y la cuenta también: si un día te vas, te los llevas.',
+        },
+        {
+          titulo: 'Le cuentas cómo trabajas',
+          texto:
+            'Cargas tus productos con precio y stock, tus días y horarios, y tus respuestas de siempre. Después armas los agentes que hagan falta.',
+        },
+        {
+          titulo: 'Miras la bandeja',
+          texto:
+            'Los agentes atienden. Tú entras cuando algo necesita una persona — y la bandeja te marca exactamente cuáles son.',
+        },
+      ],
+      garantiasEtiqueta: 'Por qué la vía oficial',
+      garantiasTitulo: 'Automatizar WhatsApp sin arriesgar tu número.',
+      garantiasTexto:
+        'Las herramientas que se cuelgan de la app del teléfono funcionan hasta que Meta las detecta. Esta es la puerta que Meta abre para esto.',
+      garantias: [
+        {
+          titulo: 'Tu número no corre riesgo',
+          texto:
+            'Todo pasa por la API oficial de WhatsApp Business, que es la vía que Meta habilita para automatizar. No hay que clonar una sesión ni dejar un teléfono enchufado en un rincón.',
+        },
+        {
+          titulo: 'Varias personas, un número',
+          texto:
+            'Tu equipo y los agentes trabajan sobre la misma bandeja, cada uno con su usuario. Nadie tiene que pedir prestado el teléfono del local.',
+        },
+        {
+          titulo: 'Tus datos son tuyos',
+          texto:
+            'Cada negocio tiene sus conversaciones separadas de las del resto y sus credenciales de WhatsApp guardadas cifradas. Y si quieres irte, se borra todo.',
+        },
+      ],
+      faqEtiqueta: 'Preguntas',
+      faqTitulo: 'Lo que todos preguntan antes de empezar.',
+      faqMas: 'Más preguntas, por tema, en el',
+      faqCentro: 'centro de ayuda',
+      preguntas: [
+        {
+          pregunta: '¿Necesito un número nuevo?',
+          respuesta:
+            'No, puedes usar el que ya vienes usando — con una condición: un número conectado a la API no puede estar al mismo tiempo en la app de WhatsApp del teléfono. Si hoy lo atiendes a mano desde el teléfono y no quieres cortar eso todavía, lo más cómodo es empezar con un número aparte y pasar el principal cuando te sientas cómodo.',
+        },
+        {
+          pregunta: '¿Y si el agente no sabe algo o mete la pata?',
+          respuesta:
+            'Para eso está el modo borrador: el agente escribe pero no envía hasta que tú lo apruebes. Es lo recomendable las primeras semanas, hasta que veas cómo responde con tus clientes reales. Cuando un tema ya lo maneja bien, le activas el envío automático solo a ese agente y dejas el resto esperando.',
+        },
+        {
+          pregunta: '¿Mis clientes se dan cuenta de que les contesta una IA?',
+          respuesta:
+            'El mensaje les llega como cualquier otro de tu negocio, y el agente responde con el tono que tú le indiques. Del lado de adentro sí queda registrado quién contestó cada cosa, así puedes revisar cualquier conversación después.',
+        },
+        {
+          pregunta: '¿Qué pasa con los datos de mis conversaciones?',
+          respuesta:
+            'Son tuyos y no se mezclan con los de otro negocio: cada cliente tiene su propio espacio en la base. Los tokens de WhatsApp se guardan cifrados. No vendemos datos ni se los pasamos a nadie. En el pie están la política de privacidad y cómo pedir la eliminación de datos.',
+        },
+        {
+          pregunta: '¿Cuánto cuesta?',
+          respuesta:
+            'Hay un plan gratis, uno estándar, uno premium y uno a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
+        },
+      ],
+      ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos cómo quedaría.',
+      ctaTexto: 'Una demo de veinte minutos, con tus productos y tus preguntas de todos los días.',
+      ctaBoton: 'Escríbenos por WhatsApp',
+    },
+    precios: {
+      title: 'Precios · conext',
+      description:
+        'Planes de conext para atender WhatsApp con IA: gratis, estándar, premium y a medida. Elegí el que le queda a tu negocio.',
+      etiqueta: 'Precios',
+      titulo: 'Precios de conext',
+      bajada: 'Elegí el paquete que mejor le queda a tu negocio.',
+      comparacion: 'Comparación de planes de conext',
+      masElegido: 'El más elegido',
+      funcion: 'Función',
+      incluido: 'Incluido',
+      noIncluido: 'No incluido',
+      nota: 'Importes en dólares (USD). Las conversaciones de WhatsApp las cobra Meta a tu cuenta, con su tarifa — no le agregamos un margen.',
+      desliza: 'Deslizá la tabla para comparar los cuatro planes.',
+      indecisoTitulo: '¿No estás seguro de qué plan te queda?',
+      indecisoTexto: 'Cuéntanos cómo atiendes hoy y lo vemos con los números de tu operación.',
+      indecisoCta: 'Pedir una demo',
+      faqTitulo: 'Preguntas sobre los planes.',
+      planes: [
+        {
+          id: 'gratis',
+          nombre: 'Gratis',
+          bajada: 'Para empezar',
+          precio: '$0',
+          periodo: 'para siempre',
+          cta: 'Empezar',
+          destino: 'app',
+        },
+        {
+          id: 'estandar',
+          nombre: 'Estándar',
+          bajada: 'Para equipos que crecen',
+          precio: '$350',
+          periodo: 'por mes',
+          cta: 'Empezar',
+          destino: 'app',
+        },
+        {
+          id: 'premium',
+          nombre: 'Premium',
+          bajada: 'Para equipos que escalan',
+          precio: '$1,000',
+          periodo: 'por mes, facturado anual',
+          cta: 'Empezar',
+          destino: 'app',
+          destacado: true,
+        },
+        {
+          id: 'empresa',
+          nombre: 'Empresa',
+          bajada: 'Para organizaciones grandes',
+          precio: 'A medida',
+          periodo: 'contrato anual',
+          cta: 'Hablar con ventas',
+          destino: 'whatsapp',
+        },
+      ],
+      grupos: [
+        {
+          icono: 'users',
+          nombre: 'Equipo',
+          filas: [
+            { nombre: 'Usuarios incluidos', valores: [false, '5', '10', '25+'] },
+            { nombre: 'Asientos adicionales', valores: [false, '$50/mes', '$50/mes', 'Personalizado'] },
+          ],
+        },
+        {
+          icono: 'layout',
+          nombre: 'Atención',
+          filas: [
+            { nombre: 'Número de WhatsApp', valores: ['1', '1', '2', 'Ilimitado'] },
+            { nombre: 'Conversaciones', valores: ['200 / mes', 'Ilimitado', 'Ilimitado', 'Ilimitado'] },
+            { nombre: 'Carpetas y etiquetas', valores: [true, true, true, true] },
+            { nombre: 'Horarios y fuera de hora', valores: [true, true, true, true] },
+          ],
+        },
+        {
+          icono: 'layers',
+          nombre: 'Inteligencia',
+          filas: [
+            { nombre: 'Agentes de IA', valores: ['1', '3', 'Ilimitado', 'Ilimitado'] },
+            { nombre: 'Envío automático', valores: [false, true, true, true] },
+            { nombre: 'Productos en catálogo', valores: ['25', '100', '250', 'Ilimitado'] },
+            { nombre: 'Borradores para revisar', valores: [true, true, true, true] },
+          ],
+        },
+        {
+          icono: 'lightbulb',
+          nombre: 'Operación',
+          filas: [
+            { nombre: 'Métricas del día', valores: [false, true, true, true] },
+            { nombre: 'Adjuntos salientes', valores: [false, true, true, true] },
+            { nombre: 'API oficial de WhatsApp', valores: [true, true, true, true] },
+            { nombre: 'Soporte', valores: ['Comunidad', 'Email', 'Prioritario', 'Dedicado'] },
+          ],
+        },
+      ],
+      preguntas: [
+        {
+          pregunta: '¿Cómo funciona el plan gratis?',
+          respuesta:
+            'Sirve para probar el CRM con un agente, el catálogo chico y las respuestas en modo borrador: la IA escribe y tú envías. Cuando el volumen pida más personas o el envío automático, pasas a un plan pago.',
+        },
+        {
+          pregunta: '¿Las conversaciones de WhatsApp las cobran ustedes?',
+          respuesta:
+            'No. Meta las cobra directo a tu cuenta de Meta, con su tarifa. Ese cobro no lo facturamos nosotros ni le agregamos un margen. Lo que se paga acá es el software.',
+        },
+        {
+          pregunta: '¿Puedo cambiar de plan después?',
+          respuesta:
+            'Sí. Escribe con el nombre del negocio y lo ajustamos: más personas, más agentes o el paquete a medida si ya no entra en Premium.',
+        },
+      ],
+    },
+    ayuda: {
+      title: 'Ayuda · conext',
+      description: 'Preguntas sobre facturación, cuentas, seguridad y datos en conext. Si no está acá, escríbenos.',
+      etiqueta: 'Ayuda',
+      titulo: 'Preguntas, por tema.',
+      bajada: 'Facturación, cuentas, seguridad y datos. Si el tema no está, el carril termina en un contacto.',
+      explorar: 'Explorar por tema',
+      atascado: '¿Todavía atascado?',
+      atascadoTexto: 'Si el tema no está acá, escríbenos con tu caso y te respondemos nosotros.',
+      contactar: 'Contactar',
+      temas: [
+        {
+          id: 'facturacion',
+          nombre: 'Facturación',
+          preguntas: [
+            {
+              pregunta: '¿Cuánto cuesta conext?',
+              respuesta:
+                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
+            },
+            {
+              pregunta: '¿Las conversaciones de WhatsApp las facturan ustedes?',
+              respuesta:
+                'No. Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa. Ese cobro no lo facturamos nosotros ni le agregamos un margen.',
+            },
+            {
+              pregunta: '¿Cómo pido una factura o cambio de plan?',
+              respuesta:
+                'Escribe a <a href="mailto:{email}">{email}</a> con el nombre del negocio. Si el cambio es de volumen —más personas, más conversaciones— conviene el mismo hilo: así no se cruza con una alta nueva.',
+            },
+          ],
+        },
+        {
+          id: 'cuentas',
+          nombre: 'Cuentas',
+          preguntas: [
+            {
+              pregunta: '¿Cómo creo una cuenta?',
+              respuesta:
+                'Hoy el alta no es autoservicio: la da el dueño del negocio, o nosotros después de una demo. La pestaña de crear cuenta en el ingreso no abre un registro. <a href="{whatsapp}">Pide una demo</a> y te dejamos el acceso.',
+            },
+            {
+              pregunta: '¿Puede atender el mismo número más de una persona?',
+              respuesta:
+                'Sí. El equipo trabaja sobre la misma bandeja, cada uno con su usuario. Nadie tiene que pedir prestado el teléfono del local: el número está conectado a la cuenta del negocio, no a un aparato.',
+            },
+            {
+              pregunta: '¿Cómo entro al panel?',
+              respuesta:
+                'Desde <a href="{login}">Iniciar sesión</a>, con el usuario que te dio el dueño del negocio. Si llegas desde este sitio, el nombre pasa al panel para no pedirte de nuevo lo mismo.',
+            },
+          ],
+        },
+        {
+          id: 'seguridad',
+          nombre: 'Seguridad',
+          preguntas: [
+            {
+              pregunta: '¿Usan la API oficial de WhatsApp?',
+              respuesta:
+                'Sí. Todo entra y sale por la Cloud API de Meta. No se clona una sesión ni hace falta dejar un teléfono enchufado. El número y la cuenta de WhatsApp Business son tuyos: si un día te vas, te los llevas.',
+            },
+            {
+              pregunta: '¿Cómo se guardan las credenciales?',
+              respuesta:
+                'El token de WhatsApp de cada negocio se cifra en reposo (AES-256-GCM) antes de guardarlo. Las claves de acceso se hashean; no quedan en texto. Un cliente no ve los datos de otro.',
+            },
+          ],
+        },
+        {
+          id: 'datos',
+          nombre: 'Datos',
+          preguntas: [
+            {
+              pregunta: '¿De quién son las conversaciones?',
+              respuesta:
+                'Tuyas. Cada negocio tiene su espacio y no se mezcla con el del resto. No vendemos datos ni los usamos para anuncios. El detalle está en la <a href="{privacidad}">política de privacidad</a>.',
+            },
+            {
+              pregunta: '¿Qué ve la inteligencia artificial?',
+              respuesta:
+                'El texto del mensaje y el contexto que el agente necesita —catálogo, instrucciones, historial reciente— se envían a Gemini para clasificar y redactar. No entrenamos un modelo propio con tus hilos.',
+            },
+            {
+              pregunta: '¿Cómo pido que borren todo?',
+              respuesta:
+                'Las instrucciones están en <a href="{eliminar}">Eliminación de datos</a>. Escribe a <a href="mailto:{email}?subject=Eliminar%20datos">{email}</a> con el nombre del negocio y el número conectado, si lo tienes.',
+            },
+          ],
+        },
+      ],
+    },
+    login: {
+      title: 'Entrar · conext',
+      description: 'Entrá a tu cuenta de conext para atender el WhatsApp de tu negocio.',
+      titular: 'Todo WhatsApp.',
+      titularAcento: 'Una sola bandeja.',
+      bajada: 'La IA clasifica cada mensaje, contesta lo seguro y te deja el resto redactado para revisar.',
+      ventajas: ['Respuesta al instante', 'Borradores con IA', 'Datos por cliente'],
+      acceso: 'Acceso',
+      iniciarSesion: 'Iniciar sesión',
+      crearCuenta: 'Crear cuenta',
+      hola: 'Hola de nuevo',
+      holaBajada: 'Entrá con Google, GitHub u otra cuenta, o con tu correo.',
+      oCorreo: 'o con tu correo',
+      correo: 'Correo',
+      correoPh: 'tu@negocio.com',
+      contrasena: 'Contraseña',
+      entrar: 'Entrar',
+      pedirAcceso: 'Pedí tu acceso',
+      pedirBajada:
+        'Creá la cuenta con el mismo proveedor que uses todos los días, o escribinos y te dejamos el número conectado.',
+      oDemo: 'o pedí una demo',
+      pedirDemo: 'Pedir una demo',
+      errorVacio: 'Escribí tu correo y tu contraseña.',
+      errorCorreo: 'Ese correo no parece válido.',
+    },
+    error: {
+      ir: 'Ir a conext',
+      404: {
+        title: 'Página no encontrada · conext',
+        description: 'La página que buscás no existe o se mudó.',
+        titulo: 'Página no encontrada',
+        bajada: 'La página que buscás no existe o se mudó.',
+      },
+      500: {
+        title: 'Algo salió mal · conext',
+        description: 'No pudimos cargar esta página. Volvé al inicio o probá de nuevo en un momento.',
+        titulo: 'Algo salió mal',
+        bajada: 'No pudimos cargar esta página. Volvé al inicio o probá de nuevo en un momento.',
+      },
+    },
+    empezar: {
+      title: 'Empezar · conext',
+      description: 'Cuatro preguntas cortas para dejar tu espacio de conext listo.',
+      volver: 'Volver al inicio',
+      atras: 'Atrás',
+      continuar: 'Continuar',
+      enter: 'Enter',
+      otroPh: 'Contanos cuál',
+      progreso: 'Paso {n} de {total}',
+      listoTitulo: 'Listo. Te preparamos el espacio.',
+      listoBajada: 'En un momento entras a conext.',
+      planes: {
+        gratis: 'Plan gratis',
+        estandar: 'Plan Estándar',
+        premium: 'Plan Premium',
+      },
+      bienvenida: {
+        titulo: 'Antes de entrar, cuatro preguntas.',
+        bajada: 'Nos ayuda a dejar el espacio listo. Tarda menos de un minuto.',
+        cta: 'Empezar',
+      },
+      pasos: [
+        {
+          id: 'origen',
+          pregunta: '¿Dónde nos encontraste?',
+          tipo: 'opciones',
+          opciones: [
+            { id: 'instagram', label: 'Instagram' },
+            { id: 'google', label: 'Google' },
+            { id: 'whatsapp', label: 'WhatsApp' },
+            { id: 'conocido', label: 'Me lo recomendó alguien' },
+            { id: 'otro', label: 'Otro', otro: true },
+          ],
+        },
+        {
+          id: 'rubro',
+          pregunta: '¿Qué tipo de negocio es?',
+          tipo: 'opciones',
+          opciones: [
+            { id: 'tienda', label: 'Tienda o local' },
+            { id: 'ecommerce', label: 'Tienda online' },
+            { id: 'servicios', label: 'Servicios' },
+            { id: 'gastro', label: 'Gastronomía' },
+            { id: 'salud', label: 'Salud o estética' },
+            { id: 'otro', label: 'Otro', otro: true },
+          ],
+        },
+        {
+          id: 'equipo',
+          pregunta: '¿Cuántas personas atienden el WhatsApp?',
+          tipo: 'opciones',
+          opciones: [
+            { id: '1', label: 'Solo yo' },
+            { id: '2-5', label: '2 a 5' },
+            { id: '6-15', label: '6 a 15' },
+            { id: '16+', label: 'Más de 15' },
+          ],
+        },
+        {
+          id: 'nombre',
+          pregunta: '¿Cómo te llamamos?',
+          tipo: 'campos',
+          campos: [
+            { id: 'nombre', label: 'Tu nombre', ph: 'Ana', auto: 'name' },
+            { id: 'negocio', label: 'El negocio', ph: 'Atelier Norte', auto: 'organization' },
+          ],
+        },
+      ],
+    },
+    legal: {
+      etiqueta: 'Legal',
+      actualizada: 'Última actualización:',
+      privacidadTitle: 'Privacidad · conext',
+      privacidadDescription:
+        'Qué datos trata conext, para qué, con quién se comparte y cómo pedir que se borren.',
+      privacidadHeading: 'Política de privacidad',
+      privacidadFecha: '20 de agosto de 2026',
+      terminosTitle: 'Términos · conext',
+      terminosDescription: 'Las condiciones de uso del CRM conext y de la conexión con WhatsApp Business.',
+      terminosHeading: 'Términos y condiciones',
+      terminosFecha: '20 de agosto de 2026',
+      eliminarTitle: 'Borrar tus datos · conext',
+      eliminarDescription:
+        'Cómo pedir que se borren tu cuenta, tus conversaciones y los datos asociados a Facebook Login en conext.',
+      eliminarHeading: 'Eliminación de datos de usuario',
+      eliminarFecha: '20 de agosto de 2026',
+    },
+    mock: {
+      nav: [
+        { key: 'inicio', label: 'Inicio' },
+        { key: 'bandeja', label: 'Bandeja', cuenta: '1', activo: true },
+        { key: 'agentes', label: 'Agentes IA' },
+        { key: 'productos', label: 'Productos' },
+        { key: 'config', label: 'Configuración' },
+      ],
+      carpetas: [
+        { label: 'Todas', cuenta: '8', activa: true },
+        { label: 'Mías', cuenta: '3' },
+        { label: 'Sin asignar', cuenta: '2' },
+        { label: 'Pendientes', cuenta: '1' },
+      ],
+      agentes: [
+        { label: 'Recepcionista', cuenta: '4', on: true },
+        { label: 'Ventas', cuenta: '3', on: true },
+        { label: 'Envíos', cuenta: '1', on: false },
+      ],
+      nuevoAgente: 'Nuevo agente',
+      seccionCarpetas: 'Carpetas',
+      seccionAgentes: 'Agentes IA',
+      diaAbierto: 'Día abierto',
+      desde: 'desde 9:12',
+      cerrarDia: 'Cerrar día',
+      adminRol: 'Administrador',
+      chats: 'Chats',
+      llamadas: 'Llamadas',
+      abiertas: 'Abiertas, recientes',
+      sugerida: 'Respuesta sugerida',
+      laEscribio: ' · la escribió Ventas',
+      descartar: 'Descartar',
+      usarEditar: 'Usar y editar',
+      escribe: 'Escribe un mensaje',
+      fecha: 'Viernes, 14 de agosto',
+      llamar: 'Llamar',
+      copiar: 'Copiar',
+      buscar: 'Buscar en la conversación',
+      atendidaPor: 'Atendida por',
+      responsable: 'Responsable',
+      canal: 'Canal',
+      etiquetas: 'Etiquetas',
+      etiquetaVentas: 'ventas',
+      masEtiqueta: '+ etiqueta',
+      modoBorrador: 'borrador',
+      modoAuto: 'automático',
+      enviadoSolo: 'enviado solo',
+      ahora: 'ahora',
+      martinUltimo: '¿Aceptan transferencia?',
+      lauraUltimo: 'Perfecto, lo retiro mañana',
+      nicolasUltimo: '¿Hacen envíos a Córdoba?',
+      carlaUltimo: 'Gracias! Cualquier cosa escribo',
+      martinMsg1: 'Hola, ¿tienen la campera de jean en talle M?',
+      martinMsg2: 'Sí, nos queda una en M. Sale $48.900 y si la pides hoy sale para tu casa mañana.',
+      martinMsg3: 'Buenísimo. ¿Aceptan transferencia?',
+      martinDraft:
+        'Sí, aceptamos transferencia. Te paso los datos de la cuenta y en cuanto me envíes el comprobante lo despacho.',
+      martinDraftCorto:
+        'Sí, aceptamos transferencia. Te paso los datos y en cuanto me envíes el comprobante lo despacho.',
+      lauraMsg: 'Quiero la de jean y la de cuero. ¿Me hacen precio por las dos?',
+      lauraDraft: 'Sí, las dos juntas quedan en $102.000. Si te cierra te armo el pedido.',
+      nicolasMsg: 'Hola! ¿Hacen envíos a Córdoba?',
+      nicolasReply: 'Sí, enviamos a todo el país por Andreani. A Córdoba llega en 48 h y el envío sale $6.200.',
+      nicolasLista: 'Sí, enviamos a todo el país por Andreani.',
+      lauraPregunta: '¿Me hacen precio por las dos?',
+      ventas: 'Ventas',
+      envios: 'Envíos',
+    },
+    producto: productoEs,
+  },
+  en: {
+    htmlLang: 'en',
+    ogLocale: 'en_US',
+    ogImageAlt: 'The conext mark',
+    nav: {
+      producto: 'Product',
+      funciones: 'Features',
+      funcionesBajada: 'What the CRM does with every message',
+      comoFunciona: 'How it works',
+      comoFuncionaBajada: 'From the first message to the reply',
+      precios: 'Pricing',
+      clientes: 'Customers',
+      recursos: 'Resources',
+      preguntas: 'FAQ',
+      preguntasBajada: 'What people ask before signing up',
+      ayuda: 'Help',
+      ayudaBajada: 'Setup and day-to-day use',
+      githubBajada: 'The project source',
+      iniciarSesion: 'Log in',
+      pedirDemo: 'Request a demo',
+      empezarGratis: 'Start for free',
+      abrirMenu: 'Open menu',
+      cerrarMenu: 'Close menu',
+      megaAtencion: 'Inbox',
+      megaInteligencia: 'Intelligence',
+      megaOperacion: 'Operations',
+      megaPlataforma: 'Platform',
+    },
+    footer: {
+      nav: 'Footer',
+      idioma: 'Language',
+      copyright: 'All rights reserved.',
+      meta: 'WhatsApp is a registered trademark of Meta Platforms, Inc.',
+      columnas: {
+        producto: 'Product',
+        atencion: 'Inbox',
+        inteligencia: 'Intelligence',
+        operacion: 'Operations',
+        recursos: 'Resources',
+        general: 'General',
+      },
+      links: {
+        funciones: 'Features',
+        comoFunciona: 'How it works',
+        garantias: 'Guarantees',
+        bandeja: 'One inbox',
+        horarios: 'Business hours',
+        agentes: 'AI agents',
+        automatico: 'Auto-send or draft',
+        productos: 'Products and stock',
+        dia: 'The day, measured',
+        preguntas: 'FAQ',
+        ayuda: 'Help center',
+        facturacion: 'Billing',
+        cuentas: 'Accounts',
+        seguridad: 'Security',
+        datos: 'Data',
+        precios: 'Pricing',
+        demo: 'Request a demo',
+        login: 'Log in',
+        legalesAyuda: 'Help',
+        privacidad: 'Privacy',
+        terminos: 'Terms',
+        eliminar: 'Data deletion',
+      },
+    },
+    landing: {
+      title: 'conext · unify your channels. Every reply, with AI',
+      description:
+        'Run your business WhatsApp with AI agents that reply on their own or leave a draft ready for you. One inbox, products, hours, and metrics, on the official WhatsApp API.',
+      anuncio: 'On the official WhatsApp Business API',
+      heroLineas: [
+        'Unify your communication channels and',
+        'power every reply with',
+        'Artificial Intelligence',
+      ],
+      heroBajada:
+        'is the CRM that handles your WhatsApp with AI agents. They answer prices, stock, and shipping with your business data — and the last word is still yours.',
+      pedirDemo: 'Request a demo',
+      verComo: 'See how it works',
+      pieHero: 'Your number, your Meta account. No unofficial apps, no phones left on a charger.',
+      funcionesEtiqueta: 'What it does',
+      funcionesTitulo: 'What you do by hand today, in one place.',
+      funcionesTexto:
+        'It is not a chatbot with a tree of options. It is the inbox your business works from, with AI inside.',
+      funciones: [
+        {
+          id: 'bandeja',
+          titulo: 'One inbox',
+          texto:
+            'Every conversation in one place, with folders, tags, and delivery status. No more “did someone already reply to this?”',
+        },
+        {
+          id: 'agentes',
+          titulo: 'AI agents',
+          texto:
+            'You create an agent per topic — sales, shipping, after-sales — and write its role and instructions in plain language. No coding.',
+        },
+        {
+          id: 'automatico',
+          titulo: 'Auto-send or draft',
+          texto:
+            'Each agent decides whether to send on its own or leave the reply written for you to review. One switch, agent by agent.',
+        },
+        {
+          id: 'productos',
+          titulo: 'Products and stock',
+          texto:
+            'Agents answer prices and availability with your catalog in view, and the home screen warns you what is about to run out.',
+        },
+        {
+          id: 'horarios',
+          titulo: 'Business hours',
+          texto:
+            'Your days and hours, with an after-hours message that replies at 3 a.m. so nobody is left waiting.',
+        },
+        {
+          id: 'dia',
+          titulo: 'The day, measured',
+          texto:
+            'How much the AI answered and how much you did, how long you took to reply, when messages pile up, and what is still open.',
+        },
+      ],
+      grupos: [
+        { nombre: 'Inbox', bajada: 'Every conversation, in its place.', ids: ['bandeja', 'horarios'] },
+        { nombre: 'Intelligence', bajada: 'It replies by your rules.', ids: ['agentes', 'automatico'] },
+        { nombre: 'Operations', bajada: 'Business info, at hand.', ids: ['productos', 'dia'] },
+      ],
+      controlEtiqueta: 'Control',
+      controlTitulo: 'AI writes. You decide if it sends.',
+      controlTexto:
+        'Topics it already handles well can go out on their own. Anything that touches money, a discount, or an angry customer waits for you. You change your mind with one click, agent by agent.',
+      pasosEtiqueta: 'How it starts',
+      pasosTitulo: 'Three steps and it is already answering.',
+      pasos: [
+        {
+          titulo: 'You connect your number',
+          texto:
+            'Your WhatsApp Business is linked to your own Meta account. The number is yours and so is the account: if you leave one day, you take them with you.',
+        },
+        {
+          titulo: 'You explain how you work',
+          texto:
+            'You load products with price and stock, your days and hours, and the replies you already use. Then you set up the agents you need.',
+        },
+        {
+          titulo: 'You watch the inbox',
+          texto:
+            'The agents handle it. You step in when something needs a person — and the inbox shows you exactly which ones.',
+        },
+      ],
+      garantiasEtiqueta: 'Why the official path',
+      garantiasTitulo: 'Automate WhatsApp without putting your number at risk.',
+      garantiasTexto:
+        'Tools that hitch a ride on the phone app work until Meta catches them. This is the door Meta opens for this.',
+      garantias: [
+        {
+          titulo: 'Your number is not at risk',
+          texto:
+            'Everything goes through the official WhatsApp Business API, the path Meta enables for automation. No cloned session, no phone left plugged in in a corner.',
+        },
+        {
+          titulo: 'Several people, one number',
+          texto:
+            'Your team and the agents work from the same inbox, each with their own user. Nobody has to borrow the shop phone.',
+        },
+        {
+          titulo: 'Your data is yours',
+          texto:
+            'Each business has its conversations kept apart from the rest, and its WhatsApp credentials stored encrypted. If you want to leave, everything is deleted.',
+        },
+      ],
+      faqEtiqueta: 'FAQ',
+      faqTitulo: 'What everyone asks before they start.',
+      faqMas: 'More questions, by topic, in the',
+      faqCentro: 'help center',
+      preguntas: [
+        {
+          pregunta: 'Do I need a new number?',
+          respuesta:
+            'No — you can use the one you already have, with one catch: a number connected to the API cannot also be in the WhatsApp app on a phone. If you handle it by hand from the phone today and you are not ready to cut that yet, the easy path is to start with a spare number and move the main one when you are comfortable.',
+        },
+        {
+          pregunta: 'What if the agent does not know something or gets it wrong?',
+          respuesta:
+            'That is what draft mode is for: the agent writes but does not send until you approve. That is the way to start for the first weeks, until you see how it replies to real customers. When it handles a topic well, you turn on auto-send for that agent only and leave the rest waiting.',
+        },
+        {
+          pregunta: 'Will my customers know an AI is answering?',
+          respuesta:
+            'The message arrives like any other from your business, and the agent replies in the tone you set. On the inside we do log who answered each one, so you can review any thread later.',
+        },
+        {
+          pregunta: 'What happens to my conversation data?',
+          respuesta:
+            'It is yours and it is not mixed with another business: each customer has their own space in the database. WhatsApp tokens are stored encrypted. We do not sell data or pass it on. The footer has the privacy policy and how to request deletion.',
+        },
+        {
+          pregunta: 'How much does it cost?',
+          respuesta:
+            'There is a free plan, a standard, a premium, and a custom one: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
+        },
+      ],
+      ctaTitulo: 'Tell us how you handle it today and we will show you how it would look.',
+      ctaTexto: 'A twenty-minute demo, with your products and the questions you get every day.',
+      ctaBoton: 'Write us on WhatsApp',
+    },
+    precios: {
+      title: 'Pricing · conext',
+      description:
+        'conext plans for running WhatsApp with AI: free, standard, premium, and custom. Pick the one that fits your business.',
+      etiqueta: 'Pricing',
+      titulo: 'conext Pricing',
+      bajada: 'Choose the package that’s right for your company.',
+      comparacion: 'conext plan comparison',
+      masElegido: 'Most popular',
+      funcion: 'Feature',
+      incluido: 'Included',
+      noIncluido: 'Not included',
+      nota: 'Prices are in US dollars (USD). WhatsApp conversations are billed by Meta to your account, at their rate — we do not add a markup.',
+      desliza: 'Swipe the table to compare all four plans.',
+      indecisoTitulo: 'Not sure which plan fits?',
+      indecisoTexto: 'Tell us how you handle it today and we will look at it with your numbers.',
+      indecisoCta: 'Request a demo',
+      faqTitulo: 'Questions about the plans.',
+      planes: [
+        {
+          id: 'gratis',
+          nombre: 'Free',
+          bajada: 'For getting started',
+          precio: '$0',
+          periodo: 'forever',
+          cta: 'Get started',
+          destino: 'app',
+        },
+        {
+          id: 'estandar',
+          nombre: 'Standard',
+          bajada: 'For growing teams',
+          precio: '$350',
+          periodo: 'per month',
+          cta: 'Get started',
+          destino: 'app',
+        },
+        {
+          id: 'premium',
+          nombre: 'Premium',
+          bajada: 'For scaling teams',
+          precio: '$1,000',
+          periodo: 'per month, billed annually',
+          cta: 'Get started',
+          destino: 'app',
+          destacado: true,
+        },
+        {
+          id: 'empresa',
+          nombre: 'Enterprise',
+          bajada: 'For large organizations',
+          precio: 'Custom',
+          periodo: 'annual contract',
+          cta: 'Talk to sales',
+          destino: 'whatsapp',
+        },
+      ],
+      grupos: [
+        {
+          icono: 'users',
+          nombre: 'Seats',
+          filas: [
+            { nombre: 'Users included', valores: [false, '5', '10', '25+'] },
+            { nombre: 'Additional seats', valores: [false, '$50/mo', '$50/mo', 'Custom'] },
+          ],
+        },
+        {
+          icono: 'layout',
+          nombre: 'Inbox',
+          filas: [
+            { nombre: 'WhatsApp numbers', valores: ['1', '1', '2', 'Unlimited'] },
+            { nombre: 'Conversations', valores: ['200 / mo', 'Unlimited', 'Unlimited', 'Unlimited'] },
+            { nombre: 'Folders and tags', valores: [true, true, true, true] },
+            { nombre: 'Business hours', valores: [true, true, true, true] },
+          ],
+        },
+        {
+          icono: 'layers',
+          nombre: 'Intelligence',
+          filas: [
+            { nombre: 'AI agents', valores: ['1', '3', 'Unlimited', 'Unlimited'] },
+            { nombre: 'Auto-send', valores: [false, true, true, true] },
+            { nombre: 'Products in catalog', valores: ['25', '100', '250', 'Unlimited'] },
+            { nombre: 'Drafts for review', valores: [true, true, true, true] },
+          ],
+        },
+        {
+          icono: 'lightbulb',
+          nombre: 'Operations',
+          filas: [
+            { nombre: 'Day metrics', valores: [false, true, true, true] },
+            { nombre: 'Outbound attachments', valores: [false, true, true, true] },
+            { nombre: 'Official WhatsApp API', valores: [true, true, true, true] },
+            { nombre: 'Support', valores: ['Community', 'Email', 'Priority', 'Dedicated'] },
+          ],
+        },
+      ],
+      preguntas: [
+        {
+          pregunta: 'How does the free plan work?',
+          respuesta:
+            'It lets you try the CRM with one agent, a small catalog, and replies in draft mode: AI writes and you send. When volume needs more people or auto-send, you move to a paid plan.',
+        },
+        {
+          pregunta: 'Do you bill WhatsApp conversations?',
+          respuesta:
+            'No. Meta charges them directly to your Meta account, at their rate. We do not invoice that charge or add a markup. What you pay here is the software.',
+        },
+        {
+          pregunta: 'Can I change plans later?',
+          respuesta:
+            'Yes. Write us with the business name and we will adjust: more people, more agents, or the custom package if Premium no longer fits.',
+        },
+      ],
+    },
+    ayuda: {
+      title: 'Help · conext',
+      description: 'Questions about billing, accounts, security, and data in conext. If it is not here, write us.',
+      etiqueta: 'Help',
+      titulo: 'Questions, by topic.',
+      bajada: 'Billing, accounts, security, and data. If the topic is not here, the rail ends in a contact.',
+      explorar: 'Browse by topic',
+      atascado: 'Still stuck?',
+      atascadoTexto: 'If the topic is not here, write us with your case and we will reply ourselves.',
+      contactar: 'Contact',
+      temas: [
+        {
+          id: 'facturacion',
+          nombre: 'Billing',
+          preguntas: [
+            {
+              pregunta: 'How much does conext cost?',
+              respuesta:
+                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
+            },
+            {
+              pregunta: 'Do you bill WhatsApp conversations?',
+              respuesta:
+                'No. Meta charges conversations directly to your Meta account, at their rate. We do not invoice that charge or add a markup.',
+            },
+            {
+              pregunta: 'How do I request an invoice or a plan change?',
+              respuesta:
+                'Write to <a href="mailto:{email}">{email}</a> with the business name. If the change is about volume — more people, more conversations — keep it in the same thread so it does not get mixed with a new signup.',
+            },
+          ],
+        },
+        {
+          id: 'cuentas',
+          nombre: 'Accounts',
+          preguntas: [
+            {
+              pregunta: 'How do I create an account?',
+              respuesta:
+                'Signup is not self-serve today: the business owner creates it, or we do after a demo. The create-account tab on login does not open a registration form. <a href="{whatsapp}">Request a demo</a> and we will set up access.',
+            },
+            {
+              pregunta: 'Can more than one person handle the same number?',
+              respuesta:
+                'Yes. The team works from the same inbox, each with their own user. Nobody has to borrow the shop phone: the number is connected to the business account, not to a device.',
+            },
+            {
+              pregunta: 'How do I get into the dashboard?',
+              respuesta:
+                'From <a href="{login}">Log in</a>, with the user the business owner gave you. If you arrive from this site, the name is passed to the dashboard so you are not asked for it again.',
+            },
+          ],
+        },
+        {
+          id: 'seguridad',
+          nombre: 'Security',
+          preguntas: [
+            {
+              pregunta: 'Do you use the official WhatsApp API?',
+              respuesta:
+                'Yes. Everything in and out goes through Meta’s Cloud API. No cloned session, no phone left plugged in. The number and the WhatsApp Business account are yours: if you leave one day, you take them with you.',
+            },
+            {
+              pregunta: 'How are credentials stored?',
+              respuesta:
+                'Each business’s WhatsApp token is encrypted at rest (AES-256-GCM) before it is stored. Access keys are hashed; they are not kept in plaintext. One customer cannot see another’s data.',
+            },
+          ],
+        },
+        {
+          id: 'datos',
+          nombre: 'Data',
+          preguntas: [
+            {
+              pregunta: 'Who owns the conversations?',
+              respuesta:
+                'You do. Each business has its own space and it is not mixed with anyone else’s. We do not sell data or use it for ads. The detail is in the <a href="{privacidad}">privacy policy</a>.',
+            },
+            {
+              pregunta: 'What does the AI see?',
+              respuesta:
+                'The message text and the context the agent needs — catalog, instructions, recent history — are sent to Gemini to classify and draft. We do not train our own model on your threads.',
+            },
+            {
+              pregunta: 'How do I ask you to delete everything?',
+              respuesta:
+                'Instructions are in <a href="{eliminar}">Data deletion</a>. Write to <a href="mailto:{email}?subject=Delete%20data">{email}</a> with the business name and the connected number, if you have it.',
+            },
+          ],
+        },
+      ],
+    },
+    login: {
+      title: 'Log in · conext',
+      description: 'Log in to your conext account to handle your business WhatsApp.',
+      titular: 'All of WhatsApp.',
+      titularAcento: 'One inbox.',
+      bajada: 'AI classifies every message, answers the safe ones, and leaves the rest drafted for you to review.',
+      ventajas: ['Instant replies', 'AI drafts', 'Data per customer'],
+      acceso: 'Access',
+      iniciarSesion: 'Log in',
+      crearCuenta: 'Create account',
+      hola: 'Welcome back',
+      holaBajada: 'Continue with Google, GitHub or another account, or with your email.',
+      oCorreo: 'or with your email',
+      correo: 'Email',
+      correoPh: 'you@business.com',
+      contrasena: 'Password',
+      entrar: 'Log in',
+      pedirAcceso: 'Request access',
+      pedirBajada:
+        'Create the account with the provider you already use every day, or write us and we will leave the number connected.',
+      oDemo: 'or request a demo',
+      pedirDemo: 'Request a demo',
+      errorVacio: 'Enter your email and password.',
+      errorCorreo: 'That email does not look valid.',
+    },
+    error: {
+      ir: 'Go to conext',
+      404: {
+        title: 'Page not found · conext',
+        description: 'The page you are looking for doesn’t exist or has been moved.',
+        titulo: 'Page not found',
+        bajada: 'The page you are looking for doesn’t exist or has been moved.',
+      },
+      500: {
+        title: 'Something went wrong · conext',
+        description: 'We couldn’t load this page. Go home, or try again in a moment.',
+        titulo: 'Something went wrong',
+        bajada: 'We couldn’t load this page. Go home, or try again in a moment.',
+      },
+    },
+    empezar: {
+      title: 'Get started · conext',
+      description: 'Four short questions to get your conext workspace ready.',
+      volver: 'Back to home',
+      atras: 'Back',
+      continuar: 'Continue',
+      enter: 'Enter',
+      otroPh: 'Tell us which',
+      progreso: 'Step {n} of {total}',
+      listoTitulo: 'Done. We are setting up your workspace.',
+      listoBajada: 'You will be in conext in a moment.',
+      planes: {
+        gratis: 'Free plan',
+        estandar: 'Standard plan',
+        premium: 'Premium plan',
+      },
+      bienvenida: {
+        titulo: 'Before you go in, four questions.',
+        bajada: 'It helps us get the workspace ready. Takes less than a minute.',
+        cta: 'Start',
+      },
+      pasos: [
+        {
+          id: 'origen',
+          pregunta: 'Where did you find us?',
+          tipo: 'opciones',
+          opciones: [
+            { id: 'instagram', label: 'Instagram' },
+            { id: 'google', label: 'Google' },
+            { id: 'whatsapp', label: 'WhatsApp' },
+            { id: 'conocido', label: 'Someone recommended it' },
+            { id: 'otro', label: 'Other', otro: true },
+          ],
+        },
+        {
+          id: 'rubro',
+          pregunta: 'What kind of business is it?',
+          tipo: 'opciones',
+          opciones: [
+            { id: 'tienda', label: 'Store or shop' },
+            { id: 'ecommerce', label: 'Online store' },
+            { id: 'servicios', label: 'Services' },
+            { id: 'gastro', label: 'Food and hospitality' },
+            { id: 'salud', label: 'Health or beauty' },
+            { id: 'otro', label: 'Other', otro: true },
+          ],
+        },
+        {
+          id: 'equipo',
+          pregunta: 'How many people handle WhatsApp?',
+          tipo: 'opciones',
+          opciones: [
+            { id: '1', label: 'Just me' },
+            { id: '2-5', label: '2 to 5' },
+            { id: '6-15', label: '6 to 15' },
+            { id: '16+', label: 'More than 15' },
+          ],
+        },
+        {
+          id: 'nombre',
+          pregunta: 'What should we call you?',
+          tipo: 'campos',
+          campos: [
+            { id: 'nombre', label: 'Your name', ph: 'Ana', auto: 'name' },
+            { id: 'negocio', label: 'The business', ph: 'Atelier Norte', auto: 'organization' },
+          ],
+        },
+      ],
+    },
+    legal: {
+      etiqueta: 'Legal',
+      actualizada: 'Last updated:',
+      privacidadTitle: 'Privacy · conext',
+      privacidadDescription: 'What data conext processes, why, who it is shared with, and how to ask for deletion.',
+      privacidadHeading: 'Privacy policy',
+      privacidadFecha: 'August 20, 2026',
+      terminosTitle: 'Terms · conext',
+      terminosDescription: 'Terms of use for the conext CRM and the WhatsApp Business connection.',
+      terminosHeading: 'Terms and conditions',
+      terminosFecha: 'August 20, 2026',
+      eliminarTitle: 'Delete your data · conext',
+      eliminarDescription:
+        'How to ask us to delete your account, your conversations, and data tied to Facebook Login in conext.',
+      eliminarHeading: 'User data deletion',
+      eliminarFecha: 'August 20, 2026',
+    },
+    mock: {
+      nav: [
+        { key: 'inicio', label: 'Home' },
+        { key: 'bandeja', label: 'Inbox', cuenta: '1', activo: true },
+        { key: 'agentes', label: 'AI agents' },
+        { key: 'productos', label: 'Products' },
+        { key: 'config', label: 'Settings' },
+      ],
+      carpetas: [
+        { label: 'All', cuenta: '8', activa: true },
+        { label: 'Mine', cuenta: '3' },
+        { label: 'Unassigned', cuenta: '2' },
+        { label: 'Pending', cuenta: '1' },
+      ],
+      agentes: [
+        { label: 'Reception', cuenta: '4', on: true },
+        { label: 'Sales', cuenta: '3', on: true },
+        { label: 'Shipping', cuenta: '1', on: false },
+      ],
+      nuevoAgente: 'New agent',
+      seccionCarpetas: 'Folders',
+      seccionAgentes: 'AI agents',
+      diaAbierto: 'Day open',
+      desde: 'since 9:12',
+      cerrarDia: 'Close day',
+      adminRol: 'Administrator',
+      chats: 'Chats',
+      llamadas: 'Calls',
+      abiertas: 'Open, recent',
+      sugerida: 'Suggested reply',
+      laEscribio: ' · written by Sales',
+      descartar: 'Dismiss',
+      usarEditar: 'Use and edit',
+      escribe: 'Write a message',
+      fecha: 'Friday, August 14',
+      llamar: 'Call',
+      copiar: 'Copy',
+      buscar: 'Search the conversation',
+      atendidaPor: 'Handled by',
+      responsable: 'Assignee',
+      canal: 'Channel',
+      etiquetas: 'Tags',
+      etiquetaVentas: 'sales',
+      masEtiqueta: '+ tag',
+      modoBorrador: 'draft',
+      modoAuto: 'auto',
+      enviadoSolo: 'sent on its own',
+      ahora: 'now',
+      martinUltimo: 'Do you take bank transfer?',
+      lauraUltimo: 'Perfect, I will pick it up tomorrow',
+      nicolasUltimo: 'Do you ship to Córdoba?',
+      carlaUltimo: 'Thanks! I will write if anything comes up',
+      martinMsg1: 'Hi, do you have the denim jacket in size M?',
+      martinMsg2: 'Yes, we have one left in M. It is $48,900 and if you order today it ships to you tomorrow.',
+      martinMsg3: 'Great. Do you take bank transfer?',
+      martinDraft:
+        'Yes, we take bank transfer. I will send you the account details and as soon as you send the receipt I will ship it.',
+      martinDraftCorto:
+        'Yes, we take bank transfer. I will send you the details and as soon as you send the receipt I will ship it.',
+      lauraMsg: 'I want the denim one and the leather one. Can you do a price for both?',
+      lauraDraft: 'Yes, both together come to $102,000. If that works I will put the order together.',
+      nicolasMsg: 'Hi! Do you ship to Córdoba?',
+      nicolasReply: 'Yes, we ship nationwide with Andreani. Córdoba arrives in 48 hours and shipping is $6,200.',
+      nicolasLista: 'Yes, we ship nationwide with Andreani.',
+      lauraPregunta: 'Can you do a price for both?',
+      ventas: 'Sales',
+      envios: 'Shipping',
+    },
+    producto: productoEn,
+  },
+}

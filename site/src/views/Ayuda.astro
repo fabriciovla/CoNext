@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro'
+import Boton from '../components/Boton.jsx'
+import { EMAIL, WHATSAPP_URL } from '../config'
+import { getLocale, t, fill, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const a = t(lang).ayuda
+
+const vars = {
+  whatsapp: WHATSAPP_URL,
+  email: EMAIL,
+  login: pathFor(lang, '/login'),
+  privacidad: pathFor(lang, '/privacidad'),
+  eliminar: pathFor(lang, '/eliminar-datos'),
+  precios: pathFor(lang, '/precios'),
+}
+
+const TEMAS = a.temas.map((tema) => ({
+  ...tema,
+  preguntas: tema.preguntas.map((p) => ({
+    ...p,
+    respuesta: fill(p.respuesta, vars),
+  })),
+}))
+---
+
+<Base title={a.title} description={a.description}>
+  <article class="contenedor py-16 sm:py-20">
+    <div>
+      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{a.etiqueta}</p>
+      <h1 class="mt-3 max-w-2xl text-3xl font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-4xl sm:leading-[1.1]">
+        {a.titulo}
+      </h1>
+      <p class="mt-4 max-w-xl text-[19px] font-normal leading-[28px] text-ink-secondary">
+        {a.bajada}
+      </p>
+    </div>
+
+    <div class="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-16">
+      <aside class="self-start lg:sticky lg:top-24">
+        <nav id="carril-temas" aria-label={a.explorar}>
+          <p class="text-[12px] font-medium text-ink-muted">{a.explorar}</p>
+          <ul class="mt-3 space-y-1">
+            {
+              TEMAS.map(({ id, nombre, preguntas }, i) => (
+                <li>
+                  <a
+                    href={`#${id}`}
+                    aria-current={i === 0 ? 'true' : undefined}
+                    class="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-[14px] font-medium
+                      text-ink-secondary transition-colors duration-200 hover:bg-tint/[0.04] hover:text-ink-primary
+                      aria-[current=true]:bg-surface-hover aria-[current=true]:text-ink-primary"
+                  >
+                    {nombre}
+                    <span
+                      class="rounded-md bg-tint/[0.06] px-1.5 py-0.5 text-[12px] font-medium tabular-nums text-ink-muted"
+                    >
+                      {preguntas.length}
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+
+        <div class="mt-8 rounded-xl border border-tint/10 p-4">
+          <p class="text-[14px] font-medium text-ink-primary">{a.atascado}</p>
+          <p class="mt-1.5 text-[13px] leading-relaxed text-ink-muted">
+            {a.atascadoTexto}
+          </p>
+          <Boton href={WHATSAPP_URL} className="mt-4 w-full">
+            {a.contactar}
+          </Boton>
+        </div>
+      </aside>
+
+      <div id="ayuda-temas" class="min-w-0 space-y-16">
+        {
+          TEMAS.map(({ id, nombre, preguntas }) => (
+            <section id={id} class="scroll-mt-24">
+              <h2
+                class="border-b border-tint/10 pb-4 text-[22px] font-medium tracking-tight text-ink-primary"
+              >
+                {nombre}
+              </h2>
+              <div class="mt-8 space-y-8">
+                {preguntas.map(({ pregunta, respuesta }) => (
+                  <div>
+                    <h3 class="text-[15.5px] font-medium text-ink-primary">{pregunta}</h3>
+                    <p
+                      class="ayuda-respuesta mt-2 text-[14.5px] leading-relaxed text-ink-secondary"
+                      set:html={respuesta}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </article>
+</Base>
+
+<script>
+  const carril = document.getElementById('carril-temas')
+  const enlaces = carril ? [...carril.querySelectorAll('a[href^="#"]')] : []
+  const secciones = [...document.querySelectorAll('#ayuda-temas section[id]')]
+
+  const marcar = (id) => {
+    for (const enlace of enlaces) {
+      const activo = enlace.hash === `#${id}`
+      if (activo) enlace.setAttribute('aria-current', 'true')
+      else enlace.removeAttribute('aria-current')
+    }
+  }
+
+  const actualizar = () => {
+    let actual = secciones[0]?.id
+    for (const seccion of secciones) {
+      if (seccion.getBoundingClientRect().top < 140) actual = seccion.id
+    }
+    if (actual) marcar(actual)
+  }
+
+  const inicial = window.location.hash.slice(1)
+  if (inicial && secciones.some((s) => s.id === inicial)) marcar(inicial)
+  else actualizar()
+
+  window.addEventListener('scroll', actualizar, { passive: true })
+</script>

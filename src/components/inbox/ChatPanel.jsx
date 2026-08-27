@@ -718,16 +718,13 @@ export default function ChatPanel({
                     aria-label={mode === 'nota' ? 'Guardar nota' : 'Enviar mensaje'}
                     // Redondo, como la isla que lo contiene.
                     //
-                    // Tinta sólida, igual que `<Button variant="primary">`: es el
-                    // botón de acción de la app y tiene que ser el mismo. Antes
-                    // llevaba el degradé de marca y un resplandor violeta —
-                    // `bg-accent-gradient` es la identidad del logo, no un color
-                    // de acción, y no aparece en ningún otro botón de la dash.
+                    // Mismo relleno que `<Button variant="primary">`: es el
+                    // botón de acción de la app y tiene que ser el mismo.
                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200
                       disabled:cursor-not-allowed disabled:opacity-35 ${
                         mode === 'nota'
                           ? 'bg-status-warning text-status-ink hover:bg-status-warning/85'
-                          : 'bg-ink-primary text-ink-inverted hover:bg-ink-primary/85'
+                          : 'bg-violet text-ink-inverted hover:bg-violet/90'
                       }`}
                   >
                     <IconSend size={18} />

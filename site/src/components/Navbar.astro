@@ -1,35 +1,86 @@
 ---
 import Logo from './Logo.jsx'
 import Boton from './Boton.jsx'
-import { IconGitHub } from './icons.jsx'
-import { GITHUB_URL } from '../config'
+import {
+  IconAlert,
+  IconBolt,
+  IconBox,
+  IconChart,
+  IconChevronDown,
+  IconInbox,
+  IconLayers,
+  IconNote,
+  IconShield,
+  IconSparkles,
+  IconTag,
+  IconUsers,
+  IconWhatsApp,
+} from './icons.jsx'
+import { dodoCheckout, GITHUB_URL, WHATSAPP_URL } from '../config'
+import { PRODUCTO_COLUMNAS, PRODUCTO_PAGINAS } from '../data/producto'
+import { t, pathFor } from '../i18n/utils'
 
-// Era un componente React hidratado con `client:load`, o sea 134 KB de runtime
-// de React en todas las páginas —incluidas las legales, que no tienen nada
-// interactivo— para poder abrir y cerrar un menú. Ahora es HTML con un script
-// de quince líneas al final, y el sitio no manda React al navegador.
-//
-// Los enlaces viven en un array para que sumar uno sea una línea.
-//
-// Son las secciones de la landing, no las páginas legales: las legales pasaron
-// al pie, que es donde la gente las busca. Acá arriba va lo que ayuda a decidir.
-//
-// Van a `/#seccion` y no a `#seccion` porque la barra está en todas las
-// páginas; desde /terminos un ancla suelta no lleva a ningún lado. Con la barra
-// adelante el navegador vuelve al inicio y baja hasta ahí.
+const ICONOS_MEGA = {
+  inbox: IconInbox,
+  tag: IconTag,
+  note: IconNote,
+  sparkles: IconSparkles,
+  bolt: IconBolt,
+  layers: IconLayers,
+  box: IconBox,
+  chart: IconChart,
+  alert: IconAlert,
+  whatsapp: IconWhatsApp,
+  users: IconUsers,
+  shield: IconShield,
+}
+
+const { lang } = Astro.props
+const n = t(lang).nav
+const prod = t(lang).producto
+const home = pathFor(lang, '/')
+const login = pathFor(lang, '/login')
+const checkoutGratis = dodoCheckout('gratis')
+const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/'
+const enProducto = ruta === pathFor(lang, '/producto') || ruta.includes('/producto/')
+
+const columnasProducto = PRODUCTO_COLUMNAS.map((columna) => ({
+  titulo: prod.columnas[columna.id],
+  items: columna.slugs.map((slug) => {
+    const meta = PRODUCTO_PAGINAS.find((p) => p.slug === slug)
+    return {
+      href: pathFor(lang, `/producto/${slug}`),
+      label: prod.paginas[slug].nombre,
+      Icono: ICONOS_MEGA[meta.icono],
+    }
+  }),
+}))
+
 const ENLACES = [
-  { href: '/#funciones', label: 'Funciones' },
-  { href: '/#como-funciona', label: 'Cómo funciona' },
-  { href: '/#preguntas', label: 'Preguntas' },
+  {
+    label: n.producto,
+    mega: true,
+    columnas: columnasProducto,
+  },
+  { href: pathFor(lang, '/precios'), label: n.precios },
+  { href: pathFor(lang, '/#clientes'), label: n.clientes, pendiente: true },
+  {
+    label: n.recursos,
+    panel: [
+      { href: pathFor(lang, '/#preguntas'), label: n.preguntas, bajada: n.preguntasBajada },
+      { href: pathFor(lang, '/ayuda'), label: n.ayuda, bajada: n.ayudaBajada },
+      { href: GITHUB_URL, label: 'GitHub', bajada: n.githubBajada, externo: true },
+    ],
+  },
 ]
 
+// Los enlaces son `ink-secondary` y no `ink-primary`: al lado del logotipo,
+// cuatro palabras en negro pleno le compiten. El hover los sube.
 const CLASE_ENLACE =
-  'text-[14.5px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary'
+  'flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
 
-// Solo el isotipo: el nombre ya lo dice el aria-label. Misma caja que el
-// hamburguesa para que en móvil los dos botones de la derecha alineen.
-const CLASE_GITHUB =
-  'inline-flex h-11 w-11 items-center justify-center rounded-full text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
+const CLASE_MEGA_ITEM =
+  'flex items-center gap-2.5 whitespace-nowrap rounded-lg px-1.5 py-2 text-[14.5px] font-medium text-ink-primary transition-colors duration-150 hover:bg-surface-hover aria-[current=page]:bg-surface-hover'
 
 // Las dos barras del ícono son el mismo elemento moviéndose, así no hay
 // parpadeo al cambiar de ícono. El estado abierto se lee del `aria-expanded`
@@ -42,110 +93,298 @@ const BARRA =
 
 {/* `sticky` y no `fixed`: así no hay que compensar la altura con padding en
     cada página, que es de donde suelen salir los saltos de layout.
-    El fondo y el borde viven en `.barra-isla`: al scrollear, este envoltorio
-    se achica y el bloque de adentro queda como una isla redondeada. Sin
+    El fondo y el borde de 1px viven en `.barra` (index.css). Sin
     `backdrop-blur`: desenfocar lo que pasa detrás de una barra pegada fuerza
-    un recálculo por cuadro. */}
+    un recálculo por cuadro, y con la franja opaca no hace falta.
+    76px de alto, que es la medida de dock.us: a esa altura la fila respira sin
+    comerse el primer pantallazo. */}
 <header id="barra" class="animate-in-down barra sticky z-50">
-  <div class="barra-isla">
-    <nav class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-      {/* `view-transition-name` es lo que hace viajar el logo hasta /login:
-          el de la barra y el del panel de ingreso comparten el mismo nombre. */}
+  <nav class="contenedor flex h-[76px] items-center gap-8">
+    {/* `view-transition-name` es lo que hace viajar el logo hasta /login:
+        el de la barra y el del panel de ingreso comparten el mismo nombre. */}
+    <a
+      href={home}
+      class="shrink-0 text-ink-primary transition-opacity duration-200 hover:opacity-80"
+      style="view-transition-name: conext-logo"
+    >
+      {/* La altura la fija el alto; el ancho lo saca del viewBox. El logo ya
+          lleva su propio `aria-label`, así que el enlace se anuncia como
+          "conext, enlace" sin necesidad de texto adicional. El color se lo da
+          el `text-ink-primary` de este enlace. */}
+      <Logo className="h-[18px] w-auto" />
+    </a>
+
+    {/* Navegación: pegada al logotipo, no a las acciones. */}
+    <ul class="hidden items-center gap-1 md:flex">
+      {ENLACES.map(({ href, label, panel, columnas, mega, pendiente }) => (
+        <li class="relative" {...((panel || columnas) ? { 'data-desplegable-wrap': '' } : {})}>
+          {panel || columnas ? (
+            <Fragment>
+              {/* El desplegable es un <button> y no un <a>: no navega a ningún
+                  lado, abre algo. Un <a href="#"> que abre un panel es lo que
+                  hace que el teclado y los lectores de pantalla lo anuncien
+                  mal. En escritorio se abre al pasar el mouse; el click queda
+                  para teclado y táctil. */}
+              <button
+                type="button"
+                class:list={[CLASE_ENLACE, 'group', mega && enProducto && 'text-ink-primary']}
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-controls={`panel-${label.toLowerCase()}`}
+                data-desplegable
+              >
+                {label}
+                <IconChevronDown
+                  size={14}
+                  className="text-ink-faint transition-transform duration-200 group-aria-expanded:rotate-180"
+                />
+              </button>
+              {/* Cerrado con `hidden`, que es `display: none`: escondido de
+                  cualquier otra forma seguiría siendo alcanzable por teclado
+                  desde el fondo de la página. El `pt-2` es el puente: sin él,
+                  al bajar el mouse del botón al panel se sale del wrap y se
+                  cierra. */}
+              <div
+                id={`panel-${label.toLowerCase()}`}
+                hidden
+                class="absolute left-0 top-full z-50 pt-2"
+              >
+                {mega && columnas ? (
+                  <div class="w-max rounded-2xl border border-tint/10 bg-surface-card p-7 shadow-pop">
+                    <div class="flex gap-x-12">
+                      {columnas.map((columna) => (
+                        <div class="shrink-0">
+                          <p class="whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+                            {columna.titulo}
+                          </p>
+                          <ul class="mt-4 space-y-0.5">
+                            {columna.items.map((item) => {
+                              const Icono = item.Icono
+                              return (
+                                <li>
+                                  <a
+                                    href={item.href}
+                                    aria-current={ruta === item.href ? 'page' : undefined}
+                                    class={CLASE_MEGA_ITEM}
+                                  >
+                                    <Icono size={18} className="shrink-0 text-violet" />
+                                    {item.label}
+                                  </a>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div class="w-[22rem] rounded-2xl border border-tint/10 bg-surface-card p-2 shadow-pop">
+                    {panel.map((item) => (
+                      <a
+                        href={item.href}
+                        {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
+                        class="block rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-surface-hover"
+                      >
+                        <span class="block text-[14.5px] font-medium text-ink-primary">{item.label}</span>
+                        <span class="mt-0.5 block text-[13px] leading-snug text-ink-muted">{item.bajada}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Fragment>
+          ) : (
+            <a
+              href={href}
+              aria-current={ruta === href ? 'page' : undefined}
+              {...(pendiente ? { 'data-pendiente': 'true' } : {})}
+              class:list={[CLASE_ENLACE, ruta === href && 'text-ink-primary']}
+            >
+              {label}
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    {/* Acciones. `ml-auto` las manda al extremo derecho. Son tres escalones de
+        peso —texto pelado, borde, sólido— para que se lea de una cuál es la
+        principal; tres botones iguales serían tres botones que nadie aprieta. */}
+    <div class="ml-auto hidden shrink-0 items-center gap-2 md:flex">
       <a
-        href="/"
-        class="text-ink-primary transition-opacity duration-200 hover:opacity-80"
-        style="view-transition-name: conext-logo"
+        href={login}
+        class="rounded-lg px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet"
       >
-        {/* La altura la fija el alto; el ancho lo saca del viewBox. El logo ya
-            lleva su propio `aria-label`, así que el enlace se anuncia como
-            "conext, enlace" sin necesidad de texto adicional. El color se lo da
-            el `text-ink-primary` de este enlace. */}
-        <Logo className="h-5 w-auto" />
+        {n.iniciarSesion}
       </a>
+      <Boton href={WHATSAPP_URL} variante="secundario" tamano="sm">{n.pedirDemo}</Boton>
+      <Boton href={checkoutGratis} variante="acento" tamano="sm" target="_self">{n.empezarGratis}</Boton>
+    </div>
 
-      {/* Escritorio: secciones, GitHub (solo el logito) e inicio de sesión.
-          El "Pedir una demo" se queda en el hero. */}
-      <div class="hidden items-center gap-9 md:flex">
-        <ul class="flex items-center gap-9">
-          {ENLACES.map(({ href, label }) => (
-            <li>
-              <a href={href} class={CLASE_ENLACE}>{label}</a>
-            </li>
-          ))}
-        </ul>
-        <div class="flex items-center gap-2">
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            title="GitHub"
-            class={CLASE_GITHUB}
-          >
-            <IconGitHub size={20} />
-          </a>
-          <Boton href="/login">Iniciar sesión</Boton>
-        </div>
-      </div>
+    {/* Móvil: entra todo en el menú, que acá abajo hay lugar para una sola cosa
+        a la derecha. */}
+    <button
+      type="button"
+      id="boton-menu"
+      aria-expanded="false"
+      aria-controls="menu-movil"
+      aria-label={n.abrirMenu}
+      data-label-abrir={n.abrirMenu}
+      data-label-cerrar={n.cerrarMenu}
+      class="group ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-tint/10 bg-tint/[0.04]
+        text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95 md:hidden"
+    >
+      <span class="relative block h-4 w-6">
+        <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
+        <span
+          class={`${BARRA} top-[calc(100%-0.375rem)] group-aria-expanded:top-1/2 group-aria-expanded:-rotate-45`}
+        ></span>
+      </span>
+    </button>
+  </nav>
 
-      {/* Móvil: el GitHub queda a la vista; el menú guarda las secciones y el
-          inicio de sesión, que en escritorio van juntos a la derecha. */}
-      <div class="flex items-center gap-1 md:hidden">
-        <a
-          href={GITHUB_URL}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-          title="GitHub"
-          class={CLASE_GITHUB}
-        >
-          <IconGitHub size={20} />
-        </a>
-        <button
-          type="button"
-          id="boton-menu"
-          aria-expanded="false"
-          aria-controls="menu-movil"
-          aria-label="Abrir menú"
-          class="group flex h-11 w-11 items-center justify-center rounded-full border border-tint/10 bg-tint/[0.04]
-            text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95"
-        >
-          <span class="relative block h-4 w-6">
-            <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
-            <span
-              class={`${BARRA} top-[calc(100%-0.375rem)] group-aria-expanded:top-1/2 group-aria-expanded:-rotate-45`}
-            ></span>
+  {/* En móvil los desplegables se abren en plano: el panel flotante no tiene
+      dónde caer, y un acordeón adentro de un menú que ya se despliega son dos
+      capas para tres enlaces. */}
+  <div id="menu-movil" hidden class="contenedor border-t border-tint/10 pb-6 pt-2 md:hidden">
+    {ENLACES.map((enlace) =>
+      enlace.columnas ? (
+        <div class="border-b border-tint/[0.07] py-3">
+          <span class="block px-1 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
+            {enlace.label}
           </span>
-        </button>
-      </div>
-    </nav>
-
-    {/* Cerrado va con el atributo `hidden`, que es `display: none`: escondido de
-        cualquier otra forma seguiría siendo alcanzable por teclado desde el
-        fondo. El menú queda adentro de la isla para que, abierto, redondee
-        junto con ella y no quede un rectángulo colgando debajo. */}
-    <div id="menu-movil" hidden class="border-t border-tint/10 px-6 pb-6 pt-2 md:hidden">
-      <ul>
-        {ENLACES.map(({ href, label }) => (
-          <li>
-            <a href={href} class={`${CLASE_ENLACE} block py-3.5`}>{label}</a>
-          </li>
-        ))}
-      </ul>
-      <Boton href="/login" className="mt-4 w-full">Iniciar sesión</Boton>
+          {enlace.columnas.map((columna) => (
+            <div class="mt-2">
+              <span class="block px-1 text-[12px] font-medium text-ink-muted">{columna.titulo}</span>
+              {columna.items.map((item) => (
+                <a
+                  href={item.href}
+                  aria-current={ruta === item.href ? 'page' : undefined}
+                  class="block px-1 py-2.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : enlace.panel ? (
+        <div class="border-b border-tint/[0.07] py-3">
+          <span class="block px-1 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
+            {enlace.label}
+          </span>
+          {enlace.panel.map((item) => (
+            <a
+              href={item.href}
+              {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
+              class="block px-1 py-2.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <a
+          href={enlace.href}
+          aria-current={ruta === enlace.href ? 'page' : undefined}
+          {...(enlace.pendiente ? { 'data-pendiente': 'true' } : {})}
+          class="block border-b border-tint/[0.07] px-1 py-3.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
+        >
+          {enlace.label}
+        </a>
+      ),
+    )}
+    <div class="mt-5 grid gap-2">
+      <Boton href={login} variante="secundario" className="w-full">{n.iniciarSesion}</Boton>
+      <Boton href={checkoutGratis} variante="acento" className="w-full" target="_self">{n.empezarGratis}</Boton>
     </div>
   </div>
 </header>
 
 <script>
-  const barra = document.getElementById('barra')
   const boton = document.getElementById('boton-menu')
   const menu = document.getElementById('menu-movil')
+  const desplegables = Array.from(document.querySelectorAll('[data-desplegable]'))
+  const conHover = window.matchMedia('(hover: hover) and (pointer: fine)')
+
+  const panelDe = (b) => document.getElementById(b.getAttribute('aria-controls') || '')
+
+  const abrir = (b) => {
+    cerrarDesplegables(b)
+    b.setAttribute('aria-expanded', 'true')
+    const panel = panelDe(b)
+    if (panel) panel.hidden = false
+  }
+
+  const cerrar = (b) => {
+    b.setAttribute('aria-expanded', 'false')
+    const panel = panelDe(b)
+    if (panel) panel.hidden = true
+  }
+
+  // Uno solo abierto por vez. `salvo` es para no cerrar el que se acaba de
+  // abrir en el mismo evento.
+  const cerrarDesplegables = (salvo) => {
+    for (const b of desplegables) {
+      if (b === salvo) continue
+      cerrar(b)
+    }
+  }
+
+  for (const b of desplegables) {
+    const wrap = b.closest('[data-desplegable-wrap]')
+    let tCerrar
+
+    b.addEventListener('click', () => {
+      const abierto = b.getAttribute('aria-expanded') === 'true'
+      // Con mouse, el hover ya lo abrió: un click no lo tiene que cerrar
+      // (la gente pulsa el mismo botón que está mirando). Sin hover, el
+      // click es el único gesto.
+      if (abierto && conHover.matches) return
+      if (abierto) cerrar(b)
+      else abrir(b)
+    })
+
+    if (!wrap) continue
+
+    wrap.addEventListener('mouseenter', () => {
+      if (!conHover.matches) return
+      clearTimeout(tCerrar)
+      abrir(b)
+    })
+    wrap.addEventListener('mouseleave', () => {
+      if (!conHover.matches) return
+      tCerrar = setTimeout(() => cerrar(b), 140)
+    })
+  }
+
+  // Un click fuera cierra. Va en captura: el listener del propio botón corre
+  // después y vuelve a abrir el que corresponda, así que el orden importa.
+  document.addEventListener(
+    'click',
+    (e) => {
+      const dentro =
+        e.target instanceof Element && e.target.closest('[data-desplegable-wrap], [data-desplegable], [id^="panel-"]')
+      if (!dentro) cerrarDesplegables()
+    },
+    true,
+  )
+
+  // Escape cierra y devuelve el foco al botón: si no, el foco se queda adentro
+  // de un panel que ya no se ve.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return
+    const abierto = desplegables.find((b) => b.getAttribute('aria-expanded') === 'true')
+    if (!abierto) return
+    cerrarDesplegables()
+    abierto.focus()
+  })
 
   boton?.addEventListener('click', () => {
     const abierto = boton.getAttribute('aria-expanded') === 'true'
     boton.setAttribute('aria-expanded', String(!abierto))
-    boton.setAttribute('aria-label', abierto ? 'Abrir menú' : 'Cerrar menú')
+    boton.setAttribute('aria-label', abierto ? boton.dataset.labelAbrir : boton.dataset.labelCerrar)
     if (menu) menu.hidden = abierto
   })
 
@@ -156,16 +395,7 @@ const BARRA =
     enlace.addEventListener('click', () => {
       menu.hidden = true
       boton?.setAttribute('aria-expanded', 'false')
-      boton?.setAttribute('aria-label', 'Abrir menú')
+      boton?.setAttribute('aria-label', boton.dataset.labelAbrir)
     }),
   )
-
-  // Unos pocos pixeles alcanzan: si el umbral es alto, la barra se transforma
-  // cuando el titular ya se fue y el gesto no se entiende. `passive` para no
-  // pelearle al scroll. Sin JS se queda la franja de siempre, que es válida.
-  const actualizarIsla = () => {
-    barra?.classList.toggle('is-isla', window.scrollY > 12)
-  }
-  actualizarIsla()
-  window.addEventListener('scroll', actualizarIsla, { passive: true })
 </script>

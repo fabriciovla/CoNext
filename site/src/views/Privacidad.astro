@@ -1,0 +1,298 @@
+---
+import Legal from '../components/Legal.astro'
+import { EMAIL } from '../config'
+import { getLocale, t, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const copy = t(lang).legal
+const eliminar = pathFor(lang, '/eliminar-datos')
+---
+
+<Legal
+  title={copy.privacidadTitle}
+  description={copy.privacidadDescription}
+  heading={copy.privacidadHeading}
+  actualizada={copy.privacidadFecha}
+>
+  {
+    lang === 'en' ? (
+      <>
+        <p>
+          This policy describes how <strong>conext</strong> (<a href="https://conext.lat">conext.lat</a>) handles
+          data when you use the site, sign up, or connect your WhatsApp Business to the CRM. If you do not
+          agree, do not use the service.
+        </p>
+        <p>
+          The controller is conext. For any question:
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        </p>
+
+        <h2>Who this covers</h2>
+        <p>There are three distinct situations, and the data is not mixed:</p>
+        <ul>
+          <li>
+            <strong>CRM customers:</strong> the business that signs up and connects its WhatsApp
+            Business number.
+          </li>
+          <li>
+            <strong>Whoever connects WhatsApp with Facebook Login:</strong> the person who authorizes
+            conext to access the business WhatsApp Business account, in Meta’s flow.
+          </li>
+          <li>
+            <strong>The business’s contacts:</strong> people who write to a customer’s WhatsApp. Those
+            messages are processed by the business; we host them to provide the CRM.
+          </li>
+        </ul>
+
+        <h2>What data we process</h2>
+        <p>Depending on how you use conext, we may process:</p>
+        <ul>
+          <li>
+            <strong>Business account:</strong> name, internal identifiers, a contact email if you give
+            us one, and the access key (stored hashed, not in plaintext).
+          </li>
+          <li>
+            <strong>WhatsApp Business:</strong> account and number identifiers (WABA ID, phone number
+            ID), verified name, display number, and the access token. The token is encrypted before it
+            is stored.
+          </li>
+          <li>
+            <strong>Conversations:</strong> the contact’s phone number, the name WhatsApp reports,
+            message text, delivery status, internal notes, tags, assignment to a team member, and
+            reply drafts.
+          </li>
+          <li>
+            <strong>Files you send:</strong> images, audio, video, or documents you send from the CRM.
+            They stay on our servers so the thread can be viewed later; Meta deletes its copy after 30
+            days.
+          </li>
+          <li>
+            <strong>Catalog and operations:</strong> products, prices, stock, hours, welcome and
+            after-hours messages, and agent instructions.
+          </li>
+          <li>
+            <strong>Dashboard use:</strong> in the browser we store local preferences (for example
+            light or dark theme and recent emojis). The public site does not use advertising cookies
+            or tracking pixels.
+          </li>
+        </ul>
+        <p>
+          Today the WhatsApp webhook processes text messages. If a contact sends a file, that event is
+          recorded as received and the content is not downloaded.
+        </p>
+
+        <h2>What we use it for</h2>
+        <ul>
+          <li>
+            Providing the CRM: receiving, displaying, classifying, and sending messages through the
+            official WhatsApp API.
+          </li>
+          <li>
+            Drafting replies with AI (classifying the message, choosing an agent, and writing a draft
+            or an auto-send, according to your settings).
+          </li>
+          <li>Showing you day metrics, stock, and conversation status.</li>
+          <li>Keeping the service running, debugging errors, and complying with the law.</li>
+        </ul>
+        <p>We do not sell data. We do not use it for third-party ads.</p>
+
+        <h2>Who it is shared with</h2>
+        <p>Only what is needed for the product to work:</p>
+        <ul>
+          <li>
+            <strong>Meta (WhatsApp Cloud API):</strong> sending and receiving messages goes through
+            Meta. So does the flow to connect the number (Facebook Login for Business / Embedded
+            Signup). Meta processes that data under
+            <a href="https://www.facebook.com/privacy/policy/">its policy</a>
+            and the WhatsApp Business terms.
+          </li>
+          <li>
+            <strong>Google (Gemini):</strong> the message text and the context the agent needs
+            (catalog, instructions, recent history) are sent to the Gemini API to classify and draft.
+            Google processes them as a processor of that work, under
+            <a href="https://policies.google.com/privacy">its policy</a>.
+          </li>
+          <li>
+            <strong>Infrastructure:</strong> hosting, database, and backups. Those providers may only
+            process the data to provide us the service.
+          </li>
+        </ul>
+        <p>
+          One customer cannot see another’s data: each business has its own space. WhatsApp
+          credentials are encrypted at rest.
+        </p>
+
+        <h2>Retention</h2>
+        <p>
+          We keep the data while the account is active. If you ask us to delete it, or if you close
+          the service, we delete it as described in
+          <a href={eliminar}>Data deletion</a>. Backups may take one extra cycle to rotate.
+        </p>
+
+        <h2>Your rights</h2>
+        <p>
+          You can request access, correction, or deletion of the business data, and object to
+          processing that is not necessary for the contract. Write to
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>. If you are in Argentina, you can also go to the
+          Agency for Access to Public Information under Law 25.326.
+        </p>
+        <p>
+          If you are a person who wrote to the WhatsApp of a business that uses conext, ask that
+          business first to delete or correct your data. If you get no reply, write us and we will
+          help identify the account.
+        </p>
+
+        <h2>Minors</h2>
+        <p>
+          conext is meant for businesses, not for anyone under 18. We do not knowingly collect data
+          from minors.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          If this policy changes in a material way, we update the date above and, when the change
+          warrants it, we notify by email or inside the dashboard. Continued use after that date means
+          you accept the new version.
+        </p>
+      </>
+    ) : (
+      <>
+        <p>
+          Esta política describe cómo <strong>conext</strong> (<a href="https://conext.lat">conext.lat</a>) trata
+          los datos cuando usas el sitio, te das de alta o conectas tu WhatsApp Business al CRM. Si no estás
+          de acuerdo, no uses el servicio.
+        </p>
+        <p>
+          El responsable del tratamiento es conext. Para cualquier consulta:
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
+        </p>
+
+        <h2>A quién cubre</h2>
+        <p>Hay tres situaciones distintas y los datos no se mezclan:</p>
+        <ul>
+          <li>
+            <strong>Clientes del CRM:</strong> el negocio que se da de alta y conecta su número de WhatsApp
+            Business.
+          </li>
+          <li>
+            <strong>Quien conecta WhatsApp con Facebook Login:</strong> la persona que autoriza a conext a
+            acceder a la cuenta de WhatsApp Business del negocio, en el flujo de Meta.
+          </li>
+          <li>
+            <strong>Contactos del negocio:</strong> las personas que escriben al WhatsApp de un cliente
+            nuestro. Esos mensajes los trata el negocio; nosotros los alojamos para prestarle el CRM.
+          </li>
+        </ul>
+
+        <h2>Qué datos tratamos</h2>
+        <p>Según cómo uses conext, podemos tratar:</p>
+        <ul>
+          <li>
+            <strong>Cuenta del negocio:</strong> nombre, identificadores internos, correo de contacto si nos
+            lo das, y la clave de acceso (se guarda hasheada, no en texto).
+          </li>
+          <li>
+            <strong>WhatsApp Business:</strong> identificadores de la cuenta y del número (WABA ID, phone
+            number ID), nombre verificado, número visible y el token de acceso. El token se cifra antes de
+            guardarlo.
+          </li>
+          <li>
+            <strong>Conversaciones:</strong> número de teléfono del contacto, nombre que informa WhatsApp,
+            texto de los mensajes, estado de entrega, notas internas, etiquetas, asignación a una persona
+            del equipo y borradores de respuesta.
+          </li>
+          <li>
+            <strong>Archivos que envías:</strong> imágenes, audio, video o documentos que mandas desde el
+            CRM. Quedan en nuestros servidores para que el hilo se pueda ver después; Meta borra su copia a
+            los 30 días.
+          </li>
+          <li>
+            <strong>Catálogo y operación:</strong> productos, precios, stock, horarios, mensajes de
+            bienvenida y fuera de hora, e instrucciones de los agentes.
+          </li>
+          <li>
+            <strong>Uso del panel:</strong> en el navegador guardamos preferencias locales (por ejemplo el
+            tema claro u oscuro y emojis recientes). El sitio público no usa cookies de publicidad ni
+            píxeles de seguimiento.
+          </li>
+        </ul>
+        <p>
+          Hoy el webhook de WhatsApp procesa mensajes de texto. Si un contacto manda un archivo, ese evento
+          se registra como recibido y no se descarga el contenido.
+        </p>
+
+        <h2>Para qué los usamos</h2>
+        <ul>
+          <li>Prestar el CRM: recibir, mostrar, clasificar y enviar mensajes por la API oficial de WhatsApp.</li>
+          <li>
+            Redactar respuestas con inteligencia artificial (clasificar el mensaje, elegir agente y escribir
+            un borrador o un envío automático, según lo que configures).
+          </li>
+          <li>Mostrarte métricas del día, stock y el estado de las conversaciones.</li>
+          <li>Mantener el servicio, depurar errores y cumplir la ley.</li>
+        </ul>
+        <p>No vendemos datos. No los usamos para anuncios de terceros.</p>
+
+        <h2>Con quién se comparten</h2>
+        <p>Solo lo necesario para que el producto funcione:</p>
+        <ul>
+          <li>
+            <strong>Meta (WhatsApp Cloud API):</strong> el envío y la recepción de mensajes pasan por Meta.
+            También el flujo para conectar el número (Facebook Login for Business / Embedded Signup). Meta
+            trata esos datos según
+            <a href="https://www.facebook.com/privacy/policy/">su política</a>
+            y las condiciones de WhatsApp Business.
+          </li>
+          <li>
+            <strong>Google (Gemini):</strong> el texto del mensaje y el contexto que el agente necesita
+            (catálogo, instrucciones, historial reciente) se envían a la API de Gemini para clasificar y
+            redactar. Google los trata como encargado de ese procesamiento, según
+            <a href="https://policies.google.com/privacy">su política</a>.
+          </li>
+          <li>
+            <strong>Infraestructura:</strong> alojamiento, base de datos y copias de seguridad. Esos
+            proveedores solo pueden tratar los datos para prestarnos el servicio.
+          </li>
+        </ul>
+        <p>
+          Un cliente no ve los datos de otro: cada negocio tiene su espacio. Las credenciales de WhatsApp
+          van cifradas en reposo.
+        </p>
+
+        <h2>Conservación</h2>
+        <p>
+          Guardamos los datos mientras la cuenta esté activa. Si pides que se borren, o si cierras el
+          servicio, los eliminamos según se describe en
+          <a href={eliminar}>Eliminación de datos</a>. Las copias de seguridad pueden tardar un ciclo
+          extra en rotar.
+        </p>
+
+        <h2>Tus derechos</h2>
+        <p>
+          Puedes pedir acceso, corrección o eliminación de los datos del negocio, y oponerte a un
+          tratamiento que no sea necesario para el contrato. Escríbenos a
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a>. Si estás en Argentina, también puedes recurrir a la
+          Agencia de Acceso a la Información Pública en el marco de la Ley 25.326.
+        </p>
+        <p>
+          Si eres una persona que escribió al WhatsApp de un negocio que usa conext, pide primero a ese
+          negocio que borre o corrija tus datos. Si no obtienes respuesta, escríbenos y te ayudamos a
+          identificar la cuenta.
+        </p>
+
+        <h2>Menores</h2>
+        <p>
+          conext está pensado para negocios, no para menores de 18 años. No recabamos datos de menores a
+          sabiendas.
+        </p>
+
+        <h2>Cambios</h2>
+        <p>
+          Si esta política cambia de forma relevante, actualizamos la fecha de arriba y, cuando el cambio lo
+          merezca, avisamos por correo o dentro del panel. El uso continuado después de la fecha implica que
+          aceptas la versión nueva.
+        </p>
+      </>
+    )
+  }
+</Legal>

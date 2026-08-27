@@ -7,18 +7,31 @@ mirar de vez en cuando, ya desempaquetados.
 
 Lo que se usa de acá:
 
-- **la luna creciente** (`assets/conext-mark.svg`) es el isotipo. El contorno
-  está copiado tal cual en `public/conext-mark.svg`, en `site/public/` y en las
-  dos copias de `Logo.jsx`.
-- **el nombre** va en Instrument Sans SemiBold con tracking `-0.03em`. En el
-  código son contornos sacados de la tabla `glyf` del TTF, no `<text>`: el
-  logotipo no depende de que la fuente esté instalada.
-- **las proporciones del isologo horizontal**: caja de la marca 62, nombre a 52
-  y 22 de aire entre las dos.
+- **la marca**, las dos formas superpuestas (`assets/conext-mark.svg`). La
+  geometría está copiada tal cual en `public/conext-mark.svg`, en
+  `site/public/` y en las dos copias de `Logo.jsx`.
+- **la baldosa crema** `#F7F2E8` con la que el pliego presenta el ícono de app
+  (`assets/app-icon-512.png`), redondeada al 22% del lado. Es solo del ícono:
+  el logotipo va sin fondo y toma el color del tema.
 
-Lo que **no** se usa: el fondo cuadrado color crema (`#F7F2E8`) con el que el
-pliego presenta el ícono de app (`assets/app-icon-512.png`). Los íconos del
-proyecto son la marca sola, sin baldosa.
+Lo que **no** se usa: **la tipografía del nombre**. El pliego lo dibuja en
+Instrument Sans SemiBold; el logotipo del código lo escribe en **Satoshi
+Medium**, que es la familia que usa todo el texto del sitio y de la app. Los
+contornos salen de la tabla `glyf` del TTF, no de `<text>`: el logotipo no
+depende de que la fuente esté instalada, y el peso queda clavado en Medium
+aunque lo que se sirva sea el archivo variable.
+
+Tampoco se usa la variante clara (`assets/conext-mark-light.svg`). El
+pliego trae dos archivos porque un `<img>` no puede cambiar de color; el
+componente dibuja el SVG en línea y sale de `currentColor`, y el hueco entre
+las dos formas es una máscara y no un relleno, así que un solo dibujo sirve
+para los dos temas.
+
+Tampoco se usa el aire del isologo tal como está medido. El pliego separa la
+marca del nombre por **cajas** (20 sobre un nombre de 50), y la marca trae 21%
+de margen adentro de la suya: a la vista quedan 0.68 em de blanco y el
+logotipo se lee como dos cosas sueltas. En el código el aire se mide entre
+tintas, 0.30 em.
 
 Esta carpeta está fuera de `public/` a propósito: `public/` se copia entero al
 build y el material de diseño no tiene por qué quedar publicado en el dominio.

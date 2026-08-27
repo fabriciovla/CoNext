@@ -16,13 +16,29 @@ import sitemap from '@astrojs/sitemap'
 // una directiva `client:` y viajan como islas.
 export default defineConfig({
   site: 'https://conext.lat',
+  i18n: {
+    defaultLocale: 'es',
+    locales: ['es', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
   integrations: [
     react(),
     // Genera /sitemap-index.xml en el build (robots.txt lo referencia).
-    // /login se queda afuera: está con noindex y listarla en el sitemap
-    // sería pedirle al buscador dos cosas contradictorias.
+    // /login, /empezar y las de error se quedan afuera: van con noindex
+    // y listarlas en el sitemap sería pedirle al buscador dos cosas
+    // contradictorias.
     sitemap({
-      filter: (pagina) => !pagina.includes('/login'),
+      filter: (pagina) =>
+        !pagina.includes('/login') &&
+        !pagina.includes('/empezar') &&
+        !pagina.endsWith('/404') &&
+        !pagina.endsWith('/500'),
+      i18n: {
+        defaultLocale: 'es',
+        locales: { es: 'es-AR', en: 'en-US' },
+      },
     }),
   ],
   server: {

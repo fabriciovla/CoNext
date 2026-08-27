@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!--
-    El ícono de la marca: la luna del logotipo sobre la baldosa crema del
-    pliego (`design/conext-logo/`). El dibujo y el aire que lo rodea vienen de
-    ahí tal cual — la luna ocupa su caja de 512 sin reencuadrar, y por eso cae
-    un pelo a la izquierda del centro geométrico: en una luna, centrarla a ojo
-    y centrarla con la regla no dan lo mismo.
+    El ícono de app: la marca sobre la baldosa crema del pliego
+    (`design/conext-logo/`). El dibujo y el aire que lo rodea vienen de ahí tal
+    cual — la marca ocupa su caja de 512 sin reencuadrar.
 
     El aire y el radio viven acá y no en cada raster: si cada ícono de app le
     suma su propio margen encima, el mismo dibujo termina con una proporción
@@ -14,9 +12,24 @@
     es el logotipo —que toma `currentColor` y sigue al tema, ver `Logo.jsx`—
     sino una insignia de tamaño fijo que el navegador dibuja en su barra de
     pestañas, fuera de nuestro documento. Con la baldosa puesta tampoco hace
-    falta el `prefers-color-scheme` que tenía antes: la luna nunca queda sobre
-    el fondo del navegador, queda sobre el crema.
+    falta un `prefers-color-scheme`: la marca nunca queda sobre el fondo del
+    navegador, queda sobre el crema.
   -->
-  <rect width="512" height="512" rx="112" ry="112" fill="#F7F2E8"/>
-  <path d="M 390 128 C 300 56, 126 88, 96 232 C 68 352, 190 474, 392 384 C 232 424, 150 342, 166 252 C 182 164, 300 118, 390 128 Z" fill="#14140f"/>
+  <defs>
+    <mask id="marca-icono" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+      <rect width="512" height="512" fill="#fff" />
+      <g fill="#000" stroke="#000" stroke-width="30">
+        <rect x="119" y="205" width="190" height="190" rx="74" ry="74" transform="rotate(8 214 300)" />
+      </g>
+    </mask>
+  </defs>
+  <rect width="512" height="512" rx="112" ry="112" fill="#F7F2E8" />
+  <g transform="translate(256 256) scale(1.06) translate(-256 -256)">
+    <g fill="#14140f" mask="url(#marca-icono)">
+      <rect x="197" y="127" width="190" height="190" rx="74" ry="74" transform="rotate(-12 292 222)" />
+    </g>
+    <g fill="#14140f">
+      <rect x="119" y="205" width="190" height="190" rx="74" ry="74" transform="rotate(8 214 300)" />
+    </g>
+  </g>
 </svg>

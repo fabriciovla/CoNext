@@ -1,0 +1,304 @@
+---
+import Base from '../layouts/Base.astro'
+import Boton from '../components/Boton.jsx'
+import Logo, { LogoMarca } from '../components/Logo.jsx'
+import LangSwitch from '../components/LangSwitch.astro'
+import { IconBolt, IconSparkles, IconShield, IconGoogle, IconGitHub, IconMicrosoft, IconApple } from '../components/icons.jsx'
+import { APP_URL, WHATSAPP_URL } from '../config'
+import { getLocale, t, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const c = t(lang).login
+const home = pathFor(lang, '/')
+
+const PROVEEDORES = [
+  { id: 'google', label: 'Google', Icono: IconGoogle },
+  { id: 'github', label: 'GitHub', Icono: IconGitHub },
+  { id: 'azure', label: 'Microsoft', Icono: IconMicrosoft },
+  { id: 'apple', label: 'Apple', Icono: IconApple },
+]
+
+const CAMPO =
+  'w-full rounded-xl border border-tint/[0.12] bg-transparent px-3.5 py-2.5 text-[14px] text-ink-primary placeholder:text-ink-faint transition-colors duration-150 focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30'
+
+const PESTANA =
+  'h-9 rounded-lg text-[13px] font-medium transition-colors duration-200 aria-selected:bg-surface-card aria-selected:text-ink-primary aria-selected:shadow-card text-ink-muted hover:text-ink-primary'
+
+const OAUTH =
+  'inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-tint/[0.12] text-[13px] font-medium text-ink-secondary transition-colors duration-150 hover:border-tint/25 hover:text-ink-primary'
+
+const VENTAJAS = [
+  { Icono: IconBolt, texto: c.ventajas[0] },
+  { Icono: IconSparkles, texto: c.ventajas[1] },
+  { Icono: IconShield, texto: c.ventajas[2] },
+]
+---
+
+<Base title={c.title} description={c.description} pantallaCompleta noindex>
+  <div class="min-h-dvh bg-surface-page lg:grid lg:grid-cols-2">
+    <section
+      class="relative hidden overflow-hidden border-r border-tint/[0.07] bg-surface-card px-10 py-10 lg:flex lg:flex-col"
+    >
+      <div class="orbe -left-48 -top-40 h-[34rem] w-[34rem]" style="--d: 80ms" aria-hidden="true"></div>
+      <div class="orbe -bottom-44 -right-40 h-[28rem] w-[28rem]" style="--d: 200ms" aria-hidden="true"></div>
+
+      <div class="relative flex flex-1 flex-col items-center justify-center text-center">
+        <a
+          href={home}
+          class="logo-vt-escritorio animate-in-scale text-ink-primary transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet"
+          style="--d: 60ms"
+        >
+          <LogoMarca className="h-[88px] w-auto" />
+        </a>
+
+        <h1
+          class="animate-in mt-12 max-w-[15ch] text-[36px] font-medium leading-[1.12] tracking-tight text-ink-primary"
+          style="--d: 160ms"
+        >
+          {c.titular}
+          <br />
+          <span class="text-violet">{c.titularAcento}</span>
+        </h1>
+        <p class="animate-in mt-4 max-w-[42ch] text-[14px] leading-relaxed text-ink-muted" style="--d: 220ms">
+          {c.bajada}
+        </p>
+      </div>
+
+      <ul
+        class="animate-in-fade relative flex items-center justify-center gap-6 text-[12px] text-ink-faint"
+        style="--d: 320ms"
+      >
+        {VENTAJAS.map(({ Icono, texto }) => (
+          <li class="flex items-center gap-1.5">
+            <Icono size={13} />
+            {texto}
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="flex min-h-dvh items-center justify-center px-5 py-12 lg:min-h-0">
+      <div class="w-full max-w-[360px]">
+        <a
+          href={home}
+          class="logo-vt-movil animate-in-down mb-8 flex justify-center text-ink-primary transition-opacity duration-200 hover:opacity-80 lg:hidden"
+        >
+          <Logo className="h-6 w-auto" />
+        </a>
+
+        <div
+          id="pestanas"
+          role="tablist"
+          aria-label={c.acceso}
+          class="animate-in grid grid-cols-2 gap-1 rounded-xl border border-tint/[0.08] bg-tint/[0.03] p-1"
+          style="--d: 80ms"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="tab-ingresar"
+            aria-controls="panel-ingresar"
+            aria-selected="true"
+            tabindex="0"
+            class={PESTANA}
+          >
+            {c.iniciarSesion}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-crear"
+            aria-controls="panel-crear"
+            aria-selected="false"
+            tabindex="-1"
+            class={PESTANA}
+          >
+            {c.crearCuenta}
+          </button>
+        </div>
+
+        <div
+          id="panel-ingresar"
+          role="tabpanel"
+          aria-labelledby="tab-ingresar"
+          class="animate-in mt-8"
+          style="--d: 160ms"
+        >
+          <h2 class="text-center text-[27px] font-medium tracking-tight text-ink-primary">
+            {c.hola}
+          </h2>
+          <p class="mb-6 mt-1.5 text-center text-[13.5px] text-ink-muted">
+            {c.holaBajada}
+          </p>
+
+          <div class="grid grid-cols-2 gap-2">
+            {PROVEEDORES.map(({ id, label, Icono }) => (
+              <a href={`${APP_URL}/?oauth=${id}`} class={OAUTH}>
+                <Icono size={16} />
+                {label}
+              </a>
+            ))}
+          </div>
+          <div class="relative my-5 text-center">
+            <span class="absolute inset-x-0 top-1/2 border-t border-tint/[0.08]"></span>
+            <span class="relative bg-surface-page px-2 text-[12px] text-ink-faint">{c.oCorreo}</span>
+          </div>
+
+          <form
+            id="form-login"
+            novalidate
+            class="space-y-4 rounded-2xl border border-tint/10 bg-surface-card p-5 shadow-card"
+            data-app={APP_URL}
+            data-error-vacio={c.errorVacio}
+            data-error-correo={c.errorCorreo}
+          >
+            <label for="email" class="block">
+              <span class="mb-1.5 block text-[12.5px] text-ink-secondary">{c.correo}</span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="username"
+                required
+                placeholder={c.correoPh}
+                class={CAMPO}
+              />
+            </label>
+            <label for="password" class="block">
+              <span class="mb-1.5 block text-[12.5px] text-ink-secondary">{c.contrasena}</span>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                placeholder="••••••••"
+                class={CAMPO}
+              />
+            </label>
+            <p id="login-error" hidden class="animate-in-pop text-[13px] text-status-critical"></p>
+            <Boton as="button" className="w-full">{c.entrar}</Boton>
+          </form>
+        </div>
+
+        <div id="panel-crear" role="tabpanel" aria-labelledby="tab-crear" hidden class="mt-8">
+          <h2 class="text-center text-[27px] font-medium tracking-tight text-ink-primary">
+            {c.pedirAcceso}
+          </h2>
+          <p class="mb-6 mt-1.5 text-center text-[13.5px] leading-relaxed text-ink-muted">
+            {c.pedirBajada}
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            {PROVEEDORES.map(({ id, label, Icono }) => (
+              <a href={`${APP_URL}/?oauth=${id}`} class={OAUTH}>
+                <Icono size={16} />
+                {label}
+              </a>
+            ))}
+          </div>
+          <div class="relative my-5 text-center">
+            <span class="absolute inset-x-0 top-1/2 border-t border-tint/[0.08]"></span>
+            <span class="relative bg-surface-page px-2 text-[12px] text-ink-faint">{c.oDemo}</span>
+          </div>
+          <Boton href={WHATSAPP_URL} className="w-full">{c.pedirDemo}</Boton>
+        </div>
+
+        {/* /login no lleva pie: el cambio de idioma vive acá para no perder /en/login. */}
+        <div class="mt-10 flex justify-center">
+          <LangSwitch lang={lang} />
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  const soltarLogo = () => {
+    document.querySelectorAll('.logo-vt-escritorio, .logo-vt-movil').forEach((el) => {
+      el.style.viewTransitionName = 'none'
+    })
+  }
+  window.addEventListener('pageswap', (e) => {
+    if (e.viewTransition) soltarLogo()
+  })
+
+  const pestanas = document.getElementById('pestanas')
+  const tabs = [...(pestanas?.querySelectorAll('[role="tab"]') ?? [])]
+  const paneles = {
+    'tab-ingresar': document.getElementById('panel-ingresar'),
+    'tab-crear': document.getElementById('panel-crear'),
+  }
+
+  const entrar = (el, clase = 'animate-in') => {
+    if (!el) return
+    el.classList.remove(clase)
+    el.style.setProperty('--d', '0ms')
+    void el.offsetWidth
+    el.classList.add(clase)
+  }
+
+  const elegir = (tab, enfocar = false) => {
+    for (const otra of tabs) {
+      const elegida = otra === tab
+      otra.setAttribute('aria-selected', String(elegida))
+      otra.tabIndex = elegida ? 0 : -1
+      const panel = paneles[otra.id]
+      if (panel) panel.hidden = !elegida
+      if (elegida) entrar(panel)
+    }
+    if (enfocar) tab.focus()
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => elegir(tab))
+    tab.addEventListener('keydown', (evento) => {
+      const salto = { ArrowRight: 1, ArrowLeft: -1 }[evento.key]
+      const destino =
+        salto !== undefined
+          ? tabs[(i + salto + tabs.length) % tabs.length]
+          : evento.key === 'Home'
+            ? tabs[0]
+            : evento.key === 'End'
+              ? tabs[tabs.length - 1]
+              : null
+      if (!destino) return
+      evento.preventDefault()
+      elegir(destino, true)
+    })
+  })
+
+  const form = document.getElementById('form-login')
+  const error = document.getElementById('login-error')
+
+  const mostrarError = (texto) => {
+    if (!error) return
+    error.hidden = false
+    error.textContent = texto
+    entrar(error, 'animate-in-pop')
+  }
+
+  form?.addEventListener('input', () => {
+    if (error) error.hidden = true
+  })
+
+  form?.addEventListener('submit', (evento) => {
+    evento.preventDefault()
+    const datos = new FormData(form)
+    const correo = String(datos.get('email') ?? '').trim()
+    const clave = String(datos.get('password') ?? '')
+
+    if (!correo || !clave) {
+      mostrarError(form.dataset.errorVacio || '')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)) {
+      mostrarError(form.dataset.errorCorreo || '')
+      return
+    }
+
+    const destino = form.dataset.app
+    if (!destino) return
+    const usuario = correo.split('@')[0]
+    window.location.assign(`${destino}/?u=${encodeURIComponent(usuario)}`)
+  })
+</script>

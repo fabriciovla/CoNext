@@ -1,0 +1,191 @@
+---
+import Legal from '../components/Legal.astro'
+import { EMAIL } from '../config'
+import { getLocale, t, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const copy = t(lang).legal
+const privacidad = pathFor(lang, '/privacidad')
+const asunto = lang === 'en' ? 'Delete%20data' : 'Eliminar%20datos'
+---
+
+<Legal
+  title={copy.eliminarTitle}
+  description={copy.eliminarDescription}
+  heading={copy.eliminarHeading}
+  actualizada={copy.eliminarFecha}
+>
+  {
+    lang === 'en' ? (
+      <>
+        <p>
+          You can ask us to delete the data conext keeps about you or your business. This page is
+          also the instruction Meta reviews for Facebook Login and WhatsApp Embedded Signup.
+        </p>
+
+        <h2>How to request it</h2>
+        <ol>
+          <li>
+            Write to <a href={`mailto:${EMAIL}?subject=${asunto}`}>{EMAIL}</a> with the subject
+            “Delete data”.
+          </li>
+          <li>
+            Include the business name, the email or username you sign in with, and the connected
+            WhatsApp number if you have it.
+          </li>
+          <li>
+            If the request is yours as a person (not as the business owner), say so and leave a
+            detail to identify you: for example the number you wrote from.
+          </li>
+        </ol>
+        <p>
+          If we cannot verify that the request is from who it claims to be, we will ask for extra
+          confirmation before deleting.
+        </p>
+
+        <h2>What we delete</h2>
+        <p>When the request is from the account owner, we delete from our systems:</p>
+        <ul>
+          <li>The business account and its dashboard users.</li>
+          <li>Conversations, messages, notes, tags, and drafts.</li>
+          <li>Files that were sent from the CRM.</li>
+          <li>Products, agents, hours, and the rest of the configuration.</li>
+          <li>
+            The WhatsApp connection: encrypted token, WABA ID, and phone number ID. We stop receiving
+            and sending messages for that number.
+          </li>
+        </ul>
+        <p>
+          The WhatsApp Business number and the Meta account remain yours. Disconnecting conext does
+          not delete your Meta portfolio or the history WhatsApp keeps on the other side.
+        </p>
+
+        <h2>If you connected WhatsApp with Facebook</h2>
+        <p>
+          Permission was given in Meta’s popup (Facebook Login for Business). When we delete the
+          account in conext, we delete the token and stop using that permission. You can also remove
+          access from your Facebook account, in Settings → Apps and websites, looking for conext.
+        </p>
+        <p>
+          Removing the app on Facebook does not by itself delete the copy we already had in the CRM:
+          that still needs the email above, or we do it when Meta notifies us if an automatic
+          callback exists later.
+        </p>
+
+        <h2>If you wrote to a business WhatsApp</h2>
+        <p>
+          Your messages belong to that business. Ask them to delete them. If they do not reply,
+          write us at <a href={`mailto:${EMAIL}`}>{EMAIL}</a> with the number you wrote to and yours:
+          we locate the account and forward the request, or we delete your thread if the business is
+          no longer active.
+        </p>
+
+        <h2>Timelines</h2>
+        <p>
+          We confirm the request within a few business days and complete deletion within 30 days at
+          most, unless the law requires us to keep something (for example, an invoice). Backups may
+          take one more cycle to rotate; they are not used for anything other than recovering the
+          service.
+        </p>
+        <p>When it is done, we notify you on the same email.</p>
+
+        <h2>What we cannot delete ourselves</h2>
+        <ul>
+          <li>Data Meta keeps in WhatsApp or in your Business Manager.</li>
+          <li>What Google retains from Gemini processing, under its own timelines as a processor.</li>
+          <li>Messages the recipient already has on their phone.</li>
+        </ul>
+
+        <p>
+          More detail on what data we process is in the
+          <a href={privacidad}>privacy policy</a>.
+        </p>
+      </>
+    ) : (
+      <>
+        <p>
+          Puedes pedir que borremos los datos que conext guarda sobre ti o sobre tu negocio. Esta página es
+          también la instrucción que Meta revisa para Facebook Login y WhatsApp Embedded Signup.
+        </p>
+
+        <h2>Cómo pedirlo</h2>
+        <ol>
+          <li>
+            Escribe a <a href={`mailto:${EMAIL}?subject=${asunto}`}>{EMAIL}</a> con el asunto
+            «Eliminar datos».
+          </li>
+          <li>
+            Incluye el nombre del negocio, el correo o usuario con el que entras, y el número de WhatsApp
+            conectado si lo tienes.
+          </li>
+          <li>
+            Si el pedido es tuyo como persona (no como dueño del negocio), indícalo y deja un dato para
+            identificarte: por ejemplo el número desde el que escribiste.
+          </li>
+        </ol>
+        <p>
+          Si no podemos verificar que el pedido es de quien dice ser, vamos a pedir una confirmación extra
+          antes de borrar.
+        </p>
+
+        <h2>Qué borramos</h2>
+        <p>Cuando el pedido es del dueño de la cuenta, eliminamos de nuestros sistemas:</p>
+        <ul>
+          <li>La cuenta del negocio y sus usuarios en el panel.</li>
+          <li>Conversaciones, mensajes, notas, etiquetas y borradores.</li>
+          <li>Archivos que se hayan enviado desde el CRM.</li>
+          <li>Productos, agentes, horarios y el resto de la configuración.</li>
+          <li>
+            La conexión con WhatsApp: token cifrado, WABA ID y phone number ID. Dejamos de recibir y de
+            enviar mensajes de ese número.
+          </li>
+        </ul>
+        <p>
+          El número de WhatsApp Business y la cuenta en Meta siguen siendo tuyos. Desconectar conext no
+          borra tu portafolio de Meta ni el historial que WhatsApp guarda del otro lado.
+        </p>
+
+        <h2>Si conectaste WhatsApp con Facebook</h2>
+        <p>
+          El permiso se dio en el popup de Meta (Facebook Login for Business). Al borrar la cuenta en
+          conext, eliminamos el token y dejamos de usar ese permiso. También puedes quitar el acceso desde
+          tu cuenta de Facebook, en Configuración → Aplicaciones y sitios web, buscando conext.
+        </p>
+        <p>
+          Quitar la app en Facebook no borra sola la copia que ya teníamos en el CRM: para eso hace falta
+          el correo de arriba, o lo hacemos cuando Meta nos notifique si más adelante hay un callback
+          automático.
+        </p>
+
+        <h2>Si escribiste al WhatsApp de un negocio</h2>
+        <p>
+          Tus mensajes los tiene ese negocio. Pídele a ellos que los borren. Si no responden, escríbenos a
+          <a href={`mailto:${EMAIL}`}>{EMAIL}</a> con el número al que escribiste y el tuyo: localizamos la
+          cuenta y les reenviamos el pedido, o borramos tu hilo si el negocio ya no está activo.
+        </p>
+
+        <h2>Plazos</h2>
+        <p>
+          Confirmamos el pedido en unos días hábiles y completamos el borrado en un máximo de 30 días,
+          salvo que la ley nos obligue a conservar algo (por ejemplo, una factura). Las copias de seguridad
+          pueden tardar un ciclo más en rotar; no se usan para otra cosa que recuperar el servicio.
+        </p>
+        <p>Cuando termine, te avisamos por el mismo correo.</p>
+
+        <h2>Qué no podemos borrar nosotros</h2>
+        <ul>
+          <li>Los datos que Meta guarda en WhatsApp o en tu Business Manager.</li>
+          <li>
+            Lo que Google retenga del procesamiento en Gemini, según sus propios plazos como encargado.
+          </li>
+          <li>Mensajes que el destinatario ya tenga en su teléfono.</li>
+        </ul>
+
+        <p>
+          Más detalle sobre qué datos tratamos está en la
+          <a href={privacidad}>política de privacidad</a>.
+        </p>
+      </>
+    )
+  }
+</Legal>

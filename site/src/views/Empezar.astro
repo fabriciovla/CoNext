@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro'
+import Cuestionario from '../components/empezar/Cuestionario.jsx'
+import { APP_URL, API_URL, ALTA_CLAVE } from '../config'
+import { getLocale, t, pathFor } from '../i18n/utils'
+
+const lang = getLocale(Astro)
+const copy = t(lang).empezar
+const home = pathFor(lang, '/')
+const pedido = Astro.url.searchParams.get('plan')
+const plan = copy.planes[pedido] ? pedido : 'gratis'
+---
+
+<Base title={copy.title} description={copy.description} pantallaCompleta noindex>
+  <script
+    is:inline
+    set:html={`
+      try {
+        var d = JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null');
+        if (d && d.listo) location.replace(${JSON.stringify(APP_URL)});
+        else document.documentElement.classList.add('empezar-vivo');
+      } catch (e) {
+        document.documentElement.classList.add('empezar-vivo');
+      }
+    `}
+  />
+
+  <div class="empezar-pagina">
+    <div class="orbe -left-40 -top-36 h-[28rem] w-[28rem]" style="--d: 80ms" aria-hidden="true"></div>
+    <div class="orbe -bottom-40 -right-36 h-[24rem] w-[24rem]" style="--d: 200ms" aria-hidden="true"></div>
+    <Cuestionario client:load copy={copy} plan={plan} appUrl={APP_URL} apiUrl={API_URL} home={home} />
+  </div>
+</Base>
+
+<script>
+  window.addEventListener('pageswap', (e) => {
+    if (!e.viewTransition) return
+    document.querySelectorAll('.logo-empezar').forEach((el) => {
+      el.style.viewTransitionName = 'none'
+    })
+  })
+</script>

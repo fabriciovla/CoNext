@@ -17,12 +17,14 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Satoshi se sirve desde acá y no desde Google Fonts, que era de donde
+         venía Inter. Un `<link>` a un CDN de fuentes es una hoja de estilo
+         bloqueante en otro dominio: hay que resolver DNS, abrir TLS y recién
+         ahí enterarse de cuál es el archivo de la fuente. Con el preload al
+         mismo origen la descarga arranca con el HTML.
+         `crossorigin` no es opcional aunque sea del mismo origen: sin él el
+         navegador se baja el archivo dos veces. -->
+    <link rel="preload" href="/fonts/satoshi-var.woff2" as="font" type="font/woff2" crossorigin />
     <title>conext</title>
     <script>
       // Antes de pintar nada: si el tema elegido es el oscuro, el atributo tiene

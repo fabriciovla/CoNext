@@ -1,0 +1,173 @@
+---
+// La escena de las páginas de error. El gesto es el de la 404 de dock.us —
+// dos plataformas circulares, una ventana de producto flotando, una planta
+// chica que ancla el piso — pero el dibujo es nuestro: una bandeja y un
+// hilo, no las figuritas 3D de ellos.
+//
+// No lleva texto: la misma escena sirve en los dos idiomas. El hueco de
+// abajo (búsqueda en 404, aviso en 500) es lo único que cambia con el código.
+import { LogoMarca } from './Logo.jsx'
+import { IconAlert, IconSearch } from './icons.jsx'
+
+const { codigo = 404 } = Astro.props
+const IconoVacio = codigo === 500 ? IconAlert : IconSearch
+---
+
+<div class="error-escena" aria-hidden="true">
+  <div class="error-plat error-plat-a"></div>
+  <div class="error-plat error-plat-b"></div>
+
+  <svg class="error-planta" viewBox="0 0 48 64" fill="none">
+    <path d="M24 62c4.5 0 8-1.6 8-4s-3.5-4-8-4-8 1.6-8 4 3.5 4 8 4Z" fill="rgb(var(--tint) / 0.18)"></path>
+    <path d="M20 54h8l-1.2-10h-5.6L20 54Z" fill="rgb(var(--tint) / 0.28)"></path>
+    <path
+      d="M24 44c0-8-6-16-12-18 2 8 6 14 12 18Z"
+      fill="rgb(var(--violet) / 0.35)"
+    ></path>
+    <path
+      d="M24 44c0-10 7-18 14-20-3 9-7 16-14 20Z"
+      fill="rgb(var(--violet) / 0.55)"
+    ></path>
+    <path
+      d="M24 44c-1-9 2-18 8-24-6 4-9 14-8 24Z"
+      fill="rgb(var(--violet) / 0.45)"
+    ></path>
+  </svg>
+
+  <div class="error-ficha">
+    <span class="error-ficha-barra"></span>
+    <span class="error-ficha-linea w-[72%]"></span>
+    <span class="error-ficha-linea w-[54%]"></span>
+    <span class="mt-2 flex items-center gap-2">
+      <span class="h-5 w-5 rounded-full bg-violet/20"></span>
+      <span class="error-ficha-linea w-[48%]"></span>
+    </span>
+    <span class="flex items-center gap-2">
+      <span class="h-5 w-5 rounded-full bg-tint/15"></span>
+      <span class="error-ficha-linea w-[40%]"></span>
+    </span>
+  </div>
+
+  <div class="error-ventana">
+    <div class="flex items-center gap-2 border-b border-tint/[0.08] px-3 py-2.5">
+      <LogoMarca className="h-4 w-auto text-ink-primary" />
+      <span class="ml-auto flex gap-1">
+        <span class="h-1.5 w-1.5 rounded-full bg-tint/20"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-tint/20"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-tint/20"></span>
+      </span>
+    </div>
+    <div class="flex flex-col gap-2 px-3 py-3">
+      <span class="error-burbuja self-start bg-tint/[0.07]"></span>
+      <span class="error-burbuja self-end w-[46%] bg-violet/15"></span>
+      <span
+        class="mt-1 flex h-14 items-center justify-center rounded-xl border border-dashed border-tint/20 bg-tint/[0.03] text-ink-faint"
+      >
+        <IconoVacio size={18} />
+      </span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .error-escena {
+    position: relative;
+    width: 100%;
+    max-width: 28rem;
+    height: 17.5rem;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 640px) {
+    .error-escena {
+      height: 20rem;
+      max-width: 30rem;
+    }
+  }
+
+  .error-plat {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+
+  .error-plat-a {
+    left: 6%;
+    bottom: 0.35rem;
+    width: 58%;
+    height: 42%;
+    background: rgb(var(--violet) / 0.12);
+  }
+
+  .error-plat-b {
+    right: 4%;
+    bottom: 0;
+    width: 52%;
+    height: 38%;
+    background: rgb(var(--violet) / 0.22);
+  }
+
+  .error-planta {
+    position: absolute;
+    left: 44%;
+    bottom: 14%;
+    width: 2.75rem;
+    z-index: 2;
+  }
+
+  .error-ficha {
+    position: absolute;
+    left: 7%;
+    top: 14%;
+    z-index: 1;
+    display: flex;
+    width: 42%;
+    transform: rotate(-7deg);
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: 1rem;
+    border: 1px solid rgb(var(--tint) / 0.1);
+    background: rgb(var(--surface-card));
+    padding: 0.85rem 0.9rem;
+    box-shadow: var(--shadow-card);
+  }
+
+  .error-ficha-barra {
+    display: block;
+    height: 0.4rem;
+    width: 38%;
+    border-radius: 999px;
+    background: rgb(var(--violet) / 0.45);
+  }
+
+  .error-ficha-linea {
+    display: block;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: rgb(var(--tint) / 0.1);
+  }
+
+  .error-ventana {
+    position: absolute;
+    left: 38%;
+    top: 8%;
+    z-index: 3;
+    width: 54%;
+    transform: rotate(4deg);
+    overflow: hidden;
+    border-radius: 1.1rem;
+    border: 1px solid rgb(var(--tint) / 0.12);
+    background: rgb(var(--surface-card));
+    box-shadow:
+      0 1px 2px rgb(var(--tint) / 0.06),
+      0 12px 28px -12px rgb(var(--tint) / 0.22),
+      0 40px 64px -32px rgb(var(--tint) / 0.28);
+  }
+
+  .error-burbuja {
+    display: block;
+    height: 1.35rem;
+    width: 58%;
+    border-radius: 0.7rem;
+  }
+</style>

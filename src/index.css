@@ -15,6 +15,20 @@
   max-width: 100%;
 }
 
+/* Satoshi, la tipografía de la marca, en su versión variable: 300 a 900 en un
+   solo archivo de 42 KB. Antes acá se usaba Inter y venía de Google Fonts por
+   un `<link>` en index.html; ahora se sirve desde `public/fonts/`, así no hay
+   una hoja bloqueante en otro dominio antes de saber cuál es el archivo.
+   La declaración es igual en `site/src/index.css`: es la misma marca, y el
+   archivo está copiado en los dos `public/fonts/`. */
+@font-face {
+  font-family: 'Satoshi';
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url('/fonts/satoshi-var.woff2') format('woff2');
+}
+
 /* Sistema de animación
    ---------------------------------------------------------------------------
    Los keyframes viven acá (CSS plano) y no en tailwind.config.js a propósito:
@@ -35,25 +49,25 @@
    es el que vive en `:root` para que sea también lo que se ve antes de que
    corra el JS. */
 :root {
-  --tint: 24 24 27;
-  --surface-page: 245 245 247;
+  --tint: 18 23 34;
+  --surface-page: 250 249 247;
   --surface-card: 255 255 255;
   --surface-raised: 255 255 255;
-  --surface-hover: 240 240 243;
-  --surface-nav: 250 250 251;
+  --surface-hover: 242 241 238;
+  --surface-nav: 255 255 255;
   /* Escala de texto: cuatro niveles sólidos, no alfa. El texto con alfa sobre
      fondo claro se lava mucho más que sobre uno oscuro, así que cada nivel se
      define por tema y se elige para que se lea: hasta el más tenue queda por
      encima de 4.5:1 contra su fondo. */
-  --ink-primary: 24 24 27;
-  --ink-secondary: 63 63 70;
-  --ink-muted: 90 90 99;
-  --ink-faint: 122 122 133;
+  --ink-primary: 18 23 34;
+  --ink-secondary: 52 62 85;
+  --ink-muted: 90 96 110;
+  --ink-faint: 104 109 122;
   --ink-inverted: 255 255 255;
-  --border: 24 24 27;
-  --border-strong: 24 24 27;
-  --violet: 84 72 191;
-  --violet-soft: 231 229 251;
+  --border: 18 23 34;
+  --border-strong: 18 23 34;
+  --violet: 64 88 255;
+  --violet-soft: 230 236 252;
   --status-good: 21 128 61;
   --status-warning: 180 120 10;
   --status-serious: 194 91 45;
@@ -64,17 +78,17 @@
      fondo es la línea de 1px, y la sombra es apenas un susurro para que el
      blanco sobre gris claro no se vea pegado. La sombra grande se reserva para
      lo que de verdad flota (modal, menú, tooltip) — ver `--shadow-pop`. */
-  --shadow-card: 0 1px 2px -1px rgba(24, 24, 27, 0.06);
-  --shadow-card-hover: 0 1px 2px -1px rgba(24, 24, 27, 0.08), 0 6px 16px -12px rgba(24, 24, 27, 0.3);
-  --shadow-pop: 0 8px 28px -8px rgba(24, 24, 27, 0.18), 0 2px 8px -4px rgba(24, 24, 27, 0.12);
+  --shadow-card: 0 1px 2px -1px rgba(18, 23, 34, 0.06);
+  --shadow-card-hover: 0 1px 2px -1px rgba(18, 23, 34, 0.08), 0 6px 16px -12px rgba(18, 23, 34, 0.3);
+  --shadow-pop: 0 8px 28px -8px rgba(18, 23, 34, 0.18), 0 2px 8px -4px rgba(18, 23, 34, 0.12);
   /* Velo del modal. Es la única variable de color que se escribe con su alfa
      adentro (y no como terna RGB): lo que cambia entre temas no es el color
      sino cuánto tapa. Sobre una página clara, el mismo negro al 80% que en el
      tema oscuro apaga la pantalla entera para preguntar si borrás un producto;
      acá alcanza con retirar el fondo. */
-  --scrim: rgba(24, 24, 27, 0.45);
-  --scrollbar-thumb: rgba(24, 24, 27, 0.18);
-  --scrollbar-thumb-hover: rgba(24, 24, 27, 0.3);
+  --scrim: rgba(18, 23, 34, 0.45);
+  --scrollbar-thumb: rgba(18, 23, 34, 0.18);
+  --scrollbar-thumb-hover: rgba(18, 23, 34, 0.3);
 }
 
 :root[data-theme='dark'] {
@@ -91,8 +105,8 @@
   --ink-inverted: 0 0 0;
   --border: 255 255 255;
   --border-strong: 255 255 255;
-  --violet: 144 133 233;
-  --violet-soft: 46 42 80;
+  --violet: 123 149 255;
+  --violet-soft: 26 33 61;
   --status-good: 12 163 12;
   --status-warning: 250 178 25;
   --status-serious: 236 131 90;
@@ -133,7 +147,7 @@ body {
 }
 
 ::selection {
-  background: rgba(144, 133, 233, 0.35);
+  background: rgba(64, 88, 255, 0.25);
 }
 
 * {
@@ -248,6 +262,18 @@ body {
   }
 }
 
+/* El latido de los orbes de /login: 10px en 16s. A esa velocidad no se ve
+   moverse, se ve respirar. */
+@keyframes fondo-respirar {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
 /* Halo del punto "día abierto": late sin llamar la atención. */
 @keyframes ui-pulse-ring {
   0% {
@@ -259,6 +285,45 @@ body {
     opacity: 0;
     transform: scale(2.4);
   }
+}
+
+/* Los orbes del panel de /login: un círculo con un anillo finito y un degradé
+   violeta que se apaga antes de tocar el borde. Es el mismo gesto que la landing
+   reparte entre sus secciones (`.orbe` y `.fondo-seccion::before` en
+   `site/src/index.css`) — si se retoca el violeta o el anillo, se retoca allá
+   también. La pantalla de ingreso es la misma de los dos lados y el fondo es
+   parte de la pantalla.
+
+   El tamaño y la posición de cada uno los pone la página: son dos y entran
+   mayormente fuera del panel, así lo que se ve es el arco y no el círculo.
+
+   La entrada va en la misma declaración que el latido y no en un
+   `.animate-fade-in` aparte: `animation` es una sola propiedad y la clase le
+   pisaría el `fondo-respirar`. Ojo también con el otro lado de eso: el orbe no
+   lleva ninguna clase de `opacity`. El alfa está adentro del degradé, que es
+   justamente lo que antes no pasaba — el resplandor tenía `opacity-[0.1]` y una
+   entrada que animaba la opacidad hasta 1, así que aparecía a pleno, se apagaba
+   de golpe al terminar el keyframe y parecía un parpadeo rosa.
+
+   Es el único movimiento decorativo de la dashboard, y es a propósito: el panel
+   de marca es la única pantalla que no es interfaz de trabajo. */
+.orbe {
+  position: absolute;
+  z-index: 0;
+  border: 1px solid rgb(var(--violet) / 0.16);
+  border-radius: 999px;
+  transform-origin: center;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgb(var(--violet) / 0.16),
+    rgb(var(--violet) / 0.055) 46%,
+    rgb(var(--violet) / 0.028) 68%,
+    transparent 78%
+  );
+  animation:
+    ui-fade-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards,
+    fondo-respirar 16s ease-in-out infinite;
 }
 
 @layer utilities {

@@ -1,0 +1,42 @@
+---
+import { t, switchLocale } from '../i18n/utils'
+
+const { lang } = Astro.props
+const copy = t(lang).footer
+const pathname = Astro.url.pathname
+const esHref = switchLocale(pathname, 'es')
+const enHref = switchLocale(pathname, 'en')
+
+const clase = (activo) =>
+  activo
+    ? 'text-[13.5px] font-medium text-ink-primary'
+    : 'text-[13.5px] text-ink-muted transition-colors duration-200 hover:text-ink-primary'
+---
+
+<nav aria-label={copy.idioma} class="flex items-center gap-5">
+  <a
+    href={esHref}
+    data-lang-switch
+    aria-current={lang === 'es' ? 'true' : undefined}
+    class={clase(lang === 'es')}>Español</a
+  >
+  <a
+    href={enHref}
+    data-lang-switch
+    aria-current={lang === 'en' ? 'true' : undefined}
+    class={clase(lang === 'en')}>English</a
+  >
+</nav>
+
+<script>
+  // El hash no viaja al server: sin esto, cambiar de idioma desde /#bandeja
+  // te deja en la portada del otro locale y perdés el ancla.
+  document.querySelectorAll('[data-lang-switch]').forEach((enlace) => {
+    enlace.addEventListener('click', (evento) => {
+      if (!location.hash) return
+      evento.preventDefault()
+      const base = enlace.getAttribute('href') || '/'
+      location.assign(`${base.split('#')[0]}${location.hash}`)
+    })
+  })
+</script>

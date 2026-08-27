@@ -149,6 +149,29 @@ export const IconUsers = (props) => (
   </Svg>
 )
 
+export const IconLayout = (props) => (
+  <Svg {...props}>
+    <rect x="3.5" y="3.5" width="17" height="17" rx="2.2" />
+    <path d="M3.5 10.5h17M10.5 3.5v17" />
+  </Svg>
+)
+
+export const IconLayers = (props) => (
+  <Svg {...props}>
+    <path d="M12 3.8 20.2 8.2 12 12.6 3.8 8.2Z" />
+    <path d="M20.2 12.2 12 16.6 3.8 12.2" />
+    <path d="M20.2 15.8 12 20.2 3.8 15.8" />
+  </Svg>
+)
+
+export const IconLightbulb = (props) => (
+  <Svg {...props}>
+    <path d="M9 18.2h6" />
+    <path d="M10.2 21h3.6" />
+    <path d="M12 3.5a6.2 6.2 0 0 0-3.6 11.2c.6.5 1 1.3 1.1 2.3h5c.1-1 .5-1.8 1.1-2.3A6.2 6.2 0 0 0 12 3.5Z" />
+  </Svg>
+)
+
 export const IconPlus = (props) => (
   <Svg {...props}>
     <path d="M12 4.5v15M4.5 12h15" />
@@ -226,6 +249,14 @@ export const IconNote = (props) => (
   </Svg>
 )
 
+export const IconAlert = (props) => (
+  <Svg {...props}>
+    <path d="M12 4.8 20.4 19.2H3.6Z" />
+    <path d="M12 10.2v4.1" />
+    <path d="M12 16.7h.01" strokeWidth="2" />
+  </Svg>
+)
+
 // Marca de GitHub: igual que WhatsApp, de relleno — el octocat de línea no se
 // lee a 20px. viewBox 24 para que el tamaño coincida con el resto de la barra.
 export const IconGitHub = ({ size = 20, className = '', ...rest }) => (
@@ -239,6 +270,67 @@ export const IconGitHub = ({ size = 20, className = '', ...rest }) => (
     {...rest}
   >
     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 10.39.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23.96-.27 1.98-.4 3-.4s2.04.13 3 .4c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57C20.56 21.8 24 17.3 24 12 24 5.37 18.63 0 12 0Z" />
+  </svg>
+)
+
+export const IconGoogle = ({ size = 16, className = '', ...rest }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 48 48"
+    className={className}
+    aria-hidden="true"
+    {...rest}
+  >
+    {/* Los cuatro hex son la marca de Google: las guidelines de Sign in with
+        Google prohíben la G en un solo color. */}
+    <path
+      fill="#EA4335"
+      d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+    />
+    <path
+      fill="#4285F4"
+      d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+    />
+    <path
+      fill="#34A853"
+      d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+    />
+  </svg>
+)
+
+export const IconMicrosoft = ({ size = 16, className = '', ...rest }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 23 23"
+    className={className}
+    aria-hidden="true"
+    {...rest}
+  >
+    {/* Cuatro cuadrados del logo de 2012, con el aire entre paneles. */}
+    <path fill="#F25022" d="M1 1h10v10H1z" />
+    <path fill="#7FBA00" d="M12 1h10v10H12z" />
+    <path fill="#00A4EF" d="M1 12h10v10H1z" />
+    <path fill="#FFB900" d="M12 12h10v10H12z" />
+  </svg>
+)
+
+export const IconApple = ({ size = 16, className = '', ...rest }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+    {...rest}
+  >
+    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701z" />
   </svg>
 )
 

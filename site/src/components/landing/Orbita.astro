@@ -1,0 +1,217 @@
+---
+// La rueda de "qué hace": la marca en el centro y las seis funciones alrededor,
+// cada una colgada del anillo. Es el mismo gesto de la tarjeta de dock.us —un
+// núcleo y lo que orbita— y está acá por lo mismo que está allá: la lista de
+// funciones que viene abajo dice *qué* hace cada cosa, pero no dice que todas
+// caen en el mismo lugar. Eso lo dice el dibujo y no un párrafo más.
+//
+// Geometría: la escena es **cuadrada** y mide lo mismo que el `viewBox` del
+// SVG (400), así que una coordenada del SVG y un porcentaje del lado son el
+// mismo punto. Por eso los nodos son HTML absoluto y no `<text>` adentro del
+// SVG: son texto de verdad, con la tipografía y el color de la página, y las
+// píldoras crecen con la traducción sin que haya que medir nada.
+//
+// La tarjeta es más ancha que alta y la escena entra centrada: los círculos
+// punteados sobran por los costados a propósito y los corta el borde de la
+// tarjeta (`overflow-hidden` acá + `overflow: visible` en el SVG). Esa fuga es
+// lo que hace que se lea como el recorte de algo más grande y no como un
+// diagrama encerrado en su caja.
+import { LogoMarca } from '../Logo.jsx'
+import {
+  IconBolt,
+  IconBox,
+  IconChart,
+  IconClock,
+  IconInbox,
+  IconSparkles,
+  IconWhatsApp,
+} from '../icons.jsx'
+
+const { funciones, lang = 'es' } = Astro.props
+
+// Seis nodos cada 60°, arrancando arriba y en sentido horario. El orden no es
+// libre: los dos de la derecha son los de inteligencia y los de la izquierda
+// los de operación, igual que los grupos de la lista de abajo.
+const ORDEN = [
+  { id: 'bandeja', Icono: IconInbox, angulo: 0, lado: 'arriba', canal: true },
+  { id: 'agentes', Icono: IconSparkles, angulo: 60, lado: 'derecha' },
+  { id: 'automatico', Icono: IconBolt, angulo: 120, lado: 'derecha' },
+  { id: 'productos', Icono: IconBox, angulo: 180, lado: 'abajo' },
+  { id: 'dia', Icono: IconChart, angulo: 240, lado: 'izquierda' },
+  { id: 'horarios', Icono: IconClock, angulo: 300, lado: 'izquierda' },
+]
+
+const LADO = 400 // el viewBox, y también el lado de la escena
+const C = LADO / 2
+const RADIO = 136
+
+// 0° arriba y en sentido horario. El -90 es porque el 0 de las funciones
+// trigonométricas cae a la derecha.
+const rad = (a) => ((a - 90) * Math.PI) / 180
+const punto = (a, r) => [C + r * Math.cos(rad(a)), C + r * Math.sin(rad(a))]
+
+const NODOS = ORDEN.map((nodo) => {
+  const [x, y] = punto(nodo.angulo, RADIO)
+  // El control de la curva va corrido 26° en el sentido de la vuelta: sobre el
+  // mismo radio la curva saldría recta y las seis se cruzarían en el centro
+  // como los rayos de una rueda de bicicleta.
+  const [cx, cy] = punto(nodo.angulo + 26, 76)
+  return {
+    ...nodo,
+    titulo: funciones[nodo.id]?.titulo ?? '',
+    x,
+    y,
+    izquierda: (x / LADO) * 100,
+    arriba: (y / LADO) * 100,
+    curva: `M${x.toFixed(1)} ${y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${C} ${C}`,
+  }
+})
+
+const PILDORA =
+  'inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-tint/10 bg-surface-card px-3.5 py-2 text-[14px] font-medium leading-none text-ink-primary shadow-card'
+
+const CANAL = lang === 'en' ? 'Official WhatsApp API' : 'API oficial de WhatsApp'
+---
+
+<div class="orbita relative overflow-hidden rounded-2xl border border-tint/10 bg-surface-nav shadow-card">
+  {/* --------------------------------------------------------------------- */}
+  {/* La rueda. Abajo de md las píldoras no entran a los costados: ahí va la  */}
+  {/* lista, que dice lo mismo sin pedir 600 px de alto.                     */}
+  {/* --------------------------------------------------------------------- */}
+  <div class="relative hidden h-[520px] md:block lg:h-[600px]">
+    <div class="absolute left-1/2 top-0 aspect-square h-full -translate-x-1/2">
+      <svg
+        viewBox="0 0 400 400"
+        class="absolute inset-0 h-full w-full overflow-visible"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* El anillo no es de un solo tono: el degradé le da el giro. Se
+              queda adentro del azul de marca —el acento y su versión clara, la
+              misma pareja de `bg-accent-gradient`— en vez de repartir un color
+              por nodo: acá el acento es el único color con voz. */}
+          <linearGradient id="orbita-anillo" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="rgb(var(--violet))" stop-opacity="0.9"></stop>
+            <stop offset="38%" stop-color="#408cff" stop-opacity="0.85"></stop>
+            <stop offset="72%" stop-color="rgb(var(--violet))" stop-opacity="0.55"></stop>
+            <stop offset="100%" stop-color="#408cff" stop-opacity="0.35"></stop>
+          </linearGradient>
+        </defs>
+
+        {/* La flor punteada: un círculo del mismo radio centrado en cada nodo,
+            así que todos pasan por el centro y por sus dos vecinos (con seis
+            nodos el lado del hexágono mide igual que el radio). Es geometría y
+            no adorno suelto: por eso los cruces caen donde caen. */}
+        {
+          NODOS.map((nodo) => (
+            <circle
+              cx={nodo.x}
+              cy={nodo.y}
+              r={RADIO}
+              fill="none"
+              stroke="rgb(var(--tint) / 0.13)"
+              stroke-width="1"
+              stroke-dasharray="3 7"
+            />
+          ))
+        }
+
+        {/* Los hilos que bajan al centro. Van antes del anillo para que el
+            anillo los tape en el cruce y no al revés. */}
+        {
+          NODOS.map((nodo) => (
+            <path
+              d={nodo.curva}
+              fill="none"
+              stroke="url(#orbita-anillo)"
+              stroke-width="1.4"
+              stroke-linecap="round"
+              opacity="0.55"
+            />
+          ))
+        }
+
+        <circle
+          cx={C}
+          cy={C}
+          r={RADIO}
+          fill="none"
+          stroke="url(#orbita-anillo)"
+          stroke-width="2.5"
+        ></circle>
+      </svg>
+
+      {/* El núcleo. El halo está para dos cosas a la vez: dar profundidad y
+          borrar la trama de puntos justo abajo de la marca. */}
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div class="orbita-halo relative h-[220px] w-[220px] lg:h-[254px] lg:w-[254px]">
+          <div
+            class="absolute left-1/2 top-1/2 flex h-[118px] w-[118px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent-gradient shadow-glow lg:h-[136px] lg:w-[136px]"
+          >
+            <LogoMarca className="h-11 w-auto text-white lg:h-[52px]" />
+          </div>
+          <span
+            class={`${PILDORA} absolute left-1/2 top-[calc(50%+52px)] -translate-x-1/2 lg:top-[calc(50%+62px)]`}
+          >
+            conext
+          </span>
+        </div>
+      </div>
+
+      {/* Los nodos. La píldora es `absolute` respecto del disco y no un hermano
+          en una fila: así el disco queda clavado en su punto del anillo y el
+          texto crece hacia afuera sin correrlo. */}
+      {
+        NODOS.map(({ Icono, titulo, izquierda, arriba, lado, canal }) => (
+          <div class="absolute" style={`left:${izquierda.toFixed(3)}%;top:${arriba.toFixed(3)}%`}>
+            <div class="relative -translate-x-1/2 -translate-y-1/2">
+              <span class="flex h-11 w-11 items-center justify-center rounded-full bg-accent-gradient text-white shadow-glow">
+                <Icono size={20} />
+              </span>
+              <span
+                class:list={[
+                  PILDORA,
+                  'absolute',
+                  lado === 'derecha' && 'left-full top-1/2 ml-3 -translate-y-1/2',
+                  lado === 'izquierda' && 'right-full top-1/2 mr-3 -translate-y-1/2',
+                  lado === 'arriba' && 'bottom-full left-1/2 mb-3 -translate-x-1/2',
+                  lado === 'abajo' && 'left-1/2 top-full mt-3 -translate-x-1/2',
+                ]}
+              >
+                {canal && <IconWhatsApp size={15} className="text-status-good" />}
+                {titulo}
+              </span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  {/* --------------------------------------------------------------------- */}
+  {/* Lo mismo, en teléfono.                                                 */}
+  {/* --------------------------------------------------------------------- */}
+  <div class="p-6 md:hidden">
+    <div class="flex flex-col items-center gap-3">
+      <span class="flex h-16 w-16 items-center justify-center rounded-full bg-accent-gradient shadow-glow">
+        <LogoMarca className="h-6 w-auto text-white" />
+      </span>
+      <span class={PILDORA}>
+        <IconWhatsApp size={15} className="text-status-good" />
+        {CANAL}
+      </span>
+    </div>
+    <ul class="mt-6 grid gap-2 sm:grid-cols-2">
+      {
+        NODOS.map(({ Icono, titulo }) => (
+          <li class="flex min-w-0 items-center gap-3 rounded-full border border-tint/10 bg-surface-card px-3 py-2.5 shadow-card">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-gradient text-white">
+              <Icono size={16} />
+            </span>
+            <span class="truncate text-[14px] font-medium text-ink-primary">{titulo}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</div>

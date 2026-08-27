@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
-import Logo from '../components/ui/Logo'
+import Logo, { LogoMarca } from '../components/ui/Logo'
+import SocialButtons from '../components/login/SocialButtons'
 import { IconBolt, IconLock, IconMoon, IconSparkles, IconSun } from '../components/ui/icons'
 
 const PESTANAS = [
@@ -20,22 +21,25 @@ const VENTAJAS = [
 function PanelMarca() {
   return (
     <section className="relative hidden overflow-hidden border-r border-tint/[0.07] bg-surface-card px-10 py-9 lg:flex lg:flex-col">
-      {/* Dos resplandores de marca, arriba y abajo: entran lento y se quedan
-          quietos. Son el único "fondo" del panel; el resto es la superficie. */}
-      <div
-        className="animate-fade-in pointer-events-none absolute -left-28 -top-32 h-[440px] w-[440px] rounded-full bg-accent-gradient opacity-[0.1] blur-[130px]"
-        style={{ '--d': '120ms' }}
-      />
-      <div
-        className="animate-fade-in pointer-events-none absolute -bottom-36 -right-24 h-[400px] w-[400px] rounded-full bg-accent-gradient opacity-[0.08] blur-[130px]"
-        style={{ '--d': '220ms' }}
-      />
+      {/* Los dos orbes del inicio, arriba y abajo. Son el único "fondo" del
+          panel; el resto es la superficie.
+          Antes eran dos resplandores rosas desenfocados con el degradé de marca,
+          y encima parpadeaban — ver el comentario de `.orbe` en index.css. Ahora
+          es el mismo círculo con anillo que reparte la landing entre sus
+          secciones, así entrar por el sitio y entrar por acá no cambian de
+          idioma. Entran mayormente fuera del panel: lo que se ve es el arco. */}
+      <div className="orbe -left-48 -top-40 h-[34rem] w-[34rem]" style={{ '--d': '120ms' }} aria-hidden="true" />
+      <div className="orbe -bottom-44 -right-40 h-[28rem] w-[28rem]" style={{ '--d': '220ms' }} aria-hidden="true" />
 
       <div className="relative flex flex-1 flex-col items-center justify-center text-center">
-        {/* El logotipo grande es el centro del panel. El retraso va en un
-            envoltorio porque `Logo` solo acepta `className`. */}
+        {/* Acá va la marca sola y no el logotipo entero: el nombre escrito le
+            queda a un renglón del titular, y "conext / Todo WhatsApp" leído
+            seguido son dos titulares peleándose el centro del panel. El nombre
+            está igual en la pestaña y en el formulario de al lado.
+            El retraso va en un envoltorio porque `LogoMarca` solo acepta
+            `className`. */}
         <div className="animate-scale-in" style={{ '--d': '140ms' }}>
-          <Logo className="h-[68px] w-auto text-ink-primary" />
+          <LogoMarca className="h-[88px] w-auto text-ink-primary" />
         </div>
 
         <h1
@@ -69,7 +73,16 @@ function PanelMarca() {
   )
 }
 
-export default function Login({ onLogin, error, onClearError, theme, onToggleTheme }) {
+export default function Login({
+  onLogin,
+  onOAuth,
+  oauthPending = false,
+  social = false,
+  error,
+  onClearError,
+  theme,
+  onToggleTheme,
+}) {
   const [tab, setTab] = useState('ingresar')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -176,13 +189,20 @@ export default function Login({ onLogin, error, onClearError, theme, onToggleThe
             </h2>
             <p className="mb-6 mt-1.5 text-center text-[13px] leading-relaxed text-ink-muted">
               {tab === 'ingresar'
-                ? 'Ingresá con tu usuario para entrar al panel.'
-                : 'Las cuentas las da el dueño del negocio: pedile que te sume al equipo y vas a recibir tu usuario por correo.'}
+                ? 'Entrá con Google, GitHub u otra cuenta, o con tu usuario.'
+                : 'Creá la cuenta con el mismo proveedor que uses todos los días, o pedile acceso al dueño del negocio.'}
             </p>
 
-            {/* Los campos van adentro de una tarjeta y no sueltos sobre la página:
-                el campo es transparente, así que sin superficie propia el borde de
-                1px es lo único que lo separa del gris del fondo. */}
+            <SocialButtons
+              onElegir={onOAuth}
+              pending={oauthPending}
+              separador={tab === 'ingresar' ? 'o con tu correo' : 'o si ya tenés cuenta'}
+            />
+
+            {error && (
+              <p className="animate-pop-in mb-4 text-center text-xs text-status-critical">{error}</p>
+            )}
+
             {tab === 'ingresar' ? (
               <form
                 onSubmit={handleSubmit}
@@ -208,8 +228,6 @@ export default function Login({ onLogin, error, onClearError, theme, onToggleThe
                   autoComplete="current-password"
                 />
 
-                {error && <p className="animate-pop-in text-xs text-status-critical">{error}</p>}
-
                 <Button type="submit" className="w-full">
                   Iniciar sesión
                 </Button>
@@ -220,7 +238,7 @@ export default function Login({ onLogin, error, onClearError, theme, onToggleThe
               </Button>
             )}
 
-            {tab === 'ingresar' && (
+            {tab === 'ingresar' && !social && (
               <p className="mt-5 text-center text-xs text-ink-faint">
                 Demo local — cualquier usuario y contraseña funcionan.
               </p>

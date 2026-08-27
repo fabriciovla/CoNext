@@ -45,7 +45,6 @@ export default function AppNav({
   dayClosedAt,
   onCloseDay,
   onOpenNewDay,
-  onCollapse,
   current,
   onNavigate,
   onLogout,
@@ -82,7 +81,6 @@ export default function AppNav({
       username={username}
       onLogout={onLogout}
       pendingCount={pendingCount}
-      onCollapse={onCollapse}
       theme={theme}
       onToggleTheme={onToggleTheme}
       footer={
@@ -117,7 +115,7 @@ export default function AppNav({
             className={`w-full rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
               dayOpen
                 ? 'border border-tint/10 bg-tint/[0.04] text-ink-secondary hover:bg-tint/[0.09] hover:text-ink-primary'
-                : 'bg-ink-primary text-ink-inverted hover:bg-ink-primary/85'
+                : 'bg-violet text-ink-inverted hover:bg-violet/90'
             }`}
           >
             {dayOpen ? 'Cerrar día' : 'Abrir nuevo día'}
