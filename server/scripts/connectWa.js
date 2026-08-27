@@ -38,20 +38,20 @@ if (!accessToken) {
 // De dónde sale la cuenta (WABA) del número, en orden de confianza:
 //
 //   1. La que se pasó a mano (cuarto argumento o DEV_WA_WABA_ID). Es la única
-//      que no puede equivocarse, y la que sirve cuando las otras dos no.
-//   2. El campo `whatsapp_business_account` del propio número. No siempre viene
-//      —depende del tipo de token— pero cuando viene es exacto.
-//   3. Los `granular_scopes` de debug_token: ahí Meta lista, para el permiso
+//      que no puede equivocarse, y la que sirve cuando la otra no.
+//   2. Los `granular_scopes` de debug_token: ahí Meta lista, para el permiso
 //      whatsapp_business_management, los ids de las cuentas que el token
 //      alcanza. Si alcanza más de una no se adivina: con un número de otra
 //      cuenta, elegir la primera guardaría la equivocada y las plantillas
 //      saldrían en la WABA que no es.
-async function resolverWabaId({ data, accessToken, version }) {
+//
+// Lo que *no* funciona, probado: pedirle `whatsapp_business_account` al nodo
+// del número. Ese campo no existe y Graph contesta un error 100 que además
+// tumba la validación del token, así que el número aparece como no conectado
+// cuando el token estaba perfecto.
+async function resolverWabaId({ accessToken, version }) {
   const aMano = wabaArg ?? process.env.DEV_WA_WABA_ID
   if (aMano) return String(aMano).trim()
-
-  const delNumero = data?.whatsapp_business_account?.id ?? data?.whatsapp_business_account
-  if (typeof delNumero === 'string' && delNumero) return delNumero
 
   try {
     const res = await fetch(
@@ -92,7 +92,7 @@ async function main() {
   // un borrador que "no se envió" sin decir por qué.
   const version = process.env.WA_GRAPH_VERSION || 'v25.0'
   const res = await fetch(
-    `https://graph.facebook.com/${version}/${numeroFinal}?fields=display_phone_number,verified_name,whatsapp_business_account`,
+    `https://graph.facebook.com/${version}/${numeroFinal}?fields=display_phone_number,verified_name`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
   )
   const data = await res.json()
@@ -105,10 +105,8 @@ async function main() {
 
   // El waba_id no es un dato de lujo: es la cuenta contra la que se listan y se
   // crean las plantillas, y sin él la sección entera queda muerta. Embedded
-  // Signup lo devuelve; por acá hay que ir a buscarlo, y hay tres formas porque
-  // ninguna está garantizada — el campo del número no siempre viene, y
-  // debug_token depende de que el token tenga el permiso de management.
-  const wabaId = await resolverWabaId({ data, accessToken, version })
+  // Signup lo devuelve; por acá hay que ir a buscarlo (ver arriba).
+  const wabaId = await resolverWabaId({ accessToken, version })
 
   if (!wabaId) {
     console.warn(
