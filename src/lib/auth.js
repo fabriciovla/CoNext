@@ -1,11 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Los ids son los de Supabase Auth (`signInWithOAuth`). `azure` es Microsoft.
+// Los ids son los de Supabase Auth (`signInWithOAuth`).
 export const PROVEEDORES_OAUTH = [
   { id: 'google', label: 'Google' },
   { id: 'github', label: 'GitHub' },
-  { id: 'azure', label: 'Microsoft' },
-  { id: 'apple', label: 'Apple' },
 ]
 
 const IDS = new Set(PROVEEDORES_OAUTH.map((p) => p.id))

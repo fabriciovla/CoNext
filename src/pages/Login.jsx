@@ -189,7 +189,7 @@ export default function Login({
             </h2>
             <p className="mb-6 mt-1.5 text-center text-[13px] leading-relaxed text-ink-muted">
               {tab === 'ingresar'
-                ? 'Entrá con Google, GitHub u otra cuenta, o con tu usuario.'
+                ? 'Entrá con Google o GitHub, o con tu usuario.'
                 : 'Creá la cuenta con el mismo proveedor que uses todos los días, o pedile acceso al dueño del negocio.'}
             </p>
 

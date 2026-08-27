@@ -12,7 +12,7 @@ const LETRAS = 'ABCDEFGH'
 const CAMPO =
   'w-full rounded-xl border border-tint/[0.12] bg-transparent px-3.5 py-2.5 text-[15px] text-ink-primary placeholder:text-ink-faint transition-colors duration-150 focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30'
 
-export default function Cuestionario({ copy, plan, appUrl, apiUrl, home }) {
+export default function Cuestionario({ copy, plan, appUrl, apiUrl }) {
   const pasos = copy.pasos
   const total = pasos.length
   const preguntaId = useId()
@@ -177,13 +177,9 @@ export default function Cuestionario({ copy, plan, appUrl, apiUrl, home }) {
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-5 sm:px-8">
         <div className="mx-auto flex min-h-0 w-full max-w-[34rem] flex-1 flex-col items-center justify-center py-4">
           {!enListo && (
-            <a
-              href={home}
-              className="mb-6 text-violet transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet"
-              aria-label={copy.volver}
-            >
+            <div className="mb-6 inline-flex w-fit text-violet">
               <LogoMarca className="h-11 w-auto sm:h-12" />
-            </a>
+            </div>
           )}
           <div key={`${i}-${dir}`} className={`w-full ${dir >= 0 ? 'paso-in-adelante' : 'paso-in-atras'}`}>
             {paso?.tipo === 'opciones' && (

@@ -2,6 +2,7 @@
 import { LogoMarca } from './Logo.jsx'
 import LangSwitch from './LangSwitch.astro'
 import { EMAIL, GITHUB_URL, WHATSAPP_URL } from '../config'
+import { PRODUCTO_COLUMNAS } from '../data/producto'
 import { t, pathFor } from '../i18n/utils'
 
 const { lang } = Astro.props
@@ -15,40 +16,25 @@ const home = pathFor(lang, '/')
 const claseEnlace =
   'text-[13.5px] text-ink-primary transition-colors duration-200 hover:text-violet'
 
+const enlaceProducto = (slug) => ({
+  href: pathFor(lang, `/producto/${slug}`),
+  label: pg[slug].nombre,
+})
+
+const enlacesDeColumna = (id) =>
+  (PRODUCTO_COLUMNAS.find((col) => col.id === id)?.slugs ?? []).map(enlaceProducto)
+
 const COLUMNAS = [
   {
     titulo: c.producto,
     enlaces: [
-      { href: pathFor(lang, '/producto/api-whatsapp'), label: pg['api-whatsapp'].nombre },
-      { href: pathFor(lang, '/producto/equipo'), label: pg.equipo.nombre },
-      { href: pathFor(lang, '/producto/datos'), label: pg.datos.nombre },
+      ...enlacesDeColumna('plataforma'),
       { href: pathFor(lang, '/precios'), label: l.precios },
     ],
   },
-  {
-    titulo: c.atencion,
-    enlaces: [
-      { href: pathFor(lang, '/producto/bandeja'), label: pg.bandeja.nombre },
-      { href: pathFor(lang, '/producto/carpetas'), label: pg.carpetas.nombre },
-      { href: pathFor(lang, '/producto/notas'), label: pg.notas.nombre },
-    ],
-  },
-  {
-    titulo: c.inteligencia,
-    enlaces: [
-      { href: pathFor(lang, '/producto/agentes'), label: pg.agentes.nombre },
-      { href: pathFor(lang, '/producto/borrador'), label: pg.borrador.nombre },
-      { href: pathFor(lang, '/producto/clasificacion'), label: pg.clasificacion.nombre },
-    ],
-  },
-  {
-    titulo: c.operacion,
-    enlaces: [
-      { href: pathFor(lang, '/producto/catalogo'), label: pg.catalogo.nombre },
-      { href: pathFor(lang, '/producto/metricas'), label: pg.metricas.nombre },
-      { href: pathFor(lang, '/producto/stock'), label: pg.stock.nombre },
-    ],
-  },
+  { titulo: c.atencion, enlaces: enlacesDeColumna('atencion') },
+  { titulo: c.inteligencia, enlaces: enlacesDeColumna('inteligencia') },
+  { titulo: c.operacion, enlaces: enlacesDeColumna('operacion') },
   {
     titulo: c.recursos,
     enlaces: [
@@ -87,7 +73,7 @@ const LEGALES = [
       <a
         href={home}
         aria-label="conext"
-        class="shrink-0 text-ink-primary transition-opacity duration-200 hover:opacity-80"
+        class="inline-flex w-fit shrink-0 text-ink-primary transition-opacity duration-200 hover:opacity-80"
       >
         <LogoMarca className="h-8 w-auto" />
       </a>

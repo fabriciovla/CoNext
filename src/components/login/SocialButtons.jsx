@@ -1,11 +1,9 @@
 import { PROVEEDORES_OAUTH } from '../../lib/auth'
-import { IconApple, IconGitHub, IconGoogle, IconMicrosoft } from '../ui/icons'
+import { IconGitHub, IconGoogle } from '../ui/icons'
 
 const ICONOS = {
   google: IconGoogle,
   github: IconGitHub,
-  azure: IconMicrosoft,
-  apple: IconApple,
 }
 
 // Grilla de proveedores. Vive afuera de la tarjeta del correo: son otro camino,

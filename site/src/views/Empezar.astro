@@ -2,11 +2,10 @@
 import Base from '../layouts/Base.astro'
 import Cuestionario from '../components/empezar/Cuestionario.jsx'
 import { APP_URL, API_URL, ALTA_CLAVE } from '../config'
-import { getLocale, t, pathFor } from '../i18n/utils'
+import { getLocale, t } from '../i18n/utils'
 
 const lang = getLocale(Astro)
 const copy = t(lang).empezar
-const home = pathFor(lang, '/')
 const pedido = Astro.url.searchParams.get('plan')
 const plan = copy.planes[pedido] ? pedido : 'gratis'
 ---
@@ -28,15 +27,6 @@ const plan = copy.planes[pedido] ? pedido : 'gratis'
   <div class="empezar-pagina">
     <div class="orbe -left-40 -top-36 h-[28rem] w-[28rem]" style="--d: 80ms" aria-hidden="true"></div>
     <div class="orbe -bottom-40 -right-36 h-[24rem] w-[24rem]" style="--d: 200ms" aria-hidden="true"></div>
-    <Cuestionario client:load copy={copy} plan={plan} appUrl={APP_URL} apiUrl={API_URL} home={home} />
+    <Cuestionario client:load copy={copy} plan={plan} appUrl={APP_URL} apiUrl={API_URL} />
   </div>
 </Base>
-
-<script>
-  window.addEventListener('pageswap', (e) => {
-    if (!e.viewTransition) return
-    document.querySelectorAll('.logo-empezar').forEach((el) => {
-      el.style.viewTransitionName = 'none'
-    })
-  })
-</script>

@@ -16,7 +16,7 @@ const STORAGE_KEY = 'wsp-crm:user'
 // El correo + contraseña sigue siendo de mentira si no hay Supabase Auth: entra
 // cualquiera, y quien tenga la consola abierta se pone la clave que quiera. Lo
 // que autoriza de verdad las requests es la API key que inyecta el proxy de
-// Vite. El login social (Google, GitHub, Microsoft, Apple) sí habla con Auth
+// Vite. El login social (Google, GitHub) sí habla con Auth
 // cuando están `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
 function leerGuardado() {
   try {

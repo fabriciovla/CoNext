@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro'
 import Boton from '../components/Boton.jsx'
 import Logo, { LogoMarca } from '../components/Logo.jsx'
 import LangSwitch from '../components/LangSwitch.astro'
-import { IconBolt, IconSparkles, IconShield, IconGoogle, IconGitHub, IconMicrosoft, IconApple } from '../components/icons.jsx'
+import { IconBolt, IconSparkles, IconShield, IconGoogle, IconGitHub } from '../components/icons.jsx'
 import { APP_URL, WHATSAPP_URL } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 
@@ -14,8 +14,6 @@ const home = pathFor(lang, '/')
 const PROVEEDORES = [
   { id: 'google', label: 'Google', Icono: IconGoogle },
   { id: 'github', label: 'GitHub', Icono: IconGitHub },
-  { id: 'azure', label: 'Microsoft', Icono: IconMicrosoft },
-  { id: 'apple', label: 'Apple', Icono: IconApple },
 ]
 
 const CAMPO =
@@ -43,13 +41,15 @@ const VENTAJAS = [
       <div class="orbe -bottom-44 -right-40 h-[28rem] w-[28rem]" style="--d: 200ms" aria-hidden="true"></div>
 
       <div class="relative flex flex-1 flex-col items-center justify-center text-center">
-        <a
-          href={home}
-          class="logo-vt-escritorio animate-in-scale text-ink-primary transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-violet"
+        {/* La marca no es un enlace: un <a> acá se estiraba con el flex y
+            dejaba una hitbox del alto del panel. El morph de la barra sigue
+            porque el nombre de la transición va en este div. */}
+        <div
+          class="logo-vt-escritorio animate-in-scale inline-flex w-fit text-ink-primary"
           style="--d: 60ms"
         >
           <LogoMarca className="h-[88px] w-auto" />
-        </a>
+        </div>
 
         <h1
           class="animate-in mt-12 max-w-[15ch] text-[36px] font-medium leading-[1.12] tracking-tight text-ink-primary"
@@ -79,12 +79,14 @@ const VENTAJAS = [
 
     <section class="flex min-h-dvh items-center justify-center px-5 py-12 lg:min-h-0">
       <div class="w-full max-w-[360px]">
-        <a
-          href={home}
-          class="logo-vt-movil animate-in-down mb-8 flex justify-center text-ink-primary transition-opacity duration-200 hover:opacity-80 lg:hidden"
-        >
-          <Logo className="h-6 w-auto" />
-        </a>
+        <div class="mb-8 flex justify-center lg:hidden">
+          <a
+            href={home}
+            class="logo-vt-movil animate-in-down inline-flex w-fit text-ink-primary transition-opacity duration-200 hover:opacity-80"
+          >
+            <Logo className="h-6 w-auto" />
+          </a>
+        </div>
 
         <div
           id="pestanas"
