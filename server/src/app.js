@@ -9,6 +9,7 @@ import settingsRouter from './routes/settings.js'
 import conversationsRouter from './routes/conversations.js'
 import agentsRouter from './routes/agents.js'
 import quickRepliesRouter from './routes/quickReplies.js'
+import templatesRouter from './routes/templates.js'
 import onboardingRouter from './routes/onboarding.js'
 import membersRouter from './routes/members.js'
 import webhooksRouter from './routes/webhooks.js'
@@ -95,6 +96,7 @@ export function createApp() {
   app.use('/conversations', conversationsRouter)
   app.use('/agents', agentsRouter)
   app.use('/quick-replies', quickRepliesRouter)
+  app.use('/templates', templatesRouter)
   app.use('/members', membersRouter)
   // Va después de resolveTenant: el cliente ya está adentro de su dashboard y
   // el número que conecta se ata a *su* tenant. Es el único dato de la cuenta

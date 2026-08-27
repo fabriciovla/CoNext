@@ -8,6 +8,7 @@ import {
   IconLogOut,
   IconChevronDown,
   IconSparkles,
+  IconTemplate,
   IconSun,
   IconMoon,
 } from './ui/icons'
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
   { key: 'inbox', label: 'Bandeja', Icon: IconInbox },
   { key: 'agents', label: 'Agentes IA', Icon: IconSparkles },
   { key: 'products', label: 'Productos', Icon: IconBox },
+  { key: 'templates', label: 'Plantillas', Icon: IconTemplate },
   { key: 'settings', label: 'Configuración', Icon: IconSettings },
 ]
 

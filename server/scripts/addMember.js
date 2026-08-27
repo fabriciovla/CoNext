@@ -67,7 +67,7 @@ if (resultado.invite) {
       'Todavía no tiene cuenta: la membresía se arma sola cuando entre por primera vez.',
   )
 } else {
-  console.log(`${email} ya es ${rol} de "${tenant.name}".`)
+  console.log(`${email} quedó como ${rol} de "${tenant.name}".`)
 }
 
 await closePool()

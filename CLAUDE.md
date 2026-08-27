@@ -81,6 +81,17 @@ La unidad de trabajo del CRM es el "día" (`days`), que se abre y cierra a mano,
 
 `services/channels/index.js` resuelve un adapter por `conversation.channel`. Solo WhatsApp funciona; Instagram está declarado pero dormido (falta la columna en `tenants` que ate una cuenta de IG a un cliente). El webhook ignora todo mensaje que no sea `type: 'text'` y lo loguea.
 
+### Plantillas
+
+Son los mensajes con los que se puede escribir **primero**: pasadas las 24h de la ventana de servicio, Meta rechaza cualquier texto libre y lo único que sale es una plantilla aprobada. Es también lo que pide el App Review de `whatsapp_business_management` (hay que mostrar una creándose en video).
+
+**No se guardan en nuestra base.** Viven en la WABA del cliente, las aprueba o rechaza Meta y el estado cambia sin avisarnos. Una copia local sería una copia desactualizada de algo cuya única fuente de verdad es Graph, así que `templatesService` las lee en vivo en cada request y `useTemplates` no hace nada optimista — se crea, se vuelve a preguntar y se dibuja lo que conteste Meta. No hay webhook de aprobación: el botón "Actualizar estados" es lo que hay.
+
+- El **nombre** lo normaliza `normalizeName` (minúsculas, sin acentos, guiones bajos) porque la regla de Meta es angosta y rebota con un error que no dice cuál era el formato.
+- Las **variables** van `{{1}}`, `{{2}}`… numeradas desde 1 y sin saltos; si el cuerpo salta del 1 al 3, Meta rechaza sin explicar. Se corta antes, en `validarVariables`. Y cada variable necesita un **ejemplo** o Meta contesta "missing example": si la pantalla no lo manda, se arma uno.
+- Lo que se puede validar sin salir del server va **antes** de pedir las credenciales: son errores de lo que la persona escribió y se contestan igual esté o no conectado el WhatsApp.
+- `AUTHENTICATION` queda afuera de las categorías a propósito: son las de código de un solo uso, con su propio formato de botones y su propia tarifa.
+- Se borra **por nombre**, y eso borra todos los idiomas de esa plantilla — es lo que la consola de Meta llama eliminar.
 ### Adjuntos (salientes)
 
 Mandar un archivo son **dos llamadas a Graph**, no una: primero se sube el binario a `/{phone_number_id}/media` como multipart y Meta devuelve un id, y recién después se manda el mensaje citando ese id (`adapter.sendMedia`). El pipeline entero es `POST /messages/media` (multipart, multer en memoria) → `guardarAdjunto` → `sendOutboundMedia`.

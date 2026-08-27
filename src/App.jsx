@@ -10,11 +10,13 @@ import Products from './pages/Products'
 import Home from './pages/Home'
 import Settings from './pages/Settings'
 import Agents from './pages/Agents'
+import Templates from './pages/Templates'
 import useAuth from './hooks/useAuth'
 import useMessages from './hooks/useMessages'
 import useProducts from './hooks/useProducts'
 import useSettings from './hooks/useSettings'
 import useAgents from './hooks/useAgents'
+import useTemplates from './hooks/useTemplates'
 import useTheme from './hooks/useTheme'
 import { groupMessagesByPhone } from './utils/groupMessages'
 
@@ -77,6 +79,15 @@ export default function App() {
     renameFolder,
     deleteFolder,
   } = useProducts()
+  const {
+    templates,
+    conectado: waConectado,
+    cargando: templatesCargando,
+    error: templatesError,
+    refrescar: refrescarTemplates,
+    addTemplate,
+    deleteTemplate,
+  } = useTemplates()
   const { settings, updateSettings } = useSettings()
   const {
     agents,
@@ -276,6 +287,17 @@ export default function App() {
             onUpdate={updateAgent}
             onDelete={deleteAgent}
             onReorder={reorderAgents}
+          />
+        )}
+        {page === 'templates' && (
+          <Templates
+            templates={templates}
+            conectado={waConectado}
+            cargando={templatesCargando}
+            error={templatesError}
+            onRefresh={refrescarTemplates}
+            onCreate={addTemplate}
+            onDelete={deleteTemplate}
           />
         )}
         {page === 'settings' && <Settings settings={settings} onUpdate={updateSettings} />}
