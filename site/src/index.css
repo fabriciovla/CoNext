@@ -785,47 +785,6 @@ html.pagina-oculta .orbe {
   }
 }
 
-/* La rueda de funciones (`landing/Orbita.astro`). Acá viven solo las dos capas
-   que no se pueden escribir con clases: la trama y el halo del núcleo.
-
-   La trama es la misma de `.fondo-seccion::after` pero un punto más marcada,
-   porque adentro de la tarjeta cae sobre `surface-nav` y no sobre la hoja. No
-   se enmascara contra los bordes: la tarjeta ya tiene un borde que la corta, y
-   una trama que se desvanece antes de llegar deja la esquina lavada. */
-.orbita::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: radial-gradient(circle, rgb(var(--tint) / 0.13) 1px, transparent 1px);
-  background-size: 26px 26px;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.orbita > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* El halo del núcleo hace dos cosas de una: da la profundidad de la esfera y
-   **borra la trama** justo abajo de la marca, que si no le pasa por atrás y la
-   ensucia. De ahí que sean dos degradés y no uno — el de la hoja tapa los
-   puntos, el violeta pone la luz. Los dos mueren adentro de la caja
-   (`closest-side`), así que no hay circunferencia a la vista. */
-.orbita-halo {
-  border-radius: 999px;
-  background:
-    radial-gradient(
-      closest-side,
-      rgb(var(--violet) / 0.1),
-      rgb(var(--violet) / 0.05) 46%,
-      rgb(var(--violet) / 0.018) 68%,
-      transparent 100%
-    ),
-    radial-gradient(closest-side, rgb(var(--surface-nav)) 42%, rgb(var(--surface-nav) / 0) 82%);
-}
-
 ::selection {
   background: rgba(64, 88, 255, 0.25);
 }

@@ -28,19 +28,13 @@ const imagenOg = new URL('/icon-512.png', Astro.site)
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- El SVG primero: un favicon se dibuja a 16 px y a ese tamaño un raster se
-         ve mordido. El PNG de 32 es el respaldo para lo que no acepta favicon
-         vectorial.
-         El logotipo toma `currentColor`, pero el favicon no puede: lo dibuja
-         el navegador en su barra de pestañas, fuera de nuestro documento. Por
-         eso `conext-mark.svg` resuelve el tema con `prefers-color-scheme`
-         adentro del archivo — y sigue al tema del navegador, no al del sitio,
-         porque la barra de pestañas es oscura aunque la página sea clara.
-         El PNG no puede cambiar de color, así que va en la variante clara.
-         El apple-touch-icon va aparte y con fondo blanco propio, porque iOS
-         compone la transparencia sobre negro. -->
-    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
+    <!-- El PNG va primero: Chrome no pinta un SVG con máscara en la pestaña,
+         deja el ícono en blanco y pone la inicial del <title> (la C de
+         conext). Pasa justo al volver del checkout de Dodo, que recarga el
+         favicon. El SVG sigue detrás, ya sin máscara, para quien sí lo dibuja.
+         El apple-touch-icon va aparte: iOS compone la transparencia sobre negro. -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- El manifiesto existe solo para que Android encuentre los íconos de 192 y
          512 que vinieron con el diseño; va con `display: browser` porque esto es

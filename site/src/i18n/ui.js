@@ -201,7 +201,7 @@ export const ui = {
         {
           pregunta: '¿Cuánto cuesta?',
           respuesta:
-            'Hay un plan gratis, uno estándar, uno premium y uno a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
+            'Hay una prueba de 7 días del Estándar (después $350/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
         },
       ],
       ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos cómo quedaría.',
@@ -211,7 +211,7 @@ export const ui = {
     precios: {
       title: 'Precios · conext',
       description:
-        'Planes de conext para atender WhatsApp con IA: gratis, estándar, premium y a medida. Elegí el que le queda a tu negocio.',
+        'Planes de conext para atender WhatsApp con IA: prueba de 7 días, estándar, premium y a medida. Elegí el que le queda a tu negocio.',
       etiqueta: 'Precios',
       titulo: 'Precios de conext',
       bajada: 'Elegí el paquete que mejor le queda a tu negocio.',
@@ -230,9 +230,9 @@ export const ui = {
         {
           id: 'gratis',
           nombre: 'Gratis',
-          bajada: 'Para empezar',
+          bajada: '7 días de Estándar',
           precio: '$0',
-          periodo: 'para siempre',
+          periodo: 'después, $350/mes',
           cta: 'Empezar',
           destino: 'app',
         },
@@ -270,8 +270,8 @@ export const ui = {
           icono: 'users',
           nombre: 'Equipo',
           filas: [
-            { nombre: 'Usuarios incluidos', valores: [false, '5', '10', '25+'] },
-            { nombre: 'Asientos adicionales', valores: [false, '$50/mes', '$50/mes', 'Personalizado'] },
+            { nombre: 'Usuarios incluidos', valores: ['5', '5', '10', '25+'] },
+            { nombre: 'Asientos adicionales', valores: ['$50/mes', '$50/mes', '$50/mes', 'Personalizado'] },
           ],
         },
         {
@@ -279,7 +279,7 @@ export const ui = {
           nombre: 'Atención',
           filas: [
             { nombre: 'Número de WhatsApp', valores: ['1', '1', '2', 'Ilimitado'] },
-            { nombre: 'Conversaciones', valores: ['200 / mes', 'Ilimitado', 'Ilimitado', 'Ilimitado'] },
+            { nombre: 'Conversaciones', valores: ['Ilimitado', 'Ilimitado', 'Ilimitado', 'Ilimitado'] },
             { nombre: 'Carpetas y etiquetas', valores: [true, true, true, true] },
             { nombre: 'Horarios y fuera de hora', valores: [true, true, true, true] },
           ],
@@ -288,9 +288,9 @@ export const ui = {
           icono: 'layers',
           nombre: 'Inteligencia',
           filas: [
-            { nombre: 'Agentes de IA', valores: ['1', '3', 'Ilimitado', 'Ilimitado'] },
-            { nombre: 'Envío automático', valores: [false, true, true, true] },
-            { nombre: 'Productos en catálogo', valores: ['25', '100', '250', 'Ilimitado'] },
+            { nombre: 'Agentes de IA', valores: ['3', '3', 'Ilimitado', 'Ilimitado'] },
+            { nombre: 'Envío automático', valores: [true, true, true, true] },
+            { nombre: 'Productos en catálogo', valores: ['100', '100', '250', 'Ilimitado'] },
             { nombre: 'Borradores para revisar', valores: [true, true, true, true] },
           ],
         },
@@ -298,10 +298,10 @@ export const ui = {
           icono: 'lightbulb',
           nombre: 'Operación',
           filas: [
-            { nombre: 'Métricas del día', valores: [false, true, true, true] },
-            { nombre: 'Adjuntos salientes', valores: [false, true, true, true] },
+            { nombre: 'Métricas del día', valores: [true, true, true, true] },
+            { nombre: 'Adjuntos salientes', valores: [true, true, true, true] },
             { nombre: 'API oficial de WhatsApp', valores: [true, true, true, true] },
-            { nombre: 'Soporte', valores: ['Comunidad', 'Email', 'Prioritario', 'Dedicado'] },
+            { nombre: 'Soporte', valores: ['Email', 'Email', 'Prioritario', 'Dedicado'] },
           ],
         },
       ],
@@ -309,7 +309,7 @@ export const ui = {
         {
           pregunta: '¿Cómo funciona el plan gratis?',
           respuesta:
-            'Sirve para probar el CRM con un agente, el catálogo chico y las respuestas en modo borrador: la IA escribe y tú envías. Cuando el volumen pida más personas o el envío automático, pasas a un plan pago.',
+            'Es una semana del Estándar, sin cobro. Pedimos la tarjeta al entrar y el día 8 se cobra $350/mes, salvo que canceles antes. Durante la prueba tenés el plan completo, no un recorte.',
         },
         {
           pregunta: '¿Las conversaciones de WhatsApp las cobran ustedes?',
@@ -341,7 +341,7 @@ export const ui = {
             {
               pregunta: '¿Cuánto cuesta conext?',
               respuesta:
-                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
+                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $350/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
             },
             {
               pregunta: '¿Las conversaciones de WhatsApp las facturan ustedes?',
@@ -467,7 +467,7 @@ export const ui = {
       listoTitulo: 'Listo. Te preparamos el espacio.',
       listoBajada: 'En un momento entras a conext.',
       planes: {
-        gratis: 'Plan gratis',
+        gratis: 'Prueba de 7 días',
         estandar: 'Plan Estándar',
         premium: 'Plan Premium',
       },
@@ -812,7 +812,7 @@ export const ui = {
         {
           pregunta: 'How much does it cost?',
           respuesta:
-            'There is a free plan, a standard, a premium, and a custom one: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
+            'There is a 7-day Standard trial (then $350/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
         },
       ],
       ctaTitulo: 'Tell us how you handle it today and we will show you how it would look.',
@@ -822,7 +822,7 @@ export const ui = {
     precios: {
       title: 'Pricing · conext',
       description:
-        'conext plans for running WhatsApp with AI: free, standard, premium, and custom. Pick the one that fits your business.',
+        'conext plans for running WhatsApp with AI: a 7-day trial, standard, premium, and custom. Pick the one that fits your business.',
       etiqueta: 'Pricing',
       titulo: 'conext Pricing',
       bajada: 'Choose the package that’s right for your company.',
@@ -841,9 +841,9 @@ export const ui = {
         {
           id: 'gratis',
           nombre: 'Free',
-          bajada: 'For getting started',
+          bajada: '7 days of Standard',
           precio: '$0',
-          periodo: 'forever',
+          periodo: 'then $350/month',
           cta: 'Get started',
           destino: 'app',
         },
@@ -881,8 +881,8 @@ export const ui = {
           icono: 'users',
           nombre: 'Seats',
           filas: [
-            { nombre: 'Users included', valores: [false, '5', '10', '25+'] },
-            { nombre: 'Additional seats', valores: [false, '$50/mo', '$50/mo', 'Custom'] },
+            { nombre: 'Users included', valores: ['5', '5', '10', '25+'] },
+            { nombre: 'Additional seats', valores: ['$50/mo', '$50/mo', '$50/mo', 'Custom'] },
           ],
         },
         {
@@ -890,7 +890,7 @@ export const ui = {
           nombre: 'Inbox',
           filas: [
             { nombre: 'WhatsApp numbers', valores: ['1', '1', '2', 'Unlimited'] },
-            { nombre: 'Conversations', valores: ['200 / mo', 'Unlimited', 'Unlimited', 'Unlimited'] },
+            { nombre: 'Conversations', valores: ['Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'] },
             { nombre: 'Folders and tags', valores: [true, true, true, true] },
             { nombre: 'Business hours', valores: [true, true, true, true] },
           ],
@@ -899,9 +899,9 @@ export const ui = {
           icono: 'layers',
           nombre: 'Intelligence',
           filas: [
-            { nombre: 'AI agents', valores: ['1', '3', 'Unlimited', 'Unlimited'] },
-            { nombre: 'Auto-send', valores: [false, true, true, true] },
-            { nombre: 'Products in catalog', valores: ['25', '100', '250', 'Unlimited'] },
+            { nombre: 'AI agents', valores: ['3', '3', 'Unlimited', 'Unlimited'] },
+            { nombre: 'Auto-send', valores: [true, true, true, true] },
+            { nombre: 'Products in catalog', valores: ['100', '100', '250', 'Unlimited'] },
             { nombre: 'Drafts for review', valores: [true, true, true, true] },
           ],
         },
@@ -909,10 +909,10 @@ export const ui = {
           icono: 'lightbulb',
           nombre: 'Operations',
           filas: [
-            { nombre: 'Day metrics', valores: [false, true, true, true] },
-            { nombre: 'Outbound attachments', valores: [false, true, true, true] },
+            { nombre: 'Day metrics', valores: [true, true, true, true] },
+            { nombre: 'Outbound attachments', valores: [true, true, true, true] },
             { nombre: 'Official WhatsApp API', valores: [true, true, true, true] },
-            { nombre: 'Support', valores: ['Community', 'Email', 'Priority', 'Dedicated'] },
+            { nombre: 'Support', valores: ['Email', 'Email', 'Priority', 'Dedicated'] },
           ],
         },
       ],
@@ -920,7 +920,7 @@ export const ui = {
         {
           pregunta: 'How does the free plan work?',
           respuesta:
-            'It lets you try the CRM with one agent, a small catalog, and replies in draft mode: AI writes and you send. When volume needs more people or auto-send, you move to a paid plan.',
+            'It is one week of Standard, with no charge. We ask for a card when you start, and on day 8 we bill $350/month unless you cancel first. During the trial you get the full plan, not a cut-down version.',
         },
         {
           pregunta: 'Do you bill WhatsApp conversations?',
@@ -952,7 +952,7 @@ export const ui = {
             {
               pregunta: 'How much does conext cost?',
               respuesta:
-                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
+                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $350/month. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
             },
             {
               pregunta: 'Do you bill WhatsApp conversations?',
@@ -1078,7 +1078,7 @@ export const ui = {
       listoTitulo: 'Done. We are setting up your workspace.',
       listoBajada: 'You will be in conext in a moment.',
       planes: {
-        gratis: 'Free plan',
+        gratis: '7-day trial',
         estandar: 'Standard plan',
         premium: 'Premium plan',
       },

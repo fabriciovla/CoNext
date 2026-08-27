@@ -20,8 +20,17 @@ if (!connectionString) {
 // también se apunta a la base hospedada.
 const usaSsl = /\bsslmode=require\b/.test(connectionString) || /\.neon\.tech|\.supabase\.co/.test(connectionString)
 
+// Desde pg 8.16 el `sslmode` de la cadena manda sobre la opción `ssl`, y
+// `require` pasó a verificar la cadena de certificados (libpq nunca lo hizo).
+// Contra el pooler de Supabase eso corta el arranque con
+// SELF_SIGNED_CERT_IN_CHAIN: `migrate()` explota, el server no llega a
+// escuchar y la dashboard queda tirando errores en todas las requests. Se le
+// saca el parámetro a la cadena y el TLS lo decide `usaSsl`, que es donde ya
+// estaba decidido.
+const cadena = usaSsl ? connectionString.replace(/([?&])sslmode=[^&]*&?/, '$1').replace(/[?&]$/, '') : connectionString
+
 const pool = new Pool({
-  connectionString,
+  connectionString: cadena,
   ssl: usaSsl ? { rejectUnauthorized: false } : false,
 })
 
