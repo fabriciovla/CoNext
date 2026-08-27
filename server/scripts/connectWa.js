@@ -1,6 +1,6 @@
 // Recarga el token de WhatsApp de un cliente ya creado:
 //
-//   node scripts/connectWa.js <tenantId|slug> "EAAT…" [phoneNumberId]
+//   node scripts/connectWa.js <tenantId|slug> "EAAT…" [phoneNumberId] [wabaId]
 //   node scripts/connectWa.js mi-negocio --from-env   (usa DEV_WA_* del .env)
 //
 // El token temporal de la consola de Meta vence a las 24h, así que en desarrollo
@@ -17,11 +17,11 @@ import { setWhatsappCredentials, getWhatsappCredentials } from '../src/services/
 
 const args = process.argv.slice(2)
 const desdeEnv = args.includes('--from-env')
-const [ref, tokenArg, phoneArg] = args.filter((a) => !a.startsWith('--'))
+const [ref, tokenArg, phoneArg, wabaArg] = args.filter((a) => !a.startsWith('--'))
 
 if (!ref || (!tokenArg && !desdeEnv)) {
   console.error(
-    'Uso: node scripts/connectWa.js <tenantId|slug> "<access token>" [phoneNumberId]\n' +
+    'Uso: node scripts/connectWa.js <tenantId|slug> "<access token>" [phoneNumberId] [wabaId]\n' +
       '     node scripts/connectWa.js <tenantId|slug> --from-env',
   )
   process.exit(1)
@@ -33,6 +33,40 @@ const phoneNumberId = phoneArg ?? process.env.DEV_WA_PHONE_NUMBER_ID
 if (!accessToken) {
   console.error('Falta el token: pasalo como argumento o cargá DEV_WA_ACCESS_TOKEN en el .env')
   process.exit(1)
+}
+
+// De dónde sale la cuenta (WABA) del número, en orden de confianza:
+//
+//   1. La que se pasó a mano (cuarto argumento o DEV_WA_WABA_ID). Es la única
+//      que no puede equivocarse, y la que sirve cuando las otras dos no.
+//   2. El campo `whatsapp_business_account` del propio número. No siempre viene
+//      —depende del tipo de token— pero cuando viene es exacto.
+//   3. Los `granular_scopes` de debug_token: ahí Meta lista, para el permiso
+//      whatsapp_business_management, los ids de las cuentas que el token
+//      alcanza. Si alcanza más de una no se adivina: con un número de otra
+//      cuenta, elegir la primera guardaría la equivocada y las plantillas
+//      saldrían en la WABA que no es.
+async function resolverWabaId({ data, accessToken, version }) {
+  const aMano = wabaArg ?? process.env.DEV_WA_WABA_ID
+  if (aMano) return String(aMano).trim()
+
+  const delNumero = data?.whatsapp_business_account?.id ?? data?.whatsapp_business_account
+  if (typeof delNumero === 'string' && delNumero) return delNumero
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/${version}/debug_token?input_token=${encodeURIComponent(accessToken)}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    )
+    if (!res.ok) return null
+    const info = await res.json()
+    const scopes = info?.data?.granular_scopes ?? []
+    const management = scopes.find((s) => s.scope === 'whatsapp_business_management')
+    const ids = management?.target_ids ?? []
+    return ids.length === 1 ? ids[0] : null
+  } catch {
+    return null
+  }
 }
 
 // Todo va adentro de una función para poder salir con `return`: llamar a
@@ -58,7 +92,7 @@ async function main() {
   // un borrador que "no se envió" sin decir por qué.
   const version = process.env.WA_GRAPH_VERSION || 'v25.0'
   const res = await fetch(
-    `https://graph.facebook.com/${version}/${numeroFinal}?fields=display_phone_number,verified_name`,
+    `https://graph.facebook.com/${version}/${numeroFinal}?fields=display_phone_number,verified_name,whatsapp_business_account`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
   )
   const data = await res.json()
@@ -69,12 +103,30 @@ async function main() {
     return 1
   }
 
-  await setWhatsappCredentials(tenant.id, { wabaId: null, phoneNumberId: numeroFinal, accessToken })
+  // El waba_id no es un dato de lujo: es la cuenta contra la que se listan y se
+  // crean las plantillas, y sin él la sección entera queda muerta. Embedded
+  // Signup lo devuelve; por acá hay que ir a buscarlo, y hay tres formas porque
+  // ninguna está garantizada — el campo del número no siempre viene, y
+  // debug_token depende de que el token tenga el permiso de management.
+  const wabaId = await resolverWabaId({ data, accessToken, version })
+
+  if (!wabaId) {
+    console.warn(
+      '\n[aviso] No se pudo averiguar el waba_id con este token. Todo lo demás funciona,\n' +
+        '        pero la sección Plantillas va a decir que falta la cuenta. Pasalo a mano:\n' +
+        `        node scripts/connectWa.js ${tenant.slug} "<token>" ${numeroFinal} <waba_id>\n` +
+        '        (está en developers.facebook.com > tu app > WhatsApp > Configuración de la API,\n' +
+        '         como "Identificador de la cuenta de WhatsApp Business").',
+    )
+  }
+
+  await setWhatsappCredentials(tenant.id, { wabaId, phoneNumberId: numeroFinal, accessToken })
   const guardadas = await getWhatsappCredentials(tenant.id)
 
   console.log(`
 Token actualizado para "${tenant.name}" (${tenant.slug}).
 
+  cuenta (waba):   ${wabaId ?? 'no resuelta'}
   número:          ${data.display_phone_number ?? numeroFinal} (${data.verified_name ?? 'sin nombre'})
   phone_number_id: ${numeroFinal}
   cifrado ok:      ${guardadas?.accessToken === accessToken ? 'sí' : 'NO — revisá ENCRYPTION_KEY'}
