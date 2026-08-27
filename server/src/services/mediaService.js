@@ -8,10 +8,14 @@ import ffmpegPath from 'ffmpeg-static'
 // Los archivos viven afuera de la base, en el disco del server. La carpeta se
 // scopea por tenant igual que todo lo demás: aunque el acceso ya pasa por el
 // id del mensaje, dos clientes nunca comparten directorio.
-export const UPLOADS_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../uploads',
-)
+//
+// `UPLOADS_DIR` del entorno es para el host: ahí el único disco que sobrevive a
+// un deploy es un volumen montado en una ruta suya, y el resto del filesystem
+// se rehace en cada build. Meta borra su copia a los 30 días, así que si esto
+// apunta al disco efímero los adjuntos viejos se pierden para siempre.
+export const UPLOADS_DIR = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../uploads')
 
 // Lo que acepta la Cloud API por tipo. Todo lo que no esté acá se manda como
 // documento, que es el único tipo sin lista blanca de formatos: un .webp o un

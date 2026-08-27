@@ -1,7 +1,7 @@
 import Avatar from '../ui/Avatar'
 import FormattedText from '../ui/FormattedText'
 import { IconBolt, IconDoubleCheck, IconDownload, IconFile } from '../ui/icons'
-import { mediaUrl } from '../../api/client'
+import useMediaSrc from '../../hooks/useMediaSrc'
 import { formatTime } from '../../utils/time'
 
 function pesoLegible(bytes) {
@@ -15,8 +15,22 @@ function pesoLegible(bytes) {
 // descargar: no tiene sentido pelear con la vista previa de un PDF adentro de
 // un globo de 30rem.
 function Adjunto({ message }) {
-  const src = mediaUrl(message.id)
+  const { src, error } = useMediaSrc(message.id)
   const nombre = message.mediaName || 'archivo'
+
+  if (error) {
+    return (
+      <span className="block rounded-xl border border-tint/10 bg-tint/[0.04] px-3 py-2 text-[13px] text-ink-muted">
+        No se pudo abrir el adjunto
+      </span>
+    )
+  }
+
+  // Mientras baja hay un rectángulo del alto de la burbuja: sin él la lista
+  // salta cuando cada archivo termina de llegar.
+  if (!src) {
+    return <span className="block h-16 w-40 animate-pulse rounded-xl bg-tint/[0.06]" />
+  }
 
   if (message.mediaKind === 'image') {
     return (

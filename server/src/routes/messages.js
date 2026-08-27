@@ -82,8 +82,9 @@ router.post(
   }),
 )
 
-// Sirve el adjunto de un mensaje. La dashboard lo pide con <img>/<audio>, así
-// que la API key la pone el proxy de Vite igual que en cualquier otra request.
+// Sirve el adjunto de un mensaje. La dashboard no lo cuelga de un `<img src>`
+// —una etiqueta no manda cabeceras y la sesión no viajaría—: lo baja con fetch
+// autorizado y lo convierte en blob (`useMediaSrc`).
 router.get(
   '/media/:id',
   ah(async (req, res) => {
@@ -91,6 +92,11 @@ router.get(
     if (!media) return res.status(404).json({ error: 'Ese mensaje no tiene adjunto' })
 
     res.type(media.mime || 'application/octet-stream')
+    // El archivo de un mensaje no cambia nunca. Sin esto, cada vez que el hilo
+    // se desmonta y vuelve, el mismo adjunto se baja de nuevo — y el tráfico de
+    // salida es lo que se paga en el host. `private` porque la respuesta es de
+    // esta persona: no la puede guardar ningún proxy compartido.
+    res.setHeader('Cache-Control', 'private, max-age=86400')
     // Los documentos se bajan con su nombre original; lo que se puede ver en el
     // hilo (imagen, audio, video) se muestra inline.
     if (media.kind === 'document') {

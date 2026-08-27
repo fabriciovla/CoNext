@@ -27,7 +27,20 @@ const TITULO_APP = {
 }
 
 export default function App() {
-  const { user, isAuthenticated, listo, error, login, loginCon, oauthPending, social, logout, clearError } =
+  const {
+    user,
+    isAuthenticated,
+    listo,
+    error,
+    login,
+    loginCon,
+    oauthPending,
+    entrando,
+    correoInicial,
+    social,
+    logout,
+    clearError,
+  } =
     useAuth()
   const {
     messages,
@@ -161,6 +174,8 @@ export default function App() {
         onLogin={login}
         onOAuth={loginCon}
         oauthPending={oauthPending}
+        entrando={entrando}
+        correoInicial={correoInicial}
         social={social}
         error={error}
         onClearError={clearError}

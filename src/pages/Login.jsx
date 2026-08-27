@@ -77,6 +77,8 @@ export default function Login({
   onLogin,
   onOAuth,
   oauthPending = false,
+  entrando = false,
+  correoInicial = '',
   social = false,
   error,
   onClearError,
@@ -84,7 +86,8 @@ export default function Login({
   onToggleTheme,
 }) {
   const [tab, setTab] = useState('ingresar')
-  const [username, setUsername] = useState('')
+  // Con Auth de verdad la landing manda el correo en la URL: llega escrito.
+  const [username, setUsername] = useState(correoInicial)
   const [password, setPassword] = useState('')
   const refsPestanas = useRef([])
 
@@ -228,7 +231,7 @@ export default function Login({
                   autoComplete="current-password"
                 />
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={entrando}>
                   Iniciar sesión
                 </Button>
               </form>
