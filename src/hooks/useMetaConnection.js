@@ -85,6 +85,55 @@ export function useMetaConnection() {
     [refrescar],
   )
 
+  // El cuerpo del callback vive acá afuera, y no adentro de `FB.login`, porque
+  // **el SDK rechaza una función async**: le valida el tipo al callback y corta
+  // con "Expression is of type asyncfunction, not function" antes de abrir
+  // nada. Como acá hay `await`, la función async va aparte y a `FB.login` se le
+  // pasa una común que la dispara. `useWhatsappConnection` nunca chocó con esto
+  // porque su callback ya era sincrónico.
+  const procesarLogin = useCallback(
+    async (response) => {
+      const accessToken = response?.authResponse?.accessToken
+      if (!accessToken) {
+        setConectando(false)
+        setError(
+          response?.status === 'not_authorized'
+            ? 'No diste los permisos que la app necesita.'
+            : 'No se completó la conexión: cerraste la ventana o no diste los permisos.',
+        )
+        return
+      }
+
+      try {
+        // El server cambia el token corto por uno largo antes de listar: si la
+        // persona se toma un rato en elegir la Página, el corto se vence en el
+        // medio y la conexión fallaría recién en el paso siguiente.
+        const r = await apiPost('/onboarding/meta/pages', { accessToken })
+        tokenRef.current = r.accessToken
+
+        if (r.paginas.length === 0) {
+          setConectando(false)
+          setError('Tu cuenta no administra ninguna Página de Facebook.')
+          return
+        }
+
+        // Con una sola Página no hay nada que preguntar: preguntarlo sería un
+        // paso de más para confirmar la única respuesta posible.
+        if (r.paginas.length === 1) {
+          await conectarPagina(r.paginas[0].id)
+          return
+        }
+
+        setPaginas(r.paginas)
+        setConectando(false)
+      } catch (err) {
+        setConectando(false)
+        setError(err.message)
+      }
+    },
+    [conectarPagina],
+  )
+
   const conectar = useCallback(() => {
     if (!window.FB) {
       setError('El conector de Meta todavía no está listo.')
@@ -97,58 +146,18 @@ export function useMetaConnection() {
     tokenRef.current = null
     setConectando(true)
 
-    // `FB.login` puede tirar de entrada (el caso típico: el SDK cargado pero
-    // sin `FB.init`). Sin este catch la excepción se va por arriba del onClick,
-    // `conectando` queda en true y la pantalla dice "Conectando…" para siempre
-    // sin que nada explique por qué.
+    // `FB.login` puede tirar de entrada: el SDK cargado pero sin `FB.init`, o
+    // un callback que no le gusta. Sin este catch la excepción se va por arriba
+    // del onClick, `conectando` queda en true y la pantalla dice "Conectando…"
+    // para siempre sin que nada explique por qué.
     try {
       window.FB.login(
-        async (response) => {
-          // Mismo diagnóstico que el de Embedded Signup, y por el mismo motivo:
-          // cuando el popup termina y no pasa nada, lo único que distingue "Meta
-          // dijo que no" de "Meta contestó algo que no entendimos" es ver la
-          // respuesta cruda. Si esta línea no aparece en la consola, el callback
-          // no corrió: el popup quedó abierto (mostrando un error adentro) o el
-          // navegador lo bloqueó.
+        (response) => {
+          // Diagnóstico: cuando el popup termina y no pasa nada, lo único que
+          // distingue "Meta dijo que no" de "Meta contestó algo que no
+          // entendimos" es ver la respuesta cruda.
           console.log('[meta-login] respuesta de FB.login', response)
-
-          const accessToken = response?.authResponse?.accessToken
-          if (!accessToken) {
-            setConectando(false)
-            setError(
-              response?.status === 'not_authorized'
-                ? 'No diste los permisos que la app necesita.'
-                : 'No se completó la conexión: cerraste la ventana o no diste los permisos.',
-            )
-            return
-          }
-
-          try {
-            // El server cambia el token corto por uno largo antes de listar: si
-            // la persona se toma un rato en elegir la Página, el corto se vence
-            // en el medio y la conexión fallaría recién en el paso siguiente.
-            const r = await apiPost('/onboarding/meta/pages', { accessToken })
-            tokenRef.current = r.accessToken
-
-            if (r.paginas.length === 0) {
-              setConectando(false)
-              setError('Tu cuenta no administra ninguna Página de Facebook.')
-              return
-            }
-
-            // Con una sola Página no hay nada que preguntar: preguntarlo sería
-            // un paso de más para confirmar la única respuesta posible.
-            if (r.paginas.length === 1) {
-              await conectarPagina(r.paginas[0].id)
-              return
-            }
-
-            setPaginas(r.paginas)
-            setConectando(false)
-          } catch (err) {
-            setConectando(false)
-            setError(err.message)
-          }
+          procesarLogin(response)
         },
         { scope: config?.permisosMeta, return_scopes: true },
       )
@@ -157,7 +166,7 @@ export function useMetaConnection() {
       setConectando(false)
       setError(`No se pudo abrir la ventana de Meta: ${err.message}`)
     }
-  }, [config, conectarPagina])
+  }, [config, procesarLogin])
 
   const cancelarSeleccion = useCallback(() => {
     setPaginas([])
