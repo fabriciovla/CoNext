@@ -28,6 +28,14 @@ export const ui = {
       megaInteligencia: 'Inteligencia',
       megaOperacion: 'Operación',
       megaPlataforma: 'Plataforma',
+      // La tarjeta del costado del mega menú y la franja de abajo. Son lo que
+      // le da un piso al panel: doce enlaces sueltos son un mapa del sitio.
+      megaDestacadoRotulo: 'Demo',
+      megaDestacadoTitulo: 'Una demo con tus conversaciones',
+      megaDestacadoTexto: 'Veinte minutos, con tu catálogo y las preguntas que ya te llegan.',
+      megaDestacadoCta: 'Pedir una demo',
+      megaPie: 'Todo corre sobre la API oficial de WhatsApp Business.',
+      megaPieCta: 'Ver planes y precios',
     },
     footer: {
       nav: 'Pie de página',
@@ -72,16 +80,12 @@ export const ui = {
       description:
         'Atiende el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas, sobre la API oficial de WhatsApp.',
       anuncio: 'Sobre la API oficial de WhatsApp Business',
-      heroLineas: [
-        'Unifica tus canales de comunicación y',
-        'potencia cada respuesta con',
-        'Inteligencia Artificial',
-      ],
+      heroLineas: ['Unifica tus canales.', 'Cada respuesta, con IA.'],
       heroBajada:
-        'es el CRM que atiende tu WhatsApp con agentes de inteligencia artificial. Responden precios, stock y envíos con la información de tu negocio — y la última palabra sigue siendo tuya.',
+        'atiende tu WhatsApp con agentes de IA que responden precios, stock y envíos con los datos de tu negocio. La última palabra sigue siendo tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
-      pieHero: 'Tu número, tu cuenta de Meta. Sin apps no oficiales ni teléfonos conectados a un cargador.',
+      heroMarcas: ['API oficial de Meta', 'Tu número, tu cuenta', 'Sin apps no oficiales'],
       funcionesEtiqueta: 'Qué hace',
       funcionesTitulo: 'Lo que hoy haces a mano, en un solo lugar.',
       funcionesTexto:
@@ -201,7 +205,7 @@ export const ui = {
         {
           pregunta: '¿Cuánto cuesta?',
           respuesta:
-            'Hay una prueba de 7 días del Estándar (después $350/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
+            'Hay una prueba de 7 días del Estándar (después $49/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
         },
       ],
       ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos cómo quedaría.',
@@ -226,13 +230,19 @@ export const ui = {
       indecisoTexto: 'Cuéntanos cómo atiendes hoy y lo vemos con los números de tu operación.',
       indecisoCta: 'Pedir una demo',
       faqTitulo: 'Preguntas sobre los planes.',
+      periodicidad: 'Periodicidad del pago',
+      mensual: 'Mensual',
+      anual: 'Anual',
+      ahorro: 'Ahorrá 20%',
       planes: [
         {
           id: 'gratis',
           nombre: 'Gratis',
           bajada: '7 días de Estándar',
-          precio: '$0',
-          periodo: 'después, $350/mes',
+          precio: '7 días',
+          periodo: 'de prueba, después $49/mes',
+          precioAnual: '7 días',
+          periodoAnual: 'de prueba, después $39/mes facturado anual',
           cta: 'Empezar',
           destino: 'app',
         },
@@ -240,8 +250,10 @@ export const ui = {
           id: 'estandar',
           nombre: 'Estándar',
           bajada: 'Para equipos que crecen',
-          precio: '$350',
+          precio: '$49',
           periodo: 'por mes',
+          precioAnual: '$39',
+          periodoAnual: 'por mes, facturado anual ($468)',
           cta: 'Empezar',
           destino: 'app',
         },
@@ -249,8 +261,10 @@ export const ui = {
           id: 'premium',
           nombre: 'Premium',
           bajada: 'Para equipos que escalan',
-          precio: '$1,000',
-          periodo: 'por mes, facturado anual',
+          precio: '$149',
+          periodo: 'por mes',
+          precioAnual: '$119',
+          periodoAnual: 'por mes, facturado anual ($1.428)',
           cta: 'Empezar',
           destino: 'app',
           destacado: true,
@@ -261,6 +275,8 @@ export const ui = {
           bajada: 'Para organizaciones grandes',
           precio: 'A medida',
           periodo: 'contrato anual',
+          precioAnual: 'A medida',
+          periodoAnual: 'contrato anual',
           cta: 'Hablar con ventas',
           destino: 'whatsapp',
         },
@@ -271,7 +287,7 @@ export const ui = {
           nombre: 'Equipo',
           filas: [
             { nombre: 'Usuarios incluidos', valores: ['5', '5', '10', '25+'] },
-            { nombre: 'Asientos adicionales', valores: ['$50/mes', '$50/mes', '$50/mes', 'Personalizado'] },
+            { nombre: 'Asientos adicionales', valores: ['$15/mes', '$15/mes', '$15/mes', 'Personalizado'] },
           ],
         },
         {
@@ -309,7 +325,7 @@ export const ui = {
         {
           pregunta: '¿Cómo funciona el plan gratis?',
           respuesta:
-            'Es una semana del Estándar, sin cobro. Pedimos la tarjeta al entrar y el día 8 se cobra $350/mes, salvo que canceles antes. Durante la prueba tenés el plan completo, no un recorte.',
+            'Es una semana del Estándar, sin cobro. Pedimos la tarjeta al entrar y el día 8 se cobra $49/mes, salvo que canceles antes. Durante la prueba tenés el plan completo, no un recorte.',
         },
         {
           pregunta: '¿Las conversaciones de WhatsApp las cobran ustedes?',
@@ -341,7 +357,7 @@ export const ui = {
             {
               pregunta: '¿Cuánto cuesta conext?',
               respuesta:
-                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $350/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
+                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $49/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
             },
             {
               pregunta: '¿Las conversaciones de WhatsApp las facturan ustedes?',
@@ -639,6 +655,12 @@ export const ui = {
       megaInteligencia: 'Intelligence',
       megaOperacion: 'Operations',
       megaPlataforma: 'Platform',
+      megaDestacadoRotulo: 'Demo',
+      megaDestacadoTitulo: 'See it with your own chats',
+      megaDestacadoTexto: 'Twenty minutes, with your catalog and the questions you already get.',
+      megaDestacadoCta: 'Request a demo',
+      megaPie: 'It all runs on the official WhatsApp Business API.',
+      megaPieCta: 'See plans and pricing',
     },
     footer: {
       nav: 'Footer',
@@ -683,16 +705,12 @@ export const ui = {
       description:
         'Run your business WhatsApp with AI agents that reply on their own or leave a draft ready for you. One inbox, products, hours, and metrics, on the official WhatsApp API.',
       anuncio: 'On the official WhatsApp Business API',
-      heroLineas: [
-        'Unify your communication channels and',
-        'power every reply with',
-        'Artificial Intelligence',
-      ],
+      heroLineas: ['Unify your channels.', 'Every reply, with AI.'],
       heroBajada:
-        'is the CRM that handles your WhatsApp with AI agents. They answer prices, stock, and shipping with your business data — and the last word is still yours.',
+        'runs your WhatsApp with AI agents that answer prices, stock, and shipping from your business data. The last word is still yours.',
       pedirDemo: 'Request a demo',
       verComo: 'See how it works',
-      pieHero: 'Your number, your Meta account. No unofficial apps, no phones left on a charger.',
+      heroMarcas: ['Official Meta API', 'Your number, your account', 'No unofficial apps'],
       funcionesEtiqueta: 'What it does',
       funcionesTitulo: 'What you do by hand today, in one place.',
       funcionesTexto:
@@ -812,7 +830,7 @@ export const ui = {
         {
           pregunta: 'How much does it cost?',
           respuesta:
-            'There is a 7-day Standard trial (then $350/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
+            'There is a 7-day Standard trial (then $49/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
         },
       ],
       ctaTitulo: 'Tell us how you handle it today and we will show you how it would look.',
@@ -837,13 +855,19 @@ export const ui = {
       indecisoTexto: 'Tell us how you handle it today and we will look at it with your numbers.',
       indecisoCta: 'Request a demo',
       faqTitulo: 'Questions about the plans.',
+      periodicidad: 'Billing period',
+      mensual: 'Monthly',
+      anual: 'Annual',
+      ahorro: 'Save 20%',
       planes: [
         {
           id: 'gratis',
           nombre: 'Free',
           bajada: '7 days of Standard',
-          precio: '$0',
-          periodo: 'then $350/month',
+          precio: '7 days',
+          periodo: 'free trial, then $49/month',
+          precioAnual: '7 days',
+          periodoAnual: 'free trial, then $39/month billed annually',
           cta: 'Get started',
           destino: 'app',
         },
@@ -851,8 +875,10 @@ export const ui = {
           id: 'estandar',
           nombre: 'Standard',
           bajada: 'For growing teams',
-          precio: '$350',
+          precio: '$49',
           periodo: 'per month',
+          precioAnual: '$39',
+          periodoAnual: 'per month, billed annually ($468)',
           cta: 'Get started',
           destino: 'app',
         },
@@ -860,8 +886,10 @@ export const ui = {
           id: 'premium',
           nombre: 'Premium',
           bajada: 'For scaling teams',
-          precio: '$1,000',
-          periodo: 'per month, billed annually',
+          precio: '$149',
+          periodo: 'per month',
+          precioAnual: '$119',
+          periodoAnual: 'per month, billed annually ($1,428)',
           cta: 'Get started',
           destino: 'app',
           destacado: true,
@@ -872,6 +900,8 @@ export const ui = {
           bajada: 'For large organizations',
           precio: 'Custom',
           periodo: 'annual contract',
+          precioAnual: 'Custom',
+          periodoAnual: 'annual contract',
           cta: 'Talk to sales',
           destino: 'whatsapp',
         },
@@ -882,7 +912,7 @@ export const ui = {
           nombre: 'Seats',
           filas: [
             { nombre: 'Users included', valores: ['5', '5', '10', '25+'] },
-            { nombre: 'Additional seats', valores: ['$50/mo', '$50/mo', '$50/mo', 'Custom'] },
+            { nombre: 'Additional seats', valores: ['$15/mo', '$15/mo', '$15/mo', 'Custom'] },
           ],
         },
         {
@@ -920,7 +950,7 @@ export const ui = {
         {
           pregunta: 'How does the free plan work?',
           respuesta:
-            'It is one week of Standard, with no charge. We ask for a card when you start, and on day 8 we bill $350/month unless you cancel first. During the trial you get the full plan, not a cut-down version.',
+            'It is one week of Standard, with no charge. We ask for a card when you start, and on day 8 we bill $49/month unless you cancel first. During the trial you get the full plan, not a cut-down version.',
         },
         {
           pregunta: 'Do you bill WhatsApp conversations?',
@@ -952,7 +982,7 @@ export const ui = {
             {
               pregunta: 'How much does conext cost?',
               respuesta:
-                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $350/month. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
+                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
             },
             {
               pregunta: 'Do you bill WhatsApp conversations?',

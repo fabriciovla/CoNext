@@ -63,11 +63,51 @@ body {
    Sigue siendo `sticky` y no `fixed` como la de dock.us: `fixed` la saca del
    flujo y obliga a compensar los 76px con un padding en cada página, que es de
    donde salen los saltos de layout cuando alguien cambia la altura de la barra
-   y se olvida del padding. `sticky` los reserva sola. */
+   y se olvida del padding. `sticky` los reserva sola.
+
+   Lo nuevo: arriba de todo la franja es transparente y se vuelve opaca recién
+   cuando la página se corrió. Arriba de todo no hay nada que tapar, y una
+   franja blanca ahí es una recta que le corta la luz al fondo justo donde la
+   página empieza — con `.fondo-alba` pasando por detrás, el resplandor arranca
+   en el borde de la pantalla y no debajo de un escalón.
+
+   Esto NO es la isla flotante que se sacó, y la diferencia es la lista de
+   propiedades: acá lo único que cambia son dos colores, que el compositor
+   resuelve sin volver a maquetar ni a repintar la geometría. No hay `padding`,
+   ni `border-radius`, ni `box-shadow` transicionando, y el alto sigue clavado
+   en 76px, así que no hay salto ni de layout ni de atención.
+
+   El estado lo pone un IntersectionObserver sobre un centinela de 40px al tope
+   del documento (`Base.astro`), no un listener de scroll: sin `scroll` no hay
+   trabajo por cuadro. */
 .barra {
   top: 0;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  /* Los dos sentidos no duran lo mismo, y no es un descuido. La hoja es lo que
+     tapa el contenido que pasa por debajo: mientras se está pintando se le ve
+     el texto a través, así que conviene que llegue rápido (120ms, en
+     `.barra-fija`) y que se retire despacio (240ms, acá). Un `transition` se
+     lee del estado al que se va, así que cada regla gobierna su sentido. */
+  transition:
+    background-color 240ms var(--ease-out-soft),
+    border-color 240ms var(--ease-out-soft);
+}
+
+.barra-fija {
   background: rgb(var(--surface-page));
-  border-bottom: 1px solid rgb(var(--tint) / 0.08);
+  border-bottom-color: rgb(var(--tint) / 0.08);
+  transition:
+    background-color 120ms var(--ease-out-soft),
+    border-color 120ms var(--ease-out-soft);
+}
+
+/* Con el menú de teléfono abierto la barra tiene que ser opaca aunque la
+   página esté arriba de todo: el desplegable cuelga de ella y sin hoja debajo
+   se leería encima del contenido. */
+.barra:has(#menu-movil:not([hidden])) {
+  background: rgb(var(--surface-page));
+  border-bottom-color: rgb(var(--tint) / 0.08);
 }
 
 /* El ancho del contenido, en un solo lugar. Antes era la cadena
@@ -130,7 +170,7 @@ body {
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   /* La hoja opaca de las celdas arma un rectángulo. Sin radio, la esquina
-     queda a 90° contra el resplandor y la cuadrícula de `.fondo`. */
+     queda a 90° contra el resplandor y la trama de `.fondo-alba`. */
   border-radius: 1.25rem;
   background: rgb(var(--surface-page));
 }
@@ -202,7 +242,7 @@ body {
   color: rgb(var(--ink-primary));
 }
 
-/* Hoja opaca bajo cada celda. Sin esto el resplandor de `.fondo` se veía
+/* Hoja opaca bajo cada celda. Sin esto el resplandor de `.fondo-alba` se veía
    a través (el tinte de Premium era alfa pura) y las letras salían lavadas. */
 .tabla-precios thead th,
 .tabla-precios tbody th,
@@ -283,6 +323,55 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* Mensual / anual. Una pista con las dos opciones adentro y la elegida en
+   relieve, no dos botones sueltos: el par tiene que leerse como un solo
+   control con dos estados. El fondo de la pista es la superficie hundida y la
+   opcion activa sube a la tarjeta, que es el mismo truco que usa cualquier
+   segmented control — se lee la profundidad, no un borde mas.
+
+   Los dos textos ocupan lugar siempre, asi que la pista no cambia de ancho al
+   pasar de "Mensual" a "Anual" y el precio de abajo no se corre. La transicion
+   es solo de color: la regla de la casa es que nada se mueve al pasar el mouse. */
+.periodo-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgb(var(--tint) / 0.05);
+  border: 1px solid rgb(var(--tint) / 0.08);
+}
+
+.periodo-opcion {
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgb(var(--ink-muted));
+  white-space: nowrap;
+  transition:
+    color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.periodo-opcion:hover {
+  color: rgb(var(--ink-primary));
+}
+
+.periodo-opcion.is-activa {
+  background: rgb(var(--surface-card));
+  color: rgb(var(--ink-primary));
+  box-shadow: 0 1px 2px rgb(var(--tint) / 0.1);
+}
+
+/* Un plan sin producto anual creado todavia queda inerte. Se ve apagado y no
+   toma el cursor de mano: un boton que se ve apretable y no lleva a ningun
+   lado es peor que uno que se anuncia como no disponible. */
+[data-destino][aria-disabled='true'] {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* Tira de precios que sigue a la barra. Sin `transform`: al promoverla a
@@ -381,99 +470,98 @@ body {
   }
 }
 
-/* Fondo ambiental detrás del contenido. Los resplandores violetas le dan
-   profundidad a la hoja sin competir con el texto y la trama de puntos evita
-   que las zonas blancas se sientan vacías. */
-.fondo {
+/* ── El fondo ────────────────────────────────────────────────────────────────
+   Dos capas, y cada una hace un trabajo distinto. Si algo del fondo se ve mal,
+   lo primero es saber cuál de las dos es.
+
+   1. `.fondo-alba` → la luz de apertura, anclada al tope del documento y por
+      detrás de la barra. Ese es todo el punto: el resplandor del hero vivía
+      adentro de la primera sección, que arranca justo abajo de la barra y
+      lleva `contain: paint`, así que el degradé se cortaba con una recta
+      horizontal exactamente sobre la línea de la barra — una costura que
+      cruzaba la pantalla de lado a lado. Sacándolo afuera la luz entra desde
+      el borde de arriba y la barra, que arriba de todo es transparente, la
+      deja pasar.
+
+   2. `.fondo-seccion::before` / `::after` → los acentos y la trama de cada
+      bloque de la landing, más abajo en este archivo.
+
+   Hubo una tercera, `.fondo`: dos hairlines verticales fijos sobre los bordes
+   del `.contenedor`, para darle un espinazo a la hoja. Se fueron. La línea del
+   pie va de borde a borde de la ventana y los rieles solo hasta el ancho del
+   contenido, así que en el margen —donde no hay nada más— se cruzaban y dejaban
+   una cruz suelta que no significaba nada. Se puede tapar (basta con darle hoja
+   propia al pie), pero el gesto no valía lo que costaba defenderlo en cada
+   línea horizontal que aparezca después. */
+
+/* La luz de apertura. `absolute` sin ancestro posicionado significa que el
+   bloque contenedor es el viewport apoyado en el origen del documento, que es
+   justo lo que hace falta acá: arranca en el borde de arriba de la página,
+   ocupa el ancho de la ventana y no la altura del documento.
+
+   Son tres radiales y no uno. Uno solo, por suave que sea, tiene un centro y
+   se lee como una mancha; tres de radios distintos y centros corridos arman
+   una cortina sin forma, que es lo que uno quiere de una luz. El más fuerte
+   entra por arriba a la derecha, que es el hueco que deja el hero — el
+   titular, los botones y el pie van todos a la izquierda.
+   Las paradas van en escalones y no de `color` a `transparent`: entre dos
+   paradas la interpolación es recta, y una rampa recta que muere de golpe
+   deja ver la circunferencia donde termina. */
+.fondo-alba {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64rem;
   z-index: 0;
-  overflow: hidden;
   pointer-events: none;
-  /* Los tres resplandores de la hoja. Van con escalones intermedios y no
-     `color → transparent`: entre dos paradas la interpolación es recta, y una
-     rampa recta que muere de golpe deja ver la circunferencia donde termina.
-     Las paradas son en rem y no en %, porque acá el degradé se mide contra la
-     caja de la página entera y un % daría un radio distinto en cada pantalla. */
   background:
     radial-gradient(
-      circle at 84% 0%,
-      rgb(var(--violet) / 0.17),
-      rgb(var(--violet) / 0.075) 16rem,
-      rgb(var(--violet) / 0.026) 27rem,
-      rgb(var(--violet) / 0.007) 38rem,
-      transparent 50rem
+      68rem 40rem at 76% -4rem,
+      rgb(var(--violet) / 0.2),
+      rgb(var(--violet) / 0.115) 26%,
+      rgb(var(--violet) / 0.052) 46%,
+      rgb(var(--violet) / 0.018) 66%,
+      rgb(var(--violet) / 0.005) 82%,
+      transparent 100%
     ),
     radial-gradient(
-      circle at 0% 38%,
-      rgb(var(--violet) / 0.1),
-      rgb(var(--violet) / 0.042) 13rem,
-      rgb(var(--violet) / 0.015) 22rem,
-      rgb(var(--violet) / 0.005) 32rem,
-      transparent 44rem
+      44rem 30rem at 4% 8rem,
+      rgb(var(--violet) / 0.105),
+      rgb(var(--violet) / 0.055) 28%,
+      rgb(var(--violet) / 0.022) 50%,
+      rgb(var(--violet) / 0.006) 72%,
+      transparent 100%
     ),
     radial-gradient(
-      circle at 80% 88%,
-      rgb(var(--violet) / 0.09),
-      rgb(var(--violet) / 0.038) 15rem,
-      rgb(var(--violet) / 0.014) 25rem,
-      rgb(var(--violet) / 0.005) 36rem,
-      transparent 48rem
-    ),
-    rgb(var(--surface-page));
+      92rem 22rem at 50% 0,
+      rgb(var(--violet) / 0.075),
+      rgb(var(--violet) / 0.032) 38%,
+      rgb(var(--violet) / 0.009) 66%,
+      transparent 100%
+    );
+  -webkit-mask-image: linear-gradient(to bottom, black 46%, transparent 96%);
+  mask-image: linear-gradient(to bottom, black 46%, transparent 96%);
 }
 
-.fondo::before {
+/* La trama del primer pantallazo. Va acá adentro y no en la sección del hero
+   porque la sección empieza abajo de la barra: puesta ahí, la banda de puntos
+   arrancaba con el titular ya empezado. Desde el alba sube hasta atrás de la
+   barra y acompaña la luz en vez de aparecer después.
+   Los puntos son 1px de tinta a muy baja opacidad. La grilla de 26px es más
+   apretada que el ritmo del texto a propósito: a 32 o 40 se empiezan a contar
+   los puntos, y lo que tiene que quedar es una textura, no un patrón. */
+.fondo-alba::after {
   content: '';
-  position: absolute;
-  top: -30rem;
-  right: -18rem;
-  width: 72rem;
-  height: 72rem;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle at 44% 56%,
-    rgb(var(--violet) / 0.15),
-    rgb(var(--violet) / 0.08) 24%,
-    rgb(var(--violet) / 0.04) 42%,
-    rgb(var(--violet) / 0.016) 60%,
-    rgb(var(--violet) / 0.005) 78%,
-    transparent 100%
-  );
-}
-
-.fondo::after {
-  content: '';
-  position: absolute;
-  top: 30%;
-  left: -26rem;
-  width: 72rem;
-  height: 44rem;
-  border-radius: 999px;
-  background: radial-gradient(
-    closest-side,
-    rgb(var(--violet) / 0.1),
-    rgb(var(--violet) / 0.055) 24%,
-    rgb(var(--violet) / 0.026) 42%,
-    rgb(var(--violet) / 0.011) 60%,
-    rgb(var(--violet) / 0.004) 78%,
-    transparent 100%
-  );
-}
-
-.fondo-cuadricula {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgb(var(--tint) / 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(to bottom, black, transparent 82%);
-  opacity: 0.72;
-}
-
-/* La landing reparte el fondo entre sus secciones. El fondo general queda para
-   las páginas legales, que no tienen estos bloques decorados. */
-body:has(.fondo-seccion) > .fondo {
-  display: none;
+  background-image: radial-gradient(circle, rgb(var(--tint) / 0.16) 1px, transparent 1px);
+  background-size: 26px 26px;
+  /* `-webkit-` primero: Chrome pinta la máscara en GPU. Sin prefijo algunos
+     motores recaen a software y el scroll se siente a tirones. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 58%, transparent 92%);
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 58%, transparent 92%);
+  opacity: 0.7;
 }
 
 .fondo-seccion {
@@ -579,13 +667,15 @@ html.pagina-oculta .orbe {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background-image: radial-gradient(circle, rgb(var(--tint) / 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-image: radial-gradient(circle, rgb(var(--tint) / 0.16) 1px, transparent 1px);
+  /* La misma grilla que `.fondo-alba::after`: dos densidades distintas en la
+     misma página se leen como dos fondos pegados con cinta. */
+  background-size: 26px 26px;
   /* `-webkit-` primero: Chrome pinta la máscara en GPU. Sin prefijo algunos
      motores recaen a software y el scroll se siente a tirones. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, black 24%, black 76%, transparent);
-  opacity: 0.55;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 24%, black 74%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 24%, black 74%, transparent);
+  opacity: 0.7;
 }
 
 .fondo-seccion:nth-of-type(even)::before {
@@ -615,22 +705,15 @@ html.pagina-oculta .orbe {
   );
 }
 
-.fondo-seccion:first-of-type::before {
-  top: -30rem;
-  right: -26rem;
-  width: 120rem;
-  height: 64rem;
-  animation-name: fondo-principal-respirar;
-  animation-duration: 12s;
-  background: radial-gradient(
-    closest-side,
-    rgb(var(--violet) / 0.17),
-    rgb(var(--violet) / 0.095) 24%,
-    rgb(var(--violet) / 0.045) 42%,
-    rgb(var(--violet) / 0.018) 60%,
-    rgb(var(--violet) / 0.005) 78%,
-    transparent 100%
-  );
+/* La primera sección no pinta nada: su luz y su trama las pone `.fondo-alba`,
+   que está afuera y arranca arriba de la barra. Acá adentro el `contain: paint`
+   cortaba el degradé con una recta horizontal justo sobre la línea de la barra,
+   que es la costura que se veía cruzando la pantalla en cada página. Dejarlas
+   apagadas y no borrar la regla es a propósito: así se lee por qué la sección
+   que más fondo tiene es la única sin fondo propio. */
+.fondo-seccion:first-of-type::before,
+.fondo-seccion:first-of-type::after {
+  display: none;
 }
 
 /* En garantías se repite el gesto grande del hero, del lado derecho: el título
@@ -667,16 +750,6 @@ html.pagina-oculta .orbe {
   }
   50% {
     transform: var(--fondo-transform-base) translate3d(0, -10px, 0);
-  }
-}
-
-@keyframes fondo-principal-respirar {
-  0%,
-  100% {
-    transform: var(--fondo-transform-base) translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: var(--fondo-transform-base) translate3d(-18px, 14px, 0) scale(1.035);
   }
 }
 
@@ -988,6 +1061,33 @@ html.pagina-oculta .orbe {
 .legal a,
 .ayuda-respuesta a {
   @apply text-ink-primary underline decoration-tint/25 underline-offset-2 transition-colors duration-200 hover:decoration-violet;
+}
+
+/* Los desplegables de la barra. El panel se muestra sacándole el `hidden`, o
+   sea que pasa de `display: none` a visible: no hay transición posible ahí, una
+   propiedad discreta no interpola. Por eso la entrada es una `animation`, que
+   sí arranca sola en cuanto el elemento existe en el layout.
+
+   180ms y 6px de recorrido. Es corto a propósito: el panel se abre al pasar el
+   mouse, así que se ve muchas veces por visita, y todo lo que dure más de dos
+   décimas empieza a sentirse como que la barra tarda en contestar.
+
+   El movimiento va en `transform` y no en `top`: el segundo relayoutea el panel
+   entero —cuatro columnas, doce filas— en cada cuadro de la entrada. */
+.panel-nav {
+  animation: nav-panel-in 180ms var(--ease-out-soft);
+  transform-origin: top center;
+}
+
+@keyframes nav-panel-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @layer utilities {

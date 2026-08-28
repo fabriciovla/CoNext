@@ -23,8 +23,14 @@ const ICONOS = {
   lightbulb: IconLightbulb,
 }
 
-const destinoDe = (plan) =>
-  plan.destino === 'whatsapp' ? WHATSAPP_URL : dodoCheckout(plan.id)
+// Empresa va siempre a WhatsApp, mensual o anual: no hay checkout que armar.
+// Para el resto se calculan los dos destinos de una y se dejan puestos en el
+// boton; el interruptor solo cambia cual de los dos esta en el href. Resolverlo
+// al hacer clic obligaria a tener el catalogo en el navegador.
+const destinosDe = (plan) =>
+  plan.destino === 'whatsapp'
+    ? { mensual: WHATSAPP_URL, anual: WHATSAPP_URL }
+    : { mensual: dodoCheckout(plan.id, 'mensual'), anual: dodoCheckout(plan.id, 'anual') }
 
 const ESQUEMA = {
   '@context': 'https://schema.org',
@@ -38,8 +44,8 @@ const ESQUEMA = {
   offers: {
     '@type': 'AggregateOffer',
     priceCurrency: 'USD',
-    lowPrice: '0',
-    highPrice: '1000',
+    lowPrice: '39',
+    highPrice: '149',
     offerCount: p.planes.length,
   },
 }
@@ -59,6 +65,24 @@ const ESQUEMA = {
       <p class="mt-4 max-w-xl text-[19px] font-normal leading-[28px] text-ink-secondary">
         {p.bajada}
       </p>
+
+      {/* Mensual / anual. Son dos <button> y no un <input type="checkbox">
+          disfrazado: no hay nada que enviar, y el estado que importa --cual de
+          los dos manda-- se dice con aria-pressed, que es lo que un lector de
+          pantalla anuncia. El precio y el destino de cada plan ya estan en el
+          DOM (data-*): esto solo elige cual se muestra, asi que cambiar de
+          periodo no pide red ni vuelve a pintar la tabla. */}
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <div class="periodo-switch" role="group" aria-label={p.periodicidad}>
+          <button type="button" class="periodo-opcion is-activa" data-periodo="mensual" aria-pressed="true">
+            {p.mensual}
+          </button>
+          <button type="button" class="periodo-opcion" data-periodo="anual" aria-pressed="false">
+            {p.anual}
+          </button>
+        </div>
+        <span class="text-[13px] font-medium text-violet">{p.ahorro}</span>
+      </div>
     </div>
 
     <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:hidden">
@@ -78,11 +102,28 @@ const ESQUEMA = {
             <span class="mt-1 text-[20px] font-medium tracking-tight text-ink-primary">{plan.nombre}</span>
             <span class="mt-1 text-[14px] text-ink-muted">{plan.bajada}</span>
             <span class="mt-4">
-              <span class="block text-[28px] font-semibold leading-none tracking-tight text-ink-primary">{plan.precio}</span>
-              <span class="mt-1.5 block text-[13px] text-ink-muted">{plan.periodo}</span>
+              <span
+                class="block text-[28px] font-semibold leading-none tracking-tight text-ink-primary"
+                data-precio
+                data-mensual={plan.precio}
+                data-anual={plan.precioAnual}
+              >
+                {plan.precio}
+              </span>
+              <span
+                class="mt-1.5 block text-[13px] text-ink-muted"
+                data-periodo-texto
+                data-mensual={plan.periodo}
+                data-anual={plan.periodoAnual}
+              >
+                {plan.periodo}
+              </span>
             </span>
             <Boton
-              href={destinoDe(plan)}
+              href={destinosDe(plan).mensual}
+              data-destino
+              data-mensual={destinosDe(plan).mensual}
+              data-anual={destinosDe(plan).anual}
               variante={plan.destacado ? 'primario' : 'secundario'}
               className="mt-5 w-full"
               target={plan.destino === 'whatsapp' ? '_blank' : '_self'}
@@ -113,7 +154,14 @@ const ESQUEMA = {
           p.planes.map((plan) => (
             <div class:list={[plan.destacado && 'is-destacado']}>
               <span class="precios-pegajosa-nombre">{plan.nombre}</span>
-              <span class="precios-pegajosa-precio">{plan.precio}</span>
+              <span
+                class="precios-pegajosa-precio"
+                data-precio
+                data-mensual={plan.precio}
+                data-anual={plan.precioAnual}
+              >
+                {plan.precio}
+              </span>
             </div>
           ))
         }
@@ -159,15 +207,28 @@ const ESQUEMA = {
                     </span>
                     <span class="mt-1 block text-[14px] font-normal text-ink-muted">{plan.bajada}</span>
                     <span class="mt-5 block">
-                      <span class="block text-[32px] font-semibold leading-none tracking-tight text-ink-primary">
+                      <span
+                        class="block text-[32px] font-semibold leading-none tracking-tight text-ink-primary"
+                        data-precio
+                        data-mensual={plan.precio}
+                        data-anual={plan.precioAnual}
+                      >
                         {plan.precio}
                       </span>
-                      <span class="mt-2 block min-h-[2.5em] text-[13.5px] font-normal leading-snug text-ink-muted">
+                      <span
+                        class="mt-2 block min-h-[2.5em] text-[13.5px] font-normal leading-snug text-ink-muted"
+                        data-periodo-texto
+                        data-mensual={plan.periodo}
+                        data-anual={plan.periodoAnual}
+                      >
                         {plan.periodo}
                       </span>
                     </span>
                     <Boton
-                      href={destinoDe(plan)}
+                      href={destinosDe(plan).mensual}
+                      data-destino
+                      data-mensual={destinosDe(plan).mensual}
+                      data-anual={destinosDe(plan).anual}
                       variante={plan.destacado ? 'primario' : 'secundario'}
                       className="mt-4 w-full"
                       target={plan.destino === 'whatsapp' ? '_blank' : '_self'}
@@ -227,6 +288,43 @@ const ESQUEMA = {
     </div>
 
     <script>
+      // Cambiar de periodo es reemplazar texto que ya esta en el DOM: cada
+      // monto trae su par en data-mensual/data-anual. Nada se recalcula ni se
+      // pide al servidor, asi que el precio no parpadea al tocar el boton.
+      const opciones = [...document.querySelectorAll('.periodo-opcion')]
+
+      const aplicarPeriodo = (periodo) => {
+        for (const el of document.querySelectorAll('[data-precio], [data-periodo-texto]')) {
+          const valor = el.dataset[periodo]
+          if (valor) el.textContent = valor
+        }
+
+        for (const el of document.querySelectorAll('[data-destino]')) {
+          const destino = el.dataset[periodo]
+          // Un plan sin producto anual todavia creado devuelve '#'. Se deja
+          // inerte a proposito en vez de caer al mensual: mandar al checkout
+          // de un precio distinto del que la pantalla acaba de mostrar es peor
+          // que un boton que no hace nada.
+          const inerte = !destino || destino === '#'
+          el.setAttribute('href', destino || '#')
+          // setAttribute y no toggleAttribute: aquel deja el atributo en cadena
+          // vacía, que no es un valor ARIA válido y además no matchea el
+          // [aria-disabled='true'] de la hoja, así que el botón se veía activo.
+          if (inerte) el.setAttribute('aria-disabled', 'true')
+          else el.removeAttribute('aria-disabled')
+        }
+
+        for (const boton of opciones) {
+          const activa = boton.dataset.periodo === periodo
+          boton.classList.toggle('is-activa', activa)
+          boton.setAttribute('aria-pressed', activa ? 'true' : 'false')
+        }
+      }
+
+      for (const boton of opciones) {
+        boton.addEventListener('click', () => aplicarPeriodo(boton.dataset.periodo))
+      }
+
       const barra = document.getElementById('precios-pegajosa')
       const cabecera = document.getElementById('precios-cabecera')
       const tabla = document.querySelector('.tabla-precios')
