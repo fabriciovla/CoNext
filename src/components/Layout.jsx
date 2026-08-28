@@ -28,13 +28,13 @@ export default function Layout({ current, nav, children }) {
           // y las tarjetas quedan pegadas a la izquierda. El `w-full` es lo
           // que hace que el `mx-auto` centre en pantallas chicas también.
           <main
-            className={`flex-1 px-6 py-5 ${
+            className={`flex-1 px-6 py-6 sm:px-8 ${
               fillsViewport ? 'flex min-h-0 flex-col overflow-hidden' : 'overflow-y-auto'
             }`}
           >
             <div
               key={current}
-              className={`animate-fade-in mx-auto w-full max-w-[1100px] ${
+              className={`animate-fade-in mx-auto w-full max-w-[1280px] ${
                 fillsViewport ? 'flex min-h-0 min-w-0 flex-1 flex-col' : ''
               }`}
             >

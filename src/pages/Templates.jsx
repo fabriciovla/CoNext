@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import PageHeader from '../components/PageHeader'
-import PageActions from '../components/PageActions'
 import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
-import Input from '../components/ui/Input'
+import Input, { LABEL_CLASS } from '../components/ui/Input'
 import Modal from '../components/ui/Modal'
 import Select from '../components/ui/Select'
 import { IconPlus, IconTrash, IconTemplate } from '../components/ui/icons'
@@ -92,17 +92,17 @@ function FormularioPlantilla({ onCancel, onSubmit }) {
       </p>
 
       <div>
-        <span className="mb-1.5 block text-[12.5px] text-ink-secondary">Categoría</span>
+        <span className={LABEL_CLASS}>Categoría</span>
         <Select value={category} onChange={setCategory} options={CATEGORIAS} ariaLabel="Categoría" />
       </div>
 
       <div>
-        <span className="mb-1.5 block text-[12.5px] text-ink-secondary">Idioma</span>
+        <span className={LABEL_CLASS}>Idioma</span>
         <Select value={language} onChange={setLanguage} options={IDIOMAS} ariaLabel="Idioma" />
       </div>
 
       <label htmlFor="tpl-body" className="block">
-        <span className="mb-1.5 block text-[12.5px] text-ink-secondary">Mensaje</span>
+        <span className={LABEL_CLASS}>Mensaje</span>
         <textarea
           id="tpl-body"
           value={body}
@@ -165,13 +165,27 @@ export default function Templates({
 
   return (
     <>
-      <PageHeader title="Plantillas" />
-
-      <p className="mx-auto mb-5 max-w-2xl text-center text-[13px] leading-relaxed text-ink-secondary">
-        Son los mensajes con los que podés escribir <strong className="font-medium text-ink-primary">primero</strong>.
-        Pasadas 24 horas desde el último mensaje del contacto, WhatsApp solo deja mandar una
-        plantilla aprobada.
-      </p>
+      <PageHeader
+        title="Plantillas"
+        description={
+          <>
+            Son los mensajes con los que podés escribir{' '}
+            <strong className="font-medium text-ink-primary">primero</strong>. Pasadas 24 horas desde
+            el último mensaje del contacto, WhatsApp solo deja mandar una plantilla aprobada.
+          </>
+        }
+        actions={
+          <>
+            <Button variant="secondary" onClick={onRefresh}>
+              Actualizar estados
+            </Button>
+            <Button onClick={() => setCreando(true)} disabled={!conectado}>
+              <IconPlus size={15} />
+              Nueva plantilla
+            </Button>
+          </>
+        }
+      />
 
       {error && (
         <Card className="mb-4 border-status-critical/30">
@@ -188,18 +202,25 @@ export default function Templates({
         </Card>
       )}
 
-      {cargando && <p className="text-center text-[13px] text-ink-muted">Trayendo las plantillas…</p>}
+      {cargando && (
+        <p className="animate-fade-in py-10 text-center text-[13px] text-ink-muted">
+          Trayendo las plantillas…
+        </p>
+      )}
 
       {!cargando && conectado && templates.length === 0 && (
-        <Card>
-          <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <IconTemplate size={20} className="text-ink-faint" />
-            <p className="text-[13px] text-ink-secondary">Todavía no hay ninguna plantilla.</p>
-            <p className="max-w-sm text-[12.5px] text-ink-faint">
-              La primera suele ser la del pedido en camino: es la que más se manda y la que más
-              rápido aprueban.
-            </p>
-          </div>
+        <Card bodyClassName="p-0">
+          <EmptyState
+            icon={<IconTemplate size={19} />}
+            title="Todavía no hay ninguna plantilla"
+            description="La primera suele ser la del pedido en camino: es la que más se manda y la que más rápido aprueban."
+            action={
+              <Button onClick={() => setCreando(true)}>
+                <IconPlus size={15} />
+                Nueva plantilla
+              </Button>
+            }
+          />
         </Card>
       )}
 
@@ -250,16 +271,6 @@ export default function Templates({
           )
         })}
       </div>
-
-      <PageActions>
-        <Button onClick={() => setCreando(true)} disabled={!conectado}>
-          <IconPlus size={15} />
-          Nueva plantilla
-        </Button>
-        <Button variant="ghost" onClick={onRefresh}>
-          Actualizar estados
-        </Button>
-      </PageActions>
 
       {creando && (
         <Modal title="Nueva plantilla" onClose={() => setCreando(false)}>

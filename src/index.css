@@ -150,6 +150,22 @@ body {
   background: rgba(64, 88, 255, 0.25);
 }
 
+/* Anillo de foco de teclado, una sola vez para toda la app.
+   `Button` e `Input` traen el suyo, pero el resto —las filas de la barra, los
+   botones de ícono del composer, las pestañas de la bandeja, las carpetas de
+   Productos— son `<button>` pelados sin ningún estilo de foco: navegando con
+   Tab no se veía dónde estaba parado el cursor en media pantalla.
+   Va en `:where()`, que tiene especificidad cero: cualquier componente que
+   declare su propio `focus-visible` (incluido el `outline-none` que Tailwind
+   pone antes de un `ring`) le gana sin necesidad de `!important`. Y es
+   `:focus-visible` y no `:focus`, así el clic del mouse no lo dispara.
+   El `outline` sigue el `border-radius` del elemento, así que en una píldora
+   sale redondo y no como un rectángulo alrededor. */
+:where(button, a, summary, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid rgb(var(--violet));
+  outline-offset: 2px;
+}
+
 * {
   scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
@@ -287,12 +303,12 @@ body {
   }
 }
 
-/* Los orbes del panel de /login: un círculo con un anillo finito y un degradé
-   violeta que se apaga antes de tocar el borde. Es el mismo gesto que la landing
-   reparte entre sus secciones (`.orbe` y `.fondo-seccion::before` en
-   `site/src/index.css`) — si se retoca el violeta o el anillo, se retoca allá
-   también. La pantalla de ingreso es la misma de los dos lados y el fondo es
-   parte de la pantalla.
+/* Los orbes del panel de /login: luz, no un objeto — un degradé violeta que se
+   apaga en escalones y no llega a tocar ningún borde. Es el mismo gesto que la
+   landing reparte entre sus secciones (`.orbe` y `.fondo-seccion::before` en
+   `site/src/index.css`) — si se retoca el violeta, se retoca allá también. La
+   pantalla de ingreso es la misma de los dos lados y el fondo es parte de la
+   pantalla.
 
    El tamaño y la posición de cada uno los pone la página: son dos y entran
    mayormente fuera del panel, así lo que se ve es el arco y no el círculo.
@@ -310,16 +326,24 @@ body {
 .orbe {
   position: absolute;
   z-index: 0;
-  border: 1px solid rgb(var(--violet) / 0.16);
   border-radius: 999px;
   transform-origin: center;
   pointer-events: none;
+  /* Sin anillo de 1px: con la circunferencia a la vista el fondo deja de ser un
+     resplandor y pasa a ser una pelota apoyada atrás del texto, que es una
+     forma más peleando por la atención. Sin borde y con el degradé apagándose
+     en cinco escalones no hay dónde termina, solo de dónde viene la luz.
+     Es el mismo degradé que `.orbe` y `.fondo-seccion::before` en
+     `site/src/index.css`: son la misma pantalla de los dos lados y esta copia
+     se había quedado con el anillo. Si se retoca allá, se retoca acá. */
   background: radial-gradient(
-    circle,
-    rgb(var(--violet) / 0.16),
-    rgb(var(--violet) / 0.055) 46%,
-    rgb(var(--violet) / 0.028) 68%,
-    transparent 78%
+    closest-side,
+    rgb(var(--violet) / 0.15),
+    rgb(var(--violet) / 0.085) 24%,
+    rgb(var(--violet) / 0.042) 42%,
+    rgb(var(--violet) / 0.017) 60%,
+    rgb(var(--violet) / 0.005) 78%,
+    transparent 100%
   );
   animation:
     ui-fade-in var(--dur-slow) var(--ease-out-expo) var(--d, 0ms) backwards,

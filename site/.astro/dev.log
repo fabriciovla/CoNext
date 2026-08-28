@@ -2,12 +2,175 @@
 {"message":"Generated 1ms","label":"types","level":"info"}
 {"message":"connected.","label":"vite","level":"info"}
 {"message":"Re-optimizing dependencies because vite config has changed","label":"vite","level":"info"}
-{"message":" astro  v7.2.1 ready in 1680 ms\n┃ Local    http://localhost:5174/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
+{"message":" astro  v7.2.1 ready in 2573 ms\n┃ Local    http://localhost:5174/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
 {"message":"watching for file changes...","label":null,"level":"info"}
-{"message":"[200] / 36ms","label":null,"level":"info"}
-{"message":"[200] /privacidad 11ms","label":null,"level":"info"}
-{"message":"[200] /terminos 12ms","label":null,"level":"info"}
-{"message":"[200] /eliminar-datos 11ms","label":null,"level":"info"}
+{"message":"\n update  ▶ New version of Astro available: 7.2.9\n  Run npx @astrojs/upgrade to update\n","label":"SKIP_FORMAT","level":"warn"}
+{"message":"[200] / 50ms","label":null,"level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"[200] / 11ms","label":null,"level":"info"}
+{"message":"[200] /precios 41ms","label":null,"level":"info"}
+{"message":"[200] /ayuda 25ms","label":null,"level":"info"}
+{"message":"A `getStaticPaths()` route pattern was matched, but no matching static path was found for requested path `/producto/bandeja-unica`.\n\nPossible dynamic routes being matched: src/pages/producto/[slug].astro.","label":"router","level":"warn"}
+{"message":"[404] /producto/bandeja-unica 46ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] /login 24ms","label":null,"level":"info"}
+{"message":"[200] /producto/bandeja 18ms","label":null,"level":"info"}
 {"message":"[200] / 4ms","label":null,"level":"info"}
-{"message":"[200] /terminos 2ms","label":null,"level":"info"}
+{"message":"[200] /privacidad 23ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /producto/bandeja 34ms","label":null,"level":"info"}
+{"message":"[200] /producto/carpetas 3ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /producto/carpetas 27ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /producto/carpetas 24ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 27ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
+{"message":"[200] /producto/carpetas 21ms","label":null,"level":"info"}
+{"message":"[200] / 20ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /producto/agentes 2ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 37ms","label":null,"level":"info"}
+{"message":"[200] / 7ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 33ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 27ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 30ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 28ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /producto/agentes 40ms","label":null,"level":"info"}
+{"message":"[200] /producto/api-whatsapp 4ms","label":null,"level":"info"}
+{"message":"[200] /producto/datos 5ms","label":null,"level":"info"}
+{"message":"[200] /precios 33ms","label":null,"level":"info"}
+{"message":"[200] /producto/bandeja 3ms","label":null,"level":"info"}
+{"message":"[200] /producto/agentes 3ms","label":null,"level":"info"}
+{"message":"[200] /producto/borrador 6ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] /producto/bandeja 4ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /producto/bandeja 37ms","label":null,"level":"info"}
+{"message":"[200] /ayuda 19ms","label":null,"level":"info"}
+{"message":"[200] / 23ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"CompilerError: Unexpected token\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    at compile (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:56:3)\n    at async compileAstro (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\compile.js:2:1)\n    at async TransformPluginContext.handler (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\index.js:221:33)\n    at async EnvironmentPluginContainer.transform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:30851:14)\n    at async loadAndTransform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:20619:26)\n    at async fetchModule (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:34251:15)\n    at async handleInvoke (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26817:21)\n    at async EventEmitter.listenerForInvokeHandler (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26872:13)","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"CompilerError: Unexpected token\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    at compile (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:56:3)\n    at async compileAstro (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\compile.js:2:1)\n    at async TransformPluginContext.handler (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\index.js:221:33)\n    at async EnvironmentPluginContainer.transform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:30851:14)\n    at async loadAndTransform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:20619:26)\n    at async fetchModule (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:34251:15)\n    at async handleInvoke (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26817:21)\n    at async EventEmitter.listenerForInvokeHandler (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26872:13)","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"CompilerError: Unexpected token\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    at compile (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:56:3)\n    at async compileAstro (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\compile.js:2:1)\n    at async TransformPluginContext.handler (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\index.js:221:33)\n    at async EnvironmentPluginContainer.transform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:30851:14)\n    at async loadAndTransform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:20619:26)\n    at async fetchModule (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:34251:15)\n    at async handleInvoke (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26817:21)\n    at async EventEmitter.listenerForInvokeHandler (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26872:13)","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"CompilerError: Unexpected token\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    at compile (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:56:3)\n    at async compileAstro (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\compile.js:2:1)\n    at async TransformPluginContext.handler (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\index.js:221:33)\n    at async EnvironmentPluginContainer.transform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:30851:14)\n    at async loadAndTransform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:20619:26)\n    at async fetchModule (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:34251:15)\n    at async handleInvoke (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26817:21)\n    at async EventEmitter.listenerForInvokeHandler (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26872:13)","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at C:/Users/User/Desktop/Dev/wsp-crm/site/src/components/Navbar.astro:417:9\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"CompilerError: Unexpected token\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    at compile (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:56:3)\n    at async compileAstro (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\compile.js:2:1)\n    at async TransformPluginContext.handler (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\vite-plugin-astro\\index.js:221:33)\n    at async EnvironmentPluginContainer.transform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:30851:14)\n    at async loadAndTransform (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:20619:26)\n    at async fetchModule (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:34251:15)\n    at async handleInvoke (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26817:21)\n    at async EventEmitter.listenerForInvokeHandler (file:///C:/Users/User/Desktop/Dev/wsp-crm/site/node_modules/astro/node_modules/vite/dist/node/chunks/node.js:26872:13)","label":null,"level":"error"}
+{"message":"[CompilerError] Unexpected token\n  Stack trace:\n    at handleCompileResultErrors (C:\\Users\\User\\Desktop\\Dev\\wsp-crm\\site\\node_modules\\astro\\dist\\core\\compile\\compile.js:68:13)\n    [...] See full stack trace in the browser, or rerun with --verbose.","label":null,"level":"error"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 29ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] /en/ 25ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /en/ 33ms","label":null,"level":"info"}
+{"message":"[200] /precios 21ms","label":null,"level":"info"}
+{"message":"[404] /no-existe 22ms","label":null,"level":"info"}
+{"message":"[200] /privacidad 20ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 31ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 30ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 30ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 28ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 46ms","label":null,"level":"info"}
+{"message":"[200] / 46ms","label":null,"level":"info"}
 {"message":"[200] / 6ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] /login 23ms","label":null,"level":"info"}
+{"message":"src/components/Navbar.astro","label":"watch","level":"info"}
+{"message":"[200] / 31ms","label":null,"level":"info"}
+{"message":"[200] / 31ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 8ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 33ms","label":null,"level":"info"}
+{"message":"[200] /precios 24ms","label":null,"level":"info"}
+{"message":"[200] /terminos 22ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] /login 31ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"src/layouts/Base.astro","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 33ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /ayuda 22ms","label":null,"level":"info"}
+{"message":"[200] /precios 20ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /producto/catalogo 23ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /login 20ms","label":null,"level":"info"}
+{"message":"[200] /login 2ms","label":null,"level":"info"}
+{"message":"[200] /login 2ms","label":null,"level":"info"}
+{"message":"[200] /precios 10ms","label":null,"level":"info"}
+{"message":"[200] / 11ms","label":null,"level":"info"}
+{"message":"[200] /precios 7ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 10ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 36ms","label":null,"level":"info"}
+{"message":"[200] / 7ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 38ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 26ms","label":null,"level":"info"}
+{"message":"[200] / 6ms","label":null,"level":"info"}
+{"message":"[200] / 6ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] / 28ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] / 8ms","label":null,"level":"info"}
+{"message":"[200] /en/ 20ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 5ms","label":null,"level":"info"}
+{"message":"[200] / 4ms","label":null,"level":"info"}
+{"message":"[200] /precios 25ms","label":null,"level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"src/views/Precios.astro","label":"watch","level":"info"}
+{"message":"/src/index.css","label":"watch","level":"info"}
+{"message":"[200] /precios 28ms","label":null,"level":"info"}
+{"message":"[200] /precios 3ms","label":null,"level":"info"}
+{"message":"src/views/Precios.astro","label":"watch","level":"info"}
+{"message":"[200] /precios 35ms","label":null,"level":"info"}
+{"message":"[200] /precios 5ms","label":null,"level":"info"}

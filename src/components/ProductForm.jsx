@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Button from './ui/Button'
-import Input from './ui/Input'
+import Input, { LABEL_CLASS } from './ui/Input'
 import Select from './ui/Select'
 
 const EMPTY = { name: '', price: '', stock: '' }
@@ -51,7 +51,7 @@ export default function ProductForm({
           sola opción que dice que no hay nada para elegir. */}
       {folders.length > 0 && (
         <div>
-          <span className="mb-1.5 block text-[12.5px] text-ink-secondary">Carpeta</span>
+          <span className={LABEL_CLASS}>Carpeta</span>
           <Select
             ariaLabel="Carpeta del producto"
             value={form.folderId ?? SIN_CARPETA}

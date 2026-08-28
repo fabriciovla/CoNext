@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import PageHeader from '../components/PageHeader'
-import PageActions from '../components/PageActions'
 import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
 import Button from '../components/ui/Button'
+import { LABEL_CLASS } from '../components/ui/Input'
 import Modal from '../components/ui/Modal'
 import Switch from '../components/ui/Switch'
-import { IconPlus, IconChevronDown, IconTrash } from '../components/ui/icons'
+import { IconPlus, IconChevronDown, IconSparkles, IconTrash } from '../components/ui/icons'
 
 const EMPTY = { name: '', role: '', instructions: '', enabled: true, autoSend: true }
 
@@ -16,7 +17,7 @@ const TEXTAREA_CLASS = `w-full rounded-lg border border-tint/[0.12] bg-transpare
 function Field({ id, label, hint, children }) {
   return (
     <label htmlFor={id} className="block">
-      <span className="mb-1.5 block text-[13px] font-medium text-ink-primary">{label}</span>
+      <span className={LABEL_CLASS}>{label}</span>
       {hint && <span className="mb-2 block text-[12px] leading-snug text-ink-muted">{hint}</span>}
       {children}
     </label>
@@ -71,8 +72,10 @@ function AgentForm({ agent, onSubmit, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Input propio y no el compartido: acá las etiquetas son preguntas en
-          lenguaje llano, y el `Input` de la app las escribe en mayúsculas. */}
+      {/* `Field` y no el `Input` compartido porque los tres campos llevan una
+          línea de ayuda debajo del rótulo; el rótulo en sí sale de la misma
+          clase (`LABEL_CLASS`), así no hay dos tamaños de etiqueta conviviendo
+          en el mismo formulario. */}
       <Field id="name" label="¿Cómo se llama?">
         <input
           id="name"
@@ -190,16 +193,22 @@ export default function Agents({
 
   return (
     <div>
-      <PageHeader title="Agentes IA" />
-
-      {/* Una línea: la regla del orden ya se ve marcada en la lista, así que no
-          hace falta explicarla en un párrafo arriba de todo. */}
-      <p className="mb-4 text-center text-[12.5px] text-ink-muted">
-        Contesta el agente que mejor encaje con la consulta. Tocá uno para configurarlo.
-      </p>
+      {/* La regla del orden ya se ve marcada en la lista, así que la bajada
+          dice solo lo que no se ve: que el agente lo elige la consulta y que la
+          tarjeta entera abre la configuración. */}
+      <PageHeader
+        title="Agentes IA"
+        description="Contesta el agente que mejor encaje con la consulta. Tocá uno para configurarlo."
+        actions={
+          <Button onClick={() => setEditing('nuevo')}>
+            <IconPlus size={14} />
+            Nuevo agente
+          </Button>
+        }
+      />
 
       {error && (
-        <p className="mx-auto mb-4 max-w-3xl rounded-xl border border-status-critical/25 bg-status-critical/10 px-4 py-2.5 text-[13px] text-status-critical">
+        <p className="mb-4 rounded-xl border border-status-critical/25 bg-status-critical/10 px-4 py-2.5 text-[13px] text-status-critical">
           {error}
         </p>
       )}
@@ -212,7 +221,7 @@ export default function Agents({
           así que un rol largo estiraba la tarjeta más allá del `max-w` y dejaba
           el interruptor fuera de la pantalla. `grid-cols-1` la declara como
           `minmax(0, 1fr)`, que sí se deja encoger. */}
-      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {agents.map((agent, index) => {
           const s = stats[agent.key] ?? { conversations: 0, handled: 0, automatic: 0, pending: 0 }
           const esPorDefecto = agent.enabled && porDefecto?.id === agent.id
@@ -295,7 +304,11 @@ export default function Agents({
                 <h3 className="truncate text-[15px] font-semibold text-ink-primary">{agent.name}</h3>
                 {/* Dos líneas y corta: el rol completo se lee adentro, y una
                     tarjeta que crece con el texto rompe el ritmo de la lista. */}
-                <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-ink-secondary">
+                {/* El techo de ancho es del párrafo y no de la tarjeta: la
+                    tarjeta ocupa la columna entera —así los datos del pie
+                    llegan hasta el borde derecho— y el rol se corta antes,
+                    donde un renglón todavía se lee de un barrido. */}
+                <p className="mt-1 line-clamp-2 max-w-3xl text-[13px] leading-relaxed text-ink-secondary">
                   {agent.role || 'Todavía no dijiste de qué se encarga.'}
                 </p>
               </div>
@@ -319,20 +332,20 @@ export default function Agents({
       </div>
 
       {agents.length === 0 && (
-        <Card>
-          <p className="py-6 text-center text-[13px] text-ink-muted">
-            No hay agentes cargados. Sin al menos uno encendido, todos los mensajes te quedan a vos
-            para contestar a mano.
-          </p>
+        <Card bodyClassName="p-0">
+          <EmptyState
+            icon={<IconSparkles size={19} />}
+            title="Todavía no hay agentes"
+            description="Sin al menos uno encendido, todos los mensajes te quedan a vos para contestar a mano."
+            action={
+              <Button onClick={() => setEditing('nuevo')}>
+                <IconPlus size={14} />
+                Nuevo agente
+              </Button>
+            }
+          />
         </Card>
       )}
-
-      <PageActions>
-        <Button onClick={() => setEditing('nuevo')}>
-          <IconPlus size={14} />
-          Nuevo agente
-        </Button>
-      </PageActions>
 
       {editing && (
         <Modal

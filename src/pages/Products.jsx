@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import PageHeader from '../components/PageHeader'
-import PageActions from '../components/PageActions'
 import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -402,24 +402,46 @@ export default function Products({
   // nada arriba es además el primero que ve un cliente nuevo: ahí lo que hace
   // falta no es avisar que la lista está vacía —eso ya se ve— sino qué se pierde
   // mientras siga así.
-  const emptyMessage = search.trim()
-    ? `Ningún producto coincide con “${search.trim()}”.`
+  // Qué decir cuando la vista no tiene nada, en dos partes: el título dice qué
+  // pasó y la línea de abajo qué se puede hacer con eso. En una sola frase
+  // larga y gris las dos cosas se leían como una disculpa.
+  const vacio = search.trim()
+    ? { titulo: 'Sin resultados', texto: `Ningún producto coincide con “${search.trim()}”.` }
     : stockFiltro === 'cero'
-      ? 'Ninguno se quedó sin stock en esta vista.'
+      ? { titulo: 'Nada sin stock', texto: 'Ninguno se quedó en cero en esta vista.' }
       : stockFiltro === 'bajo'
-        ? 'Ninguno tiene el stock bajo en esta vista.'
+        ? { titulo: 'Nada por reponer', texto: 'Ninguno tiene el stock bajo en esta vista.' }
         : view === SUELTOS
-          ? 'Todos los productos están guardados en alguna carpeta.'
+          ? {
+              titulo: 'No hay productos sueltos',
+              texto: 'Todos están guardados en alguna carpeta.',
+            }
           : carpetaActual
-            ? 'La carpeta está vacía. Arrastrá un producto hasta acá para moverlo.'
-            : 'Todavía no cargaste productos. Hasta que haya alguno, tus agentes no pueden contestar por precios ni por stock.'
+            ? {
+                titulo: 'La carpeta está vacía',
+                texto: 'Arrastrá un producto hasta acá para moverlo.',
+              }
+            : {
+                titulo: 'Todavía no cargaste productos',
+                texto:
+                  'Hasta que haya alguno, tus agentes no pueden contestar por precios ni por stock.',
+              }
 
   const catalogoVacio = products.length === 0 && !search.trim() && !stockFiltro
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="shrink-0">
-        <PageHeader title="Productos" />
+        <PageHeader
+          title="Productos"
+          description="El catálogo del que salen los precios y el stock que contestan tus agentes."
+          actions={
+            <Button onClick={openCreate}>
+              <IconPlus size={14} />
+              Nuevo producto
+            </Button>
+          }
+        />
       </div>
 
       {error && (
@@ -572,17 +594,20 @@ export default function Products({
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             {visibles.length === 0 ? (
-              <div className="animate-fade-in flex min-h-0 flex-1 flex-col items-center justify-center overflow-y-auto px-6 py-14 text-center">
-                <span className="mb-3 text-ink-faint">
-                  <IconBox size={28} />
-                </span>
-                <p className="max-w-sm text-[13px] leading-relaxed text-ink-muted">{emptyMessage}</p>
-                {catalogoVacio && (
-                  <Button className="mt-4" onClick={openCreate}>
-                    <IconPlus size={14} />
-                    Nuevo producto
-                  </Button>
-                )}
+              <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto">
+                <EmptyState
+                  icon={<IconBox size={19} />}
+                  title={vacio.titulo}
+                  description={vacio.texto}
+                  action={
+                    catalogoVacio && (
+                      <Button onClick={openCreate}>
+                        <IconPlus size={14} />
+                        Nuevo producto
+                      </Button>
+                    )
+                  }
+                />
               </div>
             ) : (
               <ul className="min-h-0 flex-1 divide-y divide-tint/[0.05] overflow-y-auto">
@@ -621,17 +646,6 @@ export default function Products({
           </div>
         )}
       </Card>
-
-      {products.length > 0 && (
-        <div className="shrink-0">
-          <PageActions>
-            <Button onClick={openCreate}>
-              <IconPlus size={14} />
-              Nuevo producto
-            </Button>
-          </PageActions>
-        </div>
-      )}
 
       {modalMode && (
         <Modal title={modalMode === 'edit' ? 'Editar producto' : 'Nuevo producto'} onClose={closeModal}>

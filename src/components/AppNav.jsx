@@ -33,6 +33,7 @@ export default function AppNav({
   groups,
   agents = [],
   username = 'admin',
+  storeName,
   filter,
   onFilterChange,
   onOpenAgent,
@@ -79,6 +80,7 @@ export default function AppNav({
       current={current}
       onNavigate={onNavigate}
       username={username}
+      storeName={storeName}
       onLogout={onLogout}
       pendingCount={pendingCount}
       theme={theme}

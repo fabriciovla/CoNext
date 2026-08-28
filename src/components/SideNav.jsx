@@ -94,6 +94,7 @@ export default function SideNav({
   current,
   onNavigate,
   username,
+  storeName,
   onLogout,
   pendingCount = 0,
   theme,
@@ -103,12 +104,21 @@ export default function SideNav({
 }) {
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav">
-      {/* Solo el logotipo: el cuadrado con la "W" y el "WhatsApp CRM / Panel de
-          administración" decían tres veces dónde estabas parado, en la única
-          pantalla de la que nadie duda. Hereda el color por `currentColor`, así
-          sirve en los dos temas. */}
-      <header className="flex shrink-0 items-center justify-center px-3.5 pb-5 pt-3.5">
+      {/* El logotipo y, debajo, de qué negocio es esta bandeja. Antes iba el
+          logotipo solo y centrado: centrado no se alinea con nada —las filas de
+          abajo arrancan a 18px del borde— y solo, no dice cuál de los clientes
+          se está mirando, que en una app multi-cliente es lo primero que hay
+          que poder responder de un vistazo. El logotipo hereda el color por
+          `currentColor`, así sirve en los dos temas.
+          Los 18px son los mismos que la fila: `px-2` del contenedor más `px-2.5`
+          de `NavRow`, así el logotipo empieza donde empiezan los íconos. */}
+      <header className="min-w-0 shrink-0 px-[18px] pb-5 pt-4">
         <Logo className="h-4 w-auto text-ink-primary" />
+        {storeName && (
+          <p className="mt-2 truncate text-[11.5px] text-ink-faint" title={storeName}>
+            {storeName}
+          </p>
+        )}
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">

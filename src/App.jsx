@@ -206,6 +206,7 @@ export default function App() {
             current={page}
             onNavigate={navigate}
             username={user.username}
+            storeName={settings.storeName}
             onLogout={logout}
             pendingCount={stats.pendientes}
             groups={allGroups}

@@ -19,6 +19,7 @@ import {
   percentChange,
 } from '../utils/metrics'
 import { groupMessagesByPhone } from '../utils/groupMessages'
+import { formatLongDate, formatTime } from '../utils/time'
 
 export default function Home({
   stats,
@@ -51,9 +52,22 @@ export default function Home({
       ? Math.round((statsAyer.automaticos / statsAyer.total) * 100)
       : null
 
+  // La bajada del encabezado dice de qué día habla todo lo de abajo. Los KPIs,
+  // la actividad por hora y la tasa de resolución son del día abierto, no de
+  // "hoy" en el calendario: sin esta línea hay que bajar hasta la tarjeta de
+  // estado para enterarse de cuál es.
+  const fecha = formatLongDate()
+  const contexto = dayOpenedAt
+    ? dayStatus === 'open'
+      ? `día abierto desde las ${formatTime(dayOpenedAt)}`
+      : dayClosedAt
+        ? `día cerrado a las ${formatTime(dayClosedAt)}`
+        : 'día cerrado'
+    : 'todavía no abriste el día'
+
   return (
     <div>
-      <PageHeader title="Inicio" />
+      <PageHeader title="Inicio" description={`${fecha} · ${contexto}`} />
 
       {/* La grilla de KPIs entra escalonada de izquierda a derecha; el mismo
           retraso se le pasa al contador para que el número arranque con la

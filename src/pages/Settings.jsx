@@ -358,23 +358,34 @@ export default function Settings({ settings, onUpdate }) {
     diasConfigurados > 0 ? storeSchedule({ ...draft, weeklyHours: horarios }) : null
 
   return (
-    <div className="stagger" style={{ '--stagger-base': '60ms' }}>
-      <PageHeader title="Configuración" />
+    // El techo de ancho envuelve también al encabezado y no solo a las
+    // tarjetas: son formularios, así que la columna es más angosta que el resto
+    // de la app, y con el techo puesto solo abajo el aviso de guardado quedaba
+    // flotando 200px a la derecha de la última tarjeta.
+    <div className="stagger max-w-5xl" style={{ '--stagger-base': '60ms' }}>
+      {/* El aviso de guardado va donde iría la acción de la sección: acá no hay
+          botón de guardar —los cambios se mandan solos— y el hueco de la
+          derecha es justo donde se busca la confirmación de que se mandaron.
+          La altura fija es para que el encabezado no cambie de alto cuando el
+          texto pasa de "se guardan solos" a "cambios guardados". */}
+      <PageHeader
+        title="Configuración"
+        description="El canal por el que entran los mensajes, el horario del negocio y cómo responde la IA."
+        actions={
+          <p className="flex h-8 items-center gap-1.5 text-[12px] text-ink-muted">
+            {guardado ? (
+              <span className="animate-pop-in flex items-center gap-1.5 font-medium text-status-good">
+                <IconCheck size={13} />
+                Cambios guardados
+              </span>
+            ) : (
+              'Los cambios se guardan solos.'
+            )}
+          </p>
+        }
+      />
 
-      {/* El aviso ocupa siempre la misma línea: confirma el auto-guardado sin
-          empujar las tarjetas cuando cambia el texto. */}
-      <p className="mb-4 flex h-5 items-center justify-center gap-1.5 text-[12px] text-ink-muted">
-        {guardado ? (
-          <span className="animate-pop-in flex items-center gap-1.5 font-medium text-status-good">
-            <IconCheck size={13} />
-            Cambios guardados
-          </span>
-        ) : (
-          'Los cambios se guardan solos.'
-        )}
-      </p>
-
-      <div className="mx-auto max-w-4xl space-y-3">
+      <div className="space-y-3">
         <WhatsappConnection className="w-full" />
 
         <Seccion

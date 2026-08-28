@@ -13,3 +13,18 @@ const HORA = new Intl.DateTimeFormat('es-AR', {
 export function formatTime(iso) {
   return HORA.format(new Date(iso))
 }
+
+// "jueves 27 de agosto". Va en la bajada del encabezado de Inicio, que es la
+// única pantalla que habla del día de hoy sin nombrarlo en ningún otro lado.
+const FECHA_LARGA = new Intl.DateTimeFormat('es-AR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+})
+
+export function formatLongDate(date = new Date()) {
+  // En español el día de la semana va en minúscula, pero acá abre la línea y
+  // una frase que empieza en minúscula se lee como si le faltara algo adelante.
+  const texto = FECHA_LARGA.format(date)
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
