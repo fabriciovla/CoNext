@@ -6,7 +6,6 @@ import { findAgent } from '../../utils/agents'
 import {
   IconSend,
   IconInbox,
-  IconSparkles,
   IconSmile,
   IconNote,
   IconPaperclip,
@@ -27,6 +26,24 @@ function formatDayLabel(iso) {
 
 function sameDay(a, b) {
   return new Date(a).toDateString() === new Date(b).toDateString()
+}
+
+// Cuánto silencio corta un bloque de mensajes. Dos "hola" seguidos son una
+// andanada y van pegados; los mismos dos "hola" con ocho horas en el medio son
+// dos veces que el cliente escribió, y agruparlos sería mentir sobre el ritmo
+// de la conversación.
+const HUECO_BLOQUE_MS = 5 * 60 * 1000
+
+// Dos mensajes son del mismo bloque si los dijo el mismo (mismo lado y, del
+// lado de acá, el mismo autor), sin cambio de día y sin un silencio largo en el
+// medio. Los eventos del sistema nunca agrupan: cortan el hilo por definición.
+function mismoBloque(a, b) {
+  if (!a || !b) return false
+  if (a.direction === 'evento' || b.direction === 'evento') return false
+  if (a.direction !== b.direction) return false
+  if (a.direction === 'out' && a.author !== b.author) return false
+  if (!sameDay(a.createdAt, b.createdAt)) return false
+  return new Date(b.createdAt) - new Date(a.createdAt) < HUECO_BLOQUE_MS
 }
 
 // WhatsApp corta el cuerpo del mensaje en 4096 caracteres: mejor frenarlo acá
@@ -258,10 +275,13 @@ export default function ChatPanel({
   }, [phone, disabled])
 
   if (!group) {
+    // El bloque entra entero y de una. El ícono rebotaba con `animate-pop-in` y
+    // el texto lo seguía 60 ms después: dos movimientos coreografiados para
+    // decir "no hay nada seleccionado".
     return (
       <div className="animate-fade-in flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-3 bg-surface-card text-center">
-        <IconInbox size={28} className="animate-pop-in text-ink-faint" style={{ '--d': '120ms' }} />
-        <p className="animate-fade-up text-[13px] leading-relaxed text-ink-faint" style={{ '--d': '180ms' }}>
+        <IconInbox size={28} className="text-ink-faint" />
+        <p className="text-[13px] leading-relaxed text-ink-faint">
           Elegí una conversación de la lista
           <br />
           para ver el historial completo.
@@ -432,35 +452,48 @@ export default function ChatPanel({
           desparramada. Por debajo de ese tope el padding es el normal.
           El tope es 56rem y no el ancho entero: una conversación se lee como
           una columna, no como una tabla. */}
+      {/* El hilo no tiene animación de entrada, y es a propósito: los globos
+          entraban uno atrás del otro, escalonados, cada vez que se abría una
+          conversación. Ningún chat hace eso — la charla ya pasó, está ahí — y
+          era lo que hacía que abrir un contacto se sintiera una demo y no la
+          bandeja de alguien que trabaja. */}
       <ul
         ref={threadRef}
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-[max(1.25rem,calc((100%-56rem)/2))] py-5"
+        className="min-h-0 flex-1 overflow-y-auto px-[max(1.25rem,calc((100%-56rem)/2))] py-5"
       >
         {visibleMessages.map((message, i) => {
           const prev = visibleMessages[i - 1]
+          const next = visibleMessages[i + 1]
           const showDay = !prev || !sameDay(prev.createdAt, message.createdAt)
 
           return (
             <Fragment key={message.id}>
               {showDay && (
-                <li className="flex justify-center py-1.5">
-                  <span className="rounded-full border border-tint/[0.06] bg-tint/[0.03] px-2.5 py-1 text-[11.5px] text-ink-muted first-letter:uppercase">
+                <li className="mt-5 flex justify-center first:mt-0">
+                  <span className="px-2.5 py-1 text-[11.5px] text-ink-faint first-letter:uppercase">
                     {formatDayLabel(message.createdAt)}
                   </span>
                 </li>
               )}
+              {/* Qué agente contestó lo dice el mensaje, no la conversación:
+                  el modelo elige uno en cada respuesta, así que un mismo hilo
+                  puede tener contestando a Ventas y a Soporte. Antes salía
+                  siempre el de la ficha de la derecha, con lo cual el rótulo
+                  decía lo mismo en todos los globos y no informaba nada. El de
+                  la conversación queda de respaldo para los mensajes viejos,
+                  anteriores a que se guardara el agente en la fila. */}
               <MessageBubble
                 message={message}
-                customer={group.customer}
-                agentName={agent.name}
-                fromEnd={visibleMessages.length - 1 - i}
+                agentName={findAgent(agents, message.agentKey ?? group.agent).name}
+                primero={!mismoBloque(prev, message)}
+                ultimo={!mismoBloque(message, next)}
               />
             </Fragment>
           )
         })}
 
         {visibleMessages.length === 0 && (
-          <li className="animate-fade-in py-10 text-center text-[12.5px] text-ink-faint">
+          <li className="py-10 text-center text-[12.5px] text-ink-faint">
             Ningún mensaje coincide con “{search.trim()}”.
           </li>
         )}
@@ -481,33 +514,26 @@ export default function ChatPanel({
             propio y empujaba el composer cada vez que llegaba una. */}
         {haySugerencia &&
           (sugerenciaAbierta ? (
-            <div className="animate-fade-up mb-2 overflow-hidden rounded-2xl border border-violet/25 bg-violet-soft">
-              <div className="flex items-start gap-2.5 px-3.5 pt-3">
-                <span className="mt-px flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-violet/15 text-violet">
-                  <IconSparkles size={13} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[11.5px] font-medium text-violet">
-                    Respuesta sugerida
-                    <span className="text-ink-muted"> · la escribió {agent.name}</span>
-                  </p>
-                  <div className="mt-1 whitespace-pre-wrap text-[13.5px] leading-snug text-ink-primary">
-                    <FormattedText>{aiDraft.text}</FormattedText>
-                  </div>
-                </div>
+            <div className="mb-2 rounded-2xl border border-tint/[0.09] bg-tint/[0.02] px-3.5 py-2.5">
+              <p className="text-[11px] text-ink-faint">Sugerencia de {agent.name}</p>
+              <div className="mt-1 whitespace-pre-wrap text-[13.5px] leading-snug text-ink-secondary">
+                <FormattedText>{aiDraft.text}</FormattedText>
               </div>
               {/* Las acciones abajo y a la derecha, donde termina de leerse el
-                  texto y del lado del botón de enviar. */}
-              <div className="mt-2.5 flex items-center justify-end gap-1 border-t border-violet/15 px-2.5 py-1.5">
+                  texto y del lado del botón de enviar. Sin franja separada ni
+                  botón sólido: el único que va lleno en esta esquina de la
+                  pantalla es el de enviar, y este le competía de igual a igual
+                  para una cosa que ni siquiera sale. */}
+              <div className="mt-1.5 flex items-center justify-end gap-0.5">
                 <button
                   onClick={() => setSugerenciaAbierta(false)}
-                  className="rounded-lg px-2.5 py-1 text-[11.5px] text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
+                  className="rounded-lg px-2 py-0.5 text-[11.5px] text-ink-faint transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
                 >
                   Descartar
                 </button>
                 <button
                   onClick={usarSugerenciaIA}
-                  className="rounded-lg bg-violet px-2.5 py-1 text-[11.5px] font-medium text-ink-inverted transition-colors duration-200 hover:bg-violet/85"
+                  className="rounded-lg px-2 py-0.5 text-[11.5px] font-medium text-violet transition-colors duration-200 hover:bg-violet-soft"
                 >
                   Usar y editar
                 </button>
@@ -518,13 +544,13 @@ export default function ChatPanel({
             // haber empezado a escribir, pero tampoco le compite al mensaje.
             <button
               onClick={() => setSugerenciaAbierta(true)}
-              className="animate-fade-in mb-2 flex w-full items-center gap-2 rounded-xl border border-violet/20 px-3 py-1.5 text-left text-[11.5px] transition-colors duration-200 hover:bg-violet-soft"
+              className="mb-2 flex w-full items-center gap-2 rounded-xl px-2.5 py-1 text-left text-[11.5px] transition-colors duration-200 hover:bg-tint/[0.05]"
             >
-              <IconSparkles size={12} className="shrink-0 text-violet" />
+              <span className="shrink-0 text-ink-faint">Sugerencia:</span>
               <span className="min-w-0 flex-1 truncate text-ink-muted">
                 {stripFormat(aiDraft.text)}
               </span>
-              <span className="shrink-0 font-medium text-violet">Ver sugerencia</span>
+              <span className="shrink-0 font-medium text-violet">Ver</span>
             </button>
           ))}
 
@@ -642,7 +668,10 @@ export default function ChatPanel({
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
                   aria-label={mode === 'nota' ? 'Nota interna' : 'Mensaje para el cliente'}
-                  placeholder={mode === 'nota' ? 'Escribe una nota' : 'Escribe un mensaje'}
+                  // Voseo, como el resto de la dashboard ("Elegí", "Contame",
+                  // "Buscás"). El "Escribe" neutro era el único imperativo en
+                  // español de traducción de toda la pantalla.
+                  placeholder={mode === 'nota' ? 'Escribí una nota' : 'Escribí un mensaje'}
                   className={`max-h-40 min-h-[2.25rem] min-w-0 resize-none overflow-y-auto bg-transparent px-2.5 py-2 text-[14.5px] leading-snug text-ink-primary placeholder:text-ink-faint focus:outline-none
                     ${multilinea ? 'order-0 basis-full' : 'order-2 flex-1'}`}
                 />

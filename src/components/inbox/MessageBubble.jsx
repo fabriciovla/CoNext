@@ -1,6 +1,5 @@
-import Avatar from '../ui/Avatar'
 import FormattedText from '../ui/FormattedText'
-import { IconBolt, IconDoubleCheck, IconDownload, IconFile } from '../ui/icons'
+import { IconBolt, IconDoubleCheck, IconDownload, IconFile, IconNote } from '../ui/icons'
 import useMediaSrc from '../../hooks/useMediaSrc'
 import { formatTime } from '../../utils/time'
 
@@ -20,7 +19,7 @@ function Adjunto({ message }) {
 
   if (error) {
     return (
-      <span className="block rounded-xl border border-tint/10 bg-tint/[0.04] px-3 py-2 text-[13px] text-ink-muted">
+      <span className="block rounded-xl bg-tint/[0.06] px-3 py-2 text-[13px] text-ink-muted">
         No se pudo abrir el adjunto
       </span>
     )
@@ -60,7 +59,7 @@ function Adjunto({ message }) {
     <a
       href={src}
       download={nombre}
-      className="flex items-center gap-2.5 rounded-xl border border-tint/10 bg-tint/[0.04] px-3 py-2 transition-colors duration-200 hover:bg-tint/[0.08]"
+      className="flex items-center gap-2.5 rounded-xl bg-tint/[0.06] px-3 py-2 transition-colors duration-200 hover:bg-tint/[0.1]"
     >
       <IconFile size={20} className="shrink-0 text-ink-muted" />
       <span className="min-w-0 flex-1">
@@ -88,26 +87,86 @@ function renderStrong(text) {
   )
 }
 
-// La hora va adentro del globo, abajo a la derecha, como en cualquier chat.
+// El pie del globo: el rayo de "lo contestó un agente", la hora y, si el
+// mensaje salió de acá, el acuse de entrega.
+//
+// Los tres van juntos y adentro del globo, que es donde los pone cualquier
+// chat. La tilde estaba suelta a la izquierda del globo, flotando contra nada:
+// ahí no se lee como "este mensaje llegó", se lee como un glifo perdido. Y el
+// agente era un renglón entero —"⚡ Agente de ventas"— colgado abajo de cada
+// respuesta automática: en un hilo donde el bot contesta seis veces, la
+// pantalla decía seis veces lo mismo que ya dice la ficha de la derecha. Como
+// rayo suelto sigue estando en todos los mensajes, que es lo que hace falta
+// para no confundir lo que escribió una persona con lo que escribió el bot, y
+// el nombre queda a un hover.
+//
 // Flota en vez de ser una línea propia: si la última línea del mensaje deja
-// lugar, la hora entra ahí, y solo baja sola cuando no entra. Como bloque
-// aparte le sumaba un renglón a cada uno de los mensajes del hilo.
-function Hora({ iso }) {
+// lugar, entra ahí, y solo baja solo cuando no entra. Como bloque aparte le
+// sumaba un renglón a cada uno de los mensajes del hilo.
+function PieDelGlobo({ message, isOut, agentName = null }) {
+  const entrega = message.deliveryStatus ?? null
+  const fallo = entrega === 'failed'
+  // Tres escalones para tres estados. Sin novedades todavía (o mensajes viejos,
+  // anteriores a que esto existiera) queda en el más tenue de los tres: decimos
+  // "salió", no "llegó", que es lo único que sabemos en ese momento.
+  //
+  // El piso es `ink-muted` y no `ink-faint`: acá el fondo no es la página sino
+  // el globo, y sobre el violeta apagado del tema oscuro el nivel más tenue de
+  // la escala se queda en 3,2:1 — está calibrado contra `surface-*`, no contra
+  // esto.
+  const tono =
+    entrega === 'read'
+      ? 'text-violet'
+      : entrega === 'delivered'
+        ? 'text-ink-secondary'
+        : 'text-ink-muted'
+  const rotulo = { sent: 'Enviado', delivered: 'Entregado', read: 'Leído' }[entrega]
+
   return (
-    <span className="float-right ml-3 mt-[7px] select-none text-[11px] leading-none tabular-nums text-ink-faint">
-      {formatTime(iso)}
+    <span className="float-right ml-2.5 mt-[5px] flex select-none items-center gap-1 leading-none">
+      {agentName && (
+        <span title={`Respondió ${agentName}`} className="flex text-ink-muted">
+          <IconBolt size={11} />
+        </span>
+      )}
+      <span className="text-[11px] tabular-nums text-ink-muted">{formatTime(message.createdAt)}</span>
+      {isOut &&
+        (fallo ? (
+          <span
+            title={message.deliveryError ?? 'No se pudo entregar'}
+            className="flex h-[12px] w-[12px] items-center justify-center rounded-full border border-status-critical text-[8px] font-bold leading-none text-status-critical"
+          >
+            !
+          </span>
+        ) : (
+          // El tooltip va en el span y no en el <svg>: como atributo del SVG
+          // no lo muestra el navegador.
+          <span title={rotulo ?? 'Enviado'} className="flex">
+            <IconDoubleCheck size={13} className={`transition-colors duration-300 ${tono}`} />
+          </span>
+        ))}
     </span>
   )
 }
 
-export default function MessageBubble({ message, customer, agentName, fromEnd = 0 }) {
-  const delay = { '--d': `${Math.min(fromEnd, 8) * 40}ms` }
+// Un mensaje del hilo.
+//
+// `primero` y `ultimo` son la posición dentro del bloque: los mensajes seguidos
+// del mismo autor se agrupan (los calcula ChatPanel). Lo que se dice una vez
+// por bloque y no una vez por mensaje se cuelga de `primero`, y la esquina
+// corta del globo —la "colita"— de `ultimo`. Sin eso, tres mensajes seguidos
+// del cliente son tres bloques idénticos separados por el mismo aire, y hay que
+// leer las horas para darse cuenta de que fue una sola andanada.
+export default function MessageBubble({ message, agentName, primero = true, ultimo = true }) {
+  // Entre mensajes del mismo bloque casi no hay aire; entre bloques sí. Es la
+  // separación la que dice "acá arrancó otra cosa", no una línea ni un rótulo.
+  const separacion = primero ? 'mt-3' : 'mt-[3px]'
 
   // Evento del sistema: una línea centrada, sin globo. No es algo que alguien
   // haya dicho, así que no se le da la forma de un mensaje.
   if (message.direction === 'evento') {
     return (
-      <li className="animate-fade-in flex justify-center py-1" style={delay}>
+      <li className={`${separacion} flex justify-center`}>
         <span className="px-3 text-center text-[11.5px] text-ink-faint">{renderStrong(message.text)}</span>
       </li>
     )
@@ -115,140 +174,100 @@ export default function MessageBubble({ message, customer, agentName, fromEnd = 
 
   // Nota interna: el cliente nunca la ve, así que se sale del esquema
   // izquierda/derecha y usa el ámbar de "atención" con su propia etiqueta.
+  //
+  // Es lo único del hilo que conserva el borde. Los globos lo perdieron porque
+  // un globo con contorno se lee como una tarjeta; acá el contorno es
+  // justamente el punto, porque la nota no es un mensaje: es algo pegado al
+  // costado de la conversación.
   if (message.direction === 'nota') {
     return (
-      <li className="animate-fade-left flex justify-end" style={delay}>
-        <div className="flex max-w-[min(78%,30rem)] flex-col items-end">
-          <div className="rounded-2xl rounded-br-md border border-status-warning/25 bg-status-warning/[0.09] px-4 py-2.5">
-            <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ink-primary">
-              <FormattedText>{message.text}</FormattedText>
-              <Hora iso={message.createdAt} />
-            </p>
-          </div>
-          <div className="mt-1 flex items-center gap-1.5 px-1 text-[11.5px] text-ink-faint">
-            <span className="text-status-warning">Nota interna</span>
-          </div>
+      <li className={`flex flex-col items-end ${separacion}`}>
+        {primero && (
+          <span className="mb-1 flex items-center gap-1 px-1 text-[11px] text-status-warning">
+            <IconNote size={11} />
+            Nota interna
+          </span>
+        )}
+        <div
+          className={`max-w-[min(78%,30rem)] rounded-2xl border border-status-warning/30 bg-status-warning/[0.08] px-3.5 py-2 ${
+            ultimo ? 'rounded-br-md' : ''
+          }`}
+        >
+          <p className="whitespace-pre-wrap break-words text-[15px] leading-[1.45] text-ink-primary">
+            <FormattedText>{message.text}</FormattedText>
+            <PieDelGlobo message={message} isOut={false} />
+          </p>
         </div>
       </li>
     )
   }
 
   const isOut = message.direction === 'out'
-  const isPending = message.direction === 'in' && message.status === 'pendiente'
   const isBot = isOut && message.author === 'bot'
-
-  // Estado de entrega que manda Meta por el webhook. Sin novedades todavía
-  // (o mensajes viejos, anteriores a que esto existiera) queda tenue: decimos
-  // "salió", no "llegó", que es lo único que sabemos en ese momento.
-  const entrega = message.deliveryStatus ?? null
-  const falloEnvio = entrega === 'failed'
-  const tonoTilde =
-    entrega === 'read' ? 'text-violet' : entrega === 'delivered' ? 'text-ink-muted' : 'text-ink-faint'
-  const textoEntrega = { sent: 'Enviado', delivered: 'Entregado', read: 'Leído' }[entrega]
+  // Entrante que todavía nadie atendió. Lo dice el tinte del globo y nada más:
+  // la palabra "Pendiente" colgada abajo de cada uno era la tercera copia del
+  // mismo dato —la lista ya lo cuenta en la burbuja naranja y la ficha ofrece
+  // resolverlos— repetida tantas veces como mensajes seguidos haya escrito el
+  // cliente.
+  const isPending = message.direction === 'in' && message.status === 'pendiente'
+  const fallo = isOut && message.deliveryStatus === 'failed'
 
   return (
-    // Cada globo entra desde su lado del hilo, y el retraso se cuenta desde el
-    // final: el último aparece sin espera (es lo que importa al enviar uno
-    // nuevo) y los de arriba lo siguen.
-    //
-    // La fila del globo y la línea de datos son hermanas, no van anidadas: así
-    // el avatar se apoya en la base del globo y no en la del bloque entero,
-    // que lo dejaría flotando debajo de la hora.
-    <li
-      className={`flex flex-col ${isOut ? 'animate-fade-left items-end' : 'animate-fade-right items-start'}`}
-      style={delay}
-    >
-      {/* Columna de lectura angosta a propósito: el globo no pasa de 30rem por
+    <li className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} ${separacion}`}>
+      {/* Sin avatares. El del contacto era el mismo marcador gris —la Cloud API
+          no nos da la foto de perfil— repetido en cada globo de una charla de a
+          dos, y sin el nombre al lado, que es lo que lo justifica en la lista;
+          el de "Bot"/"Admin" era una letra adentro de un círculo. Con quién
+          estás hablando lo dice la ficha de la derecha, que está siempre a la
+          vista, y de qué lado está cada globo ya dice quién lo dijo. Es lo
+          mismo que hace WhatsApp en una conversación de a dos, que es
+          justamente lo que esta pantalla está reflejando.
+
+          Columna de lectura angosta a propósito: el globo no pasa de 30rem por
           más ancho que tenga el panel. Con el texto en 15px, una línea más larga
           que esto obliga a barrer la pantalla con la vista para leer un mensaje
-          de dos renglones. */}
-      <div className="flex max-w-[min(78%,30rem)] items-end gap-2">
-        {!isOut && <Avatar photo name={customer} size={28} className="!rounded-full" />}
+          de dos renglones.
 
-        {/* La tilde va afuera del globo, a su izquierda, como en la referencia:
-            el estado de entrega se lee en la misma columna en todos los mensajes. */}
-        {isOut &&
-          (falloEnvio ? (
-            <span
-              title={message.deliveryError ?? 'No se pudo entregar'}
-              className="mb-1 flex h-[13px] w-[13px] shrink-0 items-center justify-center rounded-full border border-status-critical text-[9px] font-bold leading-none text-status-critical"
-            >
-              !
-            </span>
-          ) : (
-            // El tooltip va en el span y no en el <svg>: como atributo del SVG
-            // no lo muestra el navegador.
-            <span title={textoEntrega ?? 'Enviado'} className="mb-1 flex shrink-0">
-              <IconDoubleCheck size={13} className={`transition-colors duration-300 ${tonoTilde}`} />
-            </span>
-          ))}
+          Sin borde: el relleno solo ya lo separa del fondo en los dos temas, y
+          el contorno de 1px es lo que hacía que cada mensaje se leyera como una
+          tarjeta apilada en vez de como algo dicho. */}
+      <div
+        className={`min-w-0 max-w-[min(78%,30rem)] rounded-2xl px-3.5 py-2 transition-colors duration-300 ${
+          isOut
+            ? `bg-violet-soft ${ultimo ? 'rounded-br-md' : ''}`
+            : `${isPending ? 'bg-status-warning/[0.14]' : 'bg-tint/[0.06]'} ${ultimo ? 'rounded-bl-md' : ''}`
+        }`}
+      >
+        {message.mediaKind && (
+          <div className={message.text ? 'mb-2' : ''}>
+            <Adjunto message={message} />
+          </div>
+        )}
 
-        <div
-          className={`min-w-0 rounded-2xl border px-4 py-2.5 transition-colors duration-300 ${
-            isOut
-              ? 'rounded-br-md border-violet/25 bg-violet-soft'
-              : isPending
-                ? 'rounded-bl-md border-status-warning/25 bg-status-warning/[0.07]'
-                : 'rounded-bl-md border-tint/[0.07] bg-tint/[0.055]'
-          }`}
-        >
-          {message.mediaKind && (
-            <div className={message.text ? 'mb-2' : ''}>
-              <Adjunto message={message} />
-            </div>
-          )}
-
-          {/* Un adjunto sin epígrafe no arrastra un párrafo vacío, pero la hora
-              tiene que salir igual: en ese caso va sola en su renglón. */}
-          {message.text ? (
-            <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ink-primary">
-              <FormattedText>{message.text}</FormattedText>
-              <Hora iso={message.createdAt} />
-            </p>
-          ) : (
-            <p className="mt-1.5 text-right text-[11px] leading-none tabular-nums text-ink-faint">
-              {formatTime(message.createdAt)}
-            </p>
-          )}
-        </div>
-
-        {isOut && (
-          <Avatar
-            name={isBot ? 'Bot' : 'Admin'}
-            size={28}
-            className={`!rounded-full !text-[10px] ${isBot ? '!border-violet/30 !bg-violet-soft' : ''}`}
-          />
+        {/* Un adjunto sin epígrafe no arrastra un párrafo vacío, pero la hora
+            tiene que salir igual: en ese caso va sola en su renglón. El
+            `flow-root` es lo que hace que ese renglón contenga al pie flotado,
+            que si no se sale del globo. */}
+        {message.text ? (
+          <p className="whitespace-pre-wrap break-words text-[15px] leading-[1.45] text-ink-primary">
+            <FormattedText>{message.text}</FormattedText>
+            <PieDelGlobo message={message} isOut={isOut} agentName={isBot ? agentName : null} />
+          </p>
+        ) : (
+          <div className="mt-1.5 flow-root">
+            <PieDelGlobo message={message} isOut={isOut} agentName={isBot ? agentName : null} />
+          </div>
         )}
       </div>
 
-      {/* Alineada con el globo, no con el avatar: el margen equivale al ancho
-          del avatar más su separación (28px + 8px de gap = 36px = 9).
-          La hora ya no vive acá — se mudó adentro del globo —, así que esta
-          línea solo aparece cuando de verdad hay algo que decir; si no, cada
-          mensaje arrastraba un renglón vacío. */}
-      {(isBot || isPending || falloEnvio) && (
-        <div
-          className={`mt-1 flex items-center gap-1.5 text-[11.5px] text-ink-faint ${isOut ? 'mr-9' : 'ml-9'}`}
-        >
-          {isBot && (
-            <>
-              <IconBolt size={11} />
-              <span>{agentName}</span>
-            </>
-          )}
-          {isPending && <span className="text-status-warning">Pendiente</span>}
-          {/* Un envío fallido se dice con todas las letras: es el caso en que el
-              cliente no recibió nada y, sin esto, la conversación se ve igual
-              que una contestada. */}
-          {falloEnvio && (
-            <>
-              {isBot && <span aria-hidden="true">·</span>}
-              <span className="text-status-critical">
-                No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
-              </span>
-            </>
-          )}
-        </div>
+      {/* Un envío fallido se dice con todas las letras: es el caso en que el
+          cliente no recibió nada y, sin esto, la conversación se ve igual que
+          una contestada. Es lo único que sigue colgando de un globo suelto,
+          porque es de ese mensaje y no del bloque. */}
+      {fallo && (
+        <p className="mt-1 px-1 text-[11.5px] text-status-critical">
+          No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
+        </p>
       )}
     </li>
   )
