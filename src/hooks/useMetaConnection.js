@@ -99,10 +99,22 @@ export function useMetaConnection() {
 
     window.FB.login(
       async (response) => {
+        // Mismo diagnóstico que el de Embedded Signup, y por el mismo motivo:
+        // cuando el popup termina y no pasa nada, lo único que distingue "Meta
+        // dijo que no" de "Meta contestó algo que no entendimos" es ver la
+        // respuesta cruda. Si esta línea no aparece en la consola, el callback
+        // no corrió: el popup quedó abierto (mostrando un error adentro) o el
+        // navegador lo bloqueó.
+        console.log('[meta-login] respuesta de FB.login', response)
+
         const accessToken = response?.authResponse?.accessToken
         if (!accessToken) {
           setConectando(false)
-          setError('No se completó la conexión: cerraste la ventana o no diste los permisos.')
+          setError(
+            response?.status === 'not_authorized'
+              ? 'No diste los permisos que la app necesita.'
+              : 'No se completó la conexión: cerraste la ventana o no diste los permisos.',
+          )
           return
         }
 
