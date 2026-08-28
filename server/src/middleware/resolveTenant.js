@@ -1,6 +1,7 @@
 import { getTenantByApiKey } from '../services/tenantsService.js'
 import { usuarioDeToken, authDisponible } from '../services/supabaseAuth.js'
 import { ensureUser, listTenantsForUser } from '../services/membersService.js'
+import { provisionarDesdeDodo } from '../services/dodoService.js'
 
 // Reemplaza a requireApiKey, que comparaba contra una única clave compartida en
 // el .env. Con varios clientes esa clave ya no alcanza: no solo autentica, ahora
@@ -58,12 +59,23 @@ export async function resolveTenant(req, res, next) {
       }
 
       const tenants = await listTenantsForUser(user.id)
-      const activos = tenants.filter((t) => t.status === 'activo')
+      let activos = tenants.filter((t) => t.status === 'activo')
 
       if (activos.length === 0) {
-        // Entró bien, pero no es miembro de ningún negocio. No es un problema
-        // de credenciales y por eso no es 401: mandarla a iniciar sesión de
-        // nuevo no la acerca a ninguna solución.
+        // Antes de rebotarla: puede ser alguien que acaba de pagar y entra por
+        // primera vez. El pago llega por webhook minutos antes de que esta
+        // persona exista para nosotros, así que el negocio no se puede haber
+        // creado en el momento del cobro — se crea acá, en el primer ingreso.
+        const nuevo = await provisionarDesdeDodo(user)
+        if (nuevo) {
+          activos = await listTenantsForUser(user.id)
+        }
+      }
+
+      if (activos.length === 0) {
+        // Entró bien, pero no es miembro de ningún negocio ni tiene un pago a
+        // su nombre. No es un problema de credenciales y por eso no es 401:
+        // mandarla a iniciar sesión de nuevo no la acerca a ninguna solución.
         return res.status(403).json({
           error: 'Tu cuenta todavía no está asociada a ningún negocio. Pedile al dueño que te invite.',
           codigo: 'sin-tenant',
