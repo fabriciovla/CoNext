@@ -7,6 +7,7 @@ import {
   setWhatsappCredentials,
   getMetaCredentials,
   setMetaCredentials,
+  setCanalMeta,
 } from '../services/tenantsService.js'
 import { connectWhatsappAccount, getPhoneNumberInfo } from '../services/whatsappOnboarding.js'
 import {
@@ -156,6 +157,12 @@ router.get(
       igAccountId: tenant.ig_account_id,
       igUsername: tenant.ig_username,
       connectedAt: tenant.meta_connected_at,
+      // Qué canales atiende el CRM. La conexión es una sola y no se puede
+      // partir, así que esto es lo único que el negocio elige.
+      canales: {
+        instagram: tenant.instagram_activo === 1,
+        messenger: tenant.messenger_activo === 1,
+      },
     }
 
     const creds = await getMetaCredentials(req.tenantId)
@@ -198,6 +205,27 @@ router.post(
     } catch (err) {
       return res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
     }
+  }),
+)
+
+// Prender o apagar un canal. No toca la conexión ni el token: solo decide si
+// procesamos lo que llega por ahí.
+router.patch(
+  '/meta/canales/:canal',
+  ah(async (req, res) => {
+    const { activo } = req.body ?? {}
+    if (typeof activo !== 'boolean') {
+      return res.status(400).json({ error: 'Falta "activo" (true o false)' })
+    }
+
+    // El nombre del canal viene de la URL y termina eligiendo una columna, así
+    // que `setCanalMeta` solo acepta los dos conocidos y devuelve null con
+    // cualquier otra cosa. Sin ese corte sería un nombre de columna elegido por
+    // quien llama.
+    const canales = await setCanalMeta(req.tenantId, req.params.canal, activo)
+    if (!canales) return res.status(400).json({ error: `Canal desconocido: ${req.params.canal}` })
+
+    res.json({ canales })
   }),
 )
 

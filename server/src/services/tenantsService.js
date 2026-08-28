@@ -178,7 +178,8 @@ export async function getTenant(tenantId) {
   return (
     (await one(
       `SELECT id, name, slug, status, waba_id, phone_number_id, connected_at,
-              page_id, ig_account_id, page_name, ig_username, meta_connected_at
+              page_id, ig_account_id, page_name, ig_username, meta_connected_at,
+              instagram_activo, messenger_activo
        FROM tenants WHERE id = $1`,
       [tenantId],
     )) ?? null
@@ -287,4 +288,34 @@ export async function setMetaCredentials(tenantId, { pageId, igAccountId, pageAc
     [pageId, igAccountId ?? null, encrypt(pageAccessToken), pageName ?? null, igUsername ?? null, now, tenantId],
   )
   return getTenant(tenantId)
+}
+
+// Qué canales de Meta atiende el CRM para este cliente.
+//
+// La conexión es una sola y no se puede partir (un token cubre los dos), así
+// que lo que se prende y se apaga acá es si procesamos o no lo que llega por
+// cada canal. Apagado no desconecta nada: los mensajes le siguen llegando al
+// negocio por Instagram o Facebook como antes, nosotros no los tocamos.
+const CANALES_META = { instagram: 'instagram_activo', messenger: 'messenger_activo' }
+
+export async function getCanalesMeta(tenantId) {
+  const row = await one('SELECT instagram_activo, messenger_activo FROM tenants WHERE id = $1', [tenantId])
+  return {
+    instagram: row?.instagram_activo === 1,
+    messenger: row?.messenger_activo === 1,
+  }
+}
+
+// Devuelve null si el canal no existe, para que la ruta conteste 400 en vez de
+// armar un UPDATE con un nombre de columna que vino del cliente.
+export async function setCanalMeta(tenantId, canal, activo) {
+  const columna = CANALES_META[canal]
+  if (!columna) return null
+
+  await run(`UPDATE tenants SET ${columna} = $1, updated_at = $2 WHERE id = $3`, [
+    activo ? 1 : 0,
+    new Date().toISOString(),
+    tenantId,
+  ])
+  return getCanalesMeta(tenantId)
 }

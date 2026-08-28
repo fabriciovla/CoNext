@@ -1,5 +1,6 @@
 import Card from './ui/Card'
 import Button from './ui/Button'
+import Switch from './ui/Switch'
 import { IconCheck } from './ui/icons'
 import ChannelMark from './ui/ChannelMark'
 import { useMetaConnection } from '../hooks/useMetaConnection'
@@ -53,6 +54,7 @@ export default function MetaConnection({ className = '' }) {
     paginas,
     conectar,
     conectarPagina,
+    cambiarCanal,
     cancelarSeleccion,
     refrescar,
   } = useMetaConnection()
@@ -176,15 +178,43 @@ export default function MetaConnection({ className = '' }) {
             </p>
           )}
 
+          {/* Los interruptores van arriba de los ids: son lo único que el
+              negocio decide acá, y los identificadores de Meta son referencia
+              para cuando algo falla.
+
+              La conexión es una sola porque Meta entrega un token que cubre los
+              dos canales; dos botones de "conectar" abrirían el mismo popup y
+              guardarían lo mismo. Lo que sí se elige es qué atiende el CRM. */}
+          <div className="space-y-2">
+            <Switch
+              label="Instagram"
+              hint={
+                estado.igUsername
+                  ? `Contestar los mensajes directos de @${estado.igUsername}`
+                  : 'La Página no tiene una cuenta de Instagram asociada'
+              }
+              checked={Boolean(estado.canales?.instagram) && Boolean(estado.igAccountId)}
+              // Sin cuenta asociada no hay nada que prender: dejarlo activable
+              // sería ofrecer atender un canal que no existe.
+              disabled={!estado.igAccountId}
+              onChange={(v) => cambiarCanal('instagram', v)}
+            />
+            <Switch
+              label="Messenger"
+              hint={`Contestar los mensajes de la Página${estado.pageName ? ` ${estado.pageName}` : ''}`}
+              checked={Boolean(estado.canales?.messenger)}
+              onChange={(v) => cambiarCanal('messenger', v)}
+            />
+          </div>
+
+          <p className="text-[11.5px] leading-relaxed text-ink-muted">
+            Apagar un canal no lo desconecta: los mensajes le siguen llegando al negocio por
+            Instagram o Facebook, el CRM no los toca.
+          </p>
+
           <div className="divide-y divide-tint/[0.06] border-y border-tint/[0.06]">
             {estado.pageName && <Dato label="Página">{estado.pageName}</Dato>}
             <Dato label="Page ID">{estado.pageId}</Dato>
-            {/* Sin cuenta de Instagram, Messenger igual funciona. Se dice con
-                todas las letras porque si no, la ausencia se lee como un error
-                de la conexión entera. */}
-            <Dato label="Instagram">
-              {estado.igUsername ? `@${estado.igUsername}` : 'no asociado'}
-            </Dato>
             {estado.igAccountId && <Dato label="Instagram ID">{estado.igAccountId}</Dato>}
           </div>
 

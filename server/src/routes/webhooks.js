@@ -11,6 +11,7 @@ import {
   getTenantByPhoneNumberId,
   getTenantByPageId,
   getTenantByIgAccountId,
+  getCanalesMeta,
 } from '../services/tenantsService.js'
 import { getContactProfile } from '../services/channels/metaAdapter.js'
 import { aContactId } from '../services/channels/contactId.js'
@@ -185,6 +186,16 @@ async function procesarMessenger(body) {
         `[webhooks/${channel}] llegó un evento para ${campo} ${cuentaId} que no corresponde ` +
           'a ningún cliente activo; se descarta',
       )
+      continue
+    }
+
+    // El negocio elige qué canales atendemos. Apagado no desconecta nada: los
+    // mensajes le siguen llegando por Instagram o Facebook como siempre,
+    // nosotros no los procesamos. Se pregunta una vez por entry y no por
+    // evento, que serían N consultas para la misma respuesta.
+    const canales = await getCanalesMeta(tenant.id)
+    if (!canales[channel]) {
+      console.log(`[webhooks/${channel}] el cliente tiene este canal apagado; se descarta`)
       continue
     }
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { apiGet, apiPost } from '../api/client'
+import { apiGet, apiPost, apiPatch } from '../api/client'
 import { cargarSdk } from '../lib/facebookSdk'
 
 // Conexión de Instagram y Messenger, que son un solo trámite: los dos cuelgan
@@ -168,6 +168,29 @@ export function useMetaConnection() {
     }
   }, [config, procesarLogin])
 
+  // Prender o apagar un canal. No toca la conexión: decide si el CRM procesa lo
+  // que llega por ahí.
+  //
+  // Va optimista, como la asignación y las etiquetas de la bandeja: un
+  // interruptor que se queda quieto hasta que conteste el server se siente
+  // roto, y acá no hay pipeline de IA que pueda cambiar el valor por su cuenta
+  // entre nuestra acción y la respuesta. Si el server rechaza, vuelve solo.
+  const cambiarCanal = useCallback(async (canal, activo) => {
+    const pisar = (valor) =>
+      setEstado((prev) => (prev ? { ...prev, canales: { ...prev.canales, [canal]: valor } } : prev))
+
+    pisar(activo)
+    setError(null)
+
+    try {
+      const r = await apiPatch(`/onboarding/meta/canales/${canal}`, { activo })
+      setEstado((prev) => (prev ? { ...prev, canales: r.canales } : prev))
+    } catch (err) {
+      pisar(!activo)
+      setError(err.message)
+    }
+  }, [])
+
   const cancelarSeleccion = useCallback(() => {
     setPaginas([])
     tokenRef.current = null
@@ -184,6 +207,7 @@ export function useMetaConnection() {
     paginas,
     conectar,
     conectarPagina,
+    cambiarCanal,
     cancelarSeleccion,
     refrescar,
   }
