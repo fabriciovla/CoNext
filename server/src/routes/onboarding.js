@@ -169,7 +169,7 @@ router.get(
     if (!creds) return res.json({ ...base, vigente: false, error: 'No hay token guardado' })
 
     try {
-      const info = await getInfoPagina(creds.pageId, creds.pageAccessToken)
+      const info = await getInfoPagina(creds.pageAccessToken)
       res.json({
         ...base,
         vigente: true,
@@ -201,7 +201,19 @@ router.post(
     try {
       const tokenLargo = await aTokenLargo(accessToken)
       const paginas = await listarPaginas(tokenLargo)
-      res.json({ accessToken: tokenLargo, paginas })
+
+      // `listarPaginas` trae el token de cada Página, y eso **no sale de acá**:
+      // es la credencial que manda mensajes en nombre del negocio. La pantalla
+      // solo necesita saber cuál elegir, así que viaja el nombre y nada más.
+      res.json({
+        accessToken: tokenLargo,
+        paginas: paginas.map(({ id, nombre, igAccountId, igUsername }) => ({
+          id,
+          nombre,
+          igAccountId,
+          igUsername,
+        })),
+      })
     } catch (err) {
       return res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
     }

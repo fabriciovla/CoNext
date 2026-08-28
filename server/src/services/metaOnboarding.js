@@ -79,28 +79,30 @@ export async function aTokenLargo(tokenCorto) {
 }
 
 // Las Páginas que administra la persona, con su cuenta de Instagram al lado si
-// la tiene atada. Es lo que la pantalla usa para el selector.
+// la tiene atada, y el token de cada una.
+//
+// `/me/accounts` ya devuelve el `access_token` de cada Página, así que **acá
+// sale todo lo que hace falta para conectar**. Antes había un segundo viaje que
+// le pedía a Graph la Página por su id (`GET /{page-id}?fields=access_token,…`)
+// y eso falla con el error 100: leer el nodo de una Página exige
+// `pages_read_engagement`, un permiso más que habría que sumar a la lista, y
+// pedir un permiso de más para un dato que ya teníamos en la mano es al pedo.
+//
+// **El token de Página no sale de acá hacia el navegador**: la ruta que lista
+// para el selector arma su propia respuesta sin él. Es la credencial que manda
+// mensajes en nombre del negocio.
 export async function listarPaginas(userAccessToken) {
   const data = await graph(
-    `${GRAPH()}/me/accounts?fields=id,name,instagram_business_account{id,username}&limit=100`,
+    `${GRAPH()}/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&limit=100`,
     { headers: { Authorization: `Bearer ${userAccessToken}` } },
   )
   return (data?.data ?? []).map((p) => ({
     id: p.id,
     nombre: p.name,
+    accessToken: p.access_token ?? null,
     igAccountId: p.instagram_business_account?.id ?? null,
     igUsername: p.instagram_business_account?.username ?? null,
   }))
-}
-
-// Paso 2: el token de la Página elegida.
-//
-// Se pide con el token de usuario largo, y por eso este no vence. Es el que
-// después firma cada envío y cada consulta de perfil.
-async function getPagina(pageId, userAccessToken) {
-  return graph(`${GRAPH()}/${pageId}?fields=name,access_token,instagram_business_account{id,username}`, {
-    headers: { Authorization: `Bearer ${userAccessToken}` },
-  })
 }
 
 // Paso 3: suscribir nuestra app a la Página.
@@ -119,8 +121,12 @@ export async function suscribirPagina(pageId, pageAccessToken) {
 // Para la pantalla de estado: si esto responde, el token de Página sirve de
 // verdad. Un token revocado desde el Business Manager del cliente sigue
 // guardado en nuestra base y ahí diríamos "conectado" sin estarlo.
-export async function getInfoPagina(pageId, pageAccessToken) {
-  return graph(`${GRAPH()}/${pageId}?fields=name,username,instagram_business_account{id,username}`, {
+// Va contra `/me` y no contra `/{page-id}`: firmada con un token de Página,
+// `/me` **es** esa Página. Pedirla por id obliga a `pages_read_engagement`
+// (error 100), y acá alcanza con el token que ya tenemos guardado — que además
+// es justo lo que esta consulta quiere comprobar.
+export async function getInfoPagina(pageAccessToken) {
+  return graph(`${GRAPH()}/me?fields=name,instagram_business_account{id,username}`, {
     headers: { Authorization: `Bearer ${pageAccessToken}` },
   })
 }
@@ -136,9 +142,18 @@ export async function connectMetaAccount({ accessToken, pageId }) {
   if (!pageId) throw new Error('Falta elegir la Página')
 
   const tokenLargo = await aTokenLargo(accessToken)
-  const pagina = await getPagina(pageId, tokenLargo)
 
-  const pageAccessToken = pagina?.access_token
+  // La Página se busca en la misma lista que se le mostró a la persona, en vez
+  // de pedírsela a Graph de nuevo: el dato ya vino completo y ese segundo viaje
+  // era el que pedía `pages_read_engagement`.
+  const paginas = await listarPaginas(tokenLargo)
+  const pagina = paginas.find((p) => p.id === pageId)
+
+  if (!pagina) {
+    throw new Error('Esa Página no figura entre las que administrás. Probá conectar de nuevo.')
+  }
+
+  const pageAccessToken = pagina.accessToken
   if (!pageAccessToken) {
     throw new Error('Meta no devolvió el token de la Página. Revisá que tengas permiso de administrarla.')
   }
@@ -148,7 +163,7 @@ export async function connectMetaAccount({ accessToken, pageId }) {
   // La suscripción sí es crítica: sin webhooks no entra nada.
   await suscribirPagina(pageId, pageAccessToken)
 
-  const igAccountId = pagina.instagram_business_account?.id ?? null
+  const igAccountId = pagina.igAccountId
   if (!igAccountId) {
     avisos.push(
       'La Página no tiene una cuenta de Instagram profesional asociada, así que solo queda ' +
@@ -158,10 +173,10 @@ export async function connectMetaAccount({ accessToken, pageId }) {
 
   return {
     pageId,
-    pageName: pagina.name ?? null,
+    pageName: pagina.nombre ?? null,
     pageAccessToken,
     igAccountId,
-    igUsername: pagina.instagram_business_account?.username ?? null,
+    igUsername: pagina.igUsername ?? null,
     avisos,
   }
 }
