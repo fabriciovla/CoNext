@@ -46,6 +46,9 @@ function mismoBloque(a, b) {
   return new Date(b.createdAt) - new Date(a.createdAt) < HUECO_BLOQUE_MS
 }
 
+// Cuanto se queda como minimo el aviso de "Enviando…". Ver handleSend.
+const MIN_AVISO_ENVIO_MS = 700
+
 // WhatsApp corta el cuerpo del mensaje en 4096 caracteres: mejor frenarlo acá
 // que descubrirlo cuando la API lo rechaza.
 const MAX_CARACTERES = 4096
@@ -403,9 +406,15 @@ export default function ChatPanel({
       // —una subida no es instantánea y reintentarla a ciegas duplica archivos—
       // y por eso es otro estado.
       setEnviosEnVuelo((n) => n + 1)
-      Promise.resolve(onSend(group.phone, body)).finally(() =>
-        setEnviosEnVuelo((n) => Math.max(0, n - 1)),
-      )
+      const inicio = Date.now()
+      Promise.resolve(onSend(group.phone, body)).finally(() => {
+        // El envío suele tardar menos que la propia animación de entrada del
+        // aviso, así que sin este piso aparecería y se iría en el mismo gesto:
+        // un parpadeo, que se lee como que algo falló. Que se quede un instante
+        // de más no cuesta nada — el mensaje ya está en el hilo.
+        const restante = Math.max(0, MIN_AVISO_ENVIO_MS - (Date.now() - inicio))
+        setTimeout(() => setEnviosEnVuelo((n) => Math.max(0, n - 1)), restante)
+      })
     }
     setDraft('')
     setEmojiOpen(false)
@@ -796,12 +805,20 @@ export default function ChatPanel({
             mensaje — que es justo el momento en que la persona está mirando
             ahí. Es la misma razón por la que los controles que aparecen al
             pasar el mouse reservan su lugar. */}
-        <div className="h-4 px-1 pt-1">
+        <div className="h-[22px] px-1 pt-1.5">
           {enviosEnVuelo > 0 && (
-            <p className="flex animate-fade-in items-center gap-1.5 text-[11px] leading-none text-ink-faint">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet" />
-              {enviosEnVuelo > 1 ? `Enviando ${enviosEnVuelo} mensajes…` : 'Enviando…'}
-            </p>
+            // `animate-fade-down` arranca 12px más arriba y baja hasta su lugar:
+            // sale de abajo de la isla, que es de donde vino el mensaje.
+            <div className="flex animate-fade-down items-center gap-2">
+              {/* El riel es fijo y lo que se mueve es el trozo violeta adentro,
+                  recortado por el `overflow-hidden` del riel. */}
+              <span className="relative block h-[3px] w-20 shrink-0 overflow-hidden rounded-full bg-tint/[0.09]">
+                <span className="absolute inset-y-0 left-0 block w-1/3 animate-barrido rounded-full bg-violet" />
+              </span>
+              <span className="text-[11px] leading-none text-ink-faint">
+                {enviosEnVuelo > 1 ? `Enviando ${enviosEnVuelo} mensajes…` : 'Enviando…'}
+              </span>
+            </div>
           )}
         </div>
       </div>
