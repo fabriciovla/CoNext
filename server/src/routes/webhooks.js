@@ -2,8 +2,18 @@ import { Router } from 'express'
 import { run } from '../db/index.js'
 import { verifyMetaSignature } from '../middleware/verifyMetaSignature.js'
 import { verifyDodoSignature } from '../middleware/verifyDodoSignature.js'
-import { handleIncomingMessage, updateDeliveryStatus } from '../services/conversationService.js'
-import { getTenantByPhoneNumberId } from '../services/tenantsService.js'
+import {
+  handleIncomingMessage,
+  updateDeliveryStatus,
+  updateDeliveryStatusByWatermark,
+} from '../services/conversationService.js'
+import {
+  getTenantByPhoneNumberId,
+  getTenantByPageId,
+  getTenantByIgAccountId,
+} from '../services/tenantsService.js'
+import { getContactProfile } from '../services/channels/metaAdapter.js'
+import { aContactId } from '../services/channels/contactId.js'
 import { EVENTOS_ALTA, EVENTOS_BAJA, guardarEvento } from '../services/dodoService.js'
 
 const router = Router()
@@ -77,19 +87,28 @@ function extractMessages(value) {
   return events
 }
 
-router.post('/meta', verifyMetaSignature, async (req, res) => {
-  // Ack immediately — Meta retries aggressively if the webhook is slow, and
-  // the AI classification/send happens async after we've already responded.
-  res.sendStatus(200)
+// Un entrante ya normalizado se guarda igual venga del canal que venga: el
+// dedup por id de Meta y después el pipeline. Lo comparten los tres canales.
+async function guardarEntrante(tenantId, event) {
+  if (!event.phone || !event.text) return
 
-  // Instagram (entry[].messaging[]) queda sin procesar: el canal está dormido y
-  // todavía no hay columna en `tenants` que ate una cuenta de IG a un cliente,
-  // así que no habría forma de atribuir el mensaje.
-  if (req.body.entry?.some((e) => e.messaging)) {
-    console.warn('[webhooks/meta] evento de Instagram recibido, todavía sin soporte multi-cliente')
+  if (event.externalId) {
+    // El INSERT hace de dedup: si el id ya estaba, no toca ninguna fila y
+    // salimos. Reemplaza al par SELECT-después-INSERT, que con dos entregas
+    // simultáneas del mismo evento dejaba pasar las dos.
+    const filas = await run(
+      `INSERT INTO webhook_events (id, tenant_id, received_at) VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO NOTHING`,
+      [event.externalId, tenantId, new Date().toISOString()],
+    )
+    if (filas === 0) return
   }
 
-  for (const { phoneNumberId, value } of extractWhatsappChanges(req.body)) {
+  await handleIncomingMessage(tenantId, event)
+}
+
+async function procesarWhatsapp(body) {
+  for (const { phoneNumberId, value } of extractWhatsappChanges(body)) {
     let tenant
     try {
       tenant = await getTenantByPhoneNumberId(phoneNumberId)
@@ -120,26 +139,138 @@ router.post('/meta', verifyMetaSignature, async (req, res) => {
     }
 
     for (const event of extractMessages(value)) {
-      if (!event.phone || !event.text) continue
-
       try {
-        if (event.externalId) {
-          // El INSERT hace de dedup: si el wamid ya estaba, no toca ninguna fila
-          // y salimos. Reemplaza al par SELECT-después-INSERT, que con dos
-          // entregas simultáneas del mismo evento dejaba pasar las dos.
-          const filas = await run(
-            `INSERT INTO webhook_events (id, tenant_id, received_at) VALUES ($1, $2, $3)
-             ON CONFLICT (id) DO NOTHING`,
-            [event.externalId, tenant.id, new Date().toISOString()],
-          )
-          if (filas === 0) continue
-        }
-
-        await handleIncomingMessage(tenant.id, event)
+        await guardarEntrante(tenant.id, event)
       } catch (err) {
         console.error('[webhooks/meta] failed to process incoming message:', err)
       }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Instagram y Messenger
+//
+// Los dos son la Messenger Platform y llegan con la misma forma: `entry[]` con
+// un `messaging[]` adentro, y no `changes[]` como WhatsApp. Lo único que los
+// distingue es el `object` de arriba de todo —'page' contra 'instagram'—, que
+// además decide por cuál columna se resuelve el cliente: `entry[].id` es el
+// PAGE_ID en Messenger y el IGID en Instagram.
+// ---------------------------------------------------------------------------
+const RESOLVER_POR_OBJETO = {
+  page: { channel: 'messenger', getTenant: getTenantByPageId, campo: 'page_id' },
+  instagram: { channel: 'instagram', getTenant: getTenantByIgAccountId, campo: 'ig_account_id' },
+}
+
+async function procesarMessenger(body) {
+  const resolver = RESOLVER_POR_OBJETO[body.object]
+  if (!resolver) return
+
+  const { channel, getTenant, campo } = resolver
+
+  for (const entry of body.entry ?? []) {
+    const cuentaId = entry.id
+    if (!cuentaId || !entry.messaging) continue
+
+    let tenant
+    try {
+      tenant = await getTenant(cuentaId)
+    } catch (err) {
+      console.error(`[webhooks/${channel}] no se pudo resolver el tenant:`, err)
+      continue
+    }
+
+    if (!tenant) {
+      console.warn(
+        `[webhooks/${channel}] llegó un evento para ${campo} ${cuentaId} que no corresponde ` +
+          'a ningún cliente activo; se descarta',
+      )
+      continue
+    }
+
+    for (const evento of entry.messaging) {
+      try {
+        await procesarEventoMessenger(tenant.id, channel, evento)
+      } catch (err) {
+        console.error(`[webhooks/${channel}] no se pudo procesar el evento:`, err)
+      }
+    }
+  }
+}
+
+async function procesarEventoMessenger(tenantId, channel, evento) {
+  // `sender.id` es el PSID (Messenger) o el IGSID (Instagram). Va prefijado
+  // antes de tocar la base: pelado sería indistinguible de un wa_id y podría
+  // caer en la fila de otra conversación.
+  const contacto = evento.sender?.id ? aContactId(channel, evento.sender.id) : null
+
+  // Los acuses no crean nada en la bandeja, así que van antes y salen temprano.
+  //
+  // Acá no hay id de mensaje: Meta manda un watermark ("todo lo anterior a esta
+  // marca está entregado/leído"), que es otra forma de decirlo que la de
+  // WhatsApp y necesita su propia actualización.
+  if (evento.delivery) {
+    await updateDeliveryStatusByWatermark(tenantId, contacto, evento.delivery.watermark, 'delivered')
+    return
+  }
+  if (evento.read) {
+    await updateDeliveryStatusByWatermark(tenantId, contacto, evento.read.watermark, 'read')
+    return
+  }
+
+  const mensaje = evento.message
+  if (!mensaje || !contacto) return
+
+  // El eco de nuestro propio envío. Meta lo manda si la app está suscripta a
+  // `message_echoes`, y sin este corte cada respuesta que mandamos volvería a
+  // entrar como si la hubiera escrito el cliente: la IA se contestaría a sí
+  // misma en un bucle.
+  if (mensaje.is_echo) return
+
+  // Igual que en WhatsApp, solo se procesa texto. Queda logueado para que un
+  // audio o una foto no desaparezcan en silencio con el cliente esperando.
+  if (!mensaje.text) {
+    console.warn(
+      `[webhooks/${channel}] mensaje sin texto ignorado (adjunto o reacción); solo se procesa texto`,
+    )
+    return
+  }
+
+  // A diferencia de WhatsApp, el webhook no trae el nombre: hay que ir a
+  // buscarlo. Si no se puede, queda el id — es feo pero no pierde el mensaje.
+  const nombre = await getContactProfile(tenantId, contacto, channel)
+
+  await guardarEntrante(tenantId, {
+    phone: contacto,
+    channel,
+    text: mensaje.text,
+    customerName: nombre || contacto,
+    externalId: mensaje.mid ?? null,
+  })
+}
+
+router.post('/meta', verifyMetaSignature, async (req, res) => {
+  // Ack immediately — Meta retries aggressively if the webhook is slow, and
+  // the AI classification/send happens async after we've already responded.
+  res.sendStatus(200)
+
+  // Una sola URL para los tres canales: es una sola app de Meta con una sola
+  // suscripción, y el `object` de arriba de todo es lo que dice cuál es cuál.
+  try {
+    if (req.body.object === 'whatsapp_business_account') {
+      await procesarWhatsapp(req.body)
+    } else if (RESOLVER_POR_OBJETO[req.body.object]) {
+      await procesarMessenger(req.body)
+    } else {
+      // Un `object` desconocido no es un error nuestro, pero enterarse importa:
+      // suele ser una suscripción nueva activada en la consola de Meta que
+      // todavía no tiene quién la atienda de este lado.
+      console.warn(`[webhooks/meta] object "${req.body.object}" sin handler; se descarta`)
+    }
+  } catch (err) {
+    // Ya contestamos 200, así que esto no se propaga a ningún lado: sin el
+    // catch, un rechazo acá sería un unhandledRejection que voltea el proceso.
+    console.error('[webhooks/meta] error procesando el evento:', err)
   }
 })
 

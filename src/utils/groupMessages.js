@@ -63,6 +63,9 @@ export function groupMessagesByPhone(messages, assignments = {}, contactsMeta = 
       notas: sorted.filter((m) => m.direction === 'nota').length,
       tags: meta.tags ?? [],
       agent: meta.agent ?? 'recepcion',
+      // Sin canal es WhatsApp: las conversaciones anteriores a Instagram y
+      // Messenger no lo traen, y era el unico canal que habia.
+      channel: meta.channel ?? 'whatsapp',
       assignee: phone in assignments ? assignments[phone] : (meta.assignee ?? null),
     }
   })

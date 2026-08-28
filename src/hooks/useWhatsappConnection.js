@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiGet, apiPost } from '../api/client'
+import { cargarSdk } from '../lib/facebookSdk'
 
 // Embedded Signup: el cliente conecta su propio WhatsApp desde un popup de
 // Meta, sin que nadie le pida un token por terminal.
@@ -15,33 +16,9 @@ import { apiGet, apiPost } from '../api/client'
 // vieja que capturó el render en el que se creó, y con `useState` leería
 // siempre null.
 
-const SDK_URL = 'https://connect.facebook.net/en_US/sdk.js'
-
 // El código de autorización vive 30 segundos. Suena a mucho y no lo es: si el
 // server está frío o la conexión es lenta, se vence en el camino.
 const AVISO_CODIGO_CORTO = 'El código de Meta vence a los 30 segundos. Probá de nuevo.'
-
-function cargarSdk(appId, version) {
-  if (window.FB) return Promise.resolve()
-
-  return new Promise((resolve, reject) => {
-    window.fbAsyncInit = () => {
-      window.FB.init({ appId, cookie: true, xfbml: false, version })
-      resolve()
-    }
-
-    if (document.getElementById('facebook-jssdk')) return
-
-    const script = document.createElement('script')
-    script.id = 'facebook-jssdk'
-    script.src = SDK_URL
-    script.async = true
-    script.defer = true
-    script.crossOrigin = 'anonymous'
-    script.onerror = () => reject(new Error('No se pudo cargar el SDK de Facebook'))
-    document.body.appendChild(script)
-  })
-}
 
 export function useWhatsappConnection() {
   const [config, setConfig] = useState(null)

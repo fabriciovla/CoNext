@@ -2,7 +2,8 @@ import { useState } from 'react'
 import Avatar from '../ui/Avatar'
 import Select from '../ui/Select'
 import { findAgent } from '../../utils/agents'
-import { formatPhone, toE164 } from '../../utils/phone'
+import { formatPhone, toE164, esTelefono } from '../../utils/phone'
+import { NOMBRE_CANAL } from '../ui/ChannelMark'
 import { formatTime } from '../../utils/time'
 import {
   IconContactCard,
@@ -102,20 +103,35 @@ export default function ContactSidebar({
                   <Avatar photo name={group.customer} size={64} className="!rounded-full" />
                   <div>
                     <p className="text-[15.5px] font-semibold text-ink-primary">{group.customer}</p>
+                    {/* Instagram y Messenger no dan un telefono: dan un id
+                        opaco que no le dice nada a nadie. En su lugar va el
+                        nombre del canal, que es el dato que la persona del
+                        negocio si necesita para saber por donde contesta. */}
                     <p className="text-[13px] tabular-nums text-ink-muted">
-                      {formatPhone(group.phone)}
+                      {esTelefono(group.phone)
+                        ? formatPhone(group.phone)
+                        : (NOMBRE_CANAL[group.channel] ?? group.channel)}
                     </p>
                   </div>
                   <div className="mt-1 flex gap-2">
-                    <a
-                      href={`tel:${toE164(group.phone)}`}
-                      className="flex items-center gap-1.5 rounded-lg border border-tint/10 bg-tint/[0.04] px-3 py-1.5 text-[13px] text-ink-secondary transition-all duration-200 hover:bg-tint/[0.09] hover:text-ink-primary"
-                    >
-                      <IconPhone size={14} />
-                      Llamar
-                    </a>
+                    {/* Sin telefono no hay a donde llamar: el boton abriria un
+                        tel: vacio, que en escritorio no hace nada y en el
+                        celular abre el marcador en blanco. */}
+                    {esTelefono(group.phone) && (
+                      <a
+                        href={`tel:${toE164(group.phone)}`}
+                        className="flex items-center gap-1.5 rounded-lg border border-tint/10 bg-tint/[0.04] px-3 py-1.5 text-[13px] text-ink-secondary transition-all duration-200 hover:bg-tint/[0.09] hover:text-ink-primary"
+                      >
+                        <IconPhone size={14} />
+                        Llamar
+                      </a>
+                    )}
                     <button
-                      onClick={() => navigator.clipboard?.writeText(formatPhone(group.phone))}
+                      onClick={() =>
+                        navigator.clipboard?.writeText(
+                          esTelefono(group.phone) ? formatPhone(group.phone) : group.phone,
+                        )
+                      }
                       className="rounded-lg border border-tint/10 bg-tint/[0.04] px-3 py-1.5 text-[13px] text-ink-secondary transition-all duration-200 hover:bg-tint/[0.09] hover:text-ink-primary"
                     >
                       Copiar

@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader'
 import Card from '../components/ui/Card'
 import { IconCheck, IconChevronDown, IconClock, IconSparkles } from '../components/ui/icons'
 import WhatsappConnection from '../components/WhatsappConnection'
+import MetaConnection from '../components/MetaConnection'
 import { weekDays } from '../data/mockData'
 import { storeSchedule } from '../utils/metrics'
 
@@ -387,6 +388,7 @@ export default function Settings({ settings, onUpdate }) {
 
       <div className="space-y-3">
         <WhatsappConnection className="w-full" />
+        <MetaConnection className="w-full" />
 
         <Seccion
             icon={<IconClock size={16} />}

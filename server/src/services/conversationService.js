@@ -367,7 +367,7 @@ export async function getConversationTags(tenantId, phone) {
 // y la etapa que mostraba la dashboard no significaba nada.
 export async function getConversationsMeta(tenantId) {
   const rows = await many(
-    'SELECT phone, agent, assignee FROM conversations WHERE tenant_id = $1',
+    'SELECT phone, agent, assignee, channel FROM conversations WHERE tenant_id = $1',
     [tenantId],
   )
 
@@ -543,4 +543,32 @@ export async function handleIncomingMessage(tenantId, { phone, channel = 'whatsa
   )
 
   return { incoming: { ...incoming, type: category, agentKey: agent.key }, outgoing: null, classification, agent, away }
+}
+
+// Acuses de Messenger/Instagram, que no se parecen a los de WhatsApp.
+//
+// WhatsApp nombra el mensaje: cada acuse trae el wamid y se actualiza esa fila.
+// La Messenger Platform manda un **watermark**: "todo lo que te mandé hasta
+// este instante ya está entregado/leído", sin decir cuáles. Así que en vez de
+// buscar una fila se actualizan todas las salientes anteriores a esa marca.
+//
+// El equivalente del DELIVERY_RANK acá es la lista de estados que no se pisan:
+// un mensaje ya leído no vuelve a "entregado" cuando llega un watermark viejo,
+// y un fallido nunca se sobrescribe.
+const NO_PISAR = {
+  delivered: ['delivered', 'read', 'failed'],
+  read: ['read', 'failed'],
+}
+
+export async function updateDeliveryStatusByWatermark(tenantId, phone, watermarkMs, status) {
+  const superiores = NO_PISAR[status]
+  if (!superiores || !watermarkMs) return 0
+
+  return run(
+    `UPDATE messages SET delivery_status = $1
+     WHERE tenant_id = $2 AND phone = $3 AND direction = 'out'
+       AND created_at <= $4
+       AND (delivery_status IS NULL OR delivery_status <> ALL($5))`,
+    [status, tenantId, phone, new Date(watermarkMs).toISOString(), superiores],
+  )
 }

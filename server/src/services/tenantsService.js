@@ -175,7 +175,14 @@ export async function getTenantByPhoneNumberId(phoneNumberId) {
 }
 
 export async function getTenant(tenantId) {
-  return (await one('SELECT id, name, slug, status, waba_id, phone_number_id, connected_at FROM tenants WHERE id = $1', [tenantId])) ?? null
+  return (
+    (await one(
+      `SELECT id, name, slug, status, waba_id, phone_number_id, connected_at,
+              page_id, ig_account_id, page_name, ig_username, meta_connected_at
+       FROM tenants WHERE id = $1`,
+      [tenantId],
+    )) ?? null
+  )
 }
 
 export async function listTenants() {
@@ -220,4 +227,64 @@ export async function rotateApiKey(tenantId) {
     tenantId,
   ])
   return filas === 0 ? null : { apiKey }
+}
+
+// ---------------------------------------------------------------------------
+// Instagram y Messenger
+//
+// Van por separado de WhatsApp porque son otra cuenta de Meta: un negocio puede
+// tener el WhatsApp conectado y la Página no, o al revés. Comparten un solo
+// token de Página, que es el que Meta emite con permiso sobre la Página y sobre
+// la cuenta de Instagram que cuelga de ella.
+// ---------------------------------------------------------------------------
+
+// El webhook de Messenger trae `entry[].id` = PAGE_ID.
+export async function getTenantByPageId(pageId) {
+  if (!pageId) return null
+  return (
+    (await one(`SELECT id, name, slug, status FROM tenants WHERE page_id = $1 AND status = 'activo'`, [
+      pageId,
+    ])) ?? null
+  )
+}
+
+// El webhook de Instagram trae `entry[].id` = IGID (la cuenta profesional), que
+// no es el PAGE_ID aunque la cuenta cuelgue de la Página.
+export async function getTenantByIgAccountId(igAccountId) {
+  if (!igAccountId) return null
+  return (
+    (await one(`SELECT id, name, slug, status FROM tenants WHERE ig_account_id = $1 AND status = 'activo'`, [
+      igAccountId,
+    ])) ?? null
+  )
+}
+
+// Credenciales de Messenger/Instagram del cliente, descifradas. Las usa el
+// adapter en cada envío, igual que getWhatsappCredentials.
+export async function getMetaCredentials(tenantId) {
+  const row = await one('SELECT page_id, ig_account_id, page_access_token FROM tenants WHERE id = $1', [
+    tenantId,
+  ])
+  if (!row?.page_access_token) return null
+
+  return {
+    pageId: row.page_id,
+    igAccountId: row.ig_account_id,
+    pageAccessToken: decrypt(row.page_access_token),
+  }
+}
+
+// Lo que escribe el callback de Facebook Login una vez que canjeó el código y
+// eligió la Página. `igAccountId` puede venir en null: hay negocios con Página
+// y sin Instagram profesional atado, y eso no invalida Messenger.
+export async function setMetaCredentials(tenantId, { pageId, igAccountId, pageAccessToken, pageName, igUsername }) {
+  const now = new Date().toISOString()
+  await run(
+    `UPDATE tenants
+     SET page_id = $1, ig_account_id = $2, page_access_token = $3,
+         page_name = $4, ig_username = $5, meta_connected_at = $6, updated_at = $6
+     WHERE id = $7`,
+    [pageId, igAccountId ?? null, encrypt(pageAccessToken), pageName ?? null, igUsername ?? null, now, tenantId],
+  )
+  return getTenant(tenantId)
 }

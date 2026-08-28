@@ -12,7 +12,17 @@
 import 'dotenv/config'
 import { migrate } from '../src/db/migrate.js'
 import { one, run, closePool } from '../src/db/index.js'
-import { provisionTenant, getTenantByApiKey, getTenantByPhoneNumberId, setWhatsappCredentials, getWhatsappCredentials } from '../src/services/tenantsService.js'
+import {
+  provisionTenant,
+  getTenantByApiKey,
+  getTenantByPhoneNumberId,
+  setWhatsappCredentials,
+  getWhatsappCredentials,
+  getTenantByPageId,
+  getTenantByIgAccountId,
+  setMetaCredentials,
+  getMetaCredentials,
+} from '../src/services/tenantsService.js'
 import * as members from '../src/services/membersService.js'
 import { createApp } from '../src/app.js'
 
@@ -22,6 +32,7 @@ import * as quickReplies from '../src/services/quickRepliesService.js'
 import * as settings from '../src/services/settingsService.js'
 import * as days from '../src/services/dayService.js'
 import * as conversations from '../src/services/conversationService.js'
+import { aContactId } from '../src/services/channels/contactId.js'
 
 let pasaron = 0
 const fallos = []
@@ -107,6 +118,15 @@ try {
   const telefonoCompartido = '+5491155550000'
   await conversations.ensureConversation(a.id, telefonoCompartido, { customer: 'CLIENTE-ALFA' })
   await conversations.ensureConversation(b.id, telefonoCompartido, { customer: 'CLIENTE-BETA' })
+
+  // El mismo numero, pero como id de Instagram. Es el choque que el prefijo
+  // tiene que hacer imposible: sin el, un IGSID y un wa_id iguales caerian en
+  // la misma fila y las dos personas compartirian conversacion.
+  const mismoNumeroEnIg = aContactId('instagram', telefonoCompartido.replace('+', ''))
+  await conversations.ensureConversation(a.id, mismoNumeroEnIg, {
+    channel: 'instagram',
+    customer: 'CLIENTE-ALFA-IG',
+  })
   check('el mismo teléfono puede ser contacto de los dos clientes', true)
 
   await conversations.addConversationTag(a.id, telefonoCompartido, 'ETIQUETA-ALFA')
@@ -138,6 +158,22 @@ try {
   check('listClosedDays', !contiene(await days.listClosedDays(a.id), 'BETA'))
   check('getCurrentDayState', !contiene(await days.getCurrentDayState(a.id), 'BETA'))
   check('getConversation', !contiene(await conversations.getConversation(a.id, telefonoCompartido), 'BETA'))
+
+  // El prefijo separa canales: mismo numero, dos conversaciones distintas.
+  check(
+    'el mismo id en dos canales no se fusiona',
+    (await conversations.getConversation(a.id, telefonoCompartido)).customer === 'CLIENTE-ALFA' &&
+      (await conversations.getConversation(a.id, mismoNumeroEnIg)).customer === 'CLIENTE-ALFA-IG',
+  )
+  check(
+    'la conversacion de Instagram guarda su canal',
+    (await conversations.getConversation(a.id, mismoNumeroEnIg)).channel === 'instagram',
+  )
+  check(
+    'la conversacion de Instagram de A no se ve desde B',
+    (await conversations.getConversation(b.id, mismoNumeroEnIg)) === undefined ||
+      (await conversations.getConversation(b.id, mismoNumeroEnIg)) === null,
+  )
   check('getOpenDrafts', !contiene(await conversations.getOpenDrafts(a.id), 'BETA'))
   check('listMembers', !contiene(await members.listMembers(a.id), 'BETA'))
   check('listInvites', !contiene(await members.listInvites(a.id), 'BETA'))
@@ -228,6 +264,31 @@ try {
   check('el token se descifra igual que se guardó', creds?.accessToken === 'token-secreto-alfa')
   const crudo = await one('SELECT access_token FROM tenants WHERE id = $1', [a.id])
   check('en la base el token NO está en texto plano', !crudo.access_token.includes('token-secreto-alfa'), crudo.access_token?.slice(0, 24))
+
+  // Instagram y Messenger: mismas dos preguntas que WhatsApp, porque el
+  // webhook resuelve el cliente igual —por un id de Meta— y una fuga acá le
+  // entrega los mensajes de un negocio a otro.
+  await setMetaCredentials(a.id, {
+    pageId: 'PAGE-ALFA',
+    igAccountId: 'IG-ALFA',
+    pageAccessToken: 'token-pagina-alfa',
+    pageName: 'Pagina ALFA',
+    igUsername: 'alfa',
+  })
+  check('el webhook resuelve el tenant por page_id', (await getTenantByPageId('PAGE-ALFA'))?.id === a.id)
+  check('un page_id desconocido no resuelve', (await getTenantByPageId('PAGE-NADIE')) === null)
+  check('el webhook resuelve el tenant por ig_account_id', (await getTenantByIgAccountId('IG-ALFA'))?.id === a.id)
+  check('un ig_account_id desconocido no resuelve', (await getTenantByIgAccountId('IG-NADIE')) === null)
+
+  const credsMeta = await getMetaCredentials(a.id)
+  check('el token de Página se descifra igual que se guardó', credsMeta?.pageAccessToken === 'token-pagina-alfa')
+  check('B no tiene credenciales de Meta', (await getMetaCredentials(b.id)) === null)
+  const crudoMeta = await one('SELECT page_access_token FROM tenants WHERE id = $1', [a.id])
+  check(
+    'en la base el token de Página NO está en texto plano',
+    !crudoMeta.page_access_token.includes('token-pagina-alfa'),
+    crudoMeta.page_access_token?.slice(0, 24),
+  )
 
   // Un cliente suspendido deja de resolver: es el corte de servicio por falta de pago.
   await run(`UPDATE tenants SET status = 'suspendido' WHERE id = $1`, [b.id])

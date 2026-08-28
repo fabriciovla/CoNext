@@ -34,10 +34,24 @@ function partirAbonado(abonado) {
   return `${abonado.slice(0, corte)}-${abonado.slice(corte)}`
 }
 
+// Los ids de Instagram y Messenger no son teléfonos.
+//
+// Viven en la misma columna que los números (ver server/.../contactId.js) y
+// llegan prefijados: `ig:17841…`, `fb:24680…`. Sin este corte, `formatPhone`
+// les aplicaría la regla argentina y un IGSID se mostraría como
+// `+17 (841) 405-7931`, que es un teléfono que no existe.
+export function esTelefono(valor) {
+  return !/^[a-z]+:/.test(String(valor ?? ''))
+}
+
 // Para mostrar. Nunca para marcar ni para mandarle a la API: eso es `toE164`.
 export function formatPhone(valor) {
   const digitos = soloDigitos(valor)
   if (!digitos) return ''
+
+  // Un id de otro canal no se formatea: no hay nada que agrupar y la ficha del
+  // contacto muestra el canal en su lugar.
+  if (!esTelefono(valor)) return ''
 
   if (digitos.startsWith('54')) {
     let nsn = digitos.slice(2)
@@ -60,6 +74,7 @@ export function formatPhone(valor) {
 // Para `tel:` y para cualquier cosa que tenga que marcar de verdad. Acá el 9 sí
 // va: es lo que hace que la llamada salga al móvil.
 export function toE164(valor) {
+  if (!esTelefono(valor)) return ''
   const digitos = soloDigitos(valor)
   return digitos ? `+${digitos}` : ''
 }

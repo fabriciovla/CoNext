@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Qué es
 
-CRM de WhatsApp multi-cliente (SaaS): recibe mensajes por la Cloud API de Meta, los clasifica con Gemini, auto-responde los seguros y deja el resto como borrador para que una persona revise. Los comentarios del código están en español; mantené ese idioma al escribir nuevos.
+CRM multi-cliente (SaaS) de los tres canales de mensajería de Meta —WhatsApp, Instagram y Messenger—: recibe mensajes por sus webhooks, los clasifica con Gemini, auto-responde los seguros y deja el resto como borrador para que una persona revise. Los comentarios del código están en español; mantené ese idioma al escribir nuevos.
 
 Son tres proyectos npm independientes, cada uno con su `package.json` y su `node_modules`:
 
@@ -22,6 +22,7 @@ npm run dev                                  # node --watch, corre migrate() al 
 npm run tenant -- "Nombre del negocio" "+549…"   # alta de cliente; imprime la API key UNA sola vez
 npm run tenant -- "Nombre" --connect-dev-wa      # + conecta el número de prueba (DEV_WA_* del .env)
 npm run connect-wa -- <slug> "EAAT…"         # recarga el token de un cliente ya creado (vence cada 24h)
+npm run connect-meta -- <slug> "EAAG…"       # conecta la Página (Messenger + Instagram) de un cliente
 npm run seed -- <tenantId|slug>              # datos de ejemplo para un cliente ya creado
 npm run simulate -- "+54911…" whatsapp "texto" "Nombre"   # dispara el pipeline completo sin Meta
 node scripts/verifyIsolation.js              # ver abajo: es el único "test" del repo
@@ -49,10 +50,10 @@ Las migraciones se aplican solas al arrancar el server o cualquier script (`migr
 Todo dato pertenece a un cliente. `tenant_id` es la primera columna de toda clave primaria e índice, y **toda función de servicio recibe `tenantId` como primer argumento** — no existe una variante "sin tenant".
 
 - `resolveTenant` (`server/src/middleware/resolveTenant.js`) está montado en `app.js` antes de todos los routers de negocio: resuelve `req.tenant` / `req.tenantId` a partir del hash de la API key. Si falla, la request muere ahí. El resto del código nunca lee la clave, lee `req.tenant` — cuando exista login de verdad, se reemplaza solo este middleware.
-- `/webhooks` va **antes** de `resolveTenant`: lo firma Meta y no puede mandar API key. Resuelve su tenant por el `phone_number_id` del payload (`getTenantByPhoneNumberId`); si no resuelve, el evento se descarta.
+- `/webhooks` va **antes** de `resolveTenant`: lo firma Meta y no puede mandar API key. Resuelve su tenant por un id del payload, y cuál es depende del canal: `phone_number_id` en WhatsApp, `entry[].id` en Instagram y Messenger (que es el IGID o el PAGE_ID según el `object`). Las tres columnas son UNIQUE por el mismo motivo. Si no resuelve, el evento se descarta.
 - `scripts/verifyIsolation.js` crea dos tenants y verifica que ninguna función de servicio ni ruta HTTP devuelva datos del otro. Es lo más cercano a una suite de tests que hay: **corrélo después de tocar cualquier servicio o consulta**. Una fuga acá no tiene arreglo posterior.
 - Las personas del dashboard no son el tenant: `users` (perfil, enganchado a `auth.users` de Supabase) se une a `tenants` por `tenant_members` (rol `owner` / `admin` / `operador`). RLS deja ver solo los clientes de los que sos miembro; el server se conecta como `postgres`/`service_role` y se salta eso, porque el webhook de Meta no trae sesión.
-- Los tokens de WhatsApp de cada cliente se guardan cifrados con AES-256-GCM (`services/secrets.js`); las API keys, hasheadas con SHA-256 (determinístico a propósito: hay que poder buscar el tenant *por* la clave).
+- Los tokens de Meta de cada cliente —el de WhatsApp y el de la Página, que cubre Messenger e Instagram— se guardan cifrados con AES-256-GCM (`services/secrets.js`); las API keys, hasheadas con SHA-256 (determinístico a propósito: hay que poder buscar el tenant *por* la clave).
 
 ### El pipeline de un mensaje entrante
 
@@ -79,7 +80,28 @@ La unidad de trabajo del CRM es el "día" (`days`), que se abre y cierra a mano,
 
 ### Canales
 
-`services/channels/index.js` resuelve un adapter por `conversation.channel`. Solo WhatsApp funciona; Instagram está declarado pero dormido (falta la columna en `tenants` que ate una cuenta de IG a un cliente). El webhook ignora todo mensaje que no sea `type: 'text'` y lo loguea.
+`services/channels/index.js` resuelve un adapter por `conversation.channel`. Son tres: `whatsapp`, `instagram` y `messenger`. Ningún adapter ignora un mensaje que no sea texto — eso lo corta el webhook, que loguea y descarta todo lo que no sea `type: 'text'` (WhatsApp) o un `message.text` (los otros dos).
+
+**Instagram y Messenger son un solo canal con dos caras.** Los dos son la Messenger Platform: mismo webhook (`entry[].messaging[]`, y no `changes[]` como WhatsApp), mismo envío (`POST /me/messages` con un token de Página — el "me" lo resuelve Meta por el token, así que el código de envío es idéntico) y misma ventana de 24h. Por eso salen del mismo `metaAdapter.js` vía `crearAdapter(canal)` y no de dos archivos. El `instagramAdapter.js` que había antes hablaba de un `IG_BUSINESS_ACCOUNT_ID` global del `.env`, que no sobrevive al multi-cliente.
+
+Lo único que los separa:
+
+- El `object` del webhook: `'page'` (Messenger) contra `'instagram'`. Es lo que elige por cuál columna se resuelve el cliente, porque `entry[].id` es el PAGE_ID en uno y el IGID en el otro. Eso vive en `RESOLVER_POR_OBJETO`, en `webhooks.js`.
+- De dónde salió el destinatario: PSID contra IGSID.
+
+**Una sola Página conecta los dos.** La cuenta de Instagram profesional cuelga de la Página de Facebook, y Meta emite un único token con permiso sobre las dos. Por eso en `tenants` hay un `page_access_token` y no dos, y por eso la tarjeta de Configuración dice "Instagram y Messenger" y no tiene dos botones. Un negocio puede tener Página sin Instagram atado: ahí Messenger anda igual y la conexión avisa, no falla.
+
+**El id de contacto va prefijado** (`services/channels/contactId.js`). La columna `conversations.phone` es la identidad de una conversación en todo el CRM —la clave primaria `(tenant_id, phone)`, el FK compuesto de `messages` y `conversation_tags`, la key de React, `assignments[phone]`, `drafts[phone]`— y se llama `phone` porque nació cuando el único canal era WhatsApp. Los IGSID y PSID son dígitos opacos del mismo largo que un `wa_id`: guardados pelados serían indistinguibles y dos personas distintas podrían caer en la misma fila. Así que Instagram guarda `ig:17841…` y Messenger `fb:24680…`; WhatsApp sigue pelado, que es lo que deja válidas las filas viejas sin migrar nada. `aIdExterno` saca el prefijo antes de hablar con Graph. En el frontend, `esTelefono` es lo que decide si se formatea como número: sin eso un IGSID se mostraría como `+17 (841) 405-7931`.
+
+**Los acuses de Messenger no se parecen a los de WhatsApp.** WhatsApp nombra el mensaje (cada acuse trae el wamid). La Messenger Platform manda un **watermark**: "todo lo anterior a esta marca está entregado/leído", sin decir cuáles. De ahí sale `updateDeliveryStatusByWatermark`, que actualiza todas las salientes anteriores a esa marca; el equivalente del `DELIVERY_RANK` ahí es la lista de estados que no se pisan.
+
+**El eco se descarta.** Si la app está suscripta a `message_echoes`, Meta nos devuelve nuestro propio envío como un evento más. Sin el corte por `message.is_echo`, cada respuesta que mandamos volvería a entrar como si la hubiera escrito el cliente y la IA se contestaría a sí misma en un bucle.
+
+**El nombre del contacto hay que ir a buscarlo.** WhatsApp lo manda al lado del mensaje (`contacts[].profile.name`); acá el payload trae el id pelado, así que `getContactProfile` lo consulta a Graph. Falla en silencio a propósito: sin el permiso de perfil aprobado, es preferible una conversación titulada con el id que un mensaje que no se guarda.
+
+**Los adjuntos salientes todavía no van por estos dos canales**, y no por el mismo motivo que en WhatsApp. WhatsApp sube el binario a Graph y después cita el id; Instagram quiere una **URL pública** del archivo, y los nuestros se sirven detrás de la API key (`GET /messages/media/:id`). Falta exponerlos por una URL firmada; hasta entonces `sendMedia` avisa qué falta en vez de fallar con un `is not a function`.
+
+**El App Review es el que falta.** `pages_messaging` e `instagram_manage_messages` dependen de la verificación del negocio (la misma que tiene frenado a WhatsApp) más su propia revisión. Hasta que pase, esto funciona solo con cuentas que tengan un rol en la app — que alcanza para desarrollo y para grabar la demo. En la consola de Meta hay que suscribir la app al webhook `messages` de los productos Messenger e Instagram: sin eso la conexión queda perfecta y no llega ni un mensaje, que es el mismo silencio que en WhatsApp produce olvidarse de `subscribed_apps`.
 
 ### Plantillas
 
@@ -175,7 +197,7 @@ Del SVG salen `favicon.png` (32, respaldo para lo que no acepta favicon vectoria
 
 **El material de diseño no va en `public/`.** Apareció dos veces ahí (`public/conext logo design` y `site/public/logo design`, idénticas) y las dos veces se publicaba entero al build: 254 KB con el canvas y su `support.js` accesibles desde el dominio. Vive en `design/conext-logo/`, fuera del web root.
 
-Las dos imágenes de `public/` son WebP y se usan desde un solo componente cada una. `Avatar` con la prop **`photo`** dibuja el marcador gris de "sin foto" (`IconoSinFoto.webp`) y es lo que va en **todo contacto que aparezca en una lista**: la Cloud API no nos da la foto de perfil de WhatsApp, así que es siempre el mismo dibujo, y lo que lo justifica es el nombre al lado. **En el hilo no va ninguno** — ahí no hay nombre al lado, la charla es de a dos y el marcador terminaba repetido en cada globo diciendo lo que ya dice la ficha de la derecha. Sin `photo` sigue siendo la inicial, que es lo que usan los avatares del equipo (responsable, usuario de la barra). El logo va por `ui/WhatsappMark.jsx` (`logowsp.webp`) — antes era el mismo `path` de SVG copiado en la lista y en el composer. Si agregás imágenes nuevas, convertilas a WebP: `public/` se copia entero a `dist/`.
+Las dos imágenes de `public/` son WebP y se usan desde un solo componente cada una. `Avatar` con la prop **`photo`** dibuja el marcador gris de "sin foto" (`IconoSinFoto.webp`) y es lo que va en **todo contacto que aparezca en una lista**: la Cloud API no nos da la foto de perfil de WhatsApp, así que es siempre el mismo dibujo, y lo que lo justifica es el nombre al lado. **En el hilo no va ninguno** — ahí no hay nombre al lado, la charla es de a dos y el marcador terminaba repetido en cada globo diciendo lo que ya dice la ficha de la derecha. Sin `photo` sigue siendo la inicial, que es lo que usan los avatares del equipo (responsable, usuario de la barra). El distintivo del canal va por `ui/ChannelMark.jsx`, que despacha por `conversation.channel`: WhatsApp sigue siendo `ui/WhatsappMark.jsx` (`logowsp.webp`, que trae su propio contorno blanco) y los otros dos son SVG en línea, porque no tenemos el archivo — a esos se les dibuja el contorno a mano, sin él el violeta de Instagram y el azul de Messenger se pegan al gris del avatar. Las tres marcas van con **color literal**, como el verde de WhatsApp: son de Meta y no cambian entre temas. La lista tenía el logo de WhatsApp fijo de cuando era el único canal; es el único lugar que dice por dónde se contesta, y contestar por el canal equivocado no se deshace. Si agregás imágenes nuevas, convertilas a WebP: `public/` se copia entero a `dist/`.
 
 La barra de la izquierda es **una sola** (`components/AppNav.jsx`, montada por `Layout`) y se ve igual en todas las páginas: por eso el filtro de la bandeja, el día archivado que se está mirando y el plegado viven en `App.jsx` y no en `Inbox.jsx`. Entrar a un agente desde esa barra abre su configuración (`App` manda `focus` a la página de Agentes, que lo consume y lo suelta enseguida).
 
@@ -232,6 +254,7 @@ Ojo con el `min-width: auto` de los items de grid y flex: `grid` a secas no deja
 - **Tocar `tailwind.config.js` pide reiniciar Vite.** El HMR no relee ese archivo: la dashboard sigue sirviendo el CSS viejo y parece que el cambio de color "no hizo nada" (o peor, se ve a medias, porque las clases nuevas todavía no existen en la hoja). `npm run build` sí lo toma, así que si el build se ve bien y el dev no, es esto.
 - Sin credenciales de WhatsApp cargadas para el tenant, el adapter **simula** el envío y loguea en consola en vez de fallar. Con los adjuntos hace lo mismo: el archivo queda guardado en `uploads/` y se ve en el hilo, pero no salió para ningún lado.
 - **El `<img>` de un adjunto también necesita la API key.** La pide como `/api/messages/media/:id`, así que la inyecta el proxy de Vite igual que cualquier request. Servido como build estático sin ese proxy, los adjuntos dan 401 — el mismo agujero que ya tiene toda la dashboard hasta que haya login de verdad.
+- **El SDK de Facebook se carga desde `src/lib/facebookSdk.js` y de ningún otro lado.** Configuración monta dos tarjetas que lo necesitan (WhatsApp y Meta). La versión anterior vivía adentro de `useWhatsappConnection` y no aguantaba dos llamadas: la segunda pisaba `window.fbAsyncInit` y devolvía una promesa que no resolvía nunca, así que el SDK le avisaba solo al último que preguntó y el botón del otro quedaba deshabilitado para siempre, sin ningún error. Ahora la promesa es del módulo. Si sumás una tercera pantalla que lo use, usá ese loader.
 - `repomix-output.xml` en la raíz es un volcado generado del repo; ignoralo.
 
 ## AGREGAR - IMPORTANTE

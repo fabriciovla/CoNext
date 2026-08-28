@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Avatar from '../ui/Avatar'
 import Switch from '../ui/Switch'
 import Select from '../ui/Select'
-import WhatsappMark from '../ui/WhatsappMark'
+import ChannelMark from '../ui/ChannelMark'
 import { stripFormat } from '../ui/FormattedText'
 import { formatTime } from '../../utils/time'
 import {
@@ -25,13 +25,17 @@ const ORDENES = [
   { value: 'pendientes', label: 'Pendientes primero' },
 ]
 
-// Avatar del contacto con el distintivo del canal: todo entra por WhatsApp,
-// pero el logo en la esquina es lo que hace que la fila se lea como un chat.
-function ChannelAvatar({ name, size = 38 }) {
+// Avatar del contacto con el distintivo del canal, que es lo que hace que la
+// fila se lea como un chat y no como un registro.
+//
+// El logo estaba fijo en el de WhatsApp, de cuando era el unico canal. Ahora
+// sale de la conversacion: es el unico lugar de la lista que dice por donde
+// se contesta, y contestar por el canal equivocado no se deshace.
+function ChannelAvatar({ name, channel, size = 38 }) {
   return (
     <div className="relative shrink-0">
       <Avatar photo name={name} size={size} className="!rounded-full" />
-      <WhatsappMark size={15} className="absolute -bottom-0.5 -right-0.5" />
+      <ChannelMark channel={channel} size={15} className="absolute -bottom-0.5 -right-0.5" />
     </div>
   )
 }
@@ -161,7 +165,7 @@ export default function ConversationList({
                     transition-colors duration-150
                     ${active ? 'bg-violet-soft' : 'hover:bg-tint/[0.045]'}`}
                 >
-                  <ChannelAvatar name={group.customer} size={38} />
+                  <ChannelAvatar name={group.customer} channel={group.channel} size={38} />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
