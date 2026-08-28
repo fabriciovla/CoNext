@@ -1,8 +1,10 @@
 import { Router } from 'express'
 import { run } from '../db/index.js'
 import { verifyMetaSignature } from '../middleware/verifyMetaSignature.js'
+import { verifyDodoSignature } from '../middleware/verifyDodoSignature.js'
 import { handleIncomingMessage, updateDeliveryStatus } from '../services/conversationService.js'
 import { getTenantByPhoneNumberId } from '../services/tenantsService.js'
+import { EVENTOS_ALTA, EVENTOS_BAJA, guardarEvento } from '../services/dodoService.js'
 
 const router = Router()
 
@@ -138,6 +140,57 @@ router.post('/meta', verifyMetaSignature, async (req, res) => {
         console.error('[webhooks/meta] failed to process incoming message:', err)
       }
     }
+  }
+})
+
+// Dodo Payments: pagos y ciclo de vida de las suscripciones. Va acá y no en un
+// router propio porque comparte el motivo de /webhooks — lo firma un tercero y
+// no puede mandar nuestra API key, así que tiene que quedar antes de
+// resolveTenant.
+//
+// La diferencia con el de Meta es de quién habla. El de Meta trae mensajes de
+// un cliente que ya existe y resuelve su tenant por el phone_number_id. Este
+// trae a alguien que todavía no es cliente de nada —el tenant es justamente lo
+// que hay que crear después—, así que no resuelve nada: guarda y deja cola.
+router.post('/dodo', verifyDodoSignature, async (req, res) => {
+  // Igual que Meta, Dodo reintenta si tardamos: se contesta primero y se
+  // procesa después. La firma ya se validó, así que este 200 no le está
+  // diciendo que sí a un desconocido.
+  res.sendStatus(200)
+
+  const webhookId = req.get('webhook-id')
+
+  try {
+    const evento = await guardarEvento(webhookId, req.body)
+
+    // Reintento de Dodo o reenvío a mano desde su dashboard: ya lo teníamos.
+    if (!evento.nuevo) return
+
+    if (EVENTOS_ALTA.has(evento.tipo)) {
+      // Todavía no se provisiona solo: el alta sigue siendo `npm run tenant`.
+      // Queda gritado en el log para que no pase inadvertido, porque del otro
+      // lado hay alguien que ya pagó y está esperando poder entrar.
+      console.warn(
+        `[webhooks/dodo] ${evento.tipo} de ${evento.email ?? 'sin email'} ` +
+          `(plan ${evento.plan ?? 'sin identificar'}) — falta dar de alta el cliente`,
+      )
+      return
+    }
+
+    if (EVENTOS_BAJA.has(evento.tipo)) {
+      console.warn(
+        `[webhooks/dodo] ${evento.tipo} de ${evento.email ?? 'sin email'} ` +
+          `(suscripción ${evento.subscriptionId ?? 'sin id'}) — el acceso no se corta solo`,
+      )
+      return
+    }
+
+    console.log(`[webhooks/dodo] evento ${evento.tipo} guardado`)
+  } catch (err) {
+    // Ya contestamos 200. Si el INSERT falló, la fila no quedó, así que el
+    // reintento de Dodo lo vuelve a intentar y esta vez no hay dedup que lo
+    // descarte — que es exactamente lo que queremos que pase.
+    console.error('[webhooks/dodo] no se pudo guardar el evento:', err)
   }
 })
 
