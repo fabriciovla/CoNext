@@ -15,14 +15,36 @@ const SDK_URL = 'https://connect.facebook.net/en_US/sdk.js'
 let promesa = null
 
 export function cargarSdk(appId, version) {
-  if (window.FB) return Promise.resolve()
+  // La promesa del módulo es la única compuerta. **No** alcanza con preguntar
+  // si `window.FB` existe: el SDK define ese objeto apenas se ejecuta el
+  // archivo, que es *antes* de que nadie haya llamado a `FB.init()`. Quien
+  // pregunte en ese hueco se lleva un "ya está listo" falso, prende el botón y
+  // termina llamando a `FB.login()` sobre un SDK sin inicializar — que no abre
+  // el popup, no ejecuta el callback y no tira ningún error: la pantalla se
+  // queda en "Conectando…" para siempre.
+  //
+  // Con un solo consumidor casi nunca pasaba. Con dos tarjetas en Configuración
+  // —cada una esperando su propio /onboarding/config antes de pedir el SDK— la
+  // segunda cae en ese hueco de manera bastante confiable.
   if (promesa) return promesa
 
   promesa = new Promise((resolve, reject) => {
-    window.fbAsyncInit = () => {
+    const iniciar = () => {
       window.FB.init({ appId, cookie: true, xfbml: false, version })
       resolve()
     }
+
+    // El SDK ya está en la página: lo bajó una carga anterior de este módulo
+    // (recarga en caliente de Vite) y `fbAsyncInit` no va a volver a dispararse.
+    // Inicializar de nuevo es inofensivo y es lo único que garantiza que quede
+    // inicializado de verdad antes de resolver.
+    if (window.FB) return iniciar()
+
+    window.fbAsyncInit = iniciar
+
+    // El script ya se está bajando pero todavía no se ejecutó: no hay que
+    // agregarlo otra vez, el `fbAsyncInit` de arriba lo va a resolver.
+    if (document.getElementById('facebook-jssdk')) return
 
     const script = document.createElement('script')
     script.id = 'facebook-jssdk'
