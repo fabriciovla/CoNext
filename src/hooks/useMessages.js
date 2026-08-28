@@ -97,12 +97,54 @@ export default function useMessages() {
       .catch(fallo('resolver la conversación'))
   }
 
+  // El mensaje se dibuja antes de que conteste el server, y devuelve la promesa
+  // para que el composer sepa cuándo terminó.
+  //
+  // Es una excepción a la regla de re-consultar en vez de parchear, y va en la
+  // misma lista que las etiquetas y la asignación: acá el pipeline de IA no
+  // puede cambiar nada: lo escribió una persona y el texto es el que es. Lo que
+  // sí había era una espera de dos viajes —mandar y después volver a pedir
+  // todos los mensajes del día— antes de que el globo apareciera. En un chat
+  // eso se lee como que el botón no funcionó, y lleva a mandar de nuevo.
+  //
+  // El globo provisorio no se saca cuando llega la respuesta: lo reemplaza el
+  // refresco, que trae la fila real con su id y su estado de entrega.
   const sendMessage = (phone, text) => {
     const body = text.trim()
-    if (dayStatus !== 'open' || !body) return
-    apiPost('/messages', { phone, text: body })
+    if (dayStatus !== 'open' || !body) return Promise.resolve()
+
+    const tempId = `tmp-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId,
+        phone,
+        customer: prev.find((m) => m.phone === phone)?.customer ?? phone,
+        text: body,
+        direction: 'out',
+        type: null,
+        status: 'resuelto',
+        // Cualquier cosa que no sea 'bot': el globo del bot lleva el rayo del
+        // agente y este lo escribió una persona.
+        author: 'admin',
+        agentKey: null,
+        createdAt: new Date().toISOString(),
+        // Estado propio del cliente, que el server nunca manda: es "todavía no
+        // sabemos si salió". El pie del globo lo dibuja como un reloj en vez de
+        // la tilde, para no decir "enviado" antes de que lo esté.
+        deliveryStatus: 'enviando',
+        deliveryError: null,
+      },
+    ])
+
+    return apiPost('/messages', { phone, text: body })
       .then(() => Promise.all([refreshOpenMessages(), refreshDrafts()]))
-      .catch(fallo('enviar el mensaje'))
+      .catch((err) => {
+        // Se saca el globo provisorio: dejarlo ahí afirmaría que el mensaje
+        // salió, que es lo único que no puede pasar cuando falló el envío.
+        setMessages((prev) => prev.filter((m) => m.id !== tempId))
+        fallo('enviar el mensaje')(err)
+      })
   }
 
   // Adjuntos (archivo, foto o nota de voz). Devuelve la promesa, a diferencia

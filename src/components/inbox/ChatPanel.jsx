@@ -131,6 +131,8 @@ export default function ChatPanel({
   // previa: se revoca al soltarlo, si no el blob queda vivo hasta recargar.
   const [adjunto, setAdjunto] = useState(null)
   const [enviando, setEnviando] = useState(false)
+  // Cuántos mensajes de texto están en el aire. Ver handleSend.
+  const [enviosEnVuelo, setEnviosEnVuelo] = useState(0)
   const [grabando, setGrabando] = useState(false)
   const [segundos, setSegundos] = useState(0)
   // Fallos que son del navegador y no de la API (micrófono denegado, formato
@@ -394,7 +396,17 @@ export default function ChatPanel({
 
     if (!body) return
     if (mode === 'nota') onAddNote(group.phone, body)
-    else onSend(group.phone, body)
+    else {
+      // Un contador y no un booleano: el texto se manda sin bloquear el cuadro,
+      // así que puede haber varios en el aire y el aviso tiene que quedarse
+      // hasta que vuelva el último. `enviando`, el de los adjuntos, sí bloquea
+      // —una subida no es instantánea y reintentarla a ciegas duplica archivos—
+      // y por eso es otro estado.
+      setEnviosEnVuelo((n) => n + 1)
+      Promise.resolve(onSend(group.phone, body)).finally(() =>
+        setEnviosEnVuelo((n) => Math.max(0, n - 1)),
+      )
+    }
     setDraft('')
     setEmojiOpen(false)
     delete borradores.current[group.phone]
@@ -772,6 +784,26 @@ export default function ChatPanel({
             />
           </div>
         )}
+
+        {/* Envío en curso. Va **debajo** de la isla y no arriba, que es donde
+            van los otros avisos: los de arriba son cosas que hay que saber
+            antes de escribir (que esto es una nota interna, que falló el
+            micrófono), y este es el eco de algo que ya se hizo. Leerlo es
+            opcional y se va solo.
+
+            El alto queda reservado siempre. Apareciendo y desapareciendo con
+            `hidden`, la isla entera daría un salto de cuatro píxeles en cada
+            mensaje — que es justo el momento en que la persona está mirando
+            ahí. Es la misma razón por la que los controles que aparecen al
+            pasar el mouse reservan su lugar. */}
+        <div className="h-4 px-1 pt-1">
+          {enviosEnVuelo > 0 && (
+            <p className="flex animate-fade-in items-center gap-1.5 text-[11px] leading-none text-ink-faint">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet" />
+              {enviosEnVuelo > 1 ? `Enviando ${enviosEnVuelo} mensajes…` : 'Enviando…'}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

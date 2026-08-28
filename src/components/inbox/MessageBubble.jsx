@@ -1,5 +1,5 @@
 import FormattedText from '../ui/FormattedText'
-import { IconBolt, IconDoubleCheck, IconDownload, IconFile, IconNote } from '../ui/icons'
+import { IconBolt, IconClock, IconDoubleCheck, IconDownload, IconFile, IconNote } from '../ui/icons'
 import useMediaSrc from '../../hooks/useMediaSrc'
 import { formatTime } from '../../utils/time'
 
@@ -131,7 +131,14 @@ function PieDelGlobo({ message, isOut, agentName = null }) {
       )}
       <span className="text-[11px] tabular-nums text-ink-muted">{formatTime(message.createdAt)}</span>
       {isOut &&
-        (fallo ? (
+        (entrega === 'enviando' ? (
+          // Todavía no contestó el server. La tilde diría "salió", que es
+          // justamente lo que no sabemos: el reloj es lo mismo que pone
+          // WhatsApp mientras el mensaje está en el aire.
+          <span title="Enviando…" className="flex text-ink-muted">
+            <IconClock size={11} />
+          </span>
+        ) : fallo ? (
           <span
             title={message.deliveryError ?? 'No se pudo entregar'}
             className="flex h-[12px] w-[12px] items-center justify-center rounded-full border border-status-critical text-[8px] font-bold leading-none text-status-critical"
