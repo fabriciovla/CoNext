@@ -1,16 +1,42 @@
 ---
-// Encabezado de sección: etiqueta chica en violeta, título y bajada opcional.
+// Encabezado de sección: etiqueta chica en violeta, título, y la bajada al lado.
+//
+// Los tres iban apilados adentro de un `max-w-2xl`. En un contenedor de 1440px
+// eso deja la mitad derecha de cada sección vacía —y son cinco secciones, así
+// que la página entera se lee corrida hacia la izquierda, como un documento y
+// no como una portada. Partido en dos columnas, el título se queda con el ancho
+// que necesita para respirar y la bajada ocupa el hueco en vez de colgar
+// debajo.
+//
+// `items-end`: las dos columnas se apoyan en la misma línea de base de abajo.
+// Alineadas arriba, un título de dos renglones dejaba la bajada flotando a la
+// altura de la primera línea y las dos cosas se leían como sueltas.
+//
+// Sin bajada, la fila es una sola columna y el título vuelve a mandar solo: no
+// hay una segunda columna vacía marcando el hueco.
 const { etiqueta, titulo, texto } = Astro.props
 ---
 
-<div class="max-w-2xl">
-  <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{etiqueta}</p>
-  <h2 class="mt-3 text-3xl font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-4xl sm:leading-[1.1]">
-    {titulo}
-  </h2>
+<div
+  class:list={[
+    'grid gap-x-16 gap-y-4',
+    texto && 'lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-end',
+  ]}
+>
+  <div class="max-w-2xl">
+    <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{etiqueta}</p>
+    <h2 class="mt-3 text-balance text-3xl font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-4xl sm:leading-[1.1]">
+      {titulo}
+    </h2>
+  </div>
   {
     texto && (
-      <p class="mt-4 text-[19px] font-normal leading-[28px] text-ink-secondary">{texto}</p>
+      /* El `pb` de un cuarto de renglón compensa la altura de línea del título:
+         alineadas por caja, la bajada queda un pelo más abajo que la tinta del
+         titular aunque los dos bordes coincidan. */
+      <p class="max-w-xl text-[19px] font-normal leading-[28px] text-ink-secondary lg:pb-1">
+        {texto}
+      </p>
     )
   }
 </div>

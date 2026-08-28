@@ -80,23 +80,28 @@ const ESQUEMA = {
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
       </a>
 
+      {/* Dos lÃ­neas y no tres. El titular anterior tenÃ­a diez palabras y
+          ocupaba tres renglones a 56px: a ese tamaÃ±o cada renglÃ³n cuesta un
+          pantallazo, y para cuando terminaba de leerse ya no quedaba nada
+          arriba del pliegue. El `max-w` baja a 4xl acompaÃ±ando el recorte â
+          con el de antes, la segunda lÃ­nea corta mucho antes del borde y el
+          bloque se lee desalineado. */}
       <h1
-        class="animate-in mt-7 max-w-5xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
+        class="animate-in mt-7 max-w-4xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
         style="--d: 80ms"
       >
         {l.heroLineas[0]}
         <br class="hidden lg:inline" /> {l.heroLineas[1]}
-        <br class="hidden lg:inline" /> {l.heroLineas[2]}
       </h1>
 
       <p
-        class="animate-in mt-7 max-w-2xl text-[19px] font-normal leading-[28px] text-ink-secondary"
+        class="animate-in mt-6 max-w-2xl text-[19px] font-normal leading-[28px] text-ink-secondary"
         style="--d: 160ms"
       >
         <span class="font-medium text-ink-primary">conext</span> {l.heroBajada}
       </p>
 
-      <div class="animate-in mt-10 flex flex-wrap items-center gap-3" style="--d: 240ms">
+      <div class="animate-in mt-9 flex flex-wrap items-center gap-3" style="--d: 240ms">
         <Boton href={WHATSAPP_URL} tamano="lg">
           {l.pedirDemo}
           <IconArrowRight size={17} />
@@ -104,9 +109,21 @@ const ESQUEMA = {
         <Boton href="#como-funciona" variante="secundario" tamano="lg">{l.verComo}</Boton>
       </div>
 
-      <p class="animate-in-fade mt-7 text-[18px] leading-relaxed text-ink-muted" style="--d: 320ms">
-        {l.pieHero}
-      </p>
+      {/* Lo que abajo de los botones era un pÃ¡rrafo de 18px âcasi el cuerpo de
+          la bajada, y a dos renglones del pliegueâ son tres marcas cortas en
+          una fila. Dice lo mismo, pero se barre de un vistazo en vez de
+          leerse: es la letra chica de la promesa, no un cuarto bloque de
+          prosa peleÃ¡ndole el turno al titular. */}
+      <ul class="animate-in-fade mt-8 flex flex-wrap items-center gap-x-6 gap-y-2" style="--d: 320ms">
+        {
+          l.heroMarcas.map((marca) => (
+            <li class="flex items-center gap-1.5 text-[14px] text-ink-muted">
+              <IconCheck size={15} strokeWidth="2" className="shrink-0 text-violet" />
+              {marca}
+            </li>
+          ))
+        }
+      </ul>
     </div>
 
     <div class={`${CONTENEDOR_MUESTRA} mt-16 sm:mt-20`}>

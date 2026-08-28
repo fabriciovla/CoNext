@@ -86,10 +86,12 @@ const imagenOg = new URL('/icon-512.png', Astro.site)
       </main>
     ) : (
       <Fragment>
-        {/* Cuadrícula fija detrás de la página. El contenido va encima con z-10. */}
-        <div class="fondo" aria-hidden="true">
-          <div class="fondo-cuadricula"></div>
-        </div>
+        {/* El fondo (el porqué está en index.css): la luz de apertura, anclada
+            al tope del documento y por detrás de la barra, y el centinela —40px
+            al ras de arriba— que le avisa a la barra cuándo dejar de ser
+            transparente. El contenido va encima con z-10. */}
+        <div class="fondo-alba" aria-hidden="true"></div>
+        <div id="tope-pagina" class="pointer-events-none absolute inset-x-0 top-0 h-10" aria-hidden="true"></div>
         <div class="relative z-10 flex min-h-full flex-col">
           {/* Ninguno de los dos lleva directiva `client:`: todo el sitio llega como
               HTML. Lo poco que es interactivo (el menú de la barra, el acordeón de
@@ -105,6 +107,19 @@ const imagenOg = new URL('/icon-512.png', Astro.site)
     )}
 
     <script>
+      // La barra: transparente arriba de todo, franja opaca en cuanto la página
+      // se corrió. Se resuelve mirando un centinela de 40px pegado al tope del
+      // documento en vez de escuchar `scroll`: el observer avisa dos veces en
+      // toda la visita y el listener correría en cada cuadro.
+      const tope = document.getElementById('tope-pagina')
+      const barra = document.getElementById('barra')
+      if (tope && barra && 'IntersectionObserver' in window) {
+        const verTope = new IntersectionObserver((entradas) => {
+          for (const entrada of entradas) barra.classList.toggle('barra-fija', !entrada.isIntersecting)
+        })
+        verTope.observe(tope)
+      }
+
       // Los resplandores se pausan fuera de pantalla y con la pestaña oculta:
       // una animación infinita abajo de todo sigue compositando igual.
       const fondos = document.querySelectorAll('.fondo-seccion')

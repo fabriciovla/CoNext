@@ -3,12 +3,15 @@ import Logo from './Logo.jsx'
 import Boton from './Boton.jsx'
 import {
   IconAlert,
+  IconArrowRight,
   IconBolt,
   IconBox,
   IconChart,
   IconChevronDown,
+  IconGitHub,
   IconInbox,
   IconLayers,
+  IconLightbulb,
   IconNote,
   IconShield,
   IconSparkles,
@@ -40,6 +43,7 @@ const n = t(lang).nav
 const prod = t(lang).producto
 const home = pathFor(lang, '/')
 const login = pathFor(lang, '/login')
+const precios = pathFor(lang, '/precios')
 const checkoutGratis = dodoCheckout('gratis')
 const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/'
 const enProducto = ruta === pathFor(lang, '/producto') || ruta.includes('/producto/')
@@ -51,6 +55,7 @@ const columnasProducto = PRODUCTO_COLUMNAS.map((columna) => ({
     return {
       href: pathFor(lang, `/producto/${slug}`),
       label: prod.paginas[slug].nombre,
+      bajada: prod.paginas[slug].menu,
       Icono: ICONOS_MEGA[meta.icono],
     }
   }),
@@ -62,25 +67,50 @@ const ENLACES = [
     mega: true,
     columnas: columnasProducto,
   },
-  { href: pathFor(lang, '/precios'), label: n.precios },
+  { href: precios, label: n.precios },
   { href: pathFor(lang, '/#clientes'), label: n.clientes, pendiente: true },
   {
     label: n.recursos,
+    // Los tres de Recursos llevan ícono igual que los doce de Producto. Antes
+    // eran texto pelado: dos desplegables de la misma barra dibujados con dos
+    // lenguajes distintos, y el segundo se leía como una lista provisoria.
     panel: [
-      { href: pathFor(lang, '/#preguntas'), label: n.preguntas, bajada: n.preguntasBajada },
-      { href: pathFor(lang, '/ayuda'), label: n.ayuda, bajada: n.ayudaBajada },
-      { href: GITHUB_URL, label: 'GitHub', bajada: n.githubBajada, externo: true },
+      {
+        href: pathFor(lang, '/#preguntas'),
+        label: n.preguntas,
+        bajada: n.preguntasBajada,
+        Icono: IconLightbulb,
+      },
+      { href: pathFor(lang, '/ayuda'), label: n.ayuda, bajada: n.ayudaBajada, Icono: IconNote },
+      { href: GITHUB_URL, label: 'GitHub', bajada: n.githubBajada, Icono: IconGitHub, externo: true },
     ],
   },
 ]
 
 // Los enlaces son `ink-secondary` y no `ink-primary`: al lado del logotipo,
-// cuatro palabras en negro pleno le compiten. El hover los sube.
+// cuatro palabras en negro pleno le compiten. El hover los sube, y además
+// enciende una píldora tenue: sin ella el único indicio de que ahí hay algo
+// para apretar es que la palabra cambia de gris, que en una fila de cuatro
+// no se ve hasta que ya se pasó por encima.
 const CLASE_ENLACE =
-  'flex items-center gap-1 rounded-lg px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
+  'flex items-center gap-1 rounded-full px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:bg-tint/[0.05] hover:text-ink-primary aria-expanded:bg-tint/[0.05] aria-expanded:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
 
-const CLASE_MEGA_ITEM =
-  'flex items-center gap-2.5 whitespace-nowrap rounded-lg px-1.5 py-2 text-[14.5px] font-medium text-ink-primary transition-colors duration-150 hover:bg-surface-hover aria-[current=page]:bg-surface-hover'
+// El anillo de foco es el mismo de toda la landing. Va acá y no en cada uso:
+// adentro de un panel que se abre con el mouse es justo donde más falta hace,
+// porque quien lo recorre con Tab no tiene el cursor para ubicarse.
+const FOCO =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet'
+
+// La fila de un enlace del panel: cuadrito con el ícono a la izquierda, nombre
+// y renglón a la derecha. El cuadrito arranca neutro y toma el acento recién
+// al pasarle el mouse — el acento marca lo que se está señalando, no las doce
+// cosas a la vez. Con los doce en violeta la columna se leía como una lista de
+// advertencias y no había forma de ver cuál estaba activo.
+const CLASE_ITEM =
+  'group/item flex items-start gap-3 rounded-xl p-2 transition-colors duration-150 ' +
+  `hover:bg-surface-hover aria-[current=page]:bg-surface-hover ${FOCO}`
+const CLASE_TILE =
+  'mt-px grid h-8 w-8 shrink-0 place-items-center rounded-[10px] border border-tint/[0.08] bg-tint/[0.03] text-ink-muted transition-colors duration-150 group-hover/item:border-violet/30 group-hover/item:bg-violet-soft group-hover/item:text-violet group-aria-[current=page]/item:border-violet/30 group-aria-[current=page]/item:bg-violet-soft group-aria-[current=page]/item:text-violet'
 
 // Las dos barras del ícono son el mismo elemento moviéndose, así no hay
 // parpadeo al cambiar de ícono. El estado abierto se lee del `aria-expanded`
@@ -93,13 +123,19 @@ const BARRA =
 
 {/* `sticky` y no `fixed`: así no hay que compensar la altura con padding en
     cada página, que es de donde suelen salir los saltos de layout.
-    El fondo y el borde de 1px viven en `.barra` (index.css). Sin
-    `backdrop-blur`: desenfocar lo que pasa detrás de una barra pegada fuerza
-    un recálculo por cuadro, y con la franja opaca no hace falta.
+    El fondo y el borde viven en `.barra` (index.css), que arriba de todo es
+    transparente y se vuelve la franja opaca en cuanto la página se corre —
+    así la luz de `.fondo-alba` entra desde el borde de la pantalla en vez de
+    empezar debajo de un escalón blanco. Sin `backdrop-blur`: desenfocar lo
+    que pasa detrás de una barra pegada fuerza un recálculo por cuadro, y con
+    la franja opaca no hace falta.
     76px de alto, que es la medida de dock.us: a esa altura la fila respira sin
-    comerse el primer pantallazo. */}
+    comerse el primer pantallazo.
+    `relative` es para el mega menú: el panel de Producto no cuelga del ancho
+    de la palabra sino del `.contenedor`, así que su bloque contenedor tiene
+    que ser este <nav> y no el <li>. */}
 <header id="barra" class="animate-in-down barra sticky z-50">
-  <nav class="contenedor flex h-[76px] items-center gap-8">
+  <nav class="contenedor relative flex h-[76px] items-center gap-6 xl:gap-8">
     {/* `view-transition-name` es lo que hace viajar el logo hasta /login:
         el de la barra y el del panel de ingreso comparten el mismo nombre. */}
     <a
@@ -114,10 +150,20 @@ const BARRA =
       <Logo className="h-[18px] w-auto" />
     </a>
 
-    {/* Navegación: pegada al logotipo, no a las acciones. */}
-    <ul class="hidden items-center gap-1 md:flex">
+    {/* Navegación: pegada al logotipo, no a las acciones.
+
+        Aparece en `lg` y no en `md`, que es donde estaba. El logotipo, los
+        cuatro enlaces y los tres escalones de acción piden unos 960px de fila,
+        así que entre 768 y ~1010 la barra desbordaba y "Empezar gratis" —el
+        botón que más importa— se iba del borde derecho sin que nada lo
+        indicara: el <nav> no scrollea, simplemente se cortaba. Abajo de 1024
+        entra todo en el menú, que es donde ya entraba en el teléfono. */}
+    <ul class="hidden items-center gap-0.5 lg:flex">
       {ENLACES.map(({ href, label, panel, columnas, mega, pendiente }) => (
-        <li class="relative" {...((panel || columnas) ? { 'data-desplegable-wrap': '' } : {})}>
+        <li
+          class:list={[mega ? 'lg:static' : 'relative']}
+          {...((panel || columnas) ? { 'data-desplegable-wrap': '' } : {})}
+        >
           {panel || columnas ? (
             <Fragment>
               {/* El desplegable es un <button> y no un <a>: no navega a ningún
@@ -147,49 +193,146 @@ const BARRA =
               <div
                 id={`panel-${label.toLowerCase()}`}
                 hidden
-                class="absolute left-0 top-full z-50 pt-2"
+                class:list={[
+                  'absolute top-full z-50 pt-2',
+                  // El mega va de borde a borde del contenido: los `8` son los
+                  // 2rem de padding del `.contenedor`, así que los cantos del
+                  // panel caen exactamente sobre el logotipo y sobre el botón
+                  // del otro extremo. Esa coincidencia es lo que hace que se
+                  // lea como parte de la barra y no como una tarjeta que
+                  // aterrizó cerca. (`absolute` resuelve contra la caja de
+                  // padding, por eso el inset se escribe y no es `inset-x-0`.)
+                  mega ? 'inset-x-8' : 'left-0',
+                ]}
               >
                 {mega && columnas ? (
-                  <div class="w-max rounded-2xl border border-tint/10 bg-surface-card p-7 shadow-pop">
-                    <div class="flex gap-x-12">
-                      {columnas.map((columna) => (
-                        <div class="shrink-0">
-                          <p class="whitespace-nowrap text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
-                            {columna.titulo}
+                  <div class="panel-nav overflow-hidden rounded-2xl border border-tint/10 bg-surface-card shadow-pop">
+                    <div class="flex items-start gap-10 p-6">
+                      {/* `min-w-0` en cada eslabón de la cadena: sin eso el
+                          ancho mínimo de contenido de una columna estira el
+                          panel más allá del contenedor. */}
+                      <div class="grid min-w-0 flex-1 grid-cols-2 gap-x-8 gap-y-6 lg:grid-cols-4 lg:gap-y-0">
+                        {columnas.map((columna) => (
+                          <div class="min-w-0">
+                            <p class="px-2 text-[11.5px] font-semibold uppercase tracking-[0.13em] text-ink-faint">
+                              {columna.titulo}
+                            </p>
+                            <ul class="mt-2.5 space-y-0.5">
+                              {columna.items.map((item) => {
+                                const Icono = item.Icono
+                                return (
+                                  <li>
+                                    <a
+                                      href={item.href}
+                                      aria-current={ruta === item.href ? 'page' : undefined}
+                                      class={CLASE_ITEM}
+                                    >
+                                      <span class={CLASE_TILE}>
+                                        <Icono size={16} />
+                                      </span>
+                                      <span class="min-w-0">
+                                        <span class="block text-[14px] font-medium leading-5 text-ink-primary">
+                                          {item.label}
+                                        </span>
+                                        {/* El renglón se apaga cuando la columna
+                                            deja de aguantarlo en una línea: partido
+                                            en dos, las filas de una columna dejan de
+                                            coincidir con las de la de al lado y las
+                                            cuatro se leen como listas sueltas. Los
+                                            anchos son a medida y no `lg`/`xl` porque
+                                            dependen de si está la tarjeta del costado,
+                                            que se lleva 288px de la fila. */}
+                                        <span class="mt-0.5 hidden text-[12.5px] leading-[1.35] text-ink-muted min-[1120px]:block">
+                                          {item.bajada}
+                                        </span>
+                                      </span>
+                                    </a>
+                                  </li>
+                                )
+                              })}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* La tarjeta del costado se lleva 288px de la fila, así
+                          que entra recién a 1440 —el ancho del `.contenedor`—,
+                          que es donde las cuatro columnas siguen entrando con
+                          su renglón en una sola línea. Más angosto que eso,
+                          entre la tarjeta y los renglones gana el contenido. */}
+                      <a
+                        href={WHATSAPP_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        class={`group/dest hidden w-[15.5rem] shrink-0 self-stretch flex-col justify-between rounded-xl border border-tint/[0.08] bg-surface-nav p-5 transition-colors duration-200 hover:border-violet/30 min-[1440px]:flex ${FOCO}`}
+                      >
+                        <div>
+                          <span class="inline-flex items-center gap-1.5 rounded-full bg-violet-soft px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-violet">
+                            <IconSparkles size={12} />
+                            {n.megaDestacadoRotulo}
+                          </span>
+                          <p class="mt-4 text-[15px] font-medium leading-snug text-ink-primary">
+                            {n.megaDestacadoTitulo}
                           </p>
-                          <ul class="mt-4 space-y-0.5">
-                            {columna.items.map((item) => {
-                              const Icono = item.Icono
-                              return (
-                                <li>
-                                  <a
-                                    href={item.href}
-                                    aria-current={ruta === item.href ? 'page' : undefined}
-                                    class={CLASE_MEGA_ITEM}
-                                  >
-                                    <Icono size={18} className="shrink-0 text-violet" />
-                                    {item.label}
-                                  </a>
-                                </li>
-                              )
-                            })}
-                          </ul>
+                          <p class="mt-1.5 text-[13px] leading-[1.45] text-ink-muted">
+                            {n.megaDestacadoTexto}
+                          </p>
                         </div>
-                      ))}
+                        <span class="mt-5 inline-flex items-center gap-1.5 text-[13.5px] font-medium text-violet">
+                          {n.megaDestacadoCta}
+                          <IconArrowRight
+                            size={14}
+                            className="transition-transform duration-200 group-hover/dest:translate-x-0.5"
+                          />
+                        </span>
+                      </a>
+                    </div>
+
+                    {/* La franja de abajo le da un piso al panel. Sin ella son
+                        doce enlaces flotando y el borde inferior queda como el
+                        corte de una lista que sigue. */}
+                    <div class="flex items-center justify-between gap-4 border-t border-tint/[0.07] bg-surface-nav px-6 py-3.5">
+                      <p class="flex items-center gap-2 text-[13px] text-ink-muted">
+                        <IconWhatsApp size={15} className="shrink-0 text-status-good" />
+                        {n.megaPie}
+                      </p>
+                      <a
+                        href={precios}
+                        class={`group/pie inline-flex shrink-0 items-center gap-1.5 rounded text-[13.5px] font-medium text-ink-primary transition-colors duration-200 hover:text-violet ${FOCO}`}
+                      >
+                        {n.megaPieCta}
+                        <IconArrowRight
+                          size={14}
+                          className="transition-transform duration-200 group-hover/pie:translate-x-0.5"
+                        />
+                      </a>
                     </div>
                   </div>
                 ) : (
-                  <div class="w-[22rem] rounded-2xl border border-tint/10 bg-surface-card p-2 shadow-pop">
-                    {panel.map((item) => (
-                      <a
-                        href={item.href}
-                        {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
-                        class="block rounded-xl px-3 py-2.5 transition-colors duration-150 hover:bg-surface-hover"
-                      >
-                        <span class="block text-[14.5px] font-medium text-ink-primary">{item.label}</span>
-                        <span class="mt-0.5 block text-[13px] leading-snug text-ink-muted">{item.bajada}</span>
-                      </a>
-                    ))}
+                  <div class="panel-nav w-[23rem] rounded-2xl border border-tint/10 bg-surface-card p-2 shadow-pop">
+                    {panel.map((item) => {
+                      const Icono = item.Icono
+                      return (
+                        <a
+                          href={item.href}
+                          aria-current={ruta === item.href ? 'page' : undefined}
+                          {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
+                          class={CLASE_ITEM}
+                        >
+                          <span class={CLASE_TILE}>
+                            <Icono size={16} />
+                          </span>
+                          <span class="min-w-0">
+                            <span class="block text-[14.5px] font-medium leading-5 text-ink-primary">
+                              {item.label}
+                            </span>
+                            <span class="mt-0.5 block text-[13px] leading-snug text-ink-muted">
+                              {item.bajada}
+                            </span>
+                          </span>
+                        </a>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -199,7 +342,7 @@ const BARRA =
               href={href}
               aria-current={ruta === href ? 'page' : undefined}
               {...(pendiente ? { 'data-pendiente': 'true' } : {})}
-              class:list={[CLASE_ENLACE, ruta === href && 'text-ink-primary']}
+              class:list={[CLASE_ENLACE, ruta === href && 'bg-tint/[0.05] text-ink-primary']}
             >
               {label}
             </a>
@@ -211,10 +354,10 @@ const BARRA =
     {/* Acciones. `ml-auto` las manda al extremo derecho. Son tres escalones de
         peso —texto pelado, borde, sólido— para que se lea de una cuál es la
         principal; tres botones iguales serían tres botones que nadie aprieta. */}
-    <div class="ml-auto hidden shrink-0 items-center gap-2 md:flex">
+    <div class="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
       <a
         href={login}
-        class="rounded-lg px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet"
+        class="rounded-full px-3 py-2 text-[15px] text-ink-secondary transition-colors duration-200 hover:bg-tint/[0.05] hover:text-ink-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet"
       >
         {n.iniciarSesion}
       </a>
@@ -222,7 +365,7 @@ const BARRA =
       <Boton href={checkoutGratis} variante="acento" tamano="sm" target="_self">{n.empezarGratis}</Boton>
     </div>
 
-    {/* Móvil: entra todo en el menú, que acá abajo hay lugar para una sola cosa
+    {/* Abajo de lg entra todo en el menú, que acá hay lugar para una sola cosa
         a la derecha. */}
     <button
       type="button"
@@ -233,7 +376,7 @@ const BARRA =
       data-label-abrir={n.abrirMenu}
       data-label-cerrar={n.cerrarMenu}
       class="group ml-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-tint/10 bg-tint/[0.04]
-        text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95 md:hidden"
+        text-ink-primary transition-all duration-200 hover:border-tint/25 active:scale-95 lg:hidden"
     >
       <span class="relative block h-4 w-6">
         <span class={`${BARRA} top-0.5 group-aria-expanded:top-1/2 group-aria-expanded:rotate-45`}></span>
@@ -246,50 +389,86 @@ const BARRA =
 
   {/* En móvil los desplegables se abren en plano: el panel flotante no tiene
       dónde caer, y un acordeón adentro de un menú que ya se despliega son dos
-      capas para tres enlaces. */}
-  <div id="menu-movil" hidden class="contenedor border-t border-tint/10 pb-6 pt-2 md:hidden">
+      capas para tres enlaces.
+      El alto está acotado y scrollea: con las doce páginas de producto abiertas
+      la lista mide más que una pantalla de teléfono, y el bloque de botones de
+      abajo —que es lo que la persona vino a apretar— quedaba fuera de alcance
+      porque el <body> no scrollea con la barra pegada arriba. */}
+  <div
+    id="menu-movil"
+    hidden
+    class="contenedor max-h-[calc(100dvh-76px)] overflow-y-auto overscroll-contain border-t border-tint/10 pb-8 pt-4 lg:hidden"
+  >
     {ENLACES.map((enlace) =>
       enlace.columnas ? (
-        <div class="border-b border-tint/[0.07] py-3">
-          <span class="block px-1 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
+        <div class="pb-4">
+          <span class="block text-[12px] font-semibold uppercase tracking-[0.13em] text-ink-faint">
             {enlace.label}
           </span>
+          {/* Los cuatro grupos siguen rotulados, igual que en el mega de
+              escritorio. Aplanarlos en una grilla de dos por fila entraba en
+              menos alto, pero emparejaba `Notas internas` con `Agentes de IA`
+              —dos grupos distintos— y la única pista de a qué pertenece cada
+              enlace se perdía. El menú scrollea, así que el alto no es el
+              problema que parecía.
+              Acá no van los renglones de `menu`: a este ancho parten en tres
+              líneas y la lista deja de recorrerse de un vistazo. */}
           {enlace.columnas.map((columna) => (
-            <div class="mt-2">
-              <span class="block px-1 text-[12px] font-medium text-ink-muted">{columna.titulo}</span>
-              {columna.items.map((item) => (
-                <a
-                  href={item.href}
-                  aria-current={ruta === item.href ? 'page' : undefined}
-                  class="block px-1 py-2.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
-                >
-                  {item.label}
-                </a>
-              ))}
+            <div class="mt-3">
+              <span class="block px-2 text-[12.5px] font-medium text-ink-muted">{columna.titulo}</span>
+              <div class="mt-1 space-y-0.5">
+                {columna.items.map((item) => {
+                  const Icono = item.Icono
+                  return (
+                    <a
+                      href={item.href}
+                      aria-current={ruta === item.href ? 'page' : undefined}
+                      class={`group/item flex items-center gap-2.5 rounded-xl p-2 transition-colors duration-150 active:bg-surface-hover aria-[current=page]:bg-surface-hover ${FOCO}`}
+                    >
+                      <span class={CLASE_TILE}>
+                        <Icono size={15} />
+                      </span>
+                      <span class="min-w-0 text-[14.5px] font-medium leading-tight text-ink-primary">
+                        {item.label}
+                      </span>
+                    </a>
+                  )
+                })}
+              </div>
             </div>
           ))}
         </div>
       ) : enlace.panel ? (
-        <div class="border-b border-tint/[0.07] py-3">
-          <span class="block px-1 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
+        <div class="border-t border-tint/[0.07] py-4">
+          <span class="block text-[12px] font-semibold uppercase tracking-[0.13em] text-ink-faint">
             {enlace.label}
           </span>
-          {enlace.panel.map((item) => (
-            <a
-              href={item.href}
-              {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
-              class="block px-1 py-2.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
-            >
-              {item.label}
-            </a>
-          ))}
+          <div class="mt-2 space-y-0.5">
+            {enlace.panel.map((item) => {
+              const Icono = item.Icono
+              return (
+                <a
+                  href={item.href}
+                  {...(item.externo ? { target: '_blank', rel: 'noreferrer' } : {})}
+                  class={`group/item flex items-center gap-2.5 rounded-xl p-2 transition-colors duration-150 active:bg-surface-hover ${FOCO}`}
+                >
+                  <span class={CLASE_TILE}>
+                    <Icono size={15} />
+                  </span>
+                  <span class="min-w-0 text-[14px] font-medium leading-tight text-ink-primary">
+                    {item.label}
+                  </span>
+                </a>
+              )
+            })}
+          </div>
         </div>
       ) : (
         <a
           href={enlace.href}
           aria-current={ruta === enlace.href ? 'page' : undefined}
           {...(enlace.pendiente ? { 'data-pendiente': 'true' } : {})}
-          class="block border-b border-tint/[0.07] px-1 py-3.5 text-[15px] text-ink-secondary transition-colors duration-200 hover:text-ink-primary"
+          class="block border-t border-tint/[0.07] py-4 text-[15px] font-medium text-ink-primary"
         >
           {enlace.label}
         </a>

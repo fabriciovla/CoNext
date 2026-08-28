@@ -68,7 +68,11 @@ const LEGALES = [
 ---
 
 <footer class="border-t border-tint/10">
-  <div class="mx-auto w-full max-w-6xl px-6 py-16 sm:py-20">
+  {/* `.contenedor` y no la cadena `mx-auto w-full max-w-6xl px-6`: era la última
+      copia que quedaba del ancho viejo (1152 contra los 1440 de todo el resto),
+      así que el pie arrancaba y terminaba 144px adentro de la barra de arriba y
+      del contenido de cualquier página. */}
+  <div class="contenedor py-16 sm:py-20">
     <div class="flex flex-col gap-12 lg:flex-row lg:gap-16">
       <a
         href={home}

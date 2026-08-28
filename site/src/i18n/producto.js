@@ -1,8 +1,12 @@
 // Copy de las doce páginas de producto. Vive aparte de ui.js porque cada
 // página trae varias secciones y no vale inflar el archivo de la landing.
 
-function pagina({ nombre, title, description, titulo, bajada, secciones, pasos, cierre }) {
-  return { nombre, title, description, titulo, bajada, secciones, pasos, cierre }
+// `menu` es el renglón del mega menú de la barra: cuatro o cinco palabras.
+// No es la `bajada` ni la `description` recortada — esas están escritas para
+// leerse enteras, y en una columna del desplegable entran a dos renglones y
+// obligan a leer para elegir. Acá alcanza con que descarte lo que no es.
+function pagina({ nombre, menu, title, description, titulo, bajada, secciones, pasos, cierre }) {
+  return { nombre, menu, title, description, titulo, bajada, secciones, pasos, cierre }
 }
 
 const columnasEs = {
@@ -29,6 +33,7 @@ export const productoEs = {
   paginas: {
     bandeja: pagina({
       nombre: 'Bandeja única',
+      menu: 'Todos los chats en un lugar',
       title: 'Bandeja única · conext',
       description:
         'Todas las conversaciones de WhatsApp de tu negocio en un solo lugar: pendientes, asignadas y con estado de entrega.',
@@ -61,6 +66,7 @@ export const productoEs = {
     }),
     carpetas: pagina({
       nombre: 'Carpetas y etiquetas',
+      menu: 'Filtrar y encontrar un hilo',
       title: 'Carpetas y etiquetas · conext',
       description:
         'Filtrá la bandeja por mías, sin asignar o pendientes, y etiquetá cada conversación para encontrarla después.',
@@ -92,6 +98,7 @@ export const productoEs = {
     }),
     notas: pagina({
       nombre: 'Notas internas',
+      menu: 'Contexto que el cliente no ve',
       title: 'Notas internas · conext',
       description:
         'Dejá contexto en el hilo para el equipo, sin que el cliente lo vea. El composer cambia de modo y no se mezcla con la respuesta.',
@@ -123,6 +130,7 @@ export const productoEs = {
     }),
     agentes: pagina({
       nombre: 'Agentes de IA',
+      menu: 'Uno por tema, en español',
       title: 'Agentes de IA · conext',
       description:
         'Creá un agente por tema —ventas, envíos, posventa— con su rol e instrucciones en español. Sin programar.',
@@ -154,6 +162,7 @@ export const productoEs = {
     }),
     borrador: pagina({
       nombre: 'Envío o borrador',
+      menu: 'Manda solo o te deja el texto',
       title: 'Envío o borrador · conext',
       description:
         'Cada agente manda solo lo seguro o te deja el texto listo para revisar. El interruptor es por agente, no para todo el CRM.',
@@ -185,6 +194,7 @@ export const productoEs = {
     }),
     clasificacion: pagina({
       nombre: 'Clasificación',
+      menu: 'Elige agente y redacta',
       title: 'Clasificación · conext',
       description:
         'Una sola llamada a Gemini elige agente, marca si es automático o pendiente, y redacta la respuesta con el catálogo a la vista.',
@@ -216,6 +226,7 @@ export const productoEs = {
     }),
     catalogo: pagina({
       nombre: 'Catálogo y stock',
+      menu: 'Precios y stock a la vista',
       title: 'Catálogo y stock · conext',
       description:
         'Los agentes responden precios y disponibilidad con tu catálogo. Precio, stock y carpetas, a la vista de la IA y del equipo.',
@@ -247,6 +258,7 @@ export const productoEs = {
     }),
     metricas: pagina({
       nombre: 'Métricas del día',
+      menu: 'Cuánto respondió la IA',
       title: 'Métricas del día · conext',
       description:
         'El día de trabajo se abre y se cierra a mano. Ves cuánto respondió la IA, cuánto tardaste y qué quedó pendiente.',
@@ -278,6 +290,7 @@ export const productoEs = {
     }),
     stock: pagina({
       nombre: 'Alertas de stock',
+      menu: 'Qué producto está en cero',
       title: 'Alertas de stock · conext',
       description:
         'El inicio te avisa qué productos están en cero o por debajo del umbral, con el mismo criterio que la pantalla de productos.',
@@ -309,6 +322,7 @@ export const productoEs = {
     }),
     'api-whatsapp': pagina({
       nombre: 'API de WhatsApp',
+      menu: 'La Cloud API oficial de Meta',
       title: 'API oficial de WhatsApp · conext',
       description:
         'conext se conecta por la Cloud API de Meta. El número es tuyo, la cuenta también. Sin clonar la sesión ni dejar un teléfono enchufado.',
@@ -341,6 +355,7 @@ export const productoEs = {
     }),
     equipo: pagina({
       nombre: 'Equipo en un número',
+      menu: 'Varias personas, un número',
       title: 'Equipo en un número · conext',
       description:
         'Varias personas atienden el mismo WhatsApp, cada una con su usuario. Asignación, roles y una bandeja compartida.',
@@ -372,6 +387,7 @@ export const productoEs = {
     }),
     datos: pagina({
       nombre: 'Datos cifrados',
+      menu: 'Cada negocio, su espacio',
       title: 'Datos cifrados · conext',
       description:
         'Cada negocio tiene su espacio. Los tokens de WhatsApp van cifrados y las conversaciones no se mezclan con las de otro cliente.',
@@ -414,6 +430,7 @@ export const productoEn = {
   paginas: {
     bandeja: pagina({
       nombre: 'One inbox',
+      menu: 'Every chat in one place',
       title: 'One inbox · conext',
       description:
         'Every WhatsApp conversation for the business in one place: pending, assigned, with delivery status.',
@@ -445,6 +462,7 @@ export const productoEn = {
     }),
     carpetas: pagina({
       nombre: 'Folders and tags',
+      menu: 'Filter and find a thread',
       title: 'Folders and tags · conext',
       description:
         'Filter the inbox by yours, unassigned, or pending, and tag each conversation so you can find it later.',
@@ -476,6 +494,7 @@ export const productoEn = {
     }),
     notas: pagina({
       nombre: 'Internal notes',
+      menu: 'Notes only your team sees',
       title: 'Internal notes · conext',
       description:
         'Leave context on the thread for the team, without the customer seeing it. The composer changes mode so it cannot mix with a reply.',
@@ -507,6 +526,7 @@ export const productoEn = {
     }),
     agentes: pagina({
       nombre: 'AI agents',
+      menu: 'One per topic, plain language',
       title: 'AI agents · conext',
       description:
         'Create an agent per topic —sales, shipping, after-sales— with its role and instructions in plain language. No coding.',
@@ -538,6 +558,7 @@ export const productoEn = {
     }),
     borrador: pagina({
       nombre: 'Auto-send or draft',
+      menu: 'Sends on its own, or waits',
       title: 'Auto-send or draft · conext',
       description:
         'Each agent sends what is safe on its own, or leaves the text for you to review. The switch is per agent, not for the whole CRM.',
@@ -569,6 +590,7 @@ export const productoEn = {
     }),
     clasificacion: pagina({
       nombre: 'Classification',
+      menu: 'Picks the agent and writes',
       title: 'Classification · conext',
       description:
         'A single Gemini call picks the agent, marks automatic or pending, and writes the reply with your catalog in view.',
@@ -600,6 +622,7 @@ export const productoEn = {
     }),
     catalogo: pagina({
       nombre: 'Catalog and stock',
+      menu: 'Prices and stock in view',
       title: 'Catalog and stock · conext',
       description:
         'Agents answer prices and availability from your catalog. Price, stock, and folders, in view for the AI and the team.',
@@ -631,6 +654,7 @@ export const productoEn = {
     }),
     metricas: pagina({
       nombre: 'Day metrics',
+      menu: 'How much the AI answered',
       title: 'Day metrics · conext',
       description:
         'The work day is opened and closed by hand. You see how much the AI answered, how long you took, and what is still pending.',
@@ -662,6 +686,7 @@ export const productoEn = {
     }),
     stock: pagina({
       nombre: 'Stock alerts',
+      menu: 'Which product hit zero',
       title: 'Stock alerts · conext',
       description:
         'Home tells you which products are at zero or under the threshold, with the same rule as the products screen.',
@@ -693,6 +718,7 @@ export const productoEn = {
     }),
     'api-whatsapp': pagina({
       nombre: 'WhatsApp API',
+      menu: 'Meta’s official Cloud API',
       title: 'Official WhatsApp API · conext',
       description:
         'conext connects through Meta’s Cloud API. The number is yours, the account too. No cloned session, no phone left on a charger.',
@@ -725,6 +751,7 @@ export const productoEn = {
     }),
     equipo: pagina({
       nombre: 'Team on one number',
+      menu: 'Several people, one number',
       title: 'Team on one number · conext',
       description:
         'Several people handle the same WhatsApp, each with their own user. Assignment, roles, and a shared inbox.',
@@ -756,6 +783,7 @@ export const productoEn = {
     }),
     datos: pagina({
       nombre: 'Encrypted data',
+      menu: 'Each business, its own space',
       title: 'Encrypted data · conext',
       description:
         'Each business has its own space. WhatsApp tokens are encrypted, and conversations are not mixed with another customer’s.',
