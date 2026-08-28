@@ -2,6 +2,7 @@ import {
   getDayHours,
   getNextBusinessOpening,
   isWithinBusinessHours,
+  partesEnZona,
 } from '../businessHours.js'
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
@@ -92,6 +93,10 @@ export function buildSystemPrompt(settings, products, agents, currentAgent, now 
   const continuidad = currentAgent
     ? `La conversación la viene atendiendo "${currentAgent.key}": mantenelo salvo que este último mensaje claramente cambie de tema hacia el criterio de otro (por ejemplo, una consulta de precio que pasa a ser un reclamo).`
     : 'La conversación todavía no tiene agente asignado.'
+  // La hora que se le dice al modelo sale de la zona del negocio, igual que la
+  // que decide si esta abierto: si no, el prompt anunciaria una hora y la regla
+  // de auto-envio usaria otra.
+  const ahora = partesEnZona(now, settings?.timezone)
   const abierto = isWithinBusinessHours(settings, now)
   const proximaApertura = abierto ? null : getNextBusinessOpening(settings, now)
 
@@ -105,7 +110,7 @@ ${buildRoster(agents)}
 
 HORARIOS Y DÍAS DE ATENCIÓN (única fuente de verdad — no inventes otros):
 ${buildSchedule(settings)}
-  Ahora mismo es ${DIAS[now.getDay()]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} y el local está ${abierto ? 'ABIERTO' : 'CERRADO'}.
+  Ahora mismo es ${DIAS[ahora.dayIndex]} ${String(Math.floor(ahora.minutes / 60)).padStart(2, '0')}:${String(ahora.minutes % 60).padStart(2, '0')} y el local está ${abierto ? 'ABIERTO' : 'CERRADO'}.
   ${proximaApertura ? `La próxima apertura es el ${proximaApertura.day} a las ${proximaApertura.openTime}.` : ''}
   Si está cerrado no prometas atención inmediata ni digas que alguien va a responder "ahora":
   decí cuándo volvemos a atender.

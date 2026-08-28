@@ -1,3 +1,4 @@
+import { ZONA_POR_DEFECTO } from './businessHours.js'
 import { one, run } from '../db/index.js'
 
 export const WEEK_DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
@@ -68,6 +69,8 @@ function mapRow(row) {
     weeklyHours,
     welcomeMessage: row.welcome_message,
     awayMessage: row.away_message,
+    // La zona del negocio, no la del server: ver businessHours.partesEnZona.
+    timezone: row.timezone || ZONA_POR_DEFECTO,
   }
 }
 
