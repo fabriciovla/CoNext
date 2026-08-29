@@ -3,7 +3,7 @@
 // dibujo — el mismo que muestra WhatsApp cuando no hay foto. El nombre va al
 // lado en todos los lugares donde aparece, así que la inicial no hacía falta
 // para distinguir: la fila se lee por el nombre, no por la letra.
-const SIN_FOTO = '/IconoSinFoto.webp'
+const SIN_FOTO = `${import.meta.env.BASE_URL || '/'}IconoSinFoto.webp`
 
 // `photo` es para los contactos. El equipo (el responsable de una conversación,
 // el usuario de la barra, el Bot/Admin del hilo) se queda con la inicial: ahí sí

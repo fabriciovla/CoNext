@@ -10,7 +10,7 @@
 export default function WhatsappMark({ size = 14, className = '' }) {
   return (
     <img
-      src="/logowsp.webp"
+      src={`${import.meta.env.BASE_URL || '/'}logowsp.webp`}
       alt=""
       draggable={false}
       className={`shrink-0 select-none ${className}`}

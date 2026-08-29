@@ -13,14 +13,21 @@
 // 128px en WebP sin pérdida — 15 KB y 5 KB contra los 88 KB de los JPG. Se sirven
 // desde `public/`, que se copia entero al build.
 //
+// La URL lleva el `base` de Vite (`/` en local, `/app/` en el build). Un
+// `src="/logoinstagram.webp"` ignora ese base y pide el archivo en la raíz del
+// dominio, que es la landing: ahí está `logowsp.webp` (por eso WhatsApp
+// cargaba) y no estos dos (por eso se veían rotos).
+//
 // WhatsApp reusa `logowsp.webp`, que es el mismo que usa el distintivo: trae su
 // propio contorno blanco, pensado para apoyarse sobre un avatar. A este tamaño
 // se lee como un halo fino y no molesta; un archivo aparte sin contorno sería
 // una cuarta copia del mismo logo para mantener igual.
+const BASE = import.meta.env.BASE_URL || '/'
+
 const LOGOS = {
-  whatsapp: '/logowsp.webp',
-  instagram: '/logoinstagram.webp',
-  messenger: '/logomessenger.webp',
+  whatsapp: `${BASE}logowsp.webp`,
+  instagram: `${BASE}logoinstagram.webp`,
+  messenger: `${BASE}logomessenger.webp`,
 }
 
 export default function ChannelLogo({ channel = 'whatsapp', size = 40, className = '' }) {
