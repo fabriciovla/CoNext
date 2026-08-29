@@ -15,7 +15,7 @@ import {
   aTokenLargo,
   listarPaginas,
   connectMetaAccount,
-  getInfoPagina,
+  verificarTokenPagina,
 } from '../services/metaOnboarding.js'
 
 const router = Router()
@@ -166,21 +166,37 @@ router.get(
     }
 
     const creds = await getMetaCredentials(req.tenantId)
-    if (!creds) return res.json({ ...base, vigente: false, error: 'No hay token guardado' })
+    if (!creds) {
+      return res.json({ ...base, vigente: false, error: 'No hay un token guardado para esta Página.' })
+    }
 
     try {
-      const info = await getInfoPagina(creds.pageAccessToken)
-      res.json({
-        ...base,
-        vigente: true,
-        pageName: info?.name ?? base.pageName,
-        // La cuenta de Instagram se puede atar o desatar desde Facebook sin
-        // avisarnos, así que la de Graph manda sobre la que tenemos guardada.
-        igUsername: info?.instagram_business_account?.username ?? base.igUsername,
-        igAccountId: info?.instagram_business_account?.id ?? base.igAccountId,
-      })
+      const { valido, motivo } = await verificarTokenPagina(creds.pageAccessToken)
+
+      // `valido: null` es "no pudimos comprobarlo" y no "está vencido": pasa
+      // cuando faltan las credenciales de la app. Decir que la conexión murió
+      // por un problema nuestro de configuración manda a reconectar una Página
+      // que está bien, que es el error que esta pantalla ya cometía.
+      if (valido === null) return res.json({ ...base, vigente: true, verificado: false })
+
+      if (!valido) {
+        return res.json({
+          ...base,
+          vigente: false,
+          // Mensaje para una persona, no el texto de Graph. El de Meta habla de
+          // endpoints y permisos, que no le dice nada a quien atiende la tienda.
+          error: 'Meta ya no acepta este acceso. Puede haberse revocado desde el Business Manager.',
+          detalle: motivo ?? null,
+        })
+      }
+
+      res.json({ ...base, vigente: true, verificado: true })
     } catch (err) {
-      res.json({ ...base, vigente: false, error: err.message })
+      // Si `debug_token` no contesta, lo que falló fue nuestra consulta y no el
+      // token del cliente. Se deja la conexión como buena y se marca sin
+      // verificar: un corte de red no es motivo para mandar a reconectar.
+      console.error('[onboarding/meta/status] no se pudo verificar el token', err)
+      res.json({ ...base, vigente: true, verificado: false })
     }
   }),
 )

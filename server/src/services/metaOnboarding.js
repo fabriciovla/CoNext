@@ -118,17 +118,52 @@ export async function suscribirPagina(pageId, pageAccessToken) {
   })
 }
 
-// Para la pantalla de estado: si esto responde, el token de Página sirve de
-// verdad. Un token revocado desde el Business Manager del cliente sigue
-// guardado en nuestra base y ahí diríamos "conectado" sin estarlo.
-// Va contra `/me` y no contra `/{page-id}`: firmada con un token de Página,
-// `/me` **es** esa Página. Pedirla por id obliga a `pages_read_engagement`
-// (error 100), y acá alcanza con el token que ya tenemos guardado — que además
-// es justo lo que esta consulta quiere comprobar.
-export async function getInfoPagina(pageAccessToken) {
-  return graph(`${GRAPH()}/me?fields=name,instagram_business_account{id,username}`, {
-    headers: { Authorization: `Bearer ${pageAccessToken}` },
-  })
+// Para la pantalla de estado: ¿el token de Página que tenemos guardado sigue
+// sirviendo? Un token revocado desde el Business Manager del cliente sigue
+// guardado en nuestra base, y ahí la pantalla diría "conectado" sin estarlo
+// mientras no entra ni un mensaje.
+//
+// **Esto se pregunta con `debug_token` y no leyendo la Página**, y ahí está el
+// punto. La versión anterior iba a `GET /me` con el token de Página, que es la
+// forma de nombrarla sin saber su id — pero leer los datos de una Página, por
+// `/me` o por id, exige `pages_read_engagement`, que no pedimos. O sea que la
+// consulta **fallaba siempre**, y como el catch trataba cualquier error como
+// token muerto, la tarjeta mostraba "Token vencido" y el error crudo de Graph
+// sobre una conexión perfectamente sana, con un token que además no vence.
+//
+// `debug_token` no toca la Página: le pregunta a Meta por el token en sí,
+// firmando con el token de app (`app_id|app_secret`). No pide ningún permiso
+// sobre Páginas, y contesta exactamente lo que la pantalla quiere saber —
+// incluido `is_valid`, que sí se cae cuando el cliente revoca el acceso, que
+// era el motivo por el que esta comprobación existe.
+//
+// Lo que se pierde es refrescar el nombre de la Página y la cuenta de Instagram
+// en cada visita a la pantalla: eso salía de la misma consulta que nunca
+// funcionó, así que no se pierde nada que anduviera. Los dos datos se guardan
+// al conectar y se vuelven a leer al reconectar, que es cuando `/me/accounts`
+// los trae con el token de usuario y sin necesitar el permiso.
+export async function verificarTokenPagina(pageAccessToken) {
+  const appId = process.env.META_APP_ID
+  const appSecret = process.env.META_APP_SECRET
+  // Sin credenciales de app no hay con qué firmar la consulta. No es lo mismo
+  // que un token inválido, así que no se contesta que lo esté.
+  if (!appId || !appSecret) return { valido: null, motivo: 'Faltan las credenciales de la app' }
+
+  const url =
+    `${GRAPH()}/debug_token?input_token=${encodeURIComponent(pageAccessToken)}` +
+    `&access_token=${encodeURIComponent(`${appId}|${appSecret}`)}`
+
+  const data = await graph(url)
+  const info = data?.data ?? {}
+
+  return {
+    valido: info.is_valid === true,
+    // 0 es "no vence", que es lo normal en un token de Página sacado con un
+    // token de usuario largo. Se distingue de "no vino el dato" a propósito.
+    expiraEn: info.expires_at === 0 ? null : info.expires_at ?? null,
+    scopes: info.scopes ?? [],
+    motivo: info.error?.message ?? null,
+  }
 }
 
 // El flujo completo, en el orden que importa.

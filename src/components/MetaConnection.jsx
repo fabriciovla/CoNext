@@ -145,7 +145,11 @@ export default function MetaConnection({ className = '' }) {
                 Conectado
               </span>
             ) : (
-              <span className="text-[12px] font-medium text-status-critical">Token vencido</span>
+              // No dice "Token vencido": los tokens de Página sacados con un
+              // token de usuario largo no vencen. Si Graph deja de aceptarlo es
+              // porque se revocó el acceso, y nombrarlo "vencido" mandaba a
+              // buscar una renovación que no existe.
+              <span className="text-[12px] font-medium text-status-critical">Sin acceso</span>
             )}
             <Button variant="ghost" size="sm" onClick={refrescar}>
               Actualizar
@@ -174,7 +178,7 @@ export default function MetaConnection({ className = '' }) {
               como "no me llegan los mensajes". */}
           {!estado.vigente && estado.error && (
             <p className="rounded-lg border border-status-critical/25 bg-status-critical/10 px-3 py-2 text-[12px] text-status-critical">
-              {estado.error} — volvé a conectar la Página.
+              {estado.error} Volvé a conectar la Página para retomar los mensajes.
             </p>
           )}
 
