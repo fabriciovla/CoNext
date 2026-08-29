@@ -1,28 +1,28 @@
-import Card from './ui/Card'
 import Button from './ui/Button'
-import { IconCheck, IconPhone } from './ui/icons'
+import ChannelCard, { EstadoCanal } from './ui/ChannelCard'
+import ChannelLogo from './ui/ChannelLogo'
+import { IconCheck } from './ui/icons'
 import { useWhatsappConnection } from '../hooks/useWhatsappConnection'
 
-// Misma banda de encabezado que las otras tarjetas de Configuración: el
-// título no se estira a un riel vacío, y el estado (conectado, actualizar)
-// ocupa el lado derecho.
-function Marco({ className = '', meta, children }) {
+// El verde de WhatsApp, apenas insinuado detrás del logo. Es el mismo literal
+// que usa la marca: no sale de la paleta semántica y no cambia entre temas.
+const TONO = 'rgba(37, 211, 102, 0.11)'
+
+const BAJADA = 'Recibí y respondé desde el CRM los mensajes del número de WhatsApp Business del negocio.'
+
+function Marco({ className = '', descripcion = BAJADA, distintivo, acciones, children }) {
   return (
-    <Card className={`min-w-0 overflow-hidden ${className}`} bodyClassName="p-0">
-      <div className="flex items-start gap-3 border-b border-tint/[0.06] bg-tint/[0.02] px-5 py-3.5">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-soft text-violet">
-          <IconPhone size={16} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-[13.5px] font-semibold text-ink-primary">WhatsApp</h2>
-          <p className="mt-0.5 text-[12px] leading-relaxed text-ink-muted">
-            El canal por el que entran y salen los mensajes.
-          </p>
-        </div>
-        {meta && <div className="shrink-0 pt-0.5">{meta}</div>}
-      </div>
-      <div className="p-5">{children}</div>
-    </Card>
+    <ChannelCard
+      className={className}
+      tono={TONO}
+      marca={<ChannelLogo channel="whatsapp" size={40} />}
+      titulo="WhatsApp Business"
+      descripcion={descripcion}
+      distintivo={distintivo}
+      acciones={acciones}
+    >
+      {children}
+    </ChannelCard>
   )
 }
 
@@ -43,7 +43,7 @@ export default function WhatsappConnection({ className = '' }) {
 
   if (cargando) {
     return (
-      <Marco className={className}>
+      <Marco className={className} descripcion={null}>
         <p className="text-[13px] text-ink-muted">Cargando…</p>
       </Marco>
     )
@@ -54,7 +54,7 @@ export default function WhatsappConnection({ className = '' }) {
   // suelen estar perfectas — el .env no se puede leer si nadie contesta.
   if (!config) {
     return (
-      <Marco className={className}>
+      <Marco className={className} descripcion={null}>
         <p className="text-[13px] text-status-critical">No se pudo consultar el estado de la conexión.</p>
         {error && <p className="mt-2 text-[12px] text-ink-muted">{error}</p>}
       </Marco>
@@ -65,9 +65,12 @@ export default function WhatsappConnection({ className = '' }) {
   // de Meta que no explica nada. Mejor decir qué falta.
   if (!config.configurado) {
     return (
-      <Marco className={className}>
-        <p className="text-[13px] text-ink-secondary">Falta configurar la app de Meta en el server.</p>
-        <p className="mt-2 text-[12px] text-ink-muted">
+      <Marco
+        className={className}
+        descripcion="Falta configurar la app de Meta en el server."
+        distintivo={<EstadoCanal>Sin configurar</EstadoCanal>}
+      >
+        <p className="text-[12px] leading-relaxed text-ink-muted">
           Cargá <code className="text-ink-secondary">META_APP_ID</code>,{' '}
           <code className="text-ink-secondary">META_CONFIG_ID</code> y{' '}
           <code className="text-ink-secondary">META_APP_SECRET</code> en{' '}
@@ -79,64 +82,8 @@ export default function WhatsappConnection({ className = '' }) {
 
   const conectado = estado?.conectado
 
-  return (
-    <Marco
-      className={className}
-      meta={
-        conectado ? (
-          <div className="flex items-center gap-2">
-            {estado.vigente ? (
-              <span className="flex items-center gap-1.5 text-[12px] font-medium text-status-good">
-                <IconCheck size={13} />
-                Conectado
-              </span>
-            ) : (
-              <span className="text-[12px] font-medium text-status-critical">Token vencido</span>
-            )}
-            <Button variant="ghost" size="sm" onClick={refrescar}>
-              Actualizar
-            </Button>
-          </div>
-        ) : null
-      }
-    >
-      {!conectado && (
-        <div className="space-y-3">
-          <p className="text-[13px] leading-relaxed text-ink-secondary">
-            Conectá tu número de WhatsApp Business para empezar a recibir mensajes en el CRM. Se abre
-            una ventana de Meta: tu contraseña no pasa por acá.
-          </p>
-          <Button onClick={conectar} disabled={!sdkListo || conectando}>
-            {conectando ? 'Conectando…' : 'Conectar WhatsApp'}
-          </Button>
-        </div>
-      )}
-
-      {conectado && (
-        <div className="space-y-4">
-          {/* Si el token dejó de servir, el número sigue en la base pero no
-              entra ni sale nada. Vale más decirlo acá que dejar que se note
-              como "no me llegan los mensajes". */}
-          {!estado.vigente && estado.error && (
-            <p className="rounded-lg border border-status-critical/25 bg-status-critical/10 px-3 py-2 text-[12px] text-status-critical">
-              {estado.error} — volvé a conectar el número.
-            </p>
-          )}
-
-          <div className="divide-y divide-tint/[0.06] border-y border-tint/[0.06]">
-            {estado.numero && <Dato label="Número">{estado.numero}</Dato>}
-            {estado.nombre && <Dato label="Nombre">{estado.nombre}</Dato>}
-            {estado.calidad && <Dato label="Calidad">{estado.calidad}</Dato>}
-            <Dato label="Phone number ID">{estado.phoneNumberId}</Dato>
-            {estado.wabaId && <Dato label="WABA ID">{estado.wabaId}</Dato>}
-          </div>
-
-          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
-            {conectando ? 'Conectando…' : 'Conectar otro número'}
-          </Button>
-        </div>
-      )}
-
+  const problemas = (
+    <>
       {error && (
         <p className="mt-4 rounded-lg border border-status-critical/25 bg-status-critical/10 px-3 py-2 text-[12px] text-status-critical">
           {error}
@@ -155,6 +102,67 @@ export default function WhatsappConnection({ className = '' }) {
           ))}
         </ul>
       )}
+    </>
+  )
+
+  if (!conectado) {
+    return (
+      <Marco
+        className={className}
+        descripcion={`${BAJADA} Se abre una ventana de Meta: tu contraseña no pasa por acá.`}
+        acciones={
+          <Button variant="secondary" onClick={conectar} disabled={!sdkListo || conectando}>
+            {conectando ? 'Conectando…' : 'Conectar'}
+          </Button>
+        }
+      >
+        {problemas}
+      </Marco>
+    )
+  }
+
+  return (
+    <Marco
+      className={className}
+      distintivo={
+        estado.vigente ? (
+          <EstadoCanal tono="conectado">
+            <IconCheck size={12} />
+            Conectado
+          </EstadoCanal>
+        ) : (
+          <EstadoCanal tono="problema">Token vencido</EstadoCanal>
+        )
+      }
+      acciones={
+        <>
+          <Button variant="ghost" size="sm" onClick={refrescar}>
+            Actualizar
+          </Button>
+          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
+            {conectando ? 'Conectando…' : 'Conectar otro número'}
+          </Button>
+        </>
+      }
+    >
+      {/* Si el token dejó de servir, el número sigue en la base pero no entra
+          ni sale nada. Vale más decirlo acá que dejar que se note como "no me
+          llegan los mensajes". */}
+      {!estado.vigente && estado.error && (
+        <p className="mb-4 rounded-lg border border-status-critical/25 bg-status-critical/10 px-3 py-2 text-[12px] text-status-critical">
+          {estado.error} — volvé a conectar el número.
+        </p>
+      )}
+
+      <div className="divide-y divide-tint/[0.06] border-y border-tint/[0.06]">
+        {estado.numero && <Dato label="Número">{estado.numero}</Dato>}
+        {estado.nombre && <Dato label="Nombre">{estado.nombre}</Dato>}
+        {estado.calidad && <Dato label="Calidad">{estado.calidad}</Dato>}
+        <Dato label="Phone number ID">{estado.phoneNumberId}</Dato>
+        {estado.wabaId && <Dato label="WABA ID">{estado.wabaId}</Dato>}
+      </div>
+
+      {problemas}
     </Marco>
   )
 }

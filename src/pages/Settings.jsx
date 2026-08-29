@@ -387,8 +387,18 @@ export default function Settings({ settings, onUpdate }) {
       />
 
       <div className="space-y-3">
-        <WhatsappConnection className="w-full" />
-        <MetaConnection className="w-full" />
+        {/* Los canales van en grilla y no apilados uno encima del otro: son un
+            catálogo de servicios que se enganchan, no dos secciones más del
+            formulario. Puestos al lado, lo que se compara de un vistazo es cuál
+            está conectado y cuál no, que es la única pregunta que traen.
+
+            `items-stretch` es el que las deja a la par: las dos miden lo mismo
+            aunque una diga más que la otra, y la fila de acciones de cada una
+            queda apoyada abajo, en la misma línea. */}
+        <div className="grid grid-cols-1 items-stretch gap-3 md:grid-cols-2">
+          <WhatsappConnection />
+          <MetaConnection />
+        </div>
 
         <Seccion
             icon={<IconClock size={16} />}
