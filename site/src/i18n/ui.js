@@ -81,9 +81,7 @@ export const ui = {
         'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
       anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
       heroLineas: [
-        'Los clientes preguntan por un chat.',
-        'Siguen por otro.',
-        'Confirman por un tercero.',
+        'Preguntan por un chat, siguen por otro.',
         '¿Puedes seguir el ritmo?',
       ],
       heroBajada:
@@ -722,9 +720,7 @@ export const ui = {
         'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
       anuncio: 'The CRM on the official WhatsApp Business API',
       heroLineas: [
-        'Customers ask in one chat.',
-        'They follow up in another.',
-        'They confirm in a third.',
+        'They ask in one chat, follow up in another.',
         'Can you keep up?',
       ],
       heroBajada:

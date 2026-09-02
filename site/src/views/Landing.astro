@@ -110,21 +110,16 @@ const ESQUEMA = {
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
       </a>
 
-      {/* El titular es el problema, no el canal: tres golpes y la pregunta.
-          Si nombra WhatsApp e Instagram, el que atiende por Messenger se baja.
-          Cada frase es un renglón a propósito — juntas en un párrafo se leen
-          como bajada, no como titular. El `max-w` es 5xl: las frases cortas
-          no necesitan más, y a 4xl la primera cortaba feo. */}
+      {/* Dos líneas: el problema y la pregunta. Cuatro renglones de titular
+          se leían como un párrafo agrandado. Si nombra WhatsApp e Instagram,
+          el que atiende por Messenger se baja. El `max-w` es 5xl para que la
+          primera no corte a la mitad de "siguen". */}
       <h1
-        class="animate-in mt-7 max-w-5xl text-[32px] font-medium leading-[1.16] tracking-tight text-ink-primary sm:text-[44px] lg:text-[52px] lg:leading-[1.12]"
+        class="animate-in mt-7 max-w-5xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[52px] lg:leading-[1.08] lg:text-wrap"
         style="--d: 80ms"
       >
-        {l.heroLineas.map((linea, i) => (
-          <>
-            {i > 0 && <br />}
-            {linea}
-          </>
-        ))}
+        {l.heroLineas[0]}
+        <br class="hidden lg:inline" /> {l.heroLineas[1]}
       </h1>
 
       <p
