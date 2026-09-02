@@ -110,17 +110,21 @@ const ESQUEMA = {
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
       </a>
 
-      {/* Dos líneas y no tres. La marca va en la primera: sin "Conext" en el
-          H1 Google indexa el eslogan y la búsqueda de marca no encuentra
-          esta página. La segunda es la promesa, no el canal — si nombra
-          WhatsApp e Instagram, el que atiende por Messenger se baja. El
-          `max-w` baja a 4xl acompañando el recorte. */}
+      {/* El titular es el problema, no el canal: tres golpes y la pregunta.
+          Si nombra WhatsApp e Instagram, el que atiende por Messenger se baja.
+          Cada frase es un renglón a propósito — juntas en un párrafo se leen
+          como bajada, no como titular. El `max-w` es 5xl: las frases cortas
+          no necesitan más, y a 4xl la primera cortaba feo. */}
       <h1
-        class="animate-in mt-7 max-w-4xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
+        class="animate-in mt-7 max-w-5xl text-[32px] font-medium leading-[1.16] tracking-tight text-ink-primary sm:text-[44px] lg:text-[52px] lg:leading-[1.12]"
         style="--d: 80ms"
       >
-        {l.heroLineas[0]}
-        <br class="hidden lg:inline" /> {l.heroLineas[1]}
+        {l.heroLineas.map((linea, i) => (
+          <>
+            {i > 0 && <br />}
+            {linea}
+          </>
+        ))}
       </h1>
 
       <p

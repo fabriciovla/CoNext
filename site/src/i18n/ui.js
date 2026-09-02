@@ -80,9 +80,14 @@ export const ui = {
       description:
         'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
       anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
-      heroLineas: ['Conext.', 'Unifica tus canales.'],
+      heroLineas: [
+        'Los clientes preguntan por un chat.',
+        'Siguen por otro.',
+        'Confirman por un tercero.',
+        '¿Puedes seguir el ritmo?',
+      ],
       heroBajada:
-        'Es el CRM para pequeñas empresas que junta todos tus canales en una sola bandeja. Los agentes de IA responden precios, stock y envíos con los datos de tu negocio — o te dejan el borrador. La última palabra sigue siendo tuya.',
+        'A mano, no. conext es el CRM que junta todos tus canales en una sola bandeja, con agentes de IA que responden o te dejan el borrador. Aunque el cliente cambie de canal, el hilo sigue. La última palabra es tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
@@ -716,9 +721,14 @@ export const ui = {
       description:
         'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
       anuncio: 'The CRM on the official WhatsApp Business API',
-      heroLineas: ['Conext.', 'Unify your channels.'],
+      heroLineas: [
+        'Customers ask in one chat.',
+        'They follow up in another.',
+        'They confirm in a third.',
+        'Can you keep up?',
+      ],
       heroBajada:
-        'It is the CRM for small businesses that brings all your channels into one inbox. AI agents answer prices, stock, and shipping from your business data — or leave a draft. The last word is still yours.',
+        'By hand, no. conext is the CRM that brings every channel into one inbox, with AI agents that reply or leave a draft. The thread does not break when they switch. The last word is yours.',
       pedirDemo: 'Request a demo',
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
