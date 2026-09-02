@@ -80,16 +80,16 @@ export const ui = {
       description:
         'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
       anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
-      heroLineas: ['Conext.', 'Tus canales, en una sola bandeja.'],
+      heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
       heroBajada:
-        'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio — o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
+        'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio, o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
       funcionesEtiqueta: 'Qué es conext',
       funcionesTitulo: 'Un CRM de WhatsApp e Instagram, no un chatbot.',
       funcionesTexto:
-        'conext centraliza los mensajes de tus canales para que una pyme no tenga que atenderlos en tres pantallas. La IA trabaja adentro, con tu catálogo y tus horarios — no con un árbol de opciones.',
+        'conext centraliza los mensajes de tus canales para que una pyme no tenga que atenderlos en tres pantallas. La IA trabaja adentro, con tu catálogo y tus horarios, no con un árbol de opciones.',
       funciones: [
         {
           id: 'bandeja',
@@ -101,7 +101,7 @@ export const ui = {
           id: 'agentes',
           titulo: 'Agentes de IA para tu negocio',
           texto:
-            'Creas un agente por tema — ventas, envíos, posventa — y le escribes su rol en español. El CRM no pide que programes nada.',
+            'Creas un agente por tema (ventas, envíos, posventa) y le escribes su rol en español. El CRM no pide que programes nada.',
         },
         {
           id: 'automatico',
@@ -153,7 +153,7 @@ export const ui = {
         {
           titulo: 'Miras la bandeja de conext',
           texto:
-            'Los agentes atienden. Tú entras cuando algo necesita una persona — y la bandeja te marca exactamente cuáles son.',
+            'Los agentes atienden. Tú entras cuando algo necesita una persona, y la bandeja te marca exactamente cuáles son.',
         },
       ],
       garantiasEtiqueta: 'Por qué la vía oficial',
@@ -190,12 +190,12 @@ export const ui = {
         {
           pregunta: '¿Conext sirve solo para WhatsApp?',
           respuesta:
-            'No. El CRM une WhatsApp e Instagram —y Messenger, si tu Página lo tiene— en la misma bandeja. WhatsApp entra por la API oficial de WhatsApp Business; Instagram, por la Página de Facebook del negocio.',
+            'No. El CRM une WhatsApp e Instagram y Messenger, si tu Página lo tiene, en la misma bandeja. WhatsApp entra por la API oficial de WhatsApp Business; Instagram, por la Página de Facebook del negocio.',
         },
         {
           pregunta: '¿Necesito un número nuevo?',
           respuesta:
-            'No, puedes usar el que ya vienes usando — con una condición: un número conectado a la API no puede estar al mismo tiempo en la app de WhatsApp del teléfono. Si hoy lo atiendes a mano desde el teléfono y no quieres cortar eso todavía, lo más cómodo es empezar con un número aparte y pasar el principal cuando te sientas cómodo.',
+            'No, puedes usar el que ya vienes usando, con una condición: un número conectado a la API no puede estar al mismo tiempo en la app de WhatsApp del teléfono. Si hoy lo atiendes a mano desde el teléfono y no quieres cortar eso todavía, lo más cómodo es empezar con un número aparte y pasar el principal cuando te sientas cómodo.',
         },
         {
           pregunta: '¿Y si el agente no sabe algo o mete la pata?',
@@ -215,7 +215,7 @@ export const ui = {
         {
           pregunta: '¿Cuánto cuesta?',
           respuesta:
-            'Hay una prueba de 7 días del Estándar (después $49/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa — no le agregamos nada encima.',
+            'Hay una prueba de 7 días del Estándar (después $49/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa. No le agregamos nada encima.',
         },
       ],
       ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos conext.',
@@ -716,16 +716,16 @@ export const ui = {
       description:
         'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
       anuncio: 'The CRM on the official WhatsApp Business API',
-      heroLineas: ['Conext.', 'All your channels, one inbox.'],
+      heroLineas: ['All your channels, one inbox.', 'Conext.'],
       heroBajada:
-        'AI agents answer prices, stock, and shipping from your business data — or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
+        'AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
       pedirDemo: 'Request a demo',
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
       funcionesEtiqueta: 'What Conext is',
       funcionesTitulo: 'A WhatsApp and Instagram CRM, not a chatbot.',
       funcionesTexto:
-        'conext puts your channel messages in one place so a small business is not answering from three screens. The AI works inside, with your catalog and hours — not a tree of options.',
+        'conext puts your channel messages in one place so a small business is not answering from three screens. The AI works inside, with your catalog and hours, not a tree of options.',
       funciones: [
         {
           id: 'bandeja',
@@ -737,7 +737,7 @@ export const ui = {
           id: 'agentes',
           titulo: 'AI agents for your business',
           texto:
-            'You create an agent per topic — sales, shipping, after-sales — and write its role in plain language. The CRM does not ask you to code.',
+            'You create an agent per topic (sales, shipping, after-sales) and write its role in plain language. The CRM does not ask you to code.',
         },
         {
           id: 'automatico',
@@ -789,7 +789,7 @@ export const ui = {
         {
           titulo: 'You watch the Conext inbox',
           texto:
-            'The agents handle it. You step in when something needs a person — and the inbox shows you exactly which ones.',
+            'The agents handle it. You step in when something needs a person, and the inbox shows you exactly which ones.',
         },
       ],
       garantiasEtiqueta: 'Why the official path',
@@ -826,12 +826,12 @@ export const ui = {
         {
           pregunta: 'Is Conext only for WhatsApp?',
           respuesta:
-            'No. The CRM brings WhatsApp and Instagram — and Messenger, if your Page has it — into the same inbox. WhatsApp comes in through the official WhatsApp Business API; Instagram, through the business Facebook Page.',
+            'No. The CRM brings WhatsApp and Instagram and Messenger, if your Page has it, into the same inbox. WhatsApp comes in through the official WhatsApp Business API; Instagram, through the business Facebook Page.',
         },
         {
           pregunta: 'Do I need a new number?',
           respuesta:
-            'No — you can use the one you already have, with one catch: a number connected to the API cannot also be in the WhatsApp app on a phone. If you handle it by hand from the phone today and you are not ready to cut that yet, the easy path is to start with a spare number and move the main one when you are comfortable.',
+            'No. You can use the one you already have, with one catch: a number connected to the API cannot also be in the WhatsApp app on a phone. If you handle it by hand from the phone today and you are not ready to cut that yet, the easy path is to start with a spare number and move the main one when you are comfortable.',
         },
         {
           pregunta: 'What if the agent does not know something or gets it wrong?',
@@ -851,7 +851,7 @@ export const ui = {
         {
           pregunta: 'How much does it cost?',
           respuesta:
-            'There is a 7-day Standard trial (then $49/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate — we do not add a markup.',
+            'There is a 7-day Standard trial (then $49/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate. We do not add a markup.',
         },
       ],
       ctaTitulo: 'Tell us how you handle it today and we will show you Conext.',
