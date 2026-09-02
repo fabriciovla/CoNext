@@ -110,12 +110,11 @@ const ESQUEMA = {
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
       </a>
 
-      {/* Dos líneas: el problema y la pregunta. Cuatro renglones de titular
-          se leían como un párrafo agrandado. Si nombra WhatsApp e Instagram,
-          el que atiende por Messenger se baja. El `max-w` es 5xl para que la
-          primera no corte a la mitad de "siguen". */}
+      {/* Dos líneas: la marca y qué es. El titular tiene que entenderse
+          solo — una pregunta recortada de un argumento largo no. Si nombra
+          un canal, el que atiende por otro se baja. */}
       <h1
-        class="animate-in mt-7 max-w-5xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[52px] lg:leading-[1.08] lg:text-wrap"
+        class="animate-in mt-7 max-w-4xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
         style="--d: 80ms"
       >
         {l.heroLineas[0]}

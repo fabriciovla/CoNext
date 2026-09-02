@@ -80,12 +80,9 @@ export const ui = {
       description:
         'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
       anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
-      heroLineas: [
-        'Preguntan por un chat, siguen por otro.',
-        '¿Puedes seguir el ritmo?',
-      ],
+      heroLineas: ['Conext.', 'Tus canales, en una sola bandeja.'],
       heroBajada:
-        'A mano, no. conext es el CRM que junta todos tus canales en una sola bandeja, con agentes de IA que responden o te dejan el borrador. Aunque el cliente cambie de canal, el hilo sigue. La última palabra es tuya.',
+        'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio — o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
@@ -719,12 +716,9 @@ export const ui = {
       description:
         'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
       anuncio: 'The CRM on the official WhatsApp Business API',
-      heroLineas: [
-        'They ask in one chat, follow up in another.',
-        'Can you keep up?',
-      ],
+      heroLineas: ['Conext.', 'All your channels, one inbox.'],
       heroBajada:
-        'By hand, no. conext is the CRM that brings every channel into one inbox, with AI agents that reply or leave a draft. The thread does not break when they switch. The last word is yours.',
+        'AI agents answer prices, stock, and shipping from your business data — or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
       pedirDemo: 'Request a demo',
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
