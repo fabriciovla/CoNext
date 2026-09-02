@@ -80,12 +80,12 @@ export const ui = {
       description:
         'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
       anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
-      heroLineas: ['Conext.', 'El CRM de WhatsApp e Instagram.'],
+      heroLineas: ['Conext.', 'Unifica tus canales.'],
       heroBajada:
-        'Es el CRM para pequeñas empresas que junta WhatsApp e Instagram en una sola bandeja. Los agentes de IA responden precios, stock y envíos con los datos de tu negocio — o te dejan el borrador. La última palabra sigue siendo tuya.',
+        'Es el CRM para pequeñas empresas que junta todos tus canales en una sola bandeja. Los agentes de IA responden precios, stock y envíos con los datos de tu negocio — o te dejan el borrador. La última palabra sigue siendo tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
-      heroMarcas: ['WhatsApp e Instagram', 'API oficial de Meta', 'Sin apps no oficiales'],
+      heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
       funcionesEtiqueta: 'Qué es conext',
       funcionesTitulo: 'Un CRM de WhatsApp e Instagram, no un chatbot.',
       funcionesTexto:
@@ -716,12 +716,12 @@ export const ui = {
       description:
         'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
       anuncio: 'The CRM on the official WhatsApp Business API',
-      heroLineas: ['Conext.', 'The WhatsApp and Instagram CRM.'],
+      heroLineas: ['Conext.', 'Unify your channels.'],
       heroBajada:
-        'It is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI agents answer prices, stock, and shipping from your business data — or leave a draft. The last word is still yours.',
+        'It is the CRM for small businesses that brings all your channels into one inbox. AI agents answer prices, stock, and shipping from your business data — or leave a draft. The last word is still yours.',
       pedirDemo: 'Request a demo',
       verComo: 'See how it works',
-      heroMarcas: ['WhatsApp and Instagram', 'Official Meta API', 'No unofficial apps'],
+      heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
       funcionesEtiqueta: 'What Conext is',
       funcionesTitulo: 'A WhatsApp and Instagram CRM, not a chatbot.',
       funcionesTexto:
