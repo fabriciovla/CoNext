@@ -18,6 +18,7 @@ import {
 import { WHATSAPP_URL } from '../config'
 import { paginaProducto, slugsDeColumna } from '../data/producto'
 import { getLocale, t, pathFor } from '../i18n/utils'
+import { origenDe, urlCanonico } from '../lib/seo'
 
 const ICONOS = {
   inbox: IconInbox,
@@ -51,18 +52,43 @@ const hermanas = slugsDeColumna(meta.columna)
     Icono: ICONOS[paginaProducto(s).icono],
   }))
 
+const origen = origenDe(Astro.site)
 const ESQUEMA = {
   '@context': 'https://schema.org',
-  '@type': 'WebPage',
-  name: pagina.title,
-  description: pagina.description,
-  url: Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined,
-  inLanguage: lang === 'en' ? 'en' : 'es',
-  isPartOf: {
-    '@type': 'SoftwareApplication',
-    name: 'conext',
-    applicationCategory: 'BusinessApplication',
-  },
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      name: pagina.title,
+      description: pagina.description,
+      url: urlCanonico(Astro.url.pathname, Astro.site).href,
+      inLanguage: lang === 'en' ? 'en' : 'es',
+      isPartOf: { '@id': `${origen}/#aplicacion` },
+      about: { '@id': `${origen}/#org` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Conext',
+          item: urlCanonico(pathFor(lang, '/'), Astro.site).href,
+        },
+        {
+          '@type': 'ListItem',
+          position: 2,
+          name: p.indice.nombre,
+          item: urlCanonico(pathFor(lang, '/producto'), Astro.site).href,
+        },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: pagina.nombre,
+          item: urlCanonico(Astro.url.pathname, Astro.site).href,
+        },
+      ],
+    },
+  ],
 }
 ---
 
@@ -71,7 +97,9 @@ const ESQUEMA = {
 
   <article class="contenedor pb-24 pt-14 sm:pb-32 sm:pt-20">
     <div>
-      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{columnaNombre}</p>
+      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">
+        <a href={`${pathFor(lang, '/producto')}#${meta.columna}`} class="hover:text-ink-primary">{columnaNombre}</a>
+      </p>
       <div class="mt-4 flex items-start gap-4">
         {
           Icono && (
@@ -87,6 +115,11 @@ const ESQUEMA = {
           <p class="mt-4 max-w-xl text-[19px] font-normal leading-[28px] text-ink-secondary">
             {pagina.bajada}
           </p>
+          {
+            pagina.intro && (
+              <p class="mt-5 max-w-2xl text-[16px] leading-[1.7] text-ink-secondary">{pagina.intro}</p>
+            )
+          }
         </div>
       </div>
     </div>

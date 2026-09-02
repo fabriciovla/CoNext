@@ -28,6 +28,7 @@ const COLUMNAS = [
   {
     titulo: c.producto,
     enlaces: [
+      { href: pathFor(lang, '/producto'), label: copy.producto.indice.nombre },
       ...enlacesDeColumna('plataforma'),
       { href: pathFor(lang, '/precios'), label: l.precios },
     ],

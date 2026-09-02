@@ -3,5 +3,73 @@
   "installCommand": "npm install && npm install --include=dev --prefix site",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/app/:path*", "destination": "/app/index.html" }]
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap-index.xml",
+      "statusCode": 301
+    },
+    {
+      "source": "/es",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/es/:path*",
+      "destination": "/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/clientes",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/clientes",
+      "destination": "/en",
+      "statusCode": 301
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/home",
+      "destination": "/en",
+      "statusCode": 301
+    },
+    {
+      "source": "/feed",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/feed",
+      "destination": "/en",
+      "statusCode": 301
+    },
+    {
+      "source": "/comments/feed",
+      "destination": "/",
+      "statusCode": 301
+    },
+    {
+      "source": "/en/comments/feed",
+      "destination": "/en",
+      "statusCode": 301
+    }
+  ],
+  "rewrites": [{ "source": "/app/:path*", "destination": "/app/index.html" }],
+  "headers": [
+    {
+      "source": "/app",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/app/:path*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ]
 }

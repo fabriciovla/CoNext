@@ -31,4 +31,21 @@ run('npm', ['install', '--include=dev'], site)
 run('npm', ['run', 'build', '--', '--outDir', '../dist'], site)
 run('npx', ['vite', 'build', '--outDir', 'dist/app', '--base', '/app/'], root)
 
-fs.writeFileSync(path.join(root, 'dist', '_redirects'), '/app/*  /app/index.html  200\n')
+const redirects = [
+  '/app/*  /app/index.html  200',
+  '/sitemap.xml  /sitemap-index.xml  301',
+  '/es  /  301',
+  '/es/*  /:splat  301',
+  '/clientes  /  301',
+  '/en/clientes  /en  301',
+  // Sobras de un WordPress viejo: Google las sigue pidiendo.
+  // 301 a home, no 404, para que dejen de aparecer como URL propia.
+  '/home  /  301',
+  '/en/home  /en  301',
+  '/feed  /  301',
+  '/en/feed  /en  301',
+  '/comments/feed  /  301',
+  '/en/comments/feed  /en  301',
+].join('\n')
+
+fs.writeFileSync(path.join(root, 'dist', '_redirects'), `${redirects}\n`)

@@ -5,8 +5,8 @@
 // No es la `bajada` ni la `description` recortada — esas están escritas para
 // leerse enteras, y en una columna del desplegable entran a dos renglones y
 // obligan a leer para elegir. Acá alcanza con que descarte lo que no es.
-function pagina({ nombre, menu, title, description, titulo, bajada, secciones, pasos, cierre }) {
-  return { nombre, menu, title, description, titulo, bajada, secciones, pasos, cierre }
+function pagina({ nombre, menu, title, description, titulo, bajada, intro, secciones, pasos, cierre }) {
+  return { nombre, menu, title, description, titulo, bajada, intro, secciones, pasos, cierre }
 }
 
 const columnasEs = {
@@ -30,22 +30,36 @@ export const productoEs = {
   ctaTexto: 'Una demo corta, con el catálogo y las preguntas que ya te llegan por WhatsApp.',
   ctaBoton: 'Pedir una demo',
   columnas: columnasEs,
+  indice: {
+    nombre: 'Visión general',
+    etiqueta: 'Producto',
+    title: 'Producto | Conext',
+    description:
+      'Cómo está armado Conext: bandeja única, agentes de IA, catálogo, métricas y la API oficial de Meta. El CRM, página por página.',
+    titulo: 'Conext, página por página.',
+    bajada:
+      'Doce piezas. La bandeja, los agentes, el catálogo y lo que sostiene el número. Cada una con su propia página.',
+    intro:
+      'Conext es el CRM que junta los chats del negocio en un solo lugar. Estas páginas cuentan cada pieza: qué hace, cómo se usa y qué queda del lado de Meta.',
+  },
   paginas: {
     bandeja: pagina({
       nombre: 'Bandeja única',
       menu: 'Todos los chats en un lugar',
-      title: 'Bandeja única · conext',
+      title: 'Bandeja única | Conext',
       description:
-        'Todas las conversaciones de WhatsApp de tu negocio en un solo lugar: pendientes, asignadas y con estado de entrega.',
+        'Conext junta WhatsApp, Instagram y Messenger en una bandeja. Pendientes, asignadas y con estado de entrega, a la vista del equipo.',
       titulo: 'Todas las conversaciones, en un solo lugar.',
       bajada:
-        'Se termina el “¿este ya lo contestó alguien?”. El WhatsApp del negocio deja de vivir en un teléfono y pasa a una bandeja que ve todo el equipo.',
+        'Se termina el “¿este ya lo contestó alguien?”. El chat del negocio deja de vivir en un teléfono y pasa a una bandeja que ve todo el equipo.',
+      intro:
+        'En Conext cada contacto tiene un hilo. Da igual por qué canal escribió: el historial, el agente y lo pendiente quedan en el mismo lugar.',
       secciones: [
         {
           titulo: 'Un hilo por número, no por persona del local.',
           parrafos: [
             'La identidad de una conversación es el teléfono del contacto. Da igual quién abrió el chat: el hilo es el mismo, con el historial, el agente que lo está atendiendo y si quedó algo pendiente. No hay que pedir prestado el celular de la caja para retomar una venta.',
-            'Los mensajes entran por la API oficial de WhatsApp Business. Cada uno queda con su estado de entrega —enviado, entregado, leído— y el CRM no deja que un acuse que llega tarde pise uno más nuevo.',
+            'Los mensajes entran por las APIs oficiales de Meta. WhatsApp, Instagram y Messenger quedan en el hilo de su contacto, con el estado de entrega que manda el canal. El CRM no deja que un acuse que llega tarde pise uno más nuevo.',
           ],
         },
         {
@@ -67,12 +81,14 @@ export const productoEs = {
     carpetas: pagina({
       nombre: 'Carpetas y etiquetas',
       menu: 'Filtrar y encontrar un hilo',
-      title: 'Carpetas y etiquetas · conext',
+      title: 'Carpetas y etiquetas | Conext',
       description:
-        'Filtrá la bandeja por mías, sin asignar o pendientes, y etiquetá cada conversación para encontrarla después.',
+        'En Conext filtrás la bandeja por mías, sin asignar o pendientes, y etiquetás cada conversación para encontrarla después.',
       titulo: 'Encontrar un chat sin recorrer toda la lista.',
       bajada:
-        'La barra de la izquierda no es un adorno: son las mismas preguntas que te hacés en un turno —qué es mío, qué nadie tomó, qué sigue sin respuesta.',
+        'La barra de la izquierda no es un adorno: son las mismas preguntas que te hacés en un turno. Qué es mío, qué nadie tomó, qué sigue sin respuesta.',
+      intro:
+        'Las carpetas de Conext salen del trabajo del turno. Las etiquetas marcan el tema del chat. Las dos viven en la misma bandeja, no en otra app.',
       secciones: [
         {
           titulo: 'Carpetas que ya vienen con el trabajo.',
@@ -84,7 +100,7 @@ export const productoEs = {
         {
           titulo: 'Etiquetas en el contacto, no en un Excel.',
           parrafos: [
-            'Cada hilo tiene un panel de contacto. Ahí se agregan y se sacan etiquetas —ventas, envío, mayorista— sin salir de la conversación. Sirven para marcar de qué se trata el chat cuando el nombre del cliente no alcanza.',
+            'Cada hilo tiene un panel de contacto. Ahí se agregan y se sacan etiquetas (ventas, envío, mayorista) sin salir de la conversación. Sirven para marcar de qué se trata el chat cuando el nombre del cliente no alcanza.',
             'La asignación va en el mismo lugar: un responsable, o nadie. “Mías” y “Sin asignar” leen ese dato. No es un workflow de diez pasos; es quién lo está mirando hoy.',
           ],
         },
@@ -99,12 +115,14 @@ export const productoEs = {
     notas: pagina({
       nombre: 'Notas internas',
       menu: 'Contexto que el cliente no ve',
-      title: 'Notas internas · conext',
+      title: 'Notas internas | Conext',
       description:
-        'Dejá contexto en el hilo para el equipo, sin que el cliente lo vea. El composer cambia de modo y no se mezcla con la respuesta.',
+        'En Conext dejás contexto en el hilo para el equipo, sin que el cliente lo vea. El composer cambia de modo y no se mezcla con la respuesta.',
       titulo: 'Lo que el equipo tiene que saber, sin mandárselo al cliente.',
       bajada:
         '“Pidió factura A”, “no ofrecerle descuento”, “espera el pago de ayer”. Eso no es un WhatsApp. Es una nota en el hilo, visible para quien lo abra después.',
+      intro:
+        'Las notas internas de Conext quedan en el contacto. El turno que entra las lee. El cliente no recibe nada.',
       secciones: [
         {
           titulo: 'El mismo cuadro, otro modo.',
@@ -131,17 +149,19 @@ export const productoEs = {
     agentes: pagina({
       nombre: 'Agentes de IA',
       menu: 'Uno por tema, en español',
-      title: 'Agentes de IA · conext',
+      title: 'Agentes de IA | Conext',
       description:
-        'Creá un agente por tema —ventas, envíos, posventa— con su rol e instrucciones en español. Sin programar.',
+        'En Conext creás un agente de IA por tema (ventas, envíos, posventa) con su rol e instrucciones en español. Sin programar.',
       titulo: 'Un agente por tema, escrito en tu idioma.',
       bajada:
         'No es un único chatbot con un árbol de opciones. Son varias personas virtuales, cada una con su rol, y el modelo elige cuál toma el mensaje.',
+      intro:
+        'Los agentes de Conext no son un menú. Les escribís el tono y qué pueden prometer. El CRM elige cuál habla, y vos podés cambiarlo.',
       secciones: [
         {
           titulo: 'Nombre, rol, instrucciones. Nada de código.',
           parrafos: [
-            'Cada agente tiene un nombre que ves en la bandeja, un rol (quién es para el negocio) y las instrucciones que le escribís vos: tono, qué puede promete, qué no. Se prende y se apaga. Se reordenan. Se borran —siempre preguntando antes.',
+            'Cada agente tiene un nombre que ves en la bandeja, un rol (quién es para el negocio) y las instrucciones que le escribís vos: tono, qué puede prometer, qué no. Se prende y se apaga. Se reordenan. Se borran, siempre preguntando antes.',
             'El interruptor de envío automático es de cada agente, no de todo el CRM. El de ventas puede mandar solo el precio de lista; el de reclamos deja el texto para que lo mire una persona. Ese techo gana siempre: si está apagado, el modelo no sale a WhatsApp aunque se sienta seguro.',
           ],
         },
@@ -163,12 +183,14 @@ export const productoEs = {
     borrador: pagina({
       nombre: 'Envío o borrador',
       menu: 'Manda solo o te deja el texto',
-      title: 'Envío o borrador · conext',
+      title: 'Envío o borrador | Conext',
       description:
-        'Cada agente manda solo lo seguro o te deja el texto listo para revisar. El interruptor es por agente, no para todo el CRM.',
+        'En Conext cada agente de IA manda solo lo seguro o te deja el texto listo para revisar. El interruptor es por agente, no para todo el CRM.',
       titulo: 'La IA escribe. Vos decidís si se envía.',
       bajada:
         'Los temas que ya responde bien, que los atienda sola. Los que tocan un descuento, plata o un cliente enojado, que te esperen. Se cambia de opinión con un clic.',
+      intro:
+        'Una respuesta de Conext no sale solo porque el modelo se sienta seguro. Hace falta el agente prendido, el día abierto y estar en horario. Si falta una, queda borrador.',
       secciones: [
         {
           titulo: 'No basta con que el modelo se sienta seguro.',
@@ -195,12 +217,14 @@ export const productoEs = {
     clasificacion: pagina({
       nombre: 'Clasificación',
       menu: 'Elige agente y redacta',
-      title: 'Clasificación · conext',
+      title: 'Clasificación | Conext',
       description:
-        'Una sola llamada a Gemini elige agente, marca si es automático o pendiente, y redacta la respuesta con el catálogo a la vista.',
+        'Conext clasifica cada mensaje en una llamada: elige agente, marca si puede salir solo y redacta con tu catálogo a la vista.',
       titulo: 'Elegir agente, clasificar y redactar, en un paso.',
       bajada:
         'No hay un clasificador y después un redactor que espera. Una llamada, un esquema fijo, y el mensaje ya sabe quién lo atiende y si puede salir solo.',
+      intro:
+        'La clasificación de Conext no es una etiqueta para un reporte. Es la puerta que decide si alguien del equipo tiene que mirar.',
       secciones: [
         {
           titulo: 'El modelo no inventa el formato de la respuesta.',
@@ -213,7 +237,7 @@ export const productoEs = {
           titulo: 'El contexto es el de tu negocio, no uno genérico.',
           parrafos: [
             'El prompt lleva los productos con precio y stock, los horarios, los agentes y el hilo reciente. Por eso puede decir “sí, hay talle M” o “hoy cerramos a las 18” sin que le armes un árbol.',
-            'Si el mismo mensaje de Meta llega dos veces —ellos reintentan si tardás—, el CRM lo ignora la segunda: el identificador del mensaje ya está. Y si escribís fuera de hora, primero va el aviso de ausencia, con un tope para no mandarlo cada cinco minutos.',
+            'Si el mismo mensaje de Meta llega dos veces (ellos reintentan si tardás), el CRM lo ignora la segunda: el identificador del mensaje ya está. Y si escribís fuera de hora, primero va el aviso de ausencia, con un tope para no mandarlo cada cinco minutos.',
           ],
         },
       ],
@@ -227,17 +251,19 @@ export const productoEs = {
     catalogo: pagina({
       nombre: 'Catálogo y stock',
       menu: 'Precios y stock a la vista',
-      title: 'Catálogo y stock · conext',
+      title: 'Catálogo y stock | Conext',
       description:
-        'Los agentes responden precios y disponibilidad con tu catálogo. Precio, stock y carpetas, a la vista de la IA y del equipo.',
+        'Los agentes de Conext responden precios y stock con tu catálogo. Precio, disponibilidad y carpetas, a la vista de la IA y del equipo.',
       titulo: 'Los agentes contestan con tus productos, no de memoria.',
       bajada:
         'Precio y stock van en el mismo lugar donde se atiende. La IA los tiene a la vista cuando redacta; vos los ves en la pantalla de productos y en el inicio si se están por acabar.',
+      intro:
+        'El catálogo de Conext es el que mira el agente cuando el cliente pregunta por un talle o un precio. No es un PDF colgado ni una planilla aparte.',
       secciones: [
         {
           titulo: 'Un catálogo que se usa, no un PDF colgado.',
           parrafos: [
-            'Cada producto tiene nombre, precio y stock. Se agrupan en carpetas para no tener una lista plana de cien ítems. Se busca, se edita, se borra —siempre pidiendo confirmación. El valor del inventario se calcula con lo que ya está cargado; no hay un número paralelo que se desactualiza.',
+            'Cada producto tiene nombre, precio y stock. Se agrupan en carpetas para no tener una lista plana de cien ítems. Se busca, se edita, se borra, siempre pidiendo confirmación. El valor del inventario se calcula con lo que ya está cargado; no hay un número paralelo que se desactualiza.',
             'Ese mismo listado entra en la instrucción del modelo. Cuando el cliente pregunta “¿tenés el negro en M?”, la respuesta sale de acá, no de un prompt genérico que inventa talles.',
           ],
         },
@@ -259,12 +285,14 @@ export const productoEs = {
     metricas: pagina({
       nombre: 'Métricas del día',
       menu: 'Cuánto respondió la IA',
-      title: 'Métricas del día · conext',
+      title: 'Métricas del día | Conext',
       description:
-        'El día de trabajo se abre y se cierra a mano. Ves cuánto respondió la IA, cuánto tardaste y qué quedó pendiente.',
+        'En Conext el día se abre y se cierra a mano. Ves cuánto respondió la IA, cuánto tardaste y qué quedó pendiente.',
       titulo: 'El día, medido. No el calendario.',
       bajada:
         'La unidad de trabajo no es la fecha: es el día que abrís vos. Sin día abierto no se envía ni se deja nota. Cuando lo cerrás, queda archivado para comparar.',
+      intro:
+        'Las métricas de Conext salen de los mensajes de ese turno. No hay un tablero paralelo ni un “ayer” inventado si todavía no cerraste un día.',
       secciones: [
         {
           titulo: 'Abrir y cerrar es una decisión, no un cron.',
@@ -286,17 +314,19 @@ export const productoEs = {
         { titulo: 'Atendés', texto: 'Los KPIs se arman con lo que entra y lo que sale. Nada se carga a mano.' },
         { titulo: 'Cerrás', texto: 'Queda archivado. El próximo se compara contra este, no contra un día del almanaque.' },
       ],
-      cierre: 'Si el local cierra a las 20 y el sábado es feria, el día del CRM es ese turno —no las 24 horas del servidor.',
+      cierre: 'Si el local cierra a las 20 y el sábado es feria, el día del CRM es ese turno, no las 24 horas del servidor.',
     }),
     stock: pagina({
       nombre: 'Alertas de stock',
       menu: 'Qué producto está en cero',
-      title: 'Alertas de stock · conext',
+      title: 'Alertas de stock | Conext',
       description:
-        'El inicio te avisa qué productos están en cero o por debajo del umbral, con el mismo criterio que la pantalla de productos.',
+        'Conext te avisa en el inicio qué productos están en cero o bajos, con el mismo criterio que la pantalla de productos.',
       titulo: 'Enterarte antes de que el cliente pregunte y no haya.',
       bajada:
         'La IA responde con el stock que cargaste. Si ese número está mal o en cero, va a decir que no hay. Las alertas están para que lo veas vos primero.',
+      intro:
+        'Una alerta de Conext es el recorte del mostrador: qué se acaba, qué ya no está, y un click para ir a corregirlo. El agente mira el mismo número.',
       secciones: [
         {
           titulo: 'El mismo umbral en Inicio y en Productos.',
@@ -323,12 +353,14 @@ export const productoEs = {
     'api-whatsapp': pagina({
       nombre: 'API de WhatsApp',
       menu: 'La Cloud API oficial de Meta',
-      title: 'API oficial de WhatsApp · conext',
+      title: 'API oficial de WhatsApp | Conext',
       description:
-        'conext se conecta por la Cloud API de Meta. El número es tuyo, la cuenta también. Sin clonar la sesión ni dejar un teléfono enchufado.',
+        'Conext se conecta por la Cloud API de Meta. El número es tuyo, la cuenta también. Sin clonar la sesión ni dejar un teléfono enchufado.',
       titulo: 'Automatizar WhatsApp sin arriesgar el número.',
       bajada:
         'Las herramientas que se cuelgan de la app del teléfono funcionan hasta que Meta las detecta. Esta es la puerta que Meta abre para esto.',
+      intro:
+        'Conext entra por la API oficial de Meta. WhatsApp, Instagram y Messenger usan esa puerta. El número es tuyo: si un día te vas, te lo llevás.',
       secciones: [
         {
           titulo: 'Tu número, tu cuenta de Meta.',
@@ -341,7 +373,7 @@ export const productoEs = {
           titulo: 'Meta firma. El CRM no improvisa.',
           parrafos: [
             'El webhook lo firma Meta. Si el payload no corresponde a un número nuestro, se descarta. El CRM responde 200 de inmediato y procesa después: si tardara, Meta reintenta y el mismo mensaje se duplicaría. El identificador del mensaje evita que se procese dos veces.',
-            'Hoy el canal que trabaja es WhatsApp de texto. Instagram está declarado y dormido. Los adjuntos salientes sí: se suben a Graph y después se mandan; la copia que queda en el hilo es la nuestra, porque Meta borra la suya a los 30 días. Los adjuntos que manda el cliente todavía no se bajan.',
+            'Hoy entran los tres canales de Meta: WhatsApp de texto, Instagram y Messenger. Los adjuntos salientes de WhatsApp se suben a Graph y después se mandan; la copia que queda en el hilo es la nuestra, porque Meta borra la suya a los 30 días. Los adjuntos que manda el cliente todavía no se bajan.',
           ],
         },
       ],
@@ -356,24 +388,26 @@ export const productoEs = {
     equipo: pagina({
       nombre: 'Equipo en un número',
       menu: 'Varias personas, un número',
-      title: 'Equipo en un número · conext',
+      title: 'Equipo en un número | Conext',
       description:
-        'Varias personas atienden el mismo WhatsApp, cada una con su usuario. Asignación, roles y una bandeja compartida.',
+        'En Conext varias personas atienden el mismo número, cada una con su usuario. Asignación, roles y una bandeja compartida.',
       titulo: 'Varias personas, un número. Nadie pide el teléfono.',
       bajada:
         'El equipo y los agentes trabajan sobre la misma bandeja. Cada quien entra con su usuario. El WhatsApp del local deja de ser un aparato que se presta.',
+      intro:
+        'Las personas no son el cliente de Conext: se unen a un negocio con un rol. El número sigue siendo uno. Lo que se multiplica son las manos que lo atienden.',
       secciones: [
         {
           titulo: 'Un negocio, varios miembros.',
           parrafos: [
-            'Las personas no son el cliente de conext: se unen a un negocio con un rol —dueño, admin u operador. Ven solo los negocios de los que son miembros. El teléfono de WhatsApp sigue siendo uno; lo que se multiplica son las manos que lo atienden.',
+            'Las personas no son el cliente de Conext: se unen a un negocio con un rol (dueño, admin u operador). Ven solo los negocios de los que son miembros. El teléfono de WhatsApp sigue siendo uno; lo que se multiplica son las manos que lo atienden.',
             'Asignar un hilo a alguien es lo que llena la carpeta “Mías” y vacía “Sin asignar”. El resto ve quién lo tiene. No hace falta un grupo de WhatsApp paralelo para decir “esto lo toma Ana”.',
           ],
         },
         {
           titulo: 'Los agentes cuentan como manos más, no como otro número.',
           parrafos: [
-            'Un agente atiende en el mismo hilo que una persona. Queda registrado quién contestó cada cosa —modelo o humano— para poder revisar después. El cliente recibe un WhatsApp del negocio, sin un cartel de “sos un bot”, y adentro sí se sabe.',
+            'Un agente atiende en el mismo hilo que una persona. Queda registrado quién contestó cada cosa (modelo o humano) para poder revisar después. El cliente recibe un WhatsApp del negocio, sin un cartel de “sos un bot”, y adentro sí se sabe.',
             'Los planes miden asientos: cuántas personas entran. El gratis es para probar; estándar y premium suman equipo. Un asiento extra se agrega cuando el turno ya no entra en los que vinieron.',
           ],
         },
@@ -388,12 +422,14 @@ export const productoEs = {
     datos: pagina({
       nombre: 'Datos cifrados',
       menu: 'Cada negocio, su espacio',
-      title: 'Datos cifrados · conext',
+      title: 'Datos cifrados | Conext',
       description:
-        'Cada negocio tiene su espacio. Los tokens de WhatsApp van cifrados y las conversaciones no se mezclan con las de otro cliente.',
+        'Cada negocio en Conext tiene su espacio. Los tokens de Meta van cifrados y las conversaciones no se mezclan con las de otro cliente.',
       titulo: 'Tus datos son tuyos. Y están apartados de los del resto.',
       bajada:
         'Cada negocio es un espacio. Un token de WhatsApp no puede quedar en claro en una base que alguien volcó. Si te querés ir, se borra.',
+      intro:
+        'En Conext nada se consulta sin cliente. Los tokens se cifran. Si te vas, se borra el espacio: conversaciones, catálogo, agentes y credenciales.',
       secciones: [
         {
           titulo: 'Nada se consulta “sin cliente”.',
@@ -406,7 +442,7 @@ export const productoEs = {
           titulo: 'Los secretos no se guardan en claro.',
           parrafos: [
             'El token de WhatsApp de cada cliente se cifra con AES-256-GCM antes de ir a la base. Un volcado no alcanza para mandar mensajes en nombre de otro. Las API keys se hashean: se puede buscar el negocio por la clave que llega, pero no reconstruirla.',
-            'No vendemos datos ni se los pasamos a nadie. En el pie están la política de privacidad y cómo pedir la eliminación. Si te vas, se borra el espacio de ese negocio —conversaciones, catálogo, agentes, credenciales.',
+            'No vendemos datos ni se los pasamos a nadie. En el pie están la política de privacidad y cómo pedir la eliminación. Si te vas, se borra el espacio de ese negocio: conversaciones, catálogo, agentes, credenciales.',
           ],
         },
       ],
@@ -427,22 +463,36 @@ export const productoEn = {
   ctaTexto: 'A short demo, with the catalog and the questions you already get on WhatsApp.',
   ctaBoton: 'Request a demo',
   columnas: columnasEn,
+  indice: {
+    nombre: 'Overview',
+    etiqueta: 'Product',
+    title: 'Product | Conext',
+    description:
+      'How Conext is put together: one inbox, AI agents, catalog, metrics, and the official Meta API. The CRM, page by page.',
+    titulo: 'Conext, page by page.',
+    bajada:
+      'Twelve pieces. The inbox, the agents, the catalog, and what holds the number. Each one has its own page.',
+    intro:
+      'Conext is the CRM that puts the business chats in one place. These pages cover each piece: what it does, how you use it, and what stays on Meta’s side.',
+  },
   paginas: {
     bandeja: pagina({
       nombre: 'One inbox',
       menu: 'Every chat in one place',
-      title: 'One inbox · conext',
+      title: 'One inbox | Conext',
       description:
-        'Every WhatsApp conversation for the business in one place: pending, assigned, with delivery status.',
+        'Conext brings WhatsApp, Instagram, and Messenger into one inbox. Pending, assigned, with delivery status, visible to the team.',
       titulo: 'Every conversation, in one place.',
       bajada:
-        'No more “did someone already reply to this?”. The business WhatsApp stops living on a phone and becomes an inbox the whole team can see.',
+        'No more “did someone already reply to this?”. The business chat stops living on a phone and becomes an inbox the whole team can see.',
+      intro:
+        'In Conext each contact has one thread. It does not matter which channel they wrote on: the history, the agent, and what is pending stay in the same place.',
       secciones: [
         {
           titulo: 'One thread per number, not per person at the shop.',
           parrafos: [
             'A conversation is identified by the contact’s phone. It does not matter who opened the chat: the thread is the same, with the history, the agent on it, and whether something is still pending. Nobody has to borrow the till phone to pick up a sale.',
-            'Messages come in through the official WhatsApp Business API. Each one keeps its delivery status —sent, delivered, read— and the CRM will not let a late receipt overwrite a newer one.',
+            'Messages come in through Meta’s official APIs. WhatsApp, Instagram, and Messenger land on that contact’s thread, with the delivery status the channel sends. The CRM will not let a late receipt overwrite a newer one.',
           ],
         },
         {
@@ -463,12 +513,14 @@ export const productoEn = {
     carpetas: pagina({
       nombre: 'Folders and tags',
       menu: 'Filter and find a thread',
-      title: 'Folders and tags · conext',
+      title: 'Folders and tags | Conext',
       description:
-        'Filter the inbox by yours, unassigned, or pending, and tag each conversation so you can find it later.',
+        'In Conext you filter the inbox by yours, unassigned, or pending, and tag each conversation so you can find it later.',
       titulo: 'Find a chat without scrolling the whole list.',
       bajada:
-        'The left bar is not decoration. It is the questions you ask on a shift —what is mine, what nobody took, what still needs a reply.',
+        'The left bar is not decoration. It is the questions you ask on a shift: what is mine, what nobody took, what still needs a reply.',
+      intro:
+        'Conext folders come from the shift’s work. Tags mark the topic of the chat. Both live in the same inbox, not in another app.',
       secciones: [
         {
           titulo: 'Folders that come with the work.',
@@ -480,7 +532,7 @@ export const productoEn = {
         {
           titulo: 'Tags on the contact, not in a spreadsheet.',
           parrafos: [
-            'Each thread has a contact panel. You add and remove tags there —sales, shipping, wholesale— without leaving the conversation. They mark what the chat is about when the customer’s name is not enough.',
+            'Each thread has a contact panel. You add and remove tags there (sales, shipping, wholesale) without leaving the conversation. They mark what the chat is about when the customer’s name is not enough.',
             'Assignment lives in the same place: someone responsible, or no one. Mine and Unassigned read that field. It is not a ten-step workflow; it is who is looking at it today.',
           ],
         },
@@ -495,12 +547,14 @@ export const productoEn = {
     notas: pagina({
       nombre: 'Internal notes',
       menu: 'Notes only your team sees',
-      title: 'Internal notes · conext',
+      title: 'Internal notes | Conext',
       description:
-        'Leave context on the thread for the team, without the customer seeing it. The composer changes mode so it cannot mix with a reply.',
+        'In Conext you leave context on the thread for the team, without the customer seeing it. The composer changes mode so it cannot mix with a reply.',
       titulo: 'What the team needs to know, without sending it to the customer.',
       bajada:
         '“They asked for an invoice”, “don’t offer a discount”, “waiting on yesterday’s payment”. That is not a WhatsApp. It is a note on the thread, visible to whoever opens it next.',
+      intro:
+        'Conext internal notes stay on the contact. The next shift reads them. The customer gets nothing.',
       secciones: [
         {
           titulo: 'The same box, another mode.',
@@ -527,17 +581,19 @@ export const productoEn = {
     agentes: pagina({
       nombre: 'AI agents',
       menu: 'One per topic, plain language',
-      title: 'AI agents · conext',
+      title: 'AI agents | Conext',
       description:
-        'Create an agent per topic —sales, shipping, after-sales— with its role and instructions in plain language. No coding.',
+        'In Conext you create an AI agent per topic (sales, shipping, after-sales) with its role and instructions in plain language. No coding.',
       titulo: 'One agent per topic, written in your language.',
       bajada:
         'It is not a single chatbot with a tree of options. It is several virtual people, each with a role, and the model picks which one takes the message.',
+      intro:
+        'Conext agents are not a menu. You write the tone and what they may promise. The CRM picks who speaks, and you can change it.',
       secciones: [
         {
           titulo: 'Name, role, instructions. No code.',
           parrafos: [
-            'Each agent has a name you see in the inbox, a role (who they are for the business), and the instructions you write: tone, what they may promise, what they may not. You turn them on and off. You reorder them. You delete them —always after a confirmation.',
+            'Each agent has a name you see in the inbox, a role (who they are for the business), and the instructions you write: tone, what they may promise, what they may not. You turn them on and off. You reorder them. You delete them, always after a confirmation.',
             'The auto-send switch belongs to each agent, not to the whole CRM. Sales can send list prices on their own; complaints leave the text for a person to look at. That ceiling always wins: if it is off, the model does not go out to WhatsApp even if it feels sure.',
           ],
         },
@@ -559,12 +615,14 @@ export const productoEn = {
     borrador: pagina({
       nombre: 'Auto-send or draft',
       menu: 'Sends on its own, or waits',
-      title: 'Auto-send or draft · conext',
+      title: 'Auto-send or draft | Conext',
       description:
-        'Each agent sends what is safe on its own, or leaves the text for you to review. The switch is per agent, not for the whole CRM.',
+        'In Conext each AI agent sends what is safe on its own, or leaves the text for you to review. The switch is per agent, not for the whole CRM.',
       titulo: 'AI writes. You decide if it sends.',
       bajada:
         'Topics it already handles well can go out on their own. Anything that touches a discount, money, or an angry customer waits for you. You change your mind with one click.',
+      intro:
+        'A Conext reply does not go out just because the model feels sure. The agent has to be on, the day open, and you inside hours. If one is missing, it stays a draft.',
       secciones: [
         {
           titulo: 'The model feeling sure is not enough.',
@@ -591,12 +649,14 @@ export const productoEn = {
     clasificacion: pagina({
       nombre: 'Classification',
       menu: 'Picks the agent and writes',
-      title: 'Classification · conext',
+      title: 'Classification | Conext',
       description:
-        'A single Gemini call picks the agent, marks automatic or pending, and writes the reply with your catalog in view.',
-      titulo: 'Pick an agent, classify, and write — in one step.',
+        'Conext classifies each message in one call: it picks the agent, marks whether it can send, and writes with your catalog in view.',
+      titulo: 'Pick an agent, classify, and write, in one step.',
       bajada:
         'There is no classifier and then a writer waiting on it. One call, a fixed schema, and the message already knows who owns it and whether it can go out alone.',
+      intro:
+        'Conext classification is not a label for a report. It is the door that decides whether someone on the team has to look.',
       secciones: [
         {
           titulo: 'The model does not invent the shape of the answer.',
@@ -609,7 +669,7 @@ export const productoEn = {
           titulo: 'The context is your business, not a generic one.',
           parrafos: [
             'The prompt carries products with price and stock, hours, agents, and the recent thread. That is why it can say “yes, we have size M” or “we close at 6 today” without a tree you had to build.',
-            'If the same Meta message arrives twice —they retry if you are slow— the CRM ignores the second: the message id is already there. And if they write after hours, the away notice goes first, with a cap so it is not sent every five minutes.',
+            'If the same Meta message arrives twice (they retry if you are slow), the CRM ignores the second: the message id is already there. And if they write after hours, the away notice goes first, with a cap so it is not sent every five minutes.',
           ],
         },
       ],
@@ -623,17 +683,19 @@ export const productoEn = {
     catalogo: pagina({
       nombre: 'Catalog and stock',
       menu: 'Prices and stock in view',
-      title: 'Catalog and stock · conext',
+      title: 'Catalog and stock | Conext',
       description:
-        'Agents answer prices and availability from your catalog. Price, stock, and folders, in view for the AI and the team.',
+        'Conext agents answer prices and stock from your catalog. Price, availability, and folders, in view for the AI and the team.',
       titulo: 'Agents answer with your products, not from memory.',
       bajada:
         'Price and stock live where you handle the chat. The AI has them in view when it writes; you see them on the products screen and on Home if they are about to run out.',
+      intro:
+        'The Conext catalog is what the agent looks at when a customer asks for a size or a price. It is not a PDF on the side or a separate sheet.',
       secciones: [
         {
           titulo: 'A catalog that gets used, not a PDF on the side.',
           parrafos: [
-            'Each product has a name, a price, and stock. They group into folders so you are not staring at a flat list of a hundred items. You search, edit, delete —always after a confirmation. Inventory value is computed from what is already loaded; there is no parallel number that goes stale.',
+            'Each product has a name, a price, and stock. They group into folders so you are not staring at a flat list of a hundred items. You search, edit, delete, always after a confirmation. Inventory value is computed from what is already loaded; there is no parallel number that goes stale.',
             'That same list goes into the model’s instruction. When a customer asks “do you have the black one in M?”, the answer comes from here, not from a generic prompt that invents sizes.',
           ],
         },
@@ -655,12 +717,14 @@ export const productoEn = {
     metricas: pagina({
       nombre: 'Day metrics',
       menu: 'How much the AI answered',
-      title: 'Day metrics · conext',
+      title: 'Day metrics | Conext',
       description:
-        'The work day is opened and closed by hand. You see how much the AI answered, how long you took, and what is still pending.',
+        'In Conext the day is opened and closed by hand. You see how much the AI answered, how long you took, and what is still pending.',
       titulo: 'The day, measured. Not the calendar.',
       bajada:
         'The unit of work is not the date: it is the day you open. With no open day you cannot send or leave a note. When you close it, it is archived so you can compare.',
+      intro:
+        'Conext metrics come from that shift’s messages. There is no parallel dashboard, and no invented “yesterday” if you have not closed a day yet.',
       secciones: [
         {
           titulo: 'Opening and closing is a decision, not a cron job.',
@@ -682,17 +746,19 @@ export const productoEn = {
         { titulo: 'You handle it', texto: 'KPIs are built from what comes in and what goes out. Nothing is typed in by hand.' },
         { titulo: 'You close it', texto: 'It is archived. The next one is compared against this, not against a calendar day.' },
       ],
-      cierre: 'If the shop closes at 8 and Saturday is a fair, the CRM day is that shift —not the server’s 24 hours.',
+      cierre: 'If the shop closes at 8 and Saturday is a fair, the CRM day is that shift, not the server’s 24 hours.',
     }),
     stock: pagina({
       nombre: 'Stock alerts',
       menu: 'Which product hit zero',
-      title: 'Stock alerts · conext',
+      title: 'Stock alerts | Conext',
       description:
-        'Home tells you which products are at zero or under the threshold, with the same rule as the products screen.',
+        'Conext tells you on Home which products are at zero or low, with the same rule as the products screen.',
       titulo: 'Know before the customer asks and there is none.',
       bajada:
         'The AI answers with the stock you loaded. If that number is wrong or zero, it will say there is none. Alerts are there so you see it first.',
+      intro:
+        'A Conext alert is the slice a counter needs: what is running out, what is gone, and a click to go fix it. The agent looks at the same number.',
       secciones: [
         {
           titulo: 'The same threshold on Home and in Products.',
@@ -719,12 +785,14 @@ export const productoEn = {
     'api-whatsapp': pagina({
       nombre: 'WhatsApp API',
       menu: 'Meta’s official Cloud API',
-      title: 'Official WhatsApp API · conext',
+      title: 'Official WhatsApp API | Conext',
       description:
-        'conext connects through Meta’s Cloud API. The number is yours, the account too. No cloned session, no phone left on a charger.',
+        'Conext connects through Meta’s Cloud API. The number is yours, the account too. No cloned session, no phone left on a charger.',
       titulo: 'Automate WhatsApp without putting the number at risk.',
       bajada:
         'Tools that hitch a ride on the phone app work until Meta catches them. This is the door Meta opens for this.',
+      intro:
+        'Conext goes in through Meta’s official API. WhatsApp, Instagram, and Messenger use that door. The number is yours: if you leave one day, you take it with you.',
       secciones: [
         {
           titulo: 'Your number, your Meta account.',
@@ -737,7 +805,7 @@ export const productoEn = {
           titulo: 'Meta signs. The CRM does not improvise.',
           parrafos: [
             'The webhook is signed by Meta. If the payload is not one of our numbers, it is dropped. The CRM answers 200 immediately and processes after: if it were slow, Meta would retry and the same message would duplicate. The message id stops it from being processed twice.',
-            'The channel that works today is WhatsApp text. Instagram is declared and asleep. Outbound attachments do work: they upload to Graph and then send; the copy that stays in the thread is ours, because Meta deletes theirs after 30 days. Inbound customer media is not downloaded yet.',
+            'All three Meta channels come in today: WhatsApp text, Instagram, and Messenger. Outbound WhatsApp attachments upload to Graph and then send; the copy that stays in the thread is ours, because Meta deletes theirs after 30 days. Inbound customer media is not downloaded yet.',
           ],
         },
       ],
@@ -747,29 +815,31 @@ export const productoEn = {
         { titulo: 'Replies go out', texto: 'Text or media through Graph. Without credentials, development simulates; production does not pretend.' },
       ],
       cierre:
-        'Meta charges for conversations on your Meta account, at their rate. conext does not add a markup. What you pay here is the software.',
+        'Meta charges for conversations on your Meta account, at their rate. Conext does not add a markup. What you pay here is the software.',
     }),
     equipo: pagina({
       nombre: 'Team on one number',
       menu: 'Several people, one number',
-      title: 'Team on one number · conext',
+      title: 'Team on one number | Conext',
       description:
-        'Several people handle the same WhatsApp, each with their own user. Assignment, roles, and a shared inbox.',
+        'In Conext several people handle the same number, each with their own user. Assignment, roles, and a shared inbox.',
       titulo: 'Several people, one number. Nobody borrows the phone.',
       bajada:
         'The team and the agents work from the same inbox. Each person comes in with their user. The shop WhatsApp stops being a device you lend out.',
+      intro:
+        'People are not the Conext customer: they join a business with a role. The number stays one. What multiplies is the hands that handle it.',
       secciones: [
         {
           titulo: 'One business, several members.',
           parrafos: [
-            'People are not the conext customer: they join a business with a role —owner, admin, or operator. They only see the businesses they belong to. The WhatsApp number stays one; what multiplies is the hands that handle it.',
+            'People are not the Conext customer: they join a business with a role (owner, admin, or operator). They only see the businesses they belong to. The WhatsApp number stays one; what multiplies is the hands that handle it.',
             'Assigning a thread to someone is what fills Mine and empties Unassigned. Everyone else sees who has it. You do not need a side WhatsApp group to say “Ana is taking this”.',
           ],
         },
         {
           titulo: 'Agents count as extra hands, not as another number.',
           parrafos: [
-            'An agent works on the same thread as a person. Who answered each one is logged —model or human— so you can review later. The customer gets a WhatsApp from the business, with no “you are talking to a bot” banner, and on the inside you do know.',
+            'An agent works on the same thread as a person. Who answered each one is logged (model or human) so you can review later. The customer gets a WhatsApp from the business, with no “you are talking to a bot” banner, and on the inside you do know.',
             'Plans measure seats: how many people fit. Free is to try; Standard and Premium add team. An extra seat is added when the shift no longer fits in the ones that came with the plan.',
           ],
         },
@@ -784,12 +854,14 @@ export const productoEn = {
     datos: pagina({
       nombre: 'Encrypted data',
       menu: 'Each business, its own space',
-      title: 'Encrypted data · conext',
+      title: 'Encrypted data | Conext',
       description:
-        'Each business has its own space. WhatsApp tokens are encrypted, and conversations are not mixed with another customer’s.',
+        'Each business in Conext has its own space. Meta tokens are encrypted, and conversations are not mixed with another customer’s.',
       titulo: 'Your data is yours. And it is kept apart from everyone else’s.',
       bajada:
         'Each business is a space. A WhatsApp token cannot sit in the clear in a dumped database. If you want to leave, it is deleted.',
+      intro:
+        'In Conext nothing is queried without a customer. Tokens are encrypted. If you leave, the space is deleted: conversations, catalog, agents, and credentials.',
       secciones: [
         {
           titulo: 'Nothing is queried “without a customer”.',
@@ -802,7 +874,7 @@ export const productoEn = {
           titulo: 'Secrets are not stored in the clear.',
           parrafos: [
             'Each customer’s WhatsApp token is encrypted with AES-256-GCM before it hits the database. A dump is not enough to send messages as someone else. API keys are hashed: you can look up the business by the key that arrives, but you cannot rebuild it.',
-            'We do not sell data or pass it on. The footer has the privacy policy and how to request deletion. If you leave, that business’s space is deleted —conversations, catalog, agents, credentials.',
+            'We do not sell data or pass it on. The footer has the privacy policy and how to request deletion. If you leave, that business’s space is deleted: conversations, catalog, agents, credentials.',
           ],
         },
       ],

@@ -24,7 +24,8 @@ export function pathFor(lang, path) {
   let p = hashAt >= 0 ? path.slice(0, hashAt) : path
   if (!p) p = '/'
   if (lang === 'es') return `${p}${hash}`
-  if (p === '/') return `/en/${hash}`
+  // Sin barra final: `trailingSlash: 'never'` y Vercel redirigen `/en/` a `/en`.
+  if (p === '/') return `/en${hash}`
   return `/en${p}${hash}`
 }
 

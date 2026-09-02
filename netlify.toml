@@ -6,3 +6,68 @@
   from = "/app/*"
   to = "/app/index.html"
   status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap-index.xml"
+  status = 301
+
+[[redirects]]
+  from = "/es"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/es/*"
+  to = "/:splat"
+  status = 301
+
+[[redirects]]
+  from = "/clientes"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/en/clientes"
+  to = "/en"
+  status = 301
+
+[[redirects]]
+  from = "/home"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/en/home"
+  to = "/en"
+  status = 301
+
+[[redirects]]
+  from = "/feed"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/en/feed"
+  to = "/en"
+  status = 301
+
+[[redirects]]
+  from = "/comments/feed"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/en/comments/feed"
+  to = "/en"
+  status = 301
+
+[[headers]]
+  for = "/app"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/app/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

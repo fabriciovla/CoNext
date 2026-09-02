@@ -67,7 +67,7 @@ const ESQUEMA = {
       '@type': 'SoftwareApplication',
       '@id': `${origen}/#aplicacion`,
       name: 'Conext',
-      alternateName: 'conext',
+      alternateName: ['conext', 'Conext CRM'],
       applicationCategory: 'BusinessApplication',
       applicationSubCategory: 'CRM',
       operatingSystem: 'Web',
@@ -80,6 +80,7 @@ const ESQUEMA = {
         audienceType: lang === 'en' ? 'Small businesses' : 'Pequeñas empresas',
       },
       creator: { '@id': `${origen}/#org` },
+      publisher: { '@id': `${origen}/#org` },
     },
     {
       '@type': 'FAQPage',

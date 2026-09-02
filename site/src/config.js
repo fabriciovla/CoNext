@@ -22,6 +22,8 @@ export const API_URL = import.meta.env.DEV
 export const GITHUB_URL = 'https://github.com/fabriciovla'
 export const WHATSAPP_URL = 'https://wa.me/5490000000000'
 export const EMAIL = 'contact@conext.lat'
+// Apex: lo tiene allowlisteado el checkout de Dodo. El host canónico de SEO
+// es www (astro.config `site`); Vercel redirige este origen con 308.
 export const SITE_URL = 'https://conext.lat'
 
 export const ALTA_CLAVE = 'conext:alta'

@@ -1,6 +1,10 @@
-# /login no se prohíbe acá a propósito: la página lleva noindex, y para que
-# el buscador lo lea tiene que poder rastrearla. Un Disallow se lo impediría.
+# /login y /empezar no se prohíben: llevan noindex, y el buscador tiene que
+# poder leer la etiqueta. Un Disallow se lo impediría.
+# /app es la dashboard autenticada. `$` ancla el final: `Disallow: /app`
+# pelado también bloquearía /apple-touch-icon.png.
 User-agent: *
 Allow: /
+Disallow: /app$
+Disallow: /app/
 
-Sitemap: https://conext.lat/sitemap-index.xml
+Sitemap: https://www.conext.lat/sitemap-index.xml

@@ -78,24 +78,24 @@ export const ui = {
     landing: {
       title: 'Conext | CRM de WhatsApp e Instagram para pequeñas empresas',
       description:
-        'Conext es el CRM para pequeñas empresas que centraliza WhatsApp e Instagram. La IA responde sola o te deja el borrador. Pedí una demo de 20 minutos.',
-      anuncio: 'El CRM sobre la API oficial de WhatsApp Business',
+        'Conext es el CRM para pequeñas empresas que junta WhatsApp, Instagram y Messenger en una bandeja. La IA responde sola o te deja el borrador. Pedí una demo.',
+      anuncio: 'El CRM sobre la API oficial de Meta',
       heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
       heroBajada:
         'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio, o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
       pedirDemo: 'Pedir una demo',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
-      funcionesEtiqueta: 'Qué es conext',
-      funcionesTitulo: 'Un CRM de WhatsApp e Instagram, no un chatbot.',
+      funcionesEtiqueta: 'Qué es Conext',
+      funcionesTitulo: 'Un CRM para tus canales, no un chatbot.',
       funcionesTexto:
-        'conext centraliza los mensajes de tus canales para que una pyme no tenga que atenderlos en tres pantallas. La IA trabaja adentro, con tu catálogo y tus horarios, no con un árbol de opciones.',
+        'Conext centraliza los mensajes de tus canales para que una pyme no tenga que atenderlos en tres pantallas. La IA trabaja adentro, con tu catálogo y tus horarios, no con un árbol de opciones.',
       funciones: [
         {
           id: 'bandeja',
           titulo: 'Una sola bandeja',
           texto:
-            'WhatsApp e Instagram entran al mismo lugar, con carpetas, etiquetas y estado de entrega. Se termina el "¿este ya lo contestó alguien?".',
+            'WhatsApp, Instagram y Messenger entran al mismo lugar, con carpetas, etiquetas y estado de entrega. Se termina el "¿este ya lo contestó alguien?".',
         },
         {
           id: 'agentes',
@@ -129,7 +129,7 @@ export const ui = {
         },
       ],
       grupos: [
-        { nombre: 'Atención', bajada: 'WhatsApp e Instagram, en su lugar.', ids: ['bandeja', 'horarios'] },
+        { nombre: 'Atención', bajada: 'WhatsApp, Instagram y Messenger, en su lugar.', ids: ['bandeja', 'horarios'] },
         { nombre: 'Inteligencia', bajada: 'Agentes de IA, con las reglas de tu negocio.', ids: ['agentes', 'automatico'] },
         { nombre: 'Operación', bajada: 'El día a día de una pyme, a mano.', ids: ['productos', 'dia'] },
       ],
@@ -138,12 +138,12 @@ export const ui = {
       controlTexto:
         'Los temas que ya sabes que responde bien, que los atienda sola. Los que tocan dinero, un descuento o un cliente enojado, que te esperen en el CRM. Se cambia de opinión con un clic, agente por agente.',
       pasosEtiqueta: 'Cómo funciona',
-      pasosTitulo: 'Cómo funciona conext, en tres pasos.',
+      pasosTitulo: 'Cómo funciona Conext, en tres pasos.',
       pasos: [
         {
-          titulo: 'Conectas WhatsApp e Instagram',
+          titulo: 'Conectas tus canales',
           texto:
-            'Se enlaza tu WhatsApp Business y tu Instagram profesional con tu cuenta de Meta. El número es tuyo y la cuenta también: si un día te vas, te los llevas.',
+            'Se enlaza tu WhatsApp Business, tu Instagram profesional y Messenger con tu cuenta de Meta. El número es tuyo y la cuenta también: si un día te vas, te los llevas.',
         },
         {
           titulo: 'Le cuentas cómo trabaja tu negocio',
@@ -151,7 +151,7 @@ export const ui = {
             'Cargas tus productos con precio y stock, tus días y horarios, y tus respuestas de siempre. Después armas los agentes que hagan falta.',
         },
         {
-          titulo: 'Miras la bandeja de conext',
+          titulo: 'Miras la bandeja de Conext',
           texto:
             'Los agentes atienden. Tú entras cuando algo necesita una persona, y la bandeja te marca exactamente cuáles son.',
         },
@@ -159,7 +159,7 @@ export const ui = {
       garantiasEtiqueta: 'Por qué la vía oficial',
       garantiasTitulo: 'Automatizar WhatsApp sin arriesgar tu número.',
       garantiasTexto:
-        'Las herramientas que se cuelgan de WhatsApp Web o de la app del teléfono funcionan hasta que Meta las detecta. conext entra por la API oficial, que es la puerta que Meta abre para un CRM.',
+        'Las herramientas que se cuelgan de WhatsApp Web o de la app del teléfono funcionan hasta que Meta las detecta. Conext entra por la API oficial, que es la puerta que Meta abre para un CRM.',
       garantias: [
         {
           titulo: 'Tu número no corre riesgo',
@@ -178,19 +178,19 @@ export const ui = {
         },
       ],
       faqEtiqueta: 'Preguntas',
-      faqTitulo: 'Preguntas frecuentes sobre conext',
+      faqTitulo: 'Preguntas frecuentes sobre Conext',
       faqMas: 'Más preguntas, por tema, en el',
       faqCentro: 'centro de ayuda',
       preguntas: [
         {
           pregunta: '¿Qué es Conext?',
           respuesta:
-            'Conext es un CRM para pequeñas empresas que centraliza los mensajes de WhatsApp e Instagram en una sola bandeja. Los agentes de IA responden lo seguro o te dejan el borrador listo: la última palabra sigue siendo tuya. Corre sobre la API oficial de Meta, no sobre WhatsApp Web ni apps no oficiales.',
+            'Conext es un CRM para pequeñas empresas que centraliza los mensajes de WhatsApp, Instagram y Messenger en una sola bandeja. Los agentes de IA responden lo seguro o te dejan el borrador listo: la última palabra sigue siendo tuya. Corre sobre la API oficial de Meta, no sobre WhatsApp Web ni apps no oficiales.',
         },
         {
           pregunta: '¿Conext sirve solo para WhatsApp?',
           respuesta:
-            'No. El CRM une WhatsApp e Instagram y Messenger, si tu Página lo tiene, en la misma bandeja. WhatsApp entra por la API oficial de WhatsApp Business; Instagram, por la Página de Facebook del negocio.',
+            'No. El CRM une WhatsApp, Instagram y Messenger, si tu Página lo tiene, en la misma bandeja. WhatsApp entra por la API oficial de WhatsApp Business; Instagram y Messenger, por la Página de Facebook del negocio.',
         },
         {
           pregunta: '¿Necesito un número nuevo?',
@@ -218,24 +218,24 @@ export const ui = {
             'Hay una prueba de 7 días del Estándar (después $49/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa. No le agregamos nada encima.',
         },
       ],
-      ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos conext.',
+      ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos Conext.',
       ctaTexto:
-        'Una demo de veinte minutos, con tus productos y las preguntas que ya te llegan por WhatsApp e Instagram.',
+        'Una demo de veinte minutos, con tus productos y las preguntas que ya te llegan por WhatsApp, Instagram o Messenger.',
       ctaBoton: 'Escríbenos por WhatsApp',
     },
     precios: {
-      title: 'Precios · conext',
+      title: 'Precios | Conext',
       description:
-        'Planes de conext para atender WhatsApp con IA: prueba de 7 días, estándar, premium y a medida. Elegí el que le queda a tu negocio.',
+        'Planes de Conext para atender WhatsApp, Instagram y Messenger con IA: prueba de 7 días, estándar, premium y a medida.',
       etiqueta: 'Precios',
-      titulo: 'Precios de conext',
+      titulo: 'Precios de Conext',
       bajada: 'Elegí el paquete que mejor le queda a tu negocio.',
-      comparacion: 'Comparación de planes de conext',
+      comparacion: 'Comparación de planes de Conext',
       masElegido: 'El más elegido',
       funcion: 'Función',
       incluido: 'Incluido',
       noIncluido: 'No incluido',
-      nota: 'Importes en dólares (USD). Las conversaciones de WhatsApp las cobra Meta a tu cuenta, con su tarifa — no le agregamos un margen.',
+      nota: 'Importes en dólares (USD). Las conversaciones de WhatsApp las cobra Meta a tu cuenta, con su tarifa. No le agregamos un margen.',
       desliza: 'Deslizá la tabla para comparar los cuatro planes.',
       indecisoTitulo: '¿No estás seguro de qué plan te queda?',
       indecisoTexto: 'Cuéntanos cómo atiendes hoy y lo vemos con los números de tu operación.',
@@ -351,8 +351,8 @@ export const ui = {
       ],
     },
     ayuda: {
-      title: 'Ayuda · conext',
-      description: 'Preguntas sobre facturación, cuentas, seguridad y datos en conext. Si no está acá, escríbenos.',
+      title: 'Ayuda | Conext',
+      description: 'Preguntas sobre facturación, cuentas, seguridad y datos en Conext. Si no está acá, escríbenos.',
       etiqueta: 'Ayuda',
       titulo: 'Preguntas, por tema.',
       bajada: 'Facturación, cuentas, seguridad y datos. Si el tema no está, el carril termina en un contacto.',
@@ -368,7 +368,7 @@ export const ui = {
             {
               pregunta: '¿Cuánto cuesta conext?',
               respuesta:
-                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $49/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa — no le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
+                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $49/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa. No le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
             },
             {
               pregunta: '¿Las conversaciones de WhatsApp las facturan ustedes?',
@@ -378,7 +378,7 @@ export const ui = {
             {
               pregunta: '¿Cómo pido una factura o cambio de plan?',
               respuesta:
-                'Escribe a <a href="mailto:{email}">{email}</a> con el nombre del negocio. Si el cambio es de volumen —más personas, más conversaciones— conviene el mismo hilo: así no se cruza con una alta nueva.',
+                'Escribe a <a href="mailto:{email}">{email}</a> con el nombre del negocio. Si el cambio es de volumen (más personas, más conversaciones) conviene el mismo hilo: así no se cruza con una alta nueva.',
             },
           ],
         },
@@ -431,7 +431,7 @@ export const ui = {
             {
               pregunta: '¿Qué ve la inteligencia artificial?',
               respuesta:
-                'El texto del mensaje y el contexto que el agente necesita —catálogo, instrucciones, historial reciente— se envían a Gemini para clasificar y redactar. No entrenamos un modelo propio con tus hilos.',
+                'El texto del mensaje y el contexto que el agente necesita (catálogo, instrucciones, historial reciente) se envían a Gemini para clasificar y redactar. No entrenamos un modelo propio con tus hilos.',
             },
             {
               pregunta: '¿Cómo pido que borren todo?',
@@ -554,18 +554,18 @@ export const ui = {
     legal: {
       etiqueta: 'Legal',
       actualizada: 'Última actualización:',
-      privacidadTitle: 'Privacidad · conext',
+      privacidadTitle: 'Privacidad | Conext',
       privacidadDescription:
-        'Qué datos trata conext, para qué, con quién se comparte y cómo pedir que se borren.',
+        'Qué datos trata Conext, para qué, con quién se comparte y cómo pedir que se borren.',
       privacidadHeading: 'Política de privacidad',
       privacidadFecha: '20 de agosto de 2026',
-      terminosTitle: 'Términos · conext',
-      terminosDescription: 'Las condiciones de uso del CRM conext y de la conexión con WhatsApp Business.',
+      terminosTitle: 'Términos | Conext',
+      terminosDescription: 'Las condiciones de uso del CRM Conext y de la conexión con WhatsApp Business.',
       terminosHeading: 'Términos y condiciones',
       terminosFecha: '20 de agosto de 2026',
-      eliminarTitle: 'Borrar tus datos · conext',
+      eliminarTitle: 'Borrar tus datos | Conext',
       eliminarDescription:
-        'Cómo pedir que se borren tu cuenta, tus conversaciones y los datos asociados a Facebook Login en conext.',
+        'Cómo pedir que se borren tu cuenta, tus conversaciones y los datos asociados a Facebook Login en Conext.',
       eliminarHeading: 'Eliminación de datos de usuario',
       eliminarFecha: '20 de agosto de 2026',
     },
@@ -714,8 +714,8 @@ export const ui = {
     landing: {
       title: 'Conext | WhatsApp & Instagram CRM for small businesses',
       description:
-        'Conext is the CRM for small businesses that brings WhatsApp and Instagram into one inbox. AI replies on its own or leaves a draft. Request a 20-minute demo.',
-      anuncio: 'The CRM on the official WhatsApp Business API',
+        'Conext is the CRM for small businesses that brings WhatsApp, Instagram, and Messenger into one inbox. AI replies on its own or leaves a draft. Request a demo.',
+      anuncio: 'The CRM on the official Meta API',
       heroLineas: ['All your channels, one inbox.', 'Conext.'],
       heroBajada:
         'AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
@@ -723,15 +723,15 @@ export const ui = {
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
       funcionesEtiqueta: 'What Conext is',
-      funcionesTitulo: 'A WhatsApp and Instagram CRM, not a chatbot.',
+      funcionesTitulo: 'A CRM for your channels, not a chatbot.',
       funcionesTexto:
-        'conext puts your channel messages in one place so a small business is not answering from three screens. The AI works inside, with your catalog and hours, not a tree of options.',
+        'Conext puts your channel messages in one place so a small business is not answering from three screens. The AI works inside, with your catalog and hours, not a tree of options.',
       funciones: [
         {
           id: 'bandeja',
           titulo: 'One inbox',
           texto:
-            'WhatsApp and Instagram land in the same place, with folders, tags, and delivery status. No more “did someone already reply to this?”',
+            'WhatsApp, Instagram, and Messenger land in the same place, with folders, tags, and delivery status. No more “did someone already reply to this?”',
         },
         {
           id: 'agentes',
@@ -765,7 +765,7 @@ export const ui = {
         },
       ],
       grupos: [
-        { nombre: 'Inbox', bajada: 'WhatsApp and Instagram, in their place.', ids: ['bandeja', 'horarios'] },
+        { nombre: 'Inbox', bajada: 'WhatsApp, Instagram, and Messenger, in their place.', ids: ['bandeja', 'horarios'] },
         { nombre: 'Intelligence', bajada: 'AI agents, by your business rules.', ids: ['agentes', 'automatico'] },
         { nombre: 'Operations', bajada: 'The day-to-day of a small business, at hand.', ids: ['productos', 'dia'] },
       ],
@@ -777,9 +777,9 @@ export const ui = {
       pasosTitulo: 'How Conext works, in three steps.',
       pasos: [
         {
-          titulo: 'You connect WhatsApp and Instagram',
+          titulo: 'You connect your channels',
           texto:
-            'Your WhatsApp Business and professional Instagram are linked to your own Meta account. The number is yours and so is the account: if you leave one day, you take them with you.',
+            'Your WhatsApp Business, professional Instagram, and Messenger are linked to your own Meta account. The number is yours and so is the account: if you leave one day, you take them with you.',
         },
         {
           titulo: 'You explain how your business works',
@@ -795,7 +795,7 @@ export const ui = {
       garantiasEtiqueta: 'Why the official path',
       garantiasTitulo: 'Automate WhatsApp without putting your number at risk.',
       garantiasTexto:
-        'Tools that hitch a ride on WhatsApp Web or the phone app work until Meta catches them. conext goes in through the official API, the door Meta opens for a CRM.',
+        'Tools that hitch a ride on WhatsApp Web or the phone app work until Meta catches them. Conext goes in through the official API, the door Meta opens for a CRM.',
       garantias: [
         {
           titulo: 'Your number is not at risk',
@@ -821,12 +821,12 @@ export const ui = {
         {
           pregunta: 'What is Conext?',
           respuesta:
-            'Conext is a CRM for small businesses that brings WhatsApp and Instagram messages into one inbox. AI agents send what is safe or leave a draft ready: the last word is still yours. It runs on the official Meta API, not WhatsApp Web or unofficial apps.',
+            'Conext is a CRM for small businesses that brings WhatsApp, Instagram, and Messenger messages into one inbox. AI agents send what is safe or leave a draft ready: the last word is still yours. It runs on the official Meta API, not WhatsApp Web or unofficial apps.',
         },
         {
           pregunta: 'Is Conext only for WhatsApp?',
           respuesta:
-            'No. The CRM brings WhatsApp and Instagram and Messenger, if your Page has it, into the same inbox. WhatsApp comes in through the official WhatsApp Business API; Instagram, through the business Facebook Page.',
+            'No. The CRM brings WhatsApp, Instagram, and Messenger, if your Page has it, into the same inbox. WhatsApp comes in through the official WhatsApp Business API; Instagram and Messenger, through the business Facebook Page.',
         },
         {
           pregunta: 'Do I need a new number?',
@@ -856,22 +856,22 @@ export const ui = {
       ],
       ctaTitulo: 'Tell us how you handle it today and we will show you Conext.',
       ctaTexto:
-        'A twenty-minute demo, with your products and the questions you already get on WhatsApp and Instagram.',
+        'A twenty-minute demo, with your products and the questions you already get on WhatsApp, Instagram, or Messenger.',
       ctaBoton: 'Write us on WhatsApp',
     },
     precios: {
-      title: 'Pricing · conext',
+      title: 'Pricing | Conext',
       description:
-        'conext plans for running WhatsApp with AI: a 7-day trial, standard, premium, and custom. Pick the one that fits your business.',
+        'Conext plans for WhatsApp, Instagram, and Messenger with AI: a 7-day trial, standard, premium, and custom.',
       etiqueta: 'Pricing',
-      titulo: 'conext Pricing',
+      titulo: 'Conext Pricing',
       bajada: 'Choose the package that’s right for your company.',
-      comparacion: 'conext plan comparison',
+      comparacion: 'Conext plan comparison',
       masElegido: 'Most popular',
       funcion: 'Feature',
       incluido: 'Included',
       noIncluido: 'Not included',
-      nota: 'Prices are in US dollars (USD). WhatsApp conversations are billed by Meta to your account, at their rate — we do not add a markup.',
+      nota: 'Prices are in US dollars (USD). WhatsApp conversations are billed by Meta to your account, at their rate. We do not add a markup.',
       desliza: 'Swipe the table to compare all four plans.',
       indecisoTitulo: 'Not sure which plan fits?',
       indecisoTexto: 'Tell us how you handle it today and we will look at it with your numbers.',
@@ -987,8 +987,8 @@ export const ui = {
       ],
     },
     ayuda: {
-      title: 'Help · conext',
-      description: 'Questions about billing, accounts, security, and data in conext. If it is not here, write us.',
+      title: 'Help | Conext',
+      description: 'Questions about billing, accounts, security, and data in Conext. If it is not here, write us.',
       etiqueta: 'Help',
       titulo: 'Questions, by topic.',
       bajada: 'Billing, accounts, security, and data. If the topic is not here, the rail ends in a contact.',
@@ -1004,7 +1004,7 @@ export const ui = {
             {
               pregunta: 'How much does conext cost?',
               respuesta:
-                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate — we do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
+                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate. We do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
             },
             {
               pregunta: 'Do you bill WhatsApp conversations?',
@@ -1014,7 +1014,7 @@ export const ui = {
             {
               pregunta: 'How do I request an invoice or a plan change?',
               respuesta:
-                'Write to <a href="mailto:{email}">{email}</a> with the business name. If the change is about volume — more people, more conversations — keep it in the same thread so it does not get mixed with a new signup.',
+                'Write to <a href="mailto:{email}">{email}</a> with the business name. If the change is about volume (more people, more conversations), keep it in the same thread so it does not get mixed with a new signup.',
             },
           ],
         },
@@ -1067,7 +1067,7 @@ export const ui = {
             {
               pregunta: 'What does the AI see?',
               respuesta:
-                'The message text and the context the agent needs — catalog, instructions, recent history — are sent to Gemini to classify and draft. We do not train our own model on your threads.',
+                'The message text and the context the agent needs (catalog, instructions, recent history) are sent to Gemini to classify and draft. We do not train our own model on your threads.',
             },
             {
               pregunta: 'How do I ask you to delete everything?',
@@ -1190,17 +1190,17 @@ export const ui = {
     legal: {
       etiqueta: 'Legal',
       actualizada: 'Last updated:',
-      privacidadTitle: 'Privacy · conext',
-      privacidadDescription: 'What data conext processes, why, who it is shared with, and how to ask for deletion.',
+      privacidadTitle: 'Privacy | Conext',
+      privacidadDescription: 'What data Conext processes, why, who it is shared with, and how to ask for deletion.',
       privacidadHeading: 'Privacy policy',
       privacidadFecha: 'August 20, 2026',
-      terminosTitle: 'Terms · conext',
-      terminosDescription: 'Terms of use for the conext CRM and the WhatsApp Business connection.',
+      terminosTitle: 'Terms | Conext',
+      terminosDescription: 'Terms of use for the Conext CRM and the WhatsApp Business connection.',
       terminosHeading: 'Terms and conditions',
       terminosFecha: 'August 20, 2026',
-      eliminarTitle: 'Delete your data · conext',
+      eliminarTitle: 'Delete your data | Conext',
       eliminarDescription:
-        'How to ask us to delete your account, your conversations, and data tied to Facebook Login in conext.',
+        'How to ask us to delete your account, your conversations, and data tied to Facebook Login in Conext.',
       eliminarHeading: 'User data deletion',
       eliminarFecha: 'August 20, 2026',
     },

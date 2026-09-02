@@ -36,6 +36,26 @@ const esquemaSitio = {
       url: `${origen}/`,
       logo: imagenOg.href,
       email: EMAIL,
+      description:
+        'CRM para pequeñas empresas que unifica WhatsApp, Instagram y Messenger en una sola bandeja. Los agentes de IA responden lo seguro o dejan el borrador.',
+      knowsAbout: ['CRM', 'WhatsApp Business', 'Instagram', 'Messenger', 'small business'],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        email: EMAIL,
+        contactType: 'customer support',
+        availableLanguage: ['Spanish', 'English'],
+      },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${origen}/#aplicacion`,
+      name: 'Conext',
+      alternateName: ['conext', 'Conext CRM'],
+      applicationCategory: 'BusinessApplication',
+      applicationSubCategory: 'CRM',
+      operatingSystem: 'Web',
+      url: `${origen}/`,
+      publisher: { '@id': `${origen}/#org` },
     },
     {
       '@type': 'WebSite',
@@ -88,7 +108,7 @@ const esquemaSitio = {
          página trae la suya, que era imposible con una sola SPA: había un juego
          de etiquetas para las cuatro rutas. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="conext" />
+    <meta property="og:site_name" content="Conext" />
     <meta property="og:locale" content={copy.ogLocale} />
     {lang === 'es' ? (
       <meta property="og:locale:alternate" content="en_US" />
