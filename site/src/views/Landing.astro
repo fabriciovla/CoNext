@@ -23,6 +23,7 @@ import {
 import { WHATSAPP_URL } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 import { LANDING_A_PRODUCTO } from '../data/producto'
+import { origenDe, urlCanonico } from '../lib/seo.js'
 
 const lang = getLocale(Astro)
 const l = t(lang).landing
@@ -52,15 +53,44 @@ const GARANTIAS = l.garantias.map((item, i) => ({ ...item, Icono: ICONOS_GARANTI
 const CONTENEDOR = 'contenedor'
 const CONTENEDOR_MUESTRA = 'contenedor'
 
+// Organization y WebSite ya los pone Base (#org, #website). Acá solo se
+// suma lo de esta página: el CRM como SoftwareApplication y el FAQPage
+// con "¿Qué es Conext?", que es la definición de marca que el H1 solo
+// no alcanza a sostener.
+const origen = origenDe(Astro.site)
+const pagina = urlCanonico(Astro.url.pathname, Astro.site).href
+const idioma = lang === 'en' ? 'en' : 'es'
 const ESQUEMA = {
   '@context': 'https://schema.org',
-  '@type': 'SoftwareApplication',
-  name: 'conext',
-  applicationCategory: 'BusinessApplication',
-  operatingSystem: 'Web',
-  description: l.description,
-  url: Astro.site?.href,
-  inLanguage: lang === 'en' ? 'en' : 'es',
+  '@graph': [
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${origen}/#aplicacion`,
+      name: 'Conext',
+      alternateName: 'conext',
+      applicationCategory: 'BusinessApplication',
+      applicationSubCategory: 'CRM',
+      operatingSystem: 'Web',
+      description: l.description,
+      url: pagina,
+      inLanguage: idioma,
+      featureList: l.funciones.map((f) => f.titulo),
+      audience: {
+        '@type': 'BusinessAudience',
+        audienceType: lang === 'en' ? 'Small businesses' : 'Pequeñas empresas',
+      },
+      creator: { '@id': `${origen}/#org` },
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${origen}/#preguntas`,
+      mainEntity: l.preguntas.map(({ pregunta, respuesta }) => ({
+        '@type': 'Question',
+        name: pregunta,
+        acceptedAnswer: { '@type': 'Answer', text: respuesta },
+      })),
+    },
+  ],
 }
 ---
 
@@ -80,12 +110,11 @@ const ESQUEMA = {
         <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
       </a>
 
-      {/* Dos lÃ­neas y no tres. El titular anterior tenÃ­a diez palabras y
-          ocupaba tres renglones a 56px: a ese tamaÃ±o cada renglÃ³n cuesta un
-          pantallazo, y para cuando terminaba de leerse ya no quedaba nada
-          arriba del pliegue. El `max-w` baja a 4xl acompaÃ±ando el recorte â
-          con el de antes, la segunda lÃ­nea corta mucho antes del borde y el
-          bloque se lee desalineado. */}
+      {/* Dos líneas y no tres. El titular nombra la marca en la primera y la
+          categoría en la segunda: sin "Conext" en el H1 Google indexa el
+          eslogan y la búsqueda de marca no encuentra esta página. El `max-w`
+          baja a 4xl acompañando el recorte — con el de antes, la segunda
+          línea corta mucho antes del borde y el bloque se lee desalineado. */}
       <h1
         class="animate-in mt-7 max-w-4xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
         style="--d: 80ms"
@@ -98,7 +127,7 @@ const ESQUEMA = {
         class="animate-in mt-6 max-w-2xl text-[19px] font-normal leading-[28px] text-ink-secondary"
         style="--d: 160ms"
       >
-        <span class="font-medium text-ink-primary">conext</span> {l.heroBajada}
+        {l.heroBajada}
       </p>
 
       <div class="animate-in mt-9 flex flex-wrap items-center gap-3" style="--d: 240ms">
@@ -186,7 +215,7 @@ const ESQUEMA = {
                       size={20}
                       className="shrink-0 text-violet transition-colors duration-200 group-hover:text-ink-primary"
                     />
-                    <h3 class="text-[18px] font-medium text-ink-primary">{titulo}</h3>
+                    <h4 class="text-[18px] font-medium text-ink-primary">{titulo}</h4>
                   </div>
                   <p class="mt-3 max-w-md text-[15px] leading-relaxed text-ink-secondary">{texto}</p>
                 </Tag>
@@ -202,7 +231,7 @@ const ESQUEMA = {
   {/* ---------------------------------------------------------------------- */}
   {/* El control                                                              */}
   {/* ---------------------------------------------------------------------- */}
-  <section class="fondo-seccion scroll-mt-24 pt-20 sm:pt-28">
+  <section id="control" class="fondo-seccion scroll-mt-24 pt-20 sm:pt-28">
     <div class={CONTENEDOR}>
       <Titulo etiqueta={l.controlEtiqueta} titulo={l.controlTitulo} texto={l.controlTexto} />
     </div>

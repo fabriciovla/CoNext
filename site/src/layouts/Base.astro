@@ -2,25 +2,52 @@
 import '../index.css'
 import Navbar from '../components/Navbar.astro'
 import Footer from '../components/Footer.astro'
+import { EMAIL } from '../config'
 import { getLocale, t, switchLocale } from '../i18n/utils'
+import { normalizarRuta, origenDe, urlCanonico } from '../lib/seo'
 
 const { title, description, pantallaCompleta = false, noindex = false } = Astro.props
 const lang = getLocale(Astro)
 const copy = t(lang)
-const pathname = Astro.url.pathname
-const altEs = new URL(switchLocale(pathname, 'es'), Astro.site)
-const altEn = new URL(switchLocale(pathname, 'en'), Astro.site)
+const ruta = normalizarRuta(Astro.url.pathname)
+const altEs = urlCanonico(switchLocale(ruta, 'es'), Astro.site)
+const altEn = urlCanonico(switchLocale(ruta, 'en'), Astro.site)
 
-// La URL canónica sale del dominio de astro.config más la ruta de la página.
-// Astro.site ya está definido ahí; sin canónica, el mismo HTML servido con y
-// sin barra final (o detrás de otro dominio) cuenta como contenido duplicado.
-const canonica = new URL(Astro.url.pathname, Astro.site)
+// Host de `astro.config` + ruta sin query ni barra final. Si la canónica
+// apunta a un host que redirige (el apex, o la misma URL con slash), Google
+// la descarta y la página queda como duplicada sin versión elegida.
+const canonica = urlCanonico(ruta, Astro.site)
+const origen = origenDe(Astro.site)
 
 // La imagen de la vista previa necesita URL absoluta: los scrapers de WhatsApp
 // y compañía no resuelven rutas relativas. El 512 es cuadrado, por eso la
 // tarjeta de Twitter va como `summary` y no `summary_large_image` — ese formato
 // espera 1200×630 y con un cuadrado recorta la marca.
-const imagenOg = new URL('/icon-512.png', Astro.site)
+const imagenOg = new URL('/icon-512.png', `${origen}/`)
+
+const esquemaSitio = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${origen}/#org`,
+      name: 'Conext',
+      alternateName: ['conext', 'Conext CRM'],
+      url: `${origen}/`,
+      logo: imagenOg.href,
+      email: EMAIL,
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${origen}/#website`,
+      url: `${origen}/`,
+      name: 'Conext',
+      alternateName: 'conext',
+      inLanguage: ['es', 'en'],
+      publisher: { '@id': `${origen}/#org` },
+    },
+  ],
+}
 ---
 
 <!doctype html>
@@ -53,7 +80,7 @@ const imagenOg = new URL('/icon-512.png', Astro.site)
     <link rel="alternate" hreflang="es" href={altEs} />
     <link rel="alternate" hreflang="en" href={altEn} />
     <link rel="alternate" hreflang="x-default" href={altEs} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
     <!-- El color con el que Chrome en Android pinta la barra del sistema. -->
     <meta name="theme-color" content="#ffffff" />
 
@@ -76,6 +103,10 @@ const imagenOg = new URL('/icon-512.png', Astro.site)
     <meta property="og:image:height" content="512" />
     <meta property="og:image:alt" content={copy.ogImageAlt} />
     <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imagenOg} />
+    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(esquemaSitio)} />}
     <slot name="head" />
   </head>
 
