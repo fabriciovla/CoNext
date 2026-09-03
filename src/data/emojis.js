@@ -11,7 +11,7 @@
 export const EMOJI_CATEGORIES = [
   {
     key: 'caritas',
-    label: 'Caritas',
+    clave: 'ui.emojiCaritas',
     icon: '😊',
     emojis: [
       ['😀', 'sonrisa feliz cara alegre'],
@@ -89,7 +89,7 @@ export const EMOJI_CATEGORIES = [
   },
   {
     key: 'gestos',
-    label: 'Gestos',
+    clave: 'ui.emojiGestos',
     icon: '👍',
     emojis: [
       ['👍', 'pulgar arriba ok dale bien'],
@@ -126,7 +126,7 @@ export const EMOJI_CATEGORIES = [
   },
   {
     key: 'simbolos',
-    label: 'Símbolos',
+    clave: 'ui.emojiSimbolos',
     icon: '✅',
     emojis: [
       ['✅', 'listo ok tilde confirmado'],
@@ -169,7 +169,7 @@ export const EMOJI_CATEGORIES = [
   },
   {
     key: 'trabajo',
-    label: 'Trabajo',
+    clave: 'ui.emojiTrabajo',
     icon: '📦',
     emojis: [
       ['📦', 'paquete pedido caja envio'],
@@ -216,7 +216,7 @@ export const EMOJI_CATEGORIES = [
   },
   {
     key: 'comida',
-    label: 'Comida',
+    clave: 'ui.emojiComida',
     icon: '☕',
     emojis: [
       ['☕', 'cafe'],
@@ -253,7 +253,7 @@ export const EMOJI_CATEGORIES = [
   },
   {
     key: 'clima',
-    label: 'Clima',
+    clave: 'ui.emojiClima',
     icon: '☀️',
     emojis: [
       ['☀️', 'sol despejado'],

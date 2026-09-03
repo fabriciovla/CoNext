@@ -6,9 +6,10 @@ import Button from '../components/ui/Button'
 import { IconArchive } from '../components/ui/icons'
 import { phoneDigits } from '../utils/phone'
 import { formatTime } from '../utils/time'
+import { useIdioma } from '../lib/i18n.jsx'
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'long' })
+function formatDate(iso, locale) {
+  return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'long' })
 }
 
 // Las columnas de la bandeja. La barra de carpetas ya no es de esta página: vive
@@ -16,6 +17,7 @@ function formatDate(iso) {
 // mirando llegan como props desde App.
 export default function Inbox({
   allGroups,
+  cargando = false,
   filter,
   viewingDay = null,
   onLeaveDay,
@@ -33,6 +35,7 @@ export default function Inbox({
   onAddNote,
   dayStatus,
 }) {
+  const { t, locale } = useIdioma()
   const [unreplied, setUnreplied] = useState(false)
   const [orden, setOrden] = useState('recientes')
   const [search, setSearch] = useState('')
@@ -126,14 +129,14 @@ export default function Inbox({
         <div className="animate-fade-down flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-tint/[0.07] bg-tint/[0.03] px-4 py-2">
           <div className="flex items-center gap-2.5 text-[12.5px]">
             <IconArchive size={14} className="shrink-0 text-ink-muted" />
-            <span className="font-medium text-ink-primary">Día archivado</span>
+            <span className="font-medium text-ink-primary">{t('bandeja.diaArchivado')}</span>
             <span className="text-ink-muted">
-              {formatDate(viewingDay.openedAt)} · {formatTime(viewingDay.openedAt)}–
+              {formatDate(viewingDay.openedAt, locale)} · {formatTime(viewingDay.openedAt)}–
               {formatTime(viewingDay.closedAt)}
             </span>
           </div>
           <Button size="sm" variant="secondary" onClick={onLeaveDay}>
-            Volver a hoy
+            {t('bandeja.volverAHoy')}
           </Button>
         </div>
       )}
@@ -141,6 +144,7 @@ export default function Inbox({
       <div className="flex min-h-0 flex-1">
         <ConversationList
           groups={groups}
+          cargando={cargando}
           selectedPhone={selectedPhone}
           onSelect={setSelectedPhone}
           unreplied={unreplied}
@@ -160,9 +164,7 @@ export default function Inbox({
           onAddNote={onAddNote}
           disabled={Boolean(viewingDay) || dayStatus !== 'open'}
           disabledMessage={
-            viewingDay
-              ? 'Estás viendo un día archivado, es de solo lectura.'
-              : 'El día está cerrado. Abrí un nuevo día para responder.'
+            viewingDay ? t('bandeja.soloLectura') : t('bandeja.diaCerrado')
           }
         />
         {/* Asignar, resolver y buscar en el hilo salieron del header del chat y

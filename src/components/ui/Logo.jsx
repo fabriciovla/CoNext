@@ -74,6 +74,12 @@ function Marca({ id }) {
   )
 }
 
+// El nombre que ya dibuja el logotipo. Lo mira la barra izquierda, que abajo
+// del logotipo pone el nombre del negocio: cuando el negocio se llama igual que
+// el producto —el tenant nuestro— quedaba "conext" dibujado y "Conext" escrito,
+// uno arriba del otro.
+export const NOMBRE_MARCA = 'conext'
+
 const idMascara = (bruto) => `marca-${bruto.replace(/:/g, '')}`
 
 export default function Logo({ className = '' }) {

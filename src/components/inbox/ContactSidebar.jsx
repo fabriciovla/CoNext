@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../../lib/i18n.jsx'
 import Avatar from '../ui/Avatar'
 import Select from '../ui/Select'
 import { findAgent } from '../../utils/agents'
@@ -16,9 +17,9 @@ import {
 } from '../ui/icons'
 
 const TABS = [
-  { key: 'contacto', label: 'Contacto', Icon: IconContactCard },
-  { key: 'actividad', label: 'Actividad', Icon: IconChart },
-  { key: 'notas', label: 'Notas internas', Icon: IconNote },
+  { key: 'contacto', clave: 'bandeja.tabContacto', Icon: IconContactCard },
+  { key: 'actividad', clave: 'bandeja.tabActividad', Icon: IconChart },
+  { key: 'notas', clave: 'bandeja.tabNotas', Icon: IconNote },
 ]
 
 function Field({ label, children }) {
@@ -37,11 +38,11 @@ function Field({ label, children }) {
 // borró, o el ruteador guardó una key que no existe), igual tiene que aparecer
 // como opción: si no, el desplegable mostraría a otro agente como si fuera el
 // que atiende.
-function opcionesDeAgente(agents, actual) {
+function opcionesDeAgente(agents, actual, t) {
   const opciones = agents.map((a) => ({
     value: a.key,
     label: a.name,
-    hint: a.enabled ? undefined : 'apagado',
+    hint: a.enabled ? undefined : t('bandeja.apagado'),
   }))
   if (actual?.key && !agents.some((a) => a.key === actual.key)) {
     opciones.unshift({ value: actual.key, label: actual.name })
@@ -76,6 +77,7 @@ export default function ContactSidebar({
   // Arranca en "Contacto" y nunca queda vacío: los íconos cambian de pestaña,
   // no la apagan. Quién atiende, el responsable y las etiquetas son datos que se
   // miran *mientras* se contesta, y detrás de un click quedaban sin usar.
+  const t = useT()
   const [openTab, setOpenTab] = useState('contacto')
   // null = no se está escribiendo ninguna etiqueta nueva.
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState(null)
@@ -123,7 +125,7 @@ export default function ContactSidebar({
                         className="flex items-center gap-1.5 rounded-lg border border-tint/10 bg-tint/[0.04] px-3 py-1.5 text-[13px] text-ink-secondary transition-all duration-200 hover:bg-tint/[0.09] hover:text-ink-primary"
                       >
                         <IconPhone size={14} />
-                        Llamar
+                        {t('bandeja.llamar')}
                       </a>
                     )}
                     <button
@@ -134,7 +136,7 @@ export default function ContactSidebar({
                       }
                       className="rounded-lg border border-tint/10 bg-tint/[0.04] px-3 py-1.5 text-[13px] text-ink-secondary transition-all duration-200 hover:bg-tint/[0.09] hover:text-ink-primary"
                     >
-                      Copiar
+                      {t('comun.copiar')}
                     </button>
                   </div>
                 </div>
@@ -151,7 +153,9 @@ export default function ContactSidebar({
                       disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-tint/[0.04]"
                   >
                     <IconCheckCircle size={15} />
-                    {group.pendientes > 0 ? `Resolver ${group.pendientes} pendiente${group.pendientes > 1 ? 's' : ''}` : 'Sin pendientes'}
+                    {group.pendientes > 0
+                      ? t('bandeja.resolverPendientes', { n: group.pendientes })
+                      : t('bandeja.sinPendientes')}
                   </button>
                 )}
 
@@ -167,7 +171,7 @@ export default function ContactSidebar({
                     <input
                       value={search}
                       onChange={(e) => onSearchChange(e.target.value)}
-                      placeholder="Buscar en la conversación"
+                      placeholder={t('bandeja.buscarEnConversacion')}
                       className="w-full rounded-lg border border-tint/10 bg-tint/[0.04] py-2 pl-8 pr-3 text-[13px] text-ink-primary placeholder:text-ink-faint
                         transition-all duration-200 focus:border-tint/25 focus:bg-tint/[0.07] focus:outline-none"
                     />
@@ -178,13 +182,13 @@ export default function ContactSidebar({
                   {/* El agente lo elige el ruteador, pero se puede corregir a
                       mano acá: lo que se elija manda para los mensajes que
                       lleguen después en esta conversación. */}
-                  <Field label="Atendida por">
+                  <Field label={t('bandeja.atendidaPor')}>
                     {agents.length > 0 && onChangeAgent ? (
                       <Select
-                        ariaLabel="Agente que atiende la conversación"
+                        ariaLabel={t('bandeja.agenteQueAtiende')}
                         value={agent.key ?? ''}
                         onChange={(key) => onChangeAgent(group.phone, key)}
-                        options={opcionesDeAgente(agents, agent)}
+                        options={opcionesDeAgente(agents, agent, t)}
                       />
                     ) : (
                       <span className="min-w-0 truncate">{agent.name}</span>
@@ -194,10 +198,10 @@ export default function ContactSidebar({
                       un botón que alterna: las dos únicas opciones eran
                       tomarla y soltarla, y cuál de las dos corresponde ya lo
                       dice quién la tiene. */}
-                  <Field label="Responsable">
+                  <Field label={t('bandeja.responsable')}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="min-w-0 truncate capitalize">
-                        {group.assignee ?? 'Sin asignar'}
+                        {group.assignee ?? t('bandeja.sinAsignar')}
                       </span>
                       {onAssign && (
                         <button
@@ -205,16 +209,16 @@ export default function ContactSidebar({
                           className="shrink-0 rounded-md border border-tint/10 px-2 py-1 text-[12px] text-ink-muted
                             transition-colors duration-200 hover:bg-tint/[0.07] hover:text-ink-primary"
                         >
-                          {group.assignee === username ? 'Soltar' : 'Tomarla'}
+                          {group.assignee === username ? t('bandeja.soltar') : t('bandeja.tomarla')}
                         </button>
                       )}
                     </div>
                   </Field>
-                  <Field label="Canal">WhatsApp</Field>
+                  <Field label={t('bandeja.canal')}>WhatsApp</Field>
 
                   {/* Etiquetas libres: se acumulan ("mayorista" + "debe seña")
                       y son lo único que el equipo escribe sobre el contacto. */}
-                  <Field label="Etiquetas">
+                  <Field label={t('bandeja.etiquetas')}>
                     <div className="flex flex-wrap gap-1">
                       {(group.tags ?? []).map((tag) => (
                         <span
@@ -225,7 +229,7 @@ export default function ContactSidebar({
                           {onRemoveTag && (
                             <button
                               onClick={() => onRemoveTag(group.phone, tag)}
-                              title={`Quitar “${tag}”`}
+                              title={t('bandeja.quitarEtiqueta', { tag })}
                               className="text-ink-faint transition-colors duration-150 hover:text-status-critical"
                             >
                               ×
@@ -240,7 +244,7 @@ export default function ContactSidebar({
                             onClick={() => setNuevaEtiqueta('')}
                             className="rounded-full border border-dashed border-tint/15 px-2.5 py-[3px] text-[12px] text-ink-muted transition-colors duration-200 hover:border-tint/30 hover:text-ink-secondary"
                           >
-                            + etiqueta
+                            {t('bandeja.agregarEtiqueta')}
                           </button>
                         ) : (
                           <input
@@ -255,13 +259,13 @@ export default function ContactSidebar({
                               }
                               if (e.key === 'Escape') setNuevaEtiqueta(null)
                             }}
-                            placeholder="nombre y Enter"
+                            placeholder={t('bandeja.etiquetaPlaceholder')}
                             className="w-32 rounded-full border border-tint/15 bg-tint/[0.04] px-2.5 py-[3px] text-[12px] text-ink-primary placeholder:text-ink-faint focus:border-tint/35 focus:outline-none"
                           />
                         ))}
 
                       {(group.tags ?? []).length === 0 && nuevaEtiqueta === null && !onAddTag && (
-                        <span className="text-[12.5px] text-ink-faint">sin etiquetas</span>
+                        <span className="text-[12.5px] text-ink-faint">{t('bandeja.sinEtiquetas')}</span>
                       )}
                     </div>
                   </Field>
@@ -271,27 +275,33 @@ export default function ContactSidebar({
 
             {openTab === 'actividad' && (
               <div className="animate-fade-in space-y-3">
-                <p className="text-[13.5px] font-semibold text-ink-primary">Actividad</p>
+                <p className="text-[13.5px] font-semibold text-ink-primary">
+                  {t('bandeja.actividad')}
+                </p>
                 <div className="grid grid-cols-2 gap-2">
-                  <Metric label="Mensajes" value={group.total} />
-                  <Metric label="Del cliente" value={entrantes.length} />
+                  <Metric label={t('bandeja.mensajes')} value={group.total} />
+                  <Metric label={t('bandeja.delCliente')} value={entrantes.length} />
                   <Metric
-                    label="Pendientes"
+                    label={t('bandeja.pendientes')}
                     value={group.pendientes}
                     tone={group.pendientes > 0 ? 'text-status-warning' : 'text-ink-primary'}
                   />
-                  <Metric label="Automáticos" value={group.automaticos} />
+                  <Metric label={t('bandeja.automaticos')} value={group.automaticos} />
                 </div>
                 <div className="space-y-3 border-t border-tint/[0.07] pt-3">
-                  {entrantes[0] && <Field label="Primer contacto">{formatTime(entrantes[0].createdAt)}</Field>}
+                  {entrantes[0] && (
+                    <Field label={t('bandeja.primerContacto')}>
+                      {formatTime(entrantes[0].createdAt)}
+                    </Field>
+                  )}
                   {ultimaRespuesta && (
-                    <Field label="Última respuesta">
+                    <Field label={t('bandeja.ultimaRespuesta')}>
                       <span className="inline-flex items-center gap-1.5">
                         {formatTime(ultimaRespuesta.createdAt)}
                         {ultimaRespuesta.author === 'bot' && (
                           <span className="inline-flex items-center gap-1 text-[12.5px] text-ink-muted">
                             <IconBolt size={12} />
-                            automática
+                            {t('bandeja.automatica')}
                           </span>
                         )}
                       </span>
@@ -303,11 +313,12 @@ export default function ContactSidebar({
 
             {openTab === 'notas' && (
               <div className="animate-fade-in space-y-2.5">
-                <p className="text-[13.5px] font-semibold text-ink-primary">Notas internas</p>
+                <p className="text-[13.5px] font-semibold text-ink-primary">
+                  {t('bandeja.tabNotas')}
+                </p>
                 {notas.length === 0 ? (
                   <p className="text-[12.5px] leading-relaxed text-ink-faint">
-                    No hay notas en esta conversación. Escribí una con Ctrl + \ desde el cuadro de
-                    mensaje.
+                    {t('bandeja.sinNotas')}
                   </p>
                 ) : (
                   notas.map((nota) => (
@@ -331,8 +342,9 @@ export default function ContactSidebar({
       </div>
 
       <div className="flex h-full w-[52px] shrink-0 flex-col items-center gap-1 border-l border-tint/[0.07] bg-surface-nav py-3">
-        {TABS.map(({ key, label, Icon }) => {
+        {TABS.map(({ key, clave, Icon }) => {
           const active = openTab === key
+          const label = t(clave)
           return (
             <button
               key={key}

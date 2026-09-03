@@ -1,8 +1,59 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiGet, apiPost, apiPatch, apiDelete, apiUpload } from '../api/client'
 import { dayStats } from '../utils/metrics'
+import { sonidoEnviar, sonidoRecibir } from '../lib/sonidos'
+import { avisarEnEscritorio, esEscritorio, marcarPendientesEnEscritorio } from '../lib/entorno'
+import { dibujarInsignia } from '../lib/insignia'
+import { vistaPrevia } from '../utils/groupMessages'
+import { formatPhone } from '../utils/phone'
 
 const POLL_MS = 6000
+
+// Con la pantalla escondida se sigue poleando, pero cada 30s en vez de cada 6.
+// Antes el poll se salteaba entero (`if (document.hidden) return`), que con la
+// app de escritorio en la bandeja significaba no enterarse de nada hasta que
+// alguien la abriera: ni aviso, ni sonido, ni contador. Los 30s son el punto
+// entre eso y castigar al server con la app abierta de fondo todo el día.
+//
+// En la app esto anda porque la ventana se crea con `backgroundThrottling:
+// false`; en una pestaña del navegador Chromium igual estira los temporizadores
+// de una pestaña de fondo a más o menos un minuto, y está bien que así sea.
+const POLL_OCULTO_MS = 30000
+
+const quienEs = (mensaje) => mensaje.customer || formatPhone(mensaje.phone) || mensaje.phone
+
+// El aviso del sistema por los mensajes que entraron en este poll.
+//
+// Es **uno solo** aunque hayan entrado cuatro: cuatro globos apilados en la
+// esquina tapan la pantalla y no se lee ninguno. Y no sale con la ventana a la
+// vista y enfocada: ahí ya está el sonido, y el mensaje apareciendo solo en el
+// hilo es mejor aviso que un cartel del sistema arriba de la propia app.
+function avisarDeNuevos(nuevos) {
+  if (!esEscritorio() || nuevos.length === 0) return
+  if (!document.hidden && document.hasFocus()) return
+
+  const ultimo = nuevos[nuevos.length - 1]
+  const conversaciones = new Set(nuevos.map((m) => m.phone))
+
+  // De una sola conversación el aviso es el mensaje: quién escribió y qué dijo,
+  // y el click abre ese hilo. De varias no hay un hilo al que llevar, así que
+  // dice cuántos son y de cuántas personas, y el click abre la app y nada más.
+  if (conversaciones.size === 1) {
+    const cuantos = nuevos.length
+    avisarEnEscritorio({
+      titulo: quienEs(ultimo),
+      cuerpo: cuantos > 1 ? `${vistaPrevia(ultimo)} · ${cuantos} mensajes` : vistaPrevia(ultimo),
+      phone: ultimo.phone,
+    })
+    return
+  }
+
+  avisarEnEscritorio({
+    titulo: `${nuevos.length} mensajes nuevos`,
+    cuerpo: `De ${conversaciones.size} conversaciones. La última, ${quienEs(ultimo)}.`,
+    phone: null,
+  })
+}
 
 // Backed by the server now: `messages` is GET /messages?day=open, refreshed
 // on an interval so webhook-driven incoming messages show up without a
@@ -27,6 +78,10 @@ export default function useMessages() {
   // vacía y los botones "no hacían nada" sin decir por qué. El estado se limpia
   // solo en cuanto un poll vuelve a responder.
   const [apiError, setApiError] = useState(null)
+  // La primera vuelta de todas las consultas. Hasta que termina, la lista vacía
+  // y el día "cerrado" son el valor inicial y no el estado real del cliente:
+  // dibujarlos es contar algo que todavía no se sabe.
+  const [cargando, setCargando] = useState(true)
 
   // Handler de catch con el origen adentro, para no repetir el console.error en
   // cada mutación y que el mensaje que sube a la UI diga qué se estaba haciendo.
@@ -45,8 +100,29 @@ export default function useMessages() {
     setDayClosedAt(day.closedAt)
   }, [])
 
+  // Qué mensajes entrantes ya vimos, para tocar el aviso solo con los que
+  // llegan de verdad en un poll y no con los que ya estaban la primera vez
+  // que se cargó la bandeja. Arranca en null: hasta que no haya una vuelta
+  // conocida contra qué comparar, nada es "nuevo" todavía.
+  const entrantesConocidos = useRef(null)
+
+  // Cuándo salió la última vuelta del poll, para espaciarlo con la ventana
+  // escondida sin cambiar el intervalo (ver POLL_OCULTO_MS).
+  const ultimoPoll = useRef(0)
+
   const refreshOpenMessages = useCallback(async () => {
-    setMessages(await apiGet('/messages?day=open'))
+    const data = await apiGet('/messages?day=open')
+    const conocidos = entrantesConocidos.current
+    const entrantes = data.filter((m) => m.direction === 'in')
+    const nuevos = conocidos ? entrantes.filter((m) => !conocidos.has(m.id)) : []
+
+    if (nuevos.length > 0) {
+      sonidoRecibir()
+      avisarDeNuevos(nuevos)
+    }
+
+    entrantesConocidos.current = new Set(entrantes.map((m) => m.id))
+    setMessages(data)
     // El poll es lo que corre siempre: si este pasa, el server volvió.
     setApiError(null)
   }, [])
@@ -64,12 +140,20 @@ export default function useMessages() {
   }, [])
 
   useEffect(() => {
-    Promise.all([refreshDay(), refreshOpenMessages(), refreshArchivedDays(), refreshMeta(), refreshDrafts()]).catch(
-      fallo('carga inicial'),
-    )
+    Promise.all([refreshDay(), refreshOpenMessages(), refreshArchivedDays(), refreshMeta(), refreshDrafts()])
+      .catch(fallo('cargaInicial'))
+      // Solo la primera vuelta prende esto: los polls que siguen no tienen que
+      // volver a vaciar la pantalla, que ya tiene datos buenos dibujados.
+      .finally(() => setCargando(false))
 
     const interval = setInterval(() => {
-      if (document.hidden) return
+      // Escondida se polea igual, más espaciado. Se compara contra la última
+      // vuelta *ejecutada* y no contra un contador de ticks: así, al volver a la
+      // pantalla, la primera vuelta visible sale enseguida en vez de esperar a
+      // que se cumpla el turno largo que había arrancado estando oculta.
+      if (document.hidden && Date.now() - ultimoPoll.current < POLL_OCULTO_MS) return
+      ultimoPoll.current = Date.now()
+
       // El estado del día va en el poll y no solo en la carga inicial. Si esa
       // primera llamada falla (el server todavía no arrancó, o se reinició en el
       // medio), `dayStatus` se queda en 'closed', que es el valor inicial — y
@@ -80,21 +164,38 @@ export default function useMessages() {
       // que los botones dejan de hacer nada aunque el server tenga el día
       // abierto. `listClosedDays` no entra acá a propósito: trae todos los
       // mensajes de todo el historial y no cambia solo, únicamente al cerrar.
-      refreshDay().catch(fallo('actualizar el estado del día'))
-      refreshOpenMessages().catch(fallo('actualizar mensajes'))
-      refreshDrafts().catch(fallo('actualizar borradores'))
-      refreshMeta().catch(fallo('actualizar conversaciones'))
+      refreshDay().catch(fallo('actualizarDia'))
+      refreshOpenMessages().catch(fallo('actualizarMensajes'))
+      refreshDrafts().catch(fallo('actualizarBorradores'))
+      refreshMeta().catch(fallo('actualizarConversaciones'))
     }, POLL_MS)
 
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // El contador arriba del ícono en la barra de tareas: los entrantes sin
+  // atender del día abierto, que es la suma de las burbujas naranjas de la
+  // bandeja. Es lo que queda después de que la notificación se va sola, y lo
+  // único que se ve con la app minimizada y sin mirar.
+  //
+  // Se compara contra la vuelta anterior porque este efecto corre con cada poll
+  // (la lista es nueva aunque diga lo mismo) y redibujar el PNG y cruzar el IPC
+  // cada seis segundos para poner el mismo número es trabajo al pedo.
+  const pendientesMarcados = useRef(null)
+  useEffect(() => {
+    if (!esEscritorio()) return
+    const pendientes = messages.filter((m) => m.direction === 'in' && m.status === 'pendiente').length
+    if (pendientes === pendientesMarcados.current) return
+    pendientesMarcados.current = pendientes
+    marcarPendientesEnEscritorio(pendientes, dibujarInsignia(pendientes))
+  }, [messages])
+
   const resolveConversation = (phone) => {
     if (dayStatus !== 'open') return
     apiPatch(`/conversations/${encodeURIComponent(phone)}/resolve`)
       .then(refreshOpenMessages)
-      .catch(fallo('resolver la conversación'))
+      .catch(fallo('resolverConversacion'))
   }
 
   // El mensaje se dibuja antes de que conteste el server, y devuelve la promesa
@@ -138,12 +239,15 @@ export default function useMessages() {
     ])
 
     return apiPost('/messages', { phone, text: body })
-      .then(() => Promise.all([refreshOpenMessages(), refreshDrafts()]))
+      .then(() => {
+        sonidoEnviar()
+        return Promise.all([refreshOpenMessages(), refreshDrafts()])
+      })
       .catch((err) => {
         // Se saca el globo provisorio: dejarlo ahí afirmaría que el mensaje
         // salió, que es lo único que no puede pasar cuando falló el envío.
         setMessages((prev) => prev.filter((m) => m.id !== tempId))
-        fallo('enviar el mensaje')(err)
+        fallo('enviarMensaje')(err)
       })
   }
 
@@ -158,9 +262,12 @@ export default function useMessages() {
     form.append('caption', caption)
     form.append('file', file, file.name)
     return apiUpload('/messages/media', form)
-      .then((message) => Promise.all([refreshOpenMessages(), refreshDrafts()]).then(() => message))
+      .then((message) => {
+        sonidoEnviar()
+        return Promise.all([refreshOpenMessages(), refreshDrafts()]).then(() => message)
+      })
       .catch((err) => {
-        fallo('enviar el adjunto')(err)
+        fallo('enviarAdjunto')(err)
         throw err
       })
   }
@@ -170,7 +277,7 @@ export default function useMessages() {
     if (dayStatus !== 'open' || !body) return
     apiPost(`/conversations/${encodeURIComponent(phone)}/notes`, { text: body })
       .then(refreshOpenMessages)
-      .catch(fallo('agregar la nota'))
+      .catch(fallo('agregarNota'))
   }
 
   // `user` en null deja la conversación sin asignar, que es un estado válido
@@ -179,7 +286,7 @@ export default function useMessages() {
     setAssignments((prev) => ({ ...prev, [phone]: user }))
     apiPatch(`/conversations/${encodeURIComponent(phone)}/assignee`, { assignee: user })
       .then(refreshMeta)
-      .catch(fallo('asignar la conversación'))
+      .catch(fallo('asignarConversacion'))
   }
 
   // Reasignar el agente a mano: pisa lo que decidió el ruteador y es lo que va
@@ -191,7 +298,7 @@ export default function useMessages() {
     }))
     apiPatch(`/conversations/${encodeURIComponent(phone)}/agent`, { agent: agentKey })
       .then(refreshMeta)
-      .catch(fallo('cambiar el agente'))
+      .catch(fallo('cambiarAgente'))
   }
 
   // Etiquetas libres de la conversación. Se actualiza el estado local primero
@@ -207,7 +314,7 @@ export default function useMessages() {
     })
     apiPost(`/conversations/${encodeURIComponent(phone)}/tags`, { tag: clean })
       .then(refreshMeta)
-      .catch(fallo('agregar la etiqueta'))
+      .catch(fallo('agregarEtiqueta'))
   }
 
   const removeConversationTag = (phone, tag) => {
@@ -217,21 +324,21 @@ export default function useMessages() {
     }))
     apiDelete(`/conversations/${encodeURIComponent(phone)}/tags/${encodeURIComponent(tag)}`)
       .then(refreshMeta)
-      .catch(fallo('quitar la etiqueta'))
+      .catch(fallo('quitarEtiqueta'))
   }
 
   const closeDay = () => {
     if (dayStatus !== 'open') return
     apiPost('/days/close')
       .then(() => Promise.all([refreshDay(), refreshOpenMessages(), refreshArchivedDays()]))
-      .catch(fallo('cerrar el día'))
+      .catch(fallo('cerrarDia'))
   }
 
   const openNewDay = () => {
     if (dayStatus !== 'closed') return
     apiPost('/days/open')
       .then(() => Promise.all([refreshDay(), refreshOpenMessages()]))
-      .catch(fallo('abrir el día'))
+      .catch(fallo('abrirDia'))
   }
 
   // Los mismos números salen para un día archivado (la variación de las
@@ -241,6 +348,7 @@ export default function useMessages() {
 
   return {
     messages,
+    cargando,
     resolveConversation,
     sendMessage,
     sendMedia,

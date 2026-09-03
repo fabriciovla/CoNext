@@ -4,6 +4,7 @@ import Button from '../ui/Button'
 import { IconCheck, IconChevronRight } from '../ui/icons'
 import { groupMessagesByPhone } from '../../utils/groupMessages'
 import { formatDuration } from '../../utils/metrics'
+import { useT } from '../../lib/i18n.jsx'
 
 // Momento del primer entrante sin responder: es lo que define cuánto hace que
 // el cliente está esperando, no la fecha del último mensaje del hilo.
@@ -15,6 +16,7 @@ function firstPendingAt(group) {
 }
 
 export default function PendingReview({ messages, onOpenConversation, onNavigate }) {
+  const t = useT()
   const now = Date.now()
   const groups = groupMessagesByPhone(messages)
     .filter((group) => group.pendientes > 0)
@@ -23,11 +25,11 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
 
   return (
     <Card
-      title="Requiere tu atención"
+      title={t('inicio.requiereAtencion')}
       actions={
         groups.length > 0 && (
           <Button size="sm" variant="secondary" onClick={() => onNavigate('inbox')}>
-            Ver bandeja
+            {t('inicio.verBandeja')}
             <IconChevronRight size={13} />
           </Button>
         )
@@ -39,7 +41,7 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
           <span className="animate-pop-in flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-status-good/10 text-status-good" style={{ '--d': '150ms' }}>
             <IconCheck size={15} />
           </span>
-          Ninguna conversación pendiente: está todo respondido.
+          {t('inicio.todoRespondido')}
         </div>
       ) : (
         <ul className="divide-y divide-tint/[0.05]">
@@ -58,7 +60,9 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="truncate text-sm font-medium text-ink-primary">{group.customer}</p>
                     <span className="shrink-0 text-xs tabular-nums text-status-warning">
-                      {formatDuration((now - group.waitingSince) / 60000)} esperando
+                      {t('inicio.esperando', {
+                        tiempo: formatDuration((now - group.waitingSince) / 60000),
+                      })}
                     </span>
                   </div>
                   <p className="truncate text-xs text-ink-muted transition-colors duration-200 group-hover/row:text-ink-secondary">

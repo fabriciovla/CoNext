@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { VUELTA_ESCRITORIO, esEscritorio } from './entorno'
 
 // Los ids son los de Supabase Auth (`signInWithOAuth`).
 export const PROVEEDORES_OAUTH = [
@@ -44,7 +45,13 @@ export function clienteAuth() {
 // `/app/` en el build. Arrancar el OAuth en *esta* origen es lo que hace que
 // el PKCE funcione — si el popup nace en la landing (otro puerto), el verifier
 // queda en otro localStorage y el callback muere.
+//
+// En la app de escritorio la vuelta no es una URL de la web sino el esquema que
+// registra el proceso principal: `app://conext/` no lo puede abrir el navegador
+// donde termina el login. El verifier del PKCE sobrevive igual porque el
+// localStorage es el de este mismo origen, que no cambia.
 export function urlTrasOAuth() {
+  if (esEscritorio()) return VUELTA_ESCRITORIO
   const base = import.meta.env.BASE_URL || '/'
   return new URL(base, window.location.origin).href
 }

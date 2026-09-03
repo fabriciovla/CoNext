@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from './ui/Button'
 import Input, { LABEL_CLASS } from './ui/Input'
 import Select from './ui/Select'
+import { useT } from '../lib/i18n.jsx'
 
 const EMPTY = { name: '', price: '', stock: '' }
 
@@ -18,6 +19,7 @@ export default function ProductForm({
   onSubmit,
   onCancel,
 }) {
+  const t = useT()
   const [form, setForm] = useState(initial ?? { ...EMPTY, folderId: defaultFolderId })
 
   const handleChange = (field) => (e) => {
@@ -39,9 +41,9 @@ export default function ProductForm({
     <form onSubmit={handleSubmit} className="stagger space-y-4">
       <Input
         id="name"
-        label="Nombre"
+        label={t('productos.campoNombre')}
         autoFocus
-        placeholder="Coca-Cola 1.5 L"
+        placeholder={t('productos.campoNombrePlaceholder')}
         value={form.name}
         onChange={handleChange('name')}
         required
@@ -51,13 +53,13 @@ export default function ProductForm({
           sola opción que dice que no hay nada para elegir. */}
       {folders.length > 0 && (
         <div>
-          <span className={LABEL_CLASS}>Carpeta</span>
+          <span className={LABEL_CLASS}>{t('productos.campoCarpeta')}</span>
           <Select
-            ariaLabel="Carpeta del producto"
+            ariaLabel={t('productos.campoCarpetaAria')}
             value={form.folderId ?? SIN_CARPETA}
             onChange={(value) => setForm((prev) => ({ ...prev, folderId: value || null }))}
             options={[
-              { value: SIN_CARPETA, label: 'Sin carpeta' },
+              { value: SIN_CARPETA, label: t('productos.sinCarpeta') },
               ...folders.map((f) => ({ value: f.id, label: f.name })),
             ]}
           />
@@ -67,7 +69,7 @@ export default function ProductForm({
       <div className="grid grid-cols-2 gap-3">
         <Input
           id="price"
-          label="Precio"
+          label={t('productos.campoPrecio')}
           type="number"
           min="0"
           step="0.01"
@@ -77,7 +79,7 @@ export default function ProductForm({
         />
         <Input
           id="stock"
-          label="Stock"
+          label={t('productos.campoStock')}
           type="number"
           min="0"
           placeholder="0"
@@ -87,9 +89,9 @@ export default function ProductForm({
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancelar
+          {t('comun.cancelar')}
         </Button>
-        <Button type="submit">Guardar</Button>
+        <Button type="submit">{t('comun.guardar')}</Button>
       </div>
     </form>
   )

@@ -11,6 +11,11 @@ export default function useProducts() {
   const [products, setProducts] = useState([])
   const [folders, setFolders] = useState([])
   const [error, setError] = useState(null)
+  // Arranca en true y no en false: entre que monta la página y contesta el
+  // server, `products` es un array vacío, que es indistinguible de "este
+  // cliente no cargó ningún producto". Sin esta bandera la pantalla muestra el
+  // estado vacío durante medio segundo y después el catálogo.
+  const [cargando, setCargando] = useState(true)
 
   useEffect(() => {
     Promise.all([apiGet('/products'), apiGet('/products/folders')])
@@ -22,6 +27,7 @@ export default function useProducts() {
         console.error('[useProducts]', err)
         setError(err.message)
       })
+      .finally(() => setCargando(false))
   }, [])
 
   const fallar = (err) => {
@@ -127,6 +133,7 @@ export default function useProducts() {
   return {
     products,
     folders,
+    cargando,
     error,
     addProduct,
     updateProduct,

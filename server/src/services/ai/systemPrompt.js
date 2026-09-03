@@ -4,6 +4,7 @@ import {
   isWithinBusinessHours,
   partesEnZona,
 } from '../businessHours.js'
+import { instruccionDeIdioma } from './idioma.js'
 
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const SEMANA = [
@@ -15,6 +16,12 @@ const SEMANA = [
   ['Sáb', 'sábado'],
   ['Dom', 'domingo'],
 ]
+
+// En qué idioma tiene que salir la respuesta. Es un bloque propio del prompt
+// y no una palabra metida en la línea del tono porque es la instrucción que más
+// se desobedece: el prompt entero está escrito en español, y sin decirlo aparte
+// y con todas las letras el modelo arrastra ese idioma a la respuesta aunque el
+// cliente haya escrito en inglés. Los textos están en `ai/idioma.js`.
 
 function buildSchedule(settings) {
   return SEMANA.map(([key, label]) => {
@@ -97,6 +104,9 @@ export function buildSystemPrompt(settings, products, agents, currentAgent, now 
   // que decide si esta abierto: si no, el prompt anunciaria una hora y la regla
   // de auto-envio usaria otra.
   const ahora = partesEnZona(now, settings?.timezone)
+  // Un idioma guardado que ya no esté en la lista (un downgrade del server, una
+  // fila tocada a mano) cae al de siempre en vez de dejar el bloque vacío.
+  const idioma = instruccionDeIdioma(settings?.aiLanguage)
   const abierto = isWithinBusinessHours(settings, now)
   const proximaApertura = abierto ? null : getNextBusinessOpening(settings, now)
 
@@ -132,8 +142,13 @@ TU TAREA: para el último mensaje entrante del cliente, devolvé:
     Si el catálogo no tiene el producto/color/talle que pregunta el cliente, o si no podés confirmar
     algo con los datos que tenés, poné false aunque la categoría sea "automatico".
   - reply: la respuesta redactada, lista para enviar tal cual, con la voz del agente que elegiste.
-    Tono cercano, argentino, profesional, como el dueño de la tienda respondiendo personalmente.
+    Tono cercano y profesional, como el dueño de la tienda respondiendo personalmente.
     Usá el nombre del cliente si lo tenés.
+
+IDIOMA DE LA RESPUESTA:
+  ${idioma}
+  Esto vale solo para el campo reply, que es lo único que lee el cliente. Los nombres de los productos
+  van tal cual están en el catálogo: son los del negocio y no se traducen.
 
 FORMATO DEL MENSAJE — WhatsApp NO entiende Markdown. Escribí con las marcas de WhatsApp:
   - Negrita: *así*, con UN asterisco de cada lado. Nunca **así**: al cliente le llegan los

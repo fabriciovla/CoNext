@@ -1,5 +1,6 @@
 import { useId, useRef, useState } from 'react'
 import { smoothPath } from '../../utils/curve'
+import { useT } from '../../lib/i18n.jsx'
 
 // El SVG se estira horizontalmente (preserveAspectRatio="none") para llenar el
 // ancho disponible, así que las etiquetas de los ejes van en HTML alrededor del
@@ -237,12 +238,13 @@ export default function AreaChart({ data, xKey, series }) {
 }
 
 function ToggleButton({ showTable, onClick }) {
+  const t = useT()
   return (
     <button
       onClick={onClick}
       className="rounded-md px-2 py-1 text-[12px] text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
     >
-      {showTable ? 'Ver gráfico' : 'Ver tabla'}
+      {showTable ? t('ui.verGrafico') : t('ui.verTabla')}
     </button>
   )
 }

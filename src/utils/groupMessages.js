@@ -19,7 +19,10 @@ const NOMBRE_ADJUNTO = {
   document: 'Archivo',
 }
 
-function vistaPrevia(message) {
+// Exportada porque el aviso del escritorio muestra lo mismo que la fila de la
+// lista: un adjunto sin epígrafe tiene que decir "Foto" en los dos lados y no
+// quedar mudo.
+export function vistaPrevia(message) {
   if (message.text) return message.text
   if (message.mediaKind) {
     return message.mediaKind === 'document' && message.mediaName

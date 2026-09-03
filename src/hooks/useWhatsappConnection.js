@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useT } from '../lib/i18n.jsx'
 import { apiGet, apiPost } from '../api/client'
 import { cargarSdk } from '../lib/facebookSdk'
 
@@ -18,7 +19,8 @@ import { cargarSdk } from '../lib/facebookSdk'
 
 // El código de autorización vive 30 segundos. Suena a mucho y no lo es: si el
 // server está frío o la conexión es lenta, se vence en el camino.
-const AVISO_CODIGO_CORTO = 'El código de Meta vence a los 30 segundos. Probá de nuevo.'
+// Los avisos que redacta el server (`r.avisos`) salen en su idioma y no pasan
+// por el diccionario; estos, que son nuestros, sí.
 
 export function useWhatsappConnection() {
   const [config, setConfig] = useState(null)
@@ -26,6 +28,7 @@ export function useWhatsappConnection() {
   const [cargando, setCargando] = useState(true)
   const [conectando, setConectando] = useState(false)
   const [error, setError] = useState(null)
+  const t = useT()
   const [avisos, setAvisos] = useState([])
   const [sdkListo, setSdkListo] = useState(false)
 
@@ -108,11 +111,11 @@ export function useWhatsappConnection() {
       } else if (payload.event === 'CANCEL') {
         datosSignup.current = null
         setConectando(false)
-        setError('Cancelaste la conexión antes de terminar.')
+        setError(t('canales.cancelaste'))
       } else if (payload.event === 'ERROR') {
         datosSignup.current = null
         setConectando(false)
-        setError(payload.data?.error_message ?? 'Meta rechazó la conexión.')
+        setError(payload.data?.error_message ?? t('canales.metaRechazo'))
       }
     }
 
@@ -126,7 +129,7 @@ export function useWhatsappConnection() {
 
       if (!datos?.wabaId || !datos?.phoneNumberId) {
         setConectando(false)
-        setError('Meta no devolvió el número elegido. Cerrá el popup y probá de nuevo.')
+        setError(t('canales.sinNumeroElegido'))
         return
       }
 
@@ -135,7 +138,11 @@ export function useWhatsappConnection() {
         setAvisos(r.avisos ?? [])
         await refrescar()
       } catch (err) {
-        setError(err.message.includes('código') ? `${err.message} ${AVISO_CODIGO_CORTO}` : err.message)
+        setError(
+          err.message.includes('código')
+            ? `${err.message} ${t('canales.codigoCorto')}`
+            : err.message,
+        )
       } finally {
         setConectando(false)
         datosSignup.current = null
@@ -146,7 +153,7 @@ export function useWhatsappConnection() {
 
   const conectar = useCallback(() => {
     if (!window.FB || !config?.configId) {
-      setError('El conector de Meta todavía no está listo.')
+      setError(t('canales.sdkNoListo'))
       return
     }
 
@@ -163,7 +170,7 @@ export function useWhatsappConnection() {
           // Sin código puede ser que cerró el popup o que no dio los permisos.
           // El evento CANCEL del listener de arriba suele llegar antes y con un
           // mensaje mejor, así que este no lo pisa si ya hay uno.
-          setError((previo) => previo ?? 'No se completó la conexión.')
+          setError((previo) => previo ?? t('canales.noSeCompleto'))
           return
         }
         enviarAlServer(code)

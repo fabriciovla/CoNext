@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useT } from '../lib/i18n.jsx'
 import {
   authDisponible,
   clienteAuth,
@@ -6,6 +7,7 @@ import {
   urlTrasOAuth,
   usuarioDeSesion,
 } from '../lib/auth'
+import { abrirOAuthAfuera, alVolverDeOAuth, esEscritorio } from '../lib/entorno'
 
 const STORAGE_KEY = 'wsp-crm:user'
 
@@ -82,6 +84,7 @@ export default function useAuth() {
   const [correoInicial] = useState(() => (social ? correoDeTraspaso() : ''))
   const [user, setUser] = useState(() => (social ? null : sesionLocal()))
   const [listo, setListo] = useState(!social)
+  const t = useT()
   const [error, setError] = useState('')
   const [oauthPending, setOauthPending] = useState(false)
   const [entrando, setEntrando] = useState(false)
@@ -94,23 +97,37 @@ export default function useAuth() {
 
   const loginCon = useCallback(async (proveedor) => {
     if (!esProveedorOAuth(proveedor)) {
-      setError('Ese proveedor no está disponible.')
+      setError(t('login.faltaProveedor'))
       return
     }
     const auth = clienteAuth()
     if (!auth) {
-      setError('Falta configurar el login social en el server (VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY).')
+      setError(t('login.faltaSupabase'))
       return
     }
     setError('')
     setOauthPending(true)
-    const { error: err } = await auth.auth.signInWithOAuth({
+
+    // Adentro de la app el login no puede pasar por esta ventana:
+    // `skipBrowserRedirect` deja que Supabase arme la URL —y guarde de paso el
+    // verifier del PKCE— sin navegar a ningún lado, y esa URL se abre en el
+    // navegador del sistema. Navegar la ventana sería meter la pantalla de
+    // Google adentro de un webview, que es justo lo que Google rechaza.
+    const escritorio = esEscritorio()
+    const { data, error: err } = await auth.auth.signInWithOAuth({
       provider: proveedor,
-      options: { redirectTo: urlTrasOAuth() },
+      options: { redirectTo: urlTrasOAuth(), skipBrowserRedirect: escritorio },
     })
+
     if (err) {
       setOauthPending(false)
       setError(err.message)
+      return
+    }
+
+    if (escritorio && !(await abrirOAuthAfuera(data?.url))) {
+      setOauthPending(false)
+      setError(t('login.navegadorNoAbrio'))
     }
   }, [])
 
@@ -159,6 +176,60 @@ export default function useAuth() {
     }
   }, [social, entrar, loginCon])
 
+  // La vuelta del proveedor cuando esto corre adentro de la app de escritorio.
+  // Llega como `conext://auth?code=…`: el navegador terminó el login y el
+  // proceso principal capturó el deep link. `detectSessionInUrl` no sirve acá
+  // —el código nunca pasa por la URL de la página—, así que el canje se hace a
+  // mano con `exchangeCodeForSession`.
+  useEffect(() => {
+    if (!social || !esEscritorio()) return undefined
+    const auth = clienteAuth()
+    if (!auth) return undefined
+
+    let cancel = false
+
+    const baja = alVolverDeOAuth(async (href) => {
+      let parametros
+      try {
+        parametros = new URL(href).searchParams
+      } catch {
+        return
+      }
+      if (cancel) return
+      setOauthPending(false)
+
+      const fallo = parametros.get('error_description') || parametros.get('error')
+      if (fallo) {
+        setError(fallo)
+        return
+      }
+
+      const code = parametros.get('code')
+      if (!code) return
+
+      const { data, error: err } = await auth.auth.exchangeCodeForSession(code)
+      if (cancel) return
+      if (err) {
+        setError(err.message)
+        return
+      }
+      const sesion = usuarioDeSesion(data.session)
+      if (sesion) entrar(sesion)
+    })
+
+    // Si vuelve a la ventana sin haber terminado —cerró la pestaña, canceló en
+    // el proveedor— los botones tienen que volver a andar. Sin esto quedan
+    // apagados hasta reiniciar la app, sin que nada explique por qué.
+    const volvio = () => setOauthPending(false)
+    window.addEventListener('focus', volvio)
+
+    return () => {
+      cancel = true
+      baja()
+      window.removeEventListener('focus', volvio)
+    }
+  }, [social, entrar])
+
   // Con Supabase configurado esto es un ingreso de verdad: si la cuenta no
   // existe o la contraseña está mal, no se entra. Antes entraba cualquiera con
   // cualquier cosa, lo que en local era una molestia y publicado es una trampa
@@ -170,7 +241,7 @@ export default function useAuth() {
   // la dashboard inaccesible.
   const login = async (username, password) => {
     if (!username.trim() || !password.trim()) {
-      setError(social ? 'Ingresá correo y contraseña.' : 'Ingresá usuario y contraseña.')
+      setError(social ? t('login.faltanCredencialesSocial') : t('login.faltanCredenciales'))
       return
     }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Login from './pages/Login'
 import Layout from './components/Layout'
+import TitleBar from './components/TitleBar'
 import AppNav from './components/AppNav'
 import ApiErrorBanner from './components/ApiErrorBanner'
 import Modal from './components/ui/Modal'
@@ -19,16 +20,11 @@ import useAgents from './hooks/useAgents'
 import useTemplates from './hooks/useTemplates'
 import useTheme from './hooks/useTheme'
 import { groupMessagesByPhone } from './utils/groupMessages'
-
-const TITULO_APP = {
-  home: 'Inicio · conext',
-  inbox: 'Bandeja · conext',
-  agents: 'Agentes · conext',
-  products: 'Productos · conext',
-  settings: 'Configuración · conext',
-}
+import { alTocarAviso } from './lib/entorno'
+import { useT } from './lib/i18n.jsx'
 
 export default function App() {
+  const t = useT()
   const {
     user,
     isAuthenticated,
@@ -58,6 +54,7 @@ export default function App() {
     conversationsMeta,
     drafts,
     stats,
+    cargando: mensajesCargando,
     dayStatus,
     dayOpenedAt,
     dayClosedAt,
@@ -70,6 +67,7 @@ export default function App() {
   const {
     products,
     folders,
+    cargando: productsCargando,
     error: productsError,
     addProduct,
     updateProduct,
@@ -88,10 +86,11 @@ export default function App() {
     addTemplate,
     deleteTemplate,
   } = useTemplates()
-  const { settings, updateSettings } = useSettings()
+  const { settings, cargando: settingsCargando, updateSettings } = useSettings()
   const {
     agents,
     stats: agentStats,
+    cargando: agentsCargando,
     error: agentsError,
     addAgent,
     updateAgent,
@@ -171,33 +170,74 @@ export default function App() {
     setConfirmClose(false)
   }
 
+  // El título de la ventana sale del mismo diccionario que la pantalla, así
+  // que cambia con el idioma sin que haya que recargar.
   useEffect(() => {
-    document.title = isAuthenticated ? (TITULO_APP[page] ?? 'conext') : 'Entrar · conext'
-  }, [isAuthenticated, page])
+    document.title = isAuthenticated ? t(`titulos.${page}`) : t('titulos.entrar')
+  }, [isAuthenticated, page, t])
 
+  // Tocar una notificación del escritorio abre esa conversación. Sin esto el
+  // aviso deja a la persona parada en la pantalla en la que estaba y hay que
+  // buscar a mano de quién era el mensaje que se acaba de leer en el globo.
+  // En el navegador no hay a qué suscribirse y la baja es un no-op.
+  useEffect(
+    () => alTocarAviso((phone) => phone && navigate('inbox', phone)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  // La barra de título va arriba de todo y en las tres ramas: es el marco de
+  // la ventana, no una parte de la dashboard, así que también está mientras
+  // carga la sesión y en la pantalla de ingreso. En el navegador no dibuja nada.
   if (!listo) {
-    return <div className="min-h-dvh bg-surface-page" />
+    return (
+      <>
+        <TitleBar theme={theme} onToggleTheme={toggleTheme} />
+        <div className="min-h-dvh bg-surface-page" />
+      </>
+    )
   }
 
   if (!isAuthenticated) {
     return (
-      <Login
-        onLogin={login}
-        onOAuth={loginCon}
-        oauthPending={oauthPending}
-        entrando={entrando}
-        correoInicial={correoInicial}
-        social={social}
-        error={error}
-        onClearError={clearError}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      <>
+        <TitleBar theme={theme} onToggleTheme={toggleTheme} />
+        <Login
+          onLogin={login}
+          onOAuth={loginCon}
+          oauthPending={oauthPending}
+          entrando={entrando}
+          correoInicial={correoInicial}
+          social={social}
+          error={error}
+          onClearError={clearError}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      </>
     )
   }
 
   return (
     <>
+      {/* El menú de la barra de título repite lo que ya ofrece la barra de la
+          izquierda, y a propósito: es de donde salen los atajos de teclado y es
+          el primer lugar donde alguien que viene de otra app de escritorio
+          busca "Cerrar sesión" o "Nuevo agente". Cerrar el día pasa por la
+          misma confirmación que el botón de la barra — es destructivo por igual
+          desde donde se lo pida. */}
+      <TitleBar
+        theme={theme}
+        autenticado
+        pagina={page}
+        dayStatus={dayStatus}
+        onNuevoAgente={newAgent}
+        onCerrarDia={() => setConfirmClose(true)}
+        onAbrirDia={openNewDay}
+        onNavegar={navigate}
+        onCerrarSesion={logout}
+        onToggleTheme={toggleTheme}
+      />
       <ApiErrorBanner error={apiError} onDismiss={dismissApiError} />
       <Layout
         current={page}
@@ -228,12 +268,17 @@ export default function App() {
           />
         }
       >
+        {/* Inicio es lo primero que se ve al entrar, así que es donde más se
+            nota que algo tarda: sus números salen de tres consultas distintas y
+            hasta que llegan todo vale cero. Un tablero lleno de ceros no dice
+            "estoy cargando", dice "hoy no pasó nada". */}
         {page === 'home' && (
           <Home
             stats={stats}
             messages={messages}
             products={products}
             settings={settings}
+            cargando={mensajesCargando || settingsCargando}
             dayStatus={dayStatus}
             dayOpenedAt={dayOpenedAt}
             dayClosedAt={dayClosedAt}
@@ -245,6 +290,7 @@ export default function App() {
         {page === 'inbox' && (
           <Inbox
             allGroups={allGroups}
+            cargando={mensajesCargando}
             filter={filter}
             viewingDay={viewingDay}
             onLeaveDay={() => setViewingDayId(null)}
@@ -267,6 +313,7 @@ export default function App() {
           <Products
             products={products}
             folders={folders}
+            cargando={productsCargando}
             error={productsError}
             onAdd={addProduct}
             onUpdate={updateProduct}
@@ -281,6 +328,7 @@ export default function App() {
           <Agents
             agents={agents}
             stats={agentStats}
+            cargando={agentsCargando}
             error={agentsError}
             focus={agentFocus}
             onFocusHandled={clearAgentFocus}
@@ -301,25 +349,28 @@ export default function App() {
             onDelete={deleteTemplate}
           />
         )}
-        {page === 'settings' && <Settings settings={settings} onUpdate={updateSettings} />}
+        {page === 'settings' && (
+          <Settings
+            settings={settings}
+            onUpdate={updateSettings}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
+        )}
       </Layout>
 
       {/* El botón de cerrar el día está en la barra, que ahora se ve en toda la
           app: la confirmación tiene que vivir igual de arriba. */}
       {confirmClose && (
-        <Modal title="Cerrar día" onClose={() => setConfirmClose(false)}>
+        <Modal title={t('dia.cerrarDia')} onClose={() => setConfirmClose(false)}>
           <p className="text-sm text-ink-secondary">
-            Se van a archivar {messages.length} mensaje{messages.length === 1 ? '' : 's'} de hoy
-            {stats.pendientes > 0
-              ? `, incluyendo ${stats.pendientes} pendiente${stats.pendientes > 1 ? 's' : ''} de revisión`
-              : ''}
-            . La bandeja va a quedar vacía hasta que abras un nuevo día.
+            {t('dia.confirmarCierre', { mensajes: messages.length, pendientes: stats.pendientes })}
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmClose(false)}>
-              Cancelar
+              {t('comun.cancelar')}
             </Button>
-            <Button onClick={handleConfirmClose}>Cerrar día</Button>
+            <Button onClick={handleConfirmClose}>{t('dia.cerrarDia')}</Button>
           </div>
         </Modal>
       )}

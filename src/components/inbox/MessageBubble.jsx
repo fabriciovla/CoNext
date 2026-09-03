@@ -2,6 +2,7 @@ import FormattedText from '../ui/FormattedText'
 import { IconBolt, IconClock, IconDoubleCheck, IconDownload, IconFile, IconNote } from '../ui/icons'
 import useMediaSrc from '../../hooks/useMediaSrc'
 import { formatTime } from '../../utils/time'
+import { useT } from '../../lib/i18n.jsx'
 
 function pesoLegible(bytes) {
   if (!bytes) return null
@@ -14,13 +15,14 @@ function pesoLegible(bytes) {
 // descargar: no tiene sentido pelear con la vista previa de un PDF adentro de
 // un globo de 30rem.
 function Adjunto({ message }) {
+  const t = useT()
   const { src, error } = useMediaSrc(message.id)
-  const nombre = message.mediaName || 'archivo'
+  const nombre = message.mediaName || t('bandeja.archivo')
 
   if (error) {
     return (
       <span className="block rounded-xl bg-tint/[0.06] px-3 py-2 text-[13px] text-ink-muted">
-        No se pudo abrir el adjunto
+        {t('bandeja.adjuntoRoto')}
       </span>
     )
   }
@@ -104,6 +106,7 @@ function renderStrong(text) {
 // lugar, entra ahí, y solo baja solo cuando no entra. Como bloque aparte le
 // sumaba un renglón a cada uno de los mensajes del hilo.
 function PieDelGlobo({ message, isOut, agentName = null }) {
+  const t = useT()
   const entrega = message.deliveryStatus ?? null
   const fallo = entrega === 'failed'
   // Tres escalones para tres estados. Sin novedades todavía (o mensajes viejos,
@@ -120,12 +123,16 @@ function PieDelGlobo({ message, isOut, agentName = null }) {
       : entrega === 'delivered'
         ? 'text-ink-secondary'
         : 'text-ink-muted'
-  const rotulo = { sent: 'Enviado', delivered: 'Entregado', read: 'Leído' }[entrega]
+  const rotulo = {
+    sent: t('bandeja.entregaSent'),
+    delivered: t('bandeja.entregaDelivered'),
+    read: t('bandeja.entregaRead'),
+  }[entrega]
 
   return (
     <span className="float-right ml-2.5 mt-[5px] flex select-none items-center gap-1 leading-none">
       {agentName && (
-        <span title={`Respondió ${agentName}`} className="flex text-ink-muted">
+        <span title={t('bandeja.respondio', { nombre: agentName })} className="flex text-ink-muted">
           <IconBolt size={11} />
         </span>
       )}
@@ -135,12 +142,12 @@ function PieDelGlobo({ message, isOut, agentName = null }) {
           // Todavía no contestó el server. La tilde diría "salió", que es
           // justamente lo que no sabemos: el reloj es lo mismo que pone
           // WhatsApp mientras el mensaje está en el aire.
-          <span title="Enviando…" className="flex text-ink-muted">
+          <span title={t('bandeja.enviando')} className="flex text-ink-muted">
             <IconClock size={11} />
           </span>
         ) : fallo ? (
           <span
-            title={message.deliveryError ?? 'No se pudo entregar'}
+            title={message.deliveryError ?? t('bandeja.noSeEntrego')}
             className="flex h-[12px] w-[12px] items-center justify-center rounded-full border border-status-critical text-[8px] font-bold leading-none text-status-critical"
           >
             !
@@ -148,7 +155,7 @@ function PieDelGlobo({ message, isOut, agentName = null }) {
         ) : (
           // El tooltip va en el span y no en el <svg>: como atributo del SVG
           // no lo muestra el navegador.
-          <span title={rotulo ?? 'Enviado'} className="flex">
+          <span title={rotulo ?? t('bandeja.entregaSent')} className="flex">
             <IconDoubleCheck size={13} className={`transition-colors duration-300 ${tono}`} />
           </span>
         ))}
@@ -164,16 +171,32 @@ function PieDelGlobo({ message, isOut, agentName = null }) {
 // corta del globo —la "colita"— de `ultimo`. Sin eso, tres mensajes seguidos
 // del cliente son tres bloques idénticos separados por el mismo aire, y hay que
 // leer las horas para darse cuenta de que fue una sola andanada.
-export default function MessageBubble({ message, agentName, primero = true, ultimo = true }) {
+export default function MessageBubble({
+  message,
+  agentName,
+  primero = true,
+  ultimo = true,
+  entra = false,
+  retraso = 0,
+}) {
+  const t = useT()
   // Entre mensajes del mismo bloque casi no hay aire; entre bloques sí. Es la
   // separación la que dice "acá arrancó otra cosa", no una línea ni un rótulo.
   const separacion = primero ? 'mt-3' : 'mt-[3px]'
+
+  // Solo los mensajes que llegan con el hilo abierto entran animados, y el
+  // retraso lo decide ChatPanel: cuando el cliente escribe y la IA le contesta,
+  // las dos cosas llegan en el mismo poll y sin escalonarlas aparecerían juntas,
+  // como si nadie hubiera contestado nada. Los que ya estaban al abrir la
+  // conversación no llevan nada — ver el comentario del <ul> en ChatPanel.
+  const entrada = entra ? 'animate-fade-up' : ''
+  const estilo = entra ? { '--d': `${retraso}ms` } : undefined
 
   // Evento del sistema: una línea centrada, sin globo. No es algo que alguien
   // haya dicho, así que no se le da la forma de un mensaje.
   if (message.direction === 'evento') {
     return (
-      <li className={`${separacion} flex justify-center`}>
+      <li className={`${separacion} ${entrada} flex justify-center`} style={estilo}>
         <span className="px-3 text-center text-[11.5px] text-ink-faint">{renderStrong(message.text)}</span>
       </li>
     )
@@ -188,11 +211,11 @@ export default function MessageBubble({ message, agentName, primero = true, ulti
   // costado de la conversación.
   if (message.direction === 'nota') {
     return (
-      <li className={`flex flex-col items-end ${separacion}`}>
+      <li className={`flex flex-col items-end ${separacion} ${entrada}`} style={estilo}>
         {primero && (
           <span className="mb-1 flex items-center gap-1 px-1 text-[11px] text-status-warning">
             <IconNote size={11} />
-            Nota interna
+            {t('bandeja.notaInterna')}
           </span>
         )}
         <div
@@ -220,7 +243,10 @@ export default function MessageBubble({ message, agentName, primero = true, ulti
   const fallo = isOut && message.deliveryStatus === 'failed'
 
   return (
-    <li className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} ${separacion}`}>
+    <li
+      className={`flex flex-col ${isOut ? 'items-end' : 'items-start'} ${separacion} ${entrada}`}
+      style={estilo}
+    >
       {/* Sin avatares. El del contacto era el mismo marcador gris —la Cloud API
           no nos da la foto de perfil— repetido en cada globo de una charla de a
           dos, y sin el nombre al lado, que es lo que lo justifica en la lista;
@@ -273,7 +299,8 @@ export default function MessageBubble({ message, agentName, primero = true, ulti
           porque es de ese mensaje y no del bloque. */}
       {fallo && (
         <p className="mt-1 px-1 text-[11.5px] text-status-critical">
-          No se entregó{message.deliveryError ? ` (${message.deliveryError})` : ''}
+          {t('bandeja.noSeEntregoLargo')}
+          {message.deliveryError ? ` (${message.deliveryError})` : ''}
         </p>
       )}
     </li>

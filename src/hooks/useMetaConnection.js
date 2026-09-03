@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useT } from '../lib/i18n.jsx'
 import { apiGet, apiPost, apiPatch } from '../api/client'
 import { cargarSdk } from '../lib/facebookSdk'
 
@@ -18,6 +19,7 @@ export function useMetaConnection() {
   const [cargando, setCargando] = useState(true)
   const [conectando, setConectando] = useState(false)
   const [error, setError] = useState(null)
+  const t = useT()
   const [avisos, setAvisos] = useState([])
   const [sdkListo, setSdkListo] = useState(false)
   // Las Páginas a elegir. Vacío = no hay nada que preguntar.
@@ -98,8 +100,8 @@ export function useMetaConnection() {
         setConectando(false)
         setError(
           response?.status === 'not_authorized'
-            ? 'No diste los permisos que la app necesita.'
-            : 'No se completó la conexión: cerraste la ventana o no diste los permisos.',
+            ? t('canales.sinPermisos')
+            : t('canales.sinPermisosOCerrada'),
         )
         return
       }
@@ -113,7 +115,7 @@ export function useMetaConnection() {
 
         if (r.paginas.length === 0) {
           setConectando(false)
-          setError('Tu cuenta no administra ninguna Página de Facebook.')
+          setError(t('canales.sinPaginas'))
           return
         }
 
@@ -136,7 +138,7 @@ export function useMetaConnection() {
 
   const conectar = useCallback(() => {
     if (!window.FB) {
-      setError('El conector de Meta todavía no está listo.')
+      setError(t('canales.sdkNoListo'))
       return
     }
 

@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { IconClose } from './icons'
+import { useT } from '../../lib/i18n.jsx'
 
 const WIDTHS = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-xl' }
 
 export default function Modal({ title, description, onClose, children, width = 'md' }) {
+  const t = useT()
   // Escape cierra, y mientras el modal está abierto la página de atrás no
   // scrollea. Las dos cosas son lo que separa un diálogo de un div flotante:
   // sin Escape, un modal abierto por accidente hay que cerrarlo apuntando a una
@@ -54,7 +56,7 @@ export default function Modal({ title, description, onClose, children, width = '
           </div>
           <button
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('ui.cerrar')}
             className="-mr-1 -mt-0.5 shrink-0 rounded-md p-1.5 text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
           >
             <IconClose size={15} />

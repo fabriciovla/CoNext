@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EMOJI_CATEGORIES, EMOJI_INDEX } from '../../data/emojis'
+import { useT } from '../../lib/i18n.jsx'
 
 const RECIENTES_KEY = 'conext.emojis.recientes'
 const MAX_RECIENTES = 24
@@ -17,6 +18,7 @@ function leerRecientes() {
 // que se ven igual que en el teclado de su computadora; acá solo se elige cuáles
 // se ofrecen, en qué orden y cómo se buscan.
 export default function EmojiPicker({ onPick, onClose }) {
+  const t = useT()
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState(EMOJI_CATEGORIES[0].key)
   // Los últimos usados encabezan el panel: atendiendo se repiten siempre los
@@ -69,8 +71,8 @@ export default function EmojiPicker({ onPick, onClose }) {
           autoFocus
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar emoji"
-          aria-label="Buscar emoji"
+          placeholder={t('ui.buscarEmoji')}
+          aria-label={t('ui.buscarEmoji')}
           className="w-full rounded-lg border border-tint/10 bg-tint/[0.04] px-2.5 py-1.5 text-[12.5px] text-ink-primary placeholder:text-ink-faint focus:border-tint/25 focus:outline-none"
         />
       </div>
@@ -83,8 +85,8 @@ export default function EmojiPicker({ onPick, onClose }) {
             <button
               key={cat.key}
               onClick={() => setCategoria(cat.key)}
-              title={cat.label}
-              aria-label={cat.label}
+              title={t(cat.clave)}
+              aria-label={t(cat.clave)}
               aria-pressed={cat.key === categoria}
               className={`flex h-7 flex-1 items-center justify-center rounded-md text-[15px] leading-none transition-colors duration-150 ${
                 cat.key === categoria ? 'bg-violet-soft' : 'hover:bg-tint/[0.07]'
@@ -99,9 +101,9 @@ export default function EmojiPicker({ onPick, onClose }) {
       <div ref={listaRef} className="max-h-56 overflow-y-auto px-2 pb-2 pt-1.5">
         {!query && recientes.length > 0 && (
           <>
-            <p className="px-0.5 pb-1 text-[11px] text-ink-muted">Recientes</p>
+            <p className="px-0.5 pb-1 text-[11px] text-ink-muted">{t('ui.recientes')}</p>
             <Grilla emojis={recientes} onPick={elegir} />
-            <p className="px-0.5 pb-1 pt-2 text-[11px] text-ink-muted">{activa.label}</p>
+            <p className="px-0.5 pb-1 pt-2 text-[11px] text-ink-muted">{t(activa.clave)}</p>
           </>
         )}
 

@@ -3,6 +3,7 @@ import FormattedText, { stripFormat } from '../ui/FormattedText'
 import MessageBubble from './MessageBubble'
 import EmojiPicker from './EmojiPicker'
 import { findAgent } from '../../utils/agents'
+import { useIdioma } from '../../lib/i18n.jsx'
 import {
   IconSend,
   IconInbox,
@@ -16,8 +17,8 @@ import {
   IconClose,
 } from '../ui/icons'
 
-function formatDayLabel(iso) {
-  return new Date(iso).toLocaleDateString('es-AR', {
+function formatDayLabel(iso, locale) {
+  return new Date(iso).toLocaleDateString(locale, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -45,6 +46,17 @@ function mismoBloque(a, b) {
   if (!sameDay(a.createdAt, b.createdAt)) return false
   return new Date(b.createdAt) - new Date(a.createdAt) < HUECO_BLOQUE_MS
 }
+
+// Cuánto separa la entrada de un mensaje nuevo de la del siguiente del mismo
+// lote. El caso que importa son dos: el cliente escribe y la IA le contesta, y
+// las dos filas llegan en el mismo poll — sin escalonarlas aparecen juntas y no
+// se lee que una es la respuesta de la otra.
+const ESCALON_ENTRADA_MS = 300
+
+// Y el tope, para cuando llegan muchos de golpe: el poll se pausa con la
+// ventana escondida, así que volver a la app después de un rato trae la tanda
+// entera. Sin tope, el último mensaje esperaría varios segundos para aparecer.
+const MAX_ESCALONES = 3
 
 // Cuanto se queda como minimo el aviso de "Enviando…". Ver handleSend.
 const MIN_AVISO_ENVIO_MS = 700
@@ -87,6 +99,8 @@ function reloj(segundos) {
 // por debajo del mínimo cómodo para apuntarles. Adentro de una isla con
 // esquinas de 24px y texto de 14.5px, además, se veían de otra escala.
 function ComposerButton({ title, onClick, active = false, children }) {
+  // El `title` ya llega traducido de quien lo usa: este componente es una forma,
+  // no un texto.
   return (
     <button
       type="button"
@@ -113,12 +127,14 @@ export default function ChatPanel({
   onAddNote,
   agents = [],
   disabled = false,
-  disabledMessage = 'El día está cerrado. Abrí un nuevo día para responder.',
+  // El texto por defecto lo pone Inbox, que es quien sabe por qué está cerrado.
+  disabledMessage = '',
   aiDraft,
   // Lo que se esté buscando dentro del hilo. El input vive en la ficha de
   // contacto, así que el estado es de Inbox y baja por acá para filtrar.
   search = '',
 }) {
+  const { t, locale } = useIdioma()
   const [draft, setDraft] = useState('')
   // 'mensaje' se le envía al cliente; 'nota' queda para el equipo. Es el mismo
   // cuadro de texto porque se alterna todo el tiempo mientras se responde.
@@ -150,6 +166,11 @@ export default function ChatPanel({
   const borradores = useRef({})
   const borradorVivo = useRef({ text: '', mode: 'mensaje' })
   const phoneAnterior = useRef(null)
+  // Los ids que ya estaban la vuelta anterior, para saber cuáles son nuevos.
+  // Va acá arriba con el resto y no al lado de donde se usa: abajo del `return`
+  // de "elegí una conversación" sería un hook que existe o no según la
+  // prop, y React desmonta el árbol entero al elegir un contacto.
+  const entradas = useRef({ phone: null, firma: '', nuevos: new Map(), conocidos: new Set() })
 
   const phone = group?.phone
   const messageCount = group?.messages.length
@@ -287,9 +308,9 @@ export default function ChatPanel({
       <div className="animate-fade-in flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-3 bg-surface-card text-center">
         <IconInbox size={28} className="text-ink-faint" />
         <p className="text-[13px] leading-relaxed text-ink-faint">
-          Elegí una conversación de la lista
+          {t('bandeja.elegiConversacion')}
           <br />
-          para ver el historial completo.
+          {t('bandeja.elegiConversacionPie')}
         </p>
       </div>
     )
@@ -332,7 +353,7 @@ export default function ChatPanel({
   const empezarGrabacion = async () => {
     setErrorMedia(null)
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-      setErrorMedia('Este navegador no puede grabar audio.')
+      setErrorMedia(t('bandeja.sinMicrofono'))
       return
     }
 
@@ -357,7 +378,9 @@ export default function ChatPanel({
         // Queda como adjunto pendiente en vez de salir disparada: una nota de
         // voz se escucha antes de mandarla, y sin ese paso el único arreglo de
         // un audio mal grabado es mandar otro pidiendo disculpas.
-        ponerAdjunto(new File([blob], `nota-de-voz-${Date.now()}.${ext}`, { type: mime }))
+        ponerAdjunto(
+          new File([blob], `${t('bandeja.nombreNotaDeVoz')}-${Date.now()}.${ext}`, { type: mime }),
+        )
       }
 
       grabacionRef.current = { recorder, stream, descartar: false }
@@ -365,7 +388,7 @@ export default function ChatPanel({
       setSegundos(0)
       setGrabando(true)
     } catch {
-      setErrorMedia('No se pudo usar el micrófono. Revisá el permiso del navegador.')
+      setErrorMedia(t('bandeja.microfonoDenegado'))
     }
   }
 
@@ -461,6 +484,42 @@ export default function ChatPanel({
     if (e.target.value.trim()) setSugerenciaAbierta(false)
   }
 
+  // Qué mensajes llegaron con el hilo ya abierto. La cuenta se lleva sobre
+  // `group.messages` y no sobre los filtrados, porque escribir en el buscador
+  // cambia la lista visible y los que vuelven a entrar no son nuevos: ya
+  // estaban.
+  //
+  // Se calcula durante el render y no en un efecto: en un efecto el mensaje se
+  // pinta primero sin la clase y recién después la recibe, con lo que se ve
+  // aparecer entero y enseguida rehacer la entrada. Para que sea idempotente
+  // —React puede llamar al render dos veces por el mismo estado— el trabajo se
+  // saltea si la lista de ids es la misma de la vuelta anterior.
+  const firma = group.messages.map((m) => m.id).join('|')
+
+  if (entradas.current.firma !== firma) {
+    const otraConversacion = entradas.current.phone !== group.phone
+    const nuevos = new Map()
+
+    // Al abrir una conversación no entra nada: la charla ya pasó, está ahí.
+    if (!otraConversacion) {
+      let i = 0
+      for (const { id } of group.messages) {
+        if (entradas.current.conocidos.has(id)) continue
+        nuevos.set(id, Math.min(i, MAX_ESCALONES) * ESCALON_ENTRADA_MS)
+        i += 1
+      }
+    }
+
+    entradas.current = {
+      phone: group.phone,
+      firma,
+      nuevos,
+      conocidos: new Set(group.messages.map((m) => m.id)),
+    }
+  }
+
+  const nuevos = entradas.current.nuevos
+
   const query = search.trim().toLowerCase()
   const visibleMessages = query
     ? group.messages.filter((m) => m.text.toLowerCase().includes(query))
@@ -473,11 +532,14 @@ export default function ChatPanel({
           desparramada. Por debajo de ese tope el padding es el normal.
           El tope es 56rem y no el ancho entero: una conversación se lee como
           una columna, no como una tabla. */}
-      {/* El hilo no tiene animación de entrada, y es a propósito: los globos
-          entraban uno atrás del otro, escalonados, cada vez que se abría una
-          conversación. Ningún chat hace eso — la charla ya pasó, está ahí — y
-          era lo que hacía que abrir un contacto se sintiera una demo y no la
-          bandeja de alguien que trabaja. */}
+      {/* Abrir una conversación no anima nada, y es a propósito: los globos
+          entraban uno atrás del otro, escalonados, cada vez que se abría un
+          contacto. Ningún chat hace eso — la charla ya pasó, está ahí — y era
+          lo que hacía que la bandeja se sintiera una demo.
+          Lo que sí entra animado es lo que *llega* con el hilo abierto, que es
+          el caso contrario: ahí el movimiento no adorna, avisa. Y va escalonado
+          porque el mensaje del cliente y la respuesta de la IA llegan en el
+          mismo poll: apareciendo juntos no se lee que una contesta a la otra. */}
       <ul
         ref={threadRef}
         className="min-h-0 flex-1 overflow-y-auto px-[max(1.25rem,calc((100%-56rem)/2))] py-5"
@@ -492,7 +554,7 @@ export default function ChatPanel({
               {showDay && (
                 <li className="mt-5 flex justify-center first:mt-0">
                   <span className="px-2.5 py-1 text-[11.5px] text-ink-faint first-letter:uppercase">
-                    {formatDayLabel(message.createdAt)}
+                    {formatDayLabel(message.createdAt, locale)}
                   </span>
                 </li>
               )}
@@ -508,6 +570,8 @@ export default function ChatPanel({
                 agentName={findAgent(agents, message.agentKey ?? group.agent).name}
                 primero={!mismoBloque(prev, message)}
                 ultimo={!mismoBloque(message, next)}
+                entra={nuevos.has(message.id)}
+                retraso={nuevos.get(message.id) ?? 0}
               />
             </Fragment>
           )
@@ -515,7 +579,7 @@ export default function ChatPanel({
 
         {visibleMessages.length === 0 && (
           <li className="py-10 text-center text-[12.5px] text-ink-faint">
-            Ningún mensaje coincide con “{search.trim()}”.
+            {t('bandeja.sinCoincidencias', { query: search.trim() })}
           </li>
         )}
       </ul>
@@ -536,7 +600,9 @@ export default function ChatPanel({
         {haySugerencia &&
           (sugerenciaAbierta ? (
             <div className="mb-2 rounded-2xl border border-tint/[0.09] bg-tint/[0.02] px-3.5 py-2.5">
-              <p className="text-[11px] text-ink-faint">Sugerencia de {agent.name}</p>
+              <p className="text-[11px] text-ink-faint">
+                {t('bandeja.sugerenciaDe', { nombre: agent.name })}
+              </p>
               <div className="mt-1 whitespace-pre-wrap text-[13.5px] leading-snug text-ink-secondary">
                 <FormattedText>{aiDraft.text}</FormattedText>
               </div>
@@ -550,13 +616,13 @@ export default function ChatPanel({
                   onClick={() => setSugerenciaAbierta(false)}
                   className="rounded-lg px-2 py-0.5 text-[11.5px] text-ink-faint transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
                 >
-                  Descartar
+                  {t('bandeja.descartar')}
                 </button>
                 <button
                   onClick={usarSugerenciaIA}
                   className="rounded-lg px-2 py-0.5 text-[11.5px] font-medium text-violet transition-colors duration-200 hover:bg-violet-soft"
                 >
-                  Usar y editar
+                  {t('bandeja.usarYEditar')}
                 </button>
               </div>
             </div>
@@ -567,11 +633,11 @@ export default function ChatPanel({
               onClick={() => setSugerenciaAbierta(true)}
               className="mb-2 flex w-full items-center gap-2 rounded-xl px-2.5 py-1 text-left text-[11.5px] transition-colors duration-200 hover:bg-tint/[0.05]"
             >
-              <span className="shrink-0 text-ink-faint">Sugerencia:</span>
+              <span className="shrink-0 text-ink-faint">{t('bandeja.sugerencia')}</span>
               <span className="min-w-0 flex-1 truncate text-ink-muted">
                 {stripFormat(aiDraft.text)}
               </span>
-              <span className="shrink-0 font-medium text-violet">Ver</span>
+              <span className="shrink-0 font-medium text-violet">{t('bandeja.ver')}</span>
             </button>
           ))}
 
@@ -589,8 +655,8 @@ export default function ChatPanel({
         {mode === 'nota' && !disabled && (
           <p className="mb-2 flex items-center gap-1.5 px-1 text-[11.5px]">
             <IconNote size={13} className="shrink-0 text-status-warning" />
-            <span className="text-status-warning">Nota interna</span>
-            <span className="text-ink-faint">· solo la ve el equipo, no se envía</span>
+            <span className="text-status-warning">{t('bandeja.notaInterna')}</span>
+            <span className="text-ink-faint">{t('bandeja.notaInternaAviso')}</span>
           </p>
         )}
 
@@ -644,7 +710,7 @@ export default function ChatPanel({
                   </span>
                 )}
 
-                <ComposerButton title="Quitar el adjunto" onClick={quitarAdjunto}>
+                <ComposerButton title={t('bandeja.quitarAdjunto')} onClick={quitarAdjunto}>
                   <IconClose size={16} />
                 </ComposerButton>
               </div>
@@ -656,20 +722,20 @@ export default function ChatPanel({
               // controles de escribir a la vista solo invita a errarle.
               <div className="flex items-center gap-2 p-1.5">
                 <ComposerButton
-                  title="Descartar la grabación"
+                  title={t('bandeja.descartarGrabacion')}
                   onClick={() => detenerGrabacion({ descartar: true })}
                 >
                   <IconTrash size={18} />
                 </ComposerButton>
                 <span className="flex min-w-0 flex-1 items-center gap-2 text-[13px] text-ink-secondary">
                   <span className="h-2 w-2 shrink-0 rounded-full bg-status-critical" />
-                  Grabando
+                  {t('bandeja.grabando')}
                   <span className="tabular-nums text-ink-muted">{reloj(segundos)}</span>
                 </span>
                 <button
                   onClick={() => detenerGrabacion()}
-                  title="Terminar la grabación"
-                  aria-label="Terminar la grabación"
+                  title={t('bandeja.terminarGrabacion')}
+                  aria-label={t('bandeja.terminarGrabacion')}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-primary text-ink-inverted transition-colors duration-200 hover:bg-ink-primary/85"
                 >
                   <IconStop size={14} />
@@ -688,11 +754,15 @@ export default function ChatPanel({
                   value={draft}
                   onChange={handleChange}
                   onKeyDown={handleKeyDown}
-                  aria-label={mode === 'nota' ? 'Nota interna' : 'Mensaje para el cliente'}
+                  aria-label={
+                    mode === 'nota' ? t('bandeja.notaInterna') : t('bandeja.mensajeParaCliente')
+                  }
                   // Voseo, como el resto de la dashboard ("Elegí", "Contame",
                   // "Buscás"). El "Escribe" neutro era el único imperativo en
                   // español de traducción de toda la pantalla.
-                  placeholder={mode === 'nota' ? 'Escribí una nota' : 'Escribí un mensaje'}
+                  placeholder={
+                    mode === 'nota' ? t('bandeja.escribiNota') : t('bandeja.escribiMensaje')
+                  }
                   className={`max-h-40 min-h-[2.25rem] min-w-0 resize-none overflow-y-auto bg-transparent px-2.5 py-2 text-[14.5px] leading-snug text-ink-primary placeholder:text-ink-faint focus:outline-none
                     ${multilinea ? 'order-0 basis-full' : 'order-2 flex-1'}`}
                 />
@@ -703,7 +773,11 @@ export default function ChatPanel({
                     queda medio vacía. `relative` es el ancla del panel de
                     emojis. */}
                 <div className="relative order-3 ml-auto flex shrink-0 items-center gap-0.5">
-                  <ComposerButton title="Emoji" active={emojiOpen} onClick={() => setEmojiOpen((v) => !v)}>
+                  <ComposerButton
+                    title={t('bandeja.emoji')}
+                    active={emojiOpen}
+                    onClick={() => setEmojiOpen((v) => !v)}
+                  >
                     <IconSmile size={18} />
                   </ComposerButton>
                   {emojiOpen && (
@@ -715,7 +789,10 @@ export default function ChatPanel({
                     </>
                   )}
 
-                  <ComposerButton title="Adjuntar un archivo" onClick={() => fileInputRef.current?.click()}>
+                  <ComposerButton
+                    title={t('bandeja.adjuntar')}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     <IconPaperclip size={18} />
                   </ComposerButton>
 
@@ -724,7 +801,7 @@ export default function ChatPanel({
                       archivo al cliente igual. */}
                   {!adjunto && (
                     <ComposerButton
-                      title="Cambiar a nota interna (Ctrl + \)"
+                      title={t('bandeja.cambiarANota')}
                       active={mode === 'nota'}
                       onClick={() => setMode((m) => (m === 'nota' ? 'mensaje' : 'nota'))}
                     >
@@ -745,12 +822,14 @@ export default function ChatPanel({
 
                   {/* Subir puede tardar, y sin esto el único cambio visible es
                       que el botón de enviar se apaga. */}
-                  {enviando && <span className="px-1 text-[11px] text-ink-muted">Enviando…</span>}
+                  {enviando && (
+                    <span className="px-1 text-[11px] text-ink-muted">{t('bandeja.enviando')}</span>
+                  )}
 
                   {/* El micrófono no está en modo nota (una nota interna es texto)
                       ni con algo ya adjuntado: cada mensaje lleva un archivo. */}
                   {mode !== 'nota' && !adjunto && !enviando && (
-                    <ComposerButton title="Grabar una nota de voz" onClick={empezarGrabacion}>
+                    <ComposerButton title={t('bandeja.grabarNota')} onClick={empezarGrabacion}>
                       <IconMic size={18} />
                     </ComposerButton>
                   )}
@@ -760,12 +839,14 @@ export default function ChatPanel({
                     disabled={!puedeEnviar}
                     title={
                       excedido
-                        ? `El mensaje supera los ${MAX_CARACTERES} caracteres`
+                        ? t('bandeja.excedido', { max: MAX_CARACTERES })
                         : mode === 'nota'
-                          ? 'Guardar nota (Enter)'
-                          : 'Enviar mensaje (Enter)'
+                          ? t('bandeja.guardarNotaEnter')
+                          : t('bandeja.enviarMensajeEnter')
                     }
-                    aria-label={mode === 'nota' ? 'Guardar nota' : 'Enviar mensaje'}
+                    aria-label={
+                      mode === 'nota' ? t('bandeja.guardarNota') : t('bandeja.enviarMensaje')
+                    }
                     // Redondo, como la isla que lo contiene.
                     //
                     // Mismo relleno que `<Button variant="primary">`: es el
@@ -816,7 +897,9 @@ export default function ChatPanel({
                 <span className="absolute inset-y-0 left-0 block w-1/3 animate-barrido rounded-full bg-violet" />
               </span>
               <span className="text-[11px] leading-none text-ink-faint">
-                {enviosEnVuelo > 1 ? `Enviando ${enviosEnVuelo} mensajes…` : 'Enviando…'}
+                {enviosEnVuelo > 1
+                  ? t('bandeja.enviandoVarios', { n: enviosEnVuelo })
+                  : t('bandeja.enviando')}
               </span>
             </div>
           )}

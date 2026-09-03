@@ -12,6 +12,7 @@ import {
 } from '../components/icons.jsx'
 import { dodoCheckout, WHATSAPP_URL } from '../config'
 import { getLocale, t } from '../i18n/utils'
+import { urlCanonico } from '../lib/seo'
 
 const lang = getLocale(Astro)
 const p = t(lang).precios
@@ -39,7 +40,7 @@ const ESQUEMA = {
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   description: p.description,
-  url: Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined,
+  url: urlCanonico(Astro.url.pathname, Astro.site).href,
   inLanguage: lang === 'en' ? 'en' : 'es',
   offers: {
     '@type': 'AggregateOffer',

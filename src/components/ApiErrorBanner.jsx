@@ -1,4 +1,5 @@
 import { IconAlert, IconClose } from './ui/icons'
+import { useT } from '../lib/i18n.jsx'
 
 // Aviso de que la última llamada a la API falló. Va fijo arriba de todo y por
 // encima de la bandeja, que se dibuja a pantalla completa: el caso que importa
@@ -10,6 +11,7 @@ import { IconAlert, IconClose } from './ui/icons'
 // como un problema. Un slab rojo a todo el ancho, sobre el tema claro, tapaba
 // media pantalla por un error que casi siempre es "todavía no levanté el server".
 export default function ApiErrorBanner({ error, onDismiss }) {
+  const t = useT()
   if (!error) return null
 
   return (
@@ -19,14 +21,18 @@ export default function ApiErrorBanner({ error, onDismiss }) {
         border-b border-status-critical/30 bg-surface-raised px-4 py-2 text-[12.5px] shadow-pop"
     >
       <IconAlert size={14} className="shrink-0 text-status-critical" />
+      {/* El hook guarda el origen como clave (`errores.enviarMensaje`) y la
+          frase se arma acá: así el aviso sale en el idioma que esté puesto
+          cuando se dibuja, y no en el que estaba cuando falló. */}
       <p className="min-w-0 truncate text-ink-secondary">
-        No se pudo {error.origen}: <span className="text-ink-muted">{error.message}</span>
+        {t('errores.plantilla', { que: t(`errores.${error.origen}`) })}:{' '}
+        <span className="text-ink-muted">{error.message}</span>
       </p>
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="Cerrar aviso"
-        title="Cerrar aviso"
+        aria-label={t('errores.cerrarAviso')}
+        title={t('errores.cerrarAviso')}
         className="-mr-1 shrink-0 rounded-md p-1 text-ink-muted transition-colors duration-150
           hover:bg-tint/[0.06] hover:text-ink-primary"
       >

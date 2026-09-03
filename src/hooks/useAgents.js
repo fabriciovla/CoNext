@@ -9,13 +9,19 @@ export default function useAgents() {
   const [agents, setAgents] = useState([])
   const [stats, setStats] = useState({})
   const [error, setError] = useState(null)
+  // Ver el comentario de `useProducts`: la lista vacía del arranque no es lo
+  // mismo que un cliente sin agentes.
+  const [cargando, setCargando] = useState(true)
 
   const refreshStats = useCallback(async () => {
     setStats(await apiGet('/agents/stats'))
   }, [])
 
   useEffect(() => {
-    apiGet('/agents').then(setAgents).catch((err) => console.error('[useAgents]', err))
+    apiGet('/agents')
+      .then(setAgents)
+      .catch((err) => console.error('[useAgents]', err))
+      .finally(() => setCargando(false))
     refreshStats().catch((err) => console.error('[useAgents] stats', err))
 
     const interval = setInterval(() => {
@@ -73,5 +79,5 @@ export default function useAgents() {
       })
   }
 
-  return { agents, stats, error, addAgent, updateAgent, deleteAgent, reorderAgents }
+  return { agents, stats, cargando, error, addAgent, updateAgent, deleteAgent, reorderAgents }
 }

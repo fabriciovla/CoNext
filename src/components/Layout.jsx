@@ -12,7 +12,7 @@ export default function Layout({ current, nav, children }) {
   const fillsViewport = current === 'products'
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-page">
+    <div className="flex h-[calc(100dvh-var(--barra-titulo))] overflow-hidden bg-surface-page">
       {nav}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

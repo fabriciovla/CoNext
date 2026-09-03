@@ -10,3 +10,9 @@ server/data
 # Los adjuntos que se mandan desde el composer. Son datos de cada instalación,
 # no del repo.
 server/uploads
+
+# App de escritorio: el build del renderer, los instaladores y el archivo de
+# variables que arma el build a partir de server/.env + desktop/.env.
+desktop/renderer
+desktop/release
+desktop/.env.production.local

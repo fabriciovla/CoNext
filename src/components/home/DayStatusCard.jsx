@@ -3,12 +3,15 @@ import Button from '../ui/Button'
 import { IconArchive, IconClock } from '../ui/icons'
 import { storeSchedule } from '../../utils/metrics'
 import { formatTime } from '../../utils/time'
+import { useT } from '../../lib/i18n.jsx'
 
+// El motivo que devuelve `storeSchedule` es una clave, no una frase: acá se
+// traduce a la del idioma puesto.
 const SCHEDULE_TEXT = {
-  abierto: 'Atendiendo ahora',
-  'antes-de-abrir': 'Todavía no abriste',
-  'ya-cerro': 'Fuera de horario',
-  'no-laborable': 'Hoy no se atiende',
+  abierto: 'inicio.horarioAtendiendo',
+  'antes-de-abrir': 'inicio.horarioNoAbriste',
+  'ya-cerro': 'inicio.horarioFuera',
+  'no-laborable': 'inicio.horarioNoLaborable',
 }
 
 export default function DayStatusCard({
@@ -21,11 +24,12 @@ export default function DayStatusCard({
   onOpenNewDay,
   onNavigate,
 }) {
+  const t = useT()
   const isOpen = dayStatus === 'open'
   const schedule = storeSchedule(settings)
 
   return (
-    <Card title="Estado del día">
+    <Card title={t('inicio.estadoDelDia')}>
       <div className="animate-fade-in flex items-center gap-2.5">
         <span className="relative flex h-2 w-2 shrink-0">
           {/* Halo que late solo mientras el día está abierto: dice "en vivo". */}
@@ -38,9 +42,15 @@ export default function DayStatusCard({
             }`}
           />
         </span>
-        <p className="text-sm font-medium text-ink-primary">{isOpen ? 'Día abierto' : 'Día cerrado'}</p>
+        <p className="text-sm font-medium text-ink-primary">
+          {isOpen ? t('dia.abierto') : t('dia.cerrado')}
+        </p>
         <span className="text-xs text-ink-muted">
-          {isOpen ? `desde las ${formatTime(dayOpenedAt)}` : dayClosedAt ? `a las ${formatTime(dayClosedAt)}` : ''}
+          {isOpen
+            ? t('dia.desdeLas', { hora: formatTime(dayOpenedAt) })
+            : dayClosedAt
+              ? t('dia.alas', { hora: formatTime(dayClosedAt) })
+              : ''}
         </span>
       </div>
 
@@ -48,30 +58,32 @@ export default function DayStatusCard({
         <div className="flex items-center justify-between gap-3">
           <dt className="flex items-center gap-1.5 text-ink-muted">
             <IconClock size={13} />
-            Horario de atención
+            {t('inicio.horarioDeAtencion')}
           </dt>
           <dd className="tabular-nums text-ink-secondary">
             {schedule.hours
               ? `${schedule.hours.openTime} – ${schedule.hours.closeTime}`
               : schedule.isOpen
-                ? 'Turno del día anterior'
-                : 'Cerrado hoy'}
+                ? t('inicio.turnoAnterior')
+                : t('inicio.cerradoHoy')}
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-ink-muted">{schedule.today}, según tu configuración</dt>
+          <dt className="text-ink-muted">
+            {t('inicio.segunConfiguracion', { dia: t(`diasCorto.${schedule.today}`) })}
+          </dt>
           <dd className={schedule.isOpen ? 'font-medium text-status-good' : 'text-ink-secondary'}>
-            {SCHEDULE_TEXT[schedule.reason]}
+            {t(SCHEDULE_TEXT[schedule.reason])}
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <dt className="text-ink-muted">Mensajes en la bandeja</dt>
+          <dt className="text-ink-muted">{t('inicio.mensajesEnBandeja')}</dt>
           <dd className="tabular-nums text-ink-secondary">{messageCount}</dd>
         </div>
         <div className="flex items-center justify-between gap-3">
           <dt className="flex items-center gap-1.5 text-ink-muted">
             <IconArchive size={13} />
-            Días archivados
+            {t('inicio.diasArchivados')}
           </dt>
           <dd className="tabular-nums text-ink-secondary">{archivedDays.length}</dd>
         </div>
@@ -80,15 +92,15 @@ export default function DayStatusCard({
       <div className="animate-fade-up mt-4 flex gap-2" style={{ '--d': '340ms' }}>
         {isOpen ? (
           <Button size="sm" variant="secondary" onClick={() => onNavigate('inbox')}>
-            Ir a la bandeja
+            {t('inicio.irALaBandeja')}
           </Button>
         ) : (
           <Button size="sm" onClick={onOpenNewDay}>
-            Abrir nuevo día
+            {t('dia.abrirNuevo')}
           </Button>
         )}
         <Button size="sm" variant="ghost" onClick={() => onNavigate('settings')}>
-          Editar horarios
+          {t('inicio.editarHorarios')}
         </Button>
       </div>
     </Card>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { IconChevronDown, IconCheck } from './icons'
+import { useT } from '../../lib/i18n.jsx'
 
 // Desplegable de la app.
 //
@@ -17,10 +18,12 @@ export default function Select({
   options,
   onChange,
   variant = 'field',
-  placeholder = 'Elegir…',
+  // Sin placeholder propio se usa el genérico traducido.
+  placeholder,
   ariaLabel,
   className = '',
 }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   // Índice resaltado por teclado. Al abrir arranca en el elegido, no en el
   // primero: bajar una vez desde donde estás es lo que se espera.
@@ -111,7 +114,7 @@ export default function Select({
         className={triggerClass}
       >
         <span className={`min-w-0 truncate ${variant === 'field' ? 'flex-1' : ''}`}>
-          {elegida?.label ?? placeholder}
+          {elegida?.label ?? placeholder ?? t('ui.elegir')}
         </span>
         {elegida?.hint && (
           <span className="shrink-0 text-[12px] text-ink-faint">{elegida.hint}</span>

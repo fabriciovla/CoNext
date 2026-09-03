@@ -4,21 +4,23 @@ import Input from '../components/ui/Input'
 import Logo, { LogoMarca } from '../components/ui/Logo'
 import SocialButtons from '../components/login/SocialButtons'
 import { IconBolt, IconLock, IconMoon, IconSparkles, IconSun } from '../components/ui/icons'
+import { useT } from '../lib/i18n.jsx'
 
 const PESTANAS = [
-  { key: 'ingresar', label: 'Iniciar sesión' },
-  { key: 'crear', label: 'Crear cuenta' },
+  { key: 'ingresar', clave: 'login.iniciarSesion' },
+  { key: 'crear', clave: 'login.crearCuenta' },
 ]
 
 const VENTAJAS = [
-  { Icon: IconBolt, label: 'Respuesta al instante' },
-  { Icon: IconSparkles, label: 'Borradores con IA' },
-  { Icon: IconLock, label: 'Datos por cliente' },
+  { Icon: IconBolt, clave: 'login.ventajaRespuesta' },
+  { Icon: IconSparkles, clave: 'login.ventajaBorradores' },
+  { Icon: IconLock, clave: 'login.ventajaDatos' },
 ]
 
 // El panel de marca no se muestra abajo de lg: en una pantalla angosta, apilarlo
 // arriba del formulario deja el campo de usuario debajo del pliegue.
 function PanelMarca() {
+  const t = useT()
   return (
     <section className="relative hidden overflow-hidden border-r border-tint/[0.07] bg-surface-card px-10 py-9 lg:flex lg:flex-col">
       {/* Los dos orbes del inicio, arriba y abajo. Son el único "fondo" del
@@ -46,15 +48,15 @@ function PanelMarca() {
           className="animate-fade-up mt-12 max-w-[15ch] text-[34px] font-semibold leading-[1.15] tracking-tight text-ink-primary"
           style={{ '--d': '240ms' }}
         >
-          Todo WhatsApp.
+          {t('login.titular')}
           <br />
-          <span className="text-violet">Una sola bandeja.</span>
+          <span className="text-violet">{t('login.titularAcento')}</span>
         </h1>
         <p
           className="animate-fade-up mt-4 max-w-[42ch] text-[13.5px] leading-relaxed text-ink-muted"
           style={{ '--d': '300ms' }}
         >
-          La IA clasifica cada mensaje, contesta lo seguro y te deja el resto redactado para revisar.
+          {t('login.bajadaPanel')}
         </p>
       </div>
 
@@ -62,10 +64,10 @@ function PanelMarca() {
         className="animate-fade-in relative flex items-center justify-center gap-6 text-[12px] text-ink-faint"
         style={{ '--d': '420ms' }}
       >
-        {VENTAJAS.map(({ Icon, label }) => (
-          <li key={label} className="flex items-center gap-1.5">
+        {VENTAJAS.map(({ Icon, clave }) => (
+          <li key={clave} className="flex items-center gap-1.5">
             <Icon size={13} />
-            {label}
+            {t(clave)}
           </li>
         ))}
       </ul>
@@ -85,6 +87,7 @@ export default function Login({
   theme,
   onToggleTheme,
 }) {
+  const t = useT()
   const [tab, setTab] = useState('ingresar')
   // Con Auth de verdad la landing manda el correo en la URL: llega escrito.
   const [username, setUsername] = useState(correoInicial)
@@ -129,16 +132,16 @@ export default function Login({
   }
 
   return (
-    <div className="min-h-dvh bg-surface-page lg:grid lg:grid-cols-2">
+    <div className="min-h-[calc(100dvh-var(--barra-titulo))] bg-surface-page lg:grid lg:grid-cols-2">
       <PanelMarca />
 
-      <section className="relative flex min-h-dvh items-center justify-center px-5 py-12 lg:min-h-0">
+      <section className="relative flex min-h-[calc(100dvh-var(--barra-titulo))] items-center justify-center px-5 py-12 lg:min-h-0">
         {onToggleTheme && (
           <button
             type="button"
             onClick={onToggleTheme}
-            aria-label={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
-            title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+            aria-label={theme === 'dark' ? t('comun.temaClaro') : t('comun.temaOscuro')}
+            title={theme === 'dark' ? t('comun.temaClaro') : t('comun.temaOscuro')}
             className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-lg text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
           >
             {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
@@ -153,11 +156,11 @@ export default function Login({
 
           <div
             role="tablist"
-            aria-label="Acceso"
+            aria-label={t('login.acceso')}
             className="animate-fade-up grid grid-cols-2 gap-1 rounded-xl border border-tint/[0.08] bg-tint/[0.03] p-1"
             style={{ '--d': '80ms' }}
           >
-            {PESTANAS.map(({ key, label }, i) => (
+            {PESTANAS.map(({ key, clave }, i) => (
               <button
                 key={key}
                 type="button"
@@ -175,7 +178,7 @@ export default function Login({
                     : 'text-ink-muted hover:text-ink-primary'
                 }`}
               >
-                {label}
+                {t(clave)}
               </button>
             ))}
           </div>
@@ -188,18 +191,18 @@ export default function Login({
             style={{ '--stagger-base': '100ms' }}
           >
             <h2 className="text-center text-[26px] font-semibold tracking-tight text-ink-primary">
-              {tab === 'ingresar' ? 'Hola de nuevo' : 'Pedí tu acceso'}
+              {tab === 'ingresar' ? t('login.holaDeNuevo') : t('login.pediTuAcceso')}
             </h2>
             <p className="mb-6 mt-1.5 text-center text-[13px] leading-relaxed text-ink-muted">
-              {tab === 'ingresar'
-                ? 'Entrá con Google o GitHub, o con tu usuario.'
-                : 'Creá la cuenta con el mismo proveedor que uses todos los días, o pedile acceso al dueño del negocio.'}
+              {tab === 'ingresar' ? t('login.bajadaIngresar') : t('login.bajadaCrear')}
             </p>
 
             <SocialButtons
               onElegir={onOAuth}
               pending={oauthPending}
-              separador={tab === 'ingresar' ? 'o con tu correo' : 'o si ya tenés cuenta'}
+              separador={
+                tab === 'ingresar' ? t('login.separadorCorreo') : t('login.separadorCuenta')
+              }
             />
 
             {error && (
@@ -214,7 +217,7 @@ export default function Login({
                 <Input
                   id="username"
                   name="username"
-                  label="Usuario"
+                  label={social ? t('login.correo') : t('login.usuario')}
                   placeholder="admin"
                   value={username}
                   onChange={editar(setUsername)}
@@ -223,7 +226,7 @@ export default function Login({
                 <Input
                   id="password"
                   name="password"
-                  label="Contraseña"
+                  label={t('login.contrasena')}
                   type="password"
                   placeholder="••••••••"
                   value={password}
@@ -232,18 +235,18 @@ export default function Login({
                 />
 
                 <Button type="submit" className="w-full" disabled={entrando}>
-                  Iniciar sesión
+                  {t('login.iniciarSesion')}
                 </Button>
               </form>
             ) : (
               <Button variant="secondary" className="w-full" onClick={() => cambiarTab('ingresar')}>
-                Ya tengo una cuenta
+                {t('login.yaTengoCuenta')}
               </Button>
             )}
 
             {tab === 'ingresar' && !social && (
               <p className="mt-5 text-center text-xs text-ink-faint">
-                Demo local — cualquier usuario y contraseña funcionan.
+                {t('login.demoLocal')}
               </p>
             )}
           </div>

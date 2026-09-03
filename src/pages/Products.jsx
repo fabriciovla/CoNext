@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import PageHeader from '../components/PageHeader'
 import Card from '../components/ui/Card'
 import EmptyState from '../components/ui/EmptyState'
+import Skeleton from '../components/ui/Skeleton'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -17,13 +18,21 @@ import {
   IconClose,
 } from '../components/ui/icons'
 import { inventoryValue, STOCK_BAJO } from '../utils/metrics'
+import { useIdioma } from '../lib/i18n.jsx'
 
-const currency = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' })
-const compacto = new Intl.NumberFormat('es-AR', {
-  style: 'currency',
-  currency: 'ARS',
-  maximumFractionDigits: 0,
-})
+// La moneda sigue siendo ARS —es la del negocio, no la de quien mira—, pero el
+// formato acompaña al idioma: cambian el separador de miles y dónde cae el
+// símbolo, no la moneda.
+// El precio de cada fila sale de `moneda`, el formateador compartido del
+// idioma. Acá solo se arma el del pie, que redondea a peso entero: un total de
+// inventario con centavos es un número más largo que no dice nada más.
+function compactoDe(locale) {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0,
+  })
+}
 
 const TODOS = 'todos'
 const SUELTOS = 'sueltos'
@@ -32,12 +41,13 @@ const SUELTOS = 'sueltos'
 // punto de color se guarda para cuando hay algo que hacer, que es lo mismo que
 // hacen las alertas de Inicio. Y el "quedan 5" va con el rótulo en vez de en una
 // columna aparte, porque suelto no se sabía si era stock, precio o unidades.
-function stockLine(stock) {
-  if (stock === 0) return <Badge tone="red">Sin stock</Badge>
+function stockLine(stock, t) {
+  if (stock === 0) return <Badge tone="red">{t('productos.sinStock')}</Badge>
   // El umbral es el de `metrics`, el mismo que dispara las alertas de Inicio:
   // un producto no puede estar "bajo" en una pantalla y normal en la otra.
-  if (stock <= STOCK_BAJO) return <Badge tone="amber">Stock bajo, quedan {stock}</Badge>
-  return <span className="tabular-nums">{stock} en stock</span>
+  if (stock <= STOCK_BAJO)
+    return <Badge tone="amber">{t('productos.stockBajoQuedan', { n: stock })}</Badge>
+  return <span className="tabular-nums">{t('productos.enStock', { n: stock })}</span>
 }
 
 function IconAction({ title, onClick, danger = false, box = 'h-6 w-6', children }) {
@@ -97,6 +107,7 @@ function FilterChip({ active, onClick, title, children }) {
 // deja el precio, para que aparecer no mueva nada de su lugar. Arrastrar hasta
 // una carpeta sigue siendo de la fila entera.
 function ProductRow({ product, i, arrastrado, onEdit, onDelete, dragProps }) {
+  const { t, moneda } = useIdioma()
   return (
     <li
       {...dragProps}
@@ -132,18 +143,18 @@ function ProductRow({ product, i, arrastrado, onEdit, onDelete, dragProps }) {
               <span className="shrink-0 text-ink-faint">·</span>
             </>
           )}
-          <span className="shrink-0">{stockLine(product.stock)}</span>
+          <span className="shrink-0">{stockLine(product.stock, t)}</span>
         </div>
       </div>
 
       <div className="shrink-0 text-right">
         <p className="text-[13.5px] font-semibold tabular-nums text-ink-primary">
-          {currency.format(product.price)}
+          {moneda.format(product.price)}
         </p>
         <div className="flex h-5 items-center justify-end opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
           <IconAction
             box="h-5 w-5"
-            title={`Eliminar ${product.name}`}
+            title={t('productos.eliminarNombre', { nombre: product.name })}
             danger
             onClick={(e) => {
               e.stopPropagation()
@@ -159,6 +170,7 @@ function ProductRow({ product, i, arrastrado, onEdit, onDelete, dragProps }) {
 }
 
 function FolderRow({ icon, label, count, active, dropActive, arrastrando, onSelect, actions, dropProps }) {
+  const { t } = useIdioma()
   return (
     <div
       {...dropProps}
@@ -176,7 +188,7 @@ function FolderRow({ icon, label, count, active, dropActive, arrastrando, onSele
       <button
         type="button"
         onClick={onSelect}
-        aria-label={`Ver ${label}`}
+        aria-label={t('productos.verCarpeta', { nombre: label })}
         aria-current={active ? 'page' : undefined}
         className="absolute inset-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/50"
       />
@@ -204,6 +216,7 @@ function FolderRow({ icon, label, count, active, dropActive, arrastrando, onSele
 }
 
 function FolderModal({ folder, onSubmit, onClose }) {
+  const { t } = useIdioma()
   const [name, setName] = useState(folder?.name ?? '')
   const [error, setError] = useState(null)
   const [guardando, setGuardando] = useState(false)
@@ -222,14 +235,17 @@ function FolderModal({ folder, onSubmit, onClose }) {
   }
 
   return (
-    <Modal title={folder ? 'Renombrar carpeta' : 'Nueva carpeta'} onClose={onClose}>
+    <Modal
+      title={folder ? t('productos.renombrarCarpeta') : t('productos.nuevaCarpeta')}
+      onClose={onClose}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           id="folder-name"
-          label="Nombre"
+          label={t('productos.campoNombre')}
           autoFocus
           maxLength={40}
-          placeholder="Bebidas"
+          placeholder={t('productos.nombreCarpetaPlaceholder')}
           value={name}
           onChange={(e) => {
             setName(e.target.value)
@@ -239,10 +255,10 @@ function FolderModal({ folder, onSubmit, onClose }) {
         {error && <p className="text-[12.5px] leading-snug text-status-critical">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancelar
+            {t('comun.cancelar')}
           </Button>
           <Button type="submit" disabled={guardando}>
-            {folder ? 'Guardar' : 'Crear carpeta'}
+            {folder ? t('comun.guardar') : t('productos.crearCarpeta')}
           </Button>
         </div>
       </form>
@@ -255,6 +271,7 @@ export default function Products({
   // render pasa antes de que contesten.
   products = [],
   folders = [],
+  cargando = false,
   error,
   onAdd,
   onUpdate,
@@ -264,6 +281,8 @@ export default function Products({
   onRenameFolder,
   onDeleteFolder,
 }) {
+  const { t, locale } = useIdioma()
+  const compacto = useMemo(() => compactoDe(locale), [locale])
   const [view, setView] = useState(TODOS)
   const [search, setSearch] = useState('')
   const [stockFiltro, setStockFiltro] = useState(null)
@@ -309,7 +328,12 @@ export default function Products({
   }, [enCarpeta, search, stockFiltro])
 
   const carpetaActual = folders.find((f) => f.id === view) ?? null
-  const titulo = view === TODOS ? 'Todos los productos' : view === SUELTOS ? 'Sin carpeta' : carpetaActual?.name
+  const titulo =
+    view === TODOS
+      ? t('productos.todosLosProductos')
+      : view === SUELTOS
+        ? t('productos.sinCarpeta')
+        : carpetaActual?.name
   const sueltos = counts.get(null) ?? 0
   const sinStock = visibles.filter((p) => p.stock === 0).length
   const bajo = visibles.filter((p) => p.stock > 0 && p.stock <= STOCK_BAJO).length
@@ -406,25 +430,21 @@ export default function Products({
   // pasó y la línea de abajo qué se puede hacer con eso. En una sola frase
   // larga y gris las dos cosas se leían como una disculpa.
   const vacio = search.trim()
-    ? { titulo: 'Sin resultados', texto: `Ningún producto coincide con “${search.trim()}”.` }
+    ? {
+        titulo: t('productos.vacioSinResultadosTitulo'),
+        texto: t('productos.vacioSinResultados', { query: search.trim() }),
+      }
     : stockFiltro === 'cero'
-      ? { titulo: 'Nada sin stock', texto: 'Ninguno se quedó en cero en esta vista.' }
+      ? { titulo: t('productos.vacioSinStockTitulo'), texto: t('productos.vacioSinStock') }
       : stockFiltro === 'bajo'
-        ? { titulo: 'Nada por reponer', texto: 'Ninguno tiene el stock bajo en esta vista.' }
+        ? { titulo: t('productos.vacioBajoTitulo'), texto: t('productos.vacioBajo') }
         : view === SUELTOS
-          ? {
-              titulo: 'No hay productos sueltos',
-              texto: 'Todos están guardados en alguna carpeta.',
-            }
+          ? { titulo: t('productos.vacioSueltosTitulo'), texto: t('productos.vacioSueltos') }
           : carpetaActual
-            ? {
-                titulo: 'La carpeta está vacía',
-                texto: 'Arrastrá un producto hasta acá para moverlo.',
-              }
+            ? { titulo: t('productos.vacioCarpetaTitulo'), texto: t('productos.vacioCarpeta') }
             : {
-                titulo: 'Todavía no cargaste productos',
-                texto:
-                  'Hasta que haya alguno, tus agentes no pueden contestar por precios ni por stock.',
+                titulo: t('productos.vacioCatalogoTitulo'),
+                texto: t('productos.vacioCatalogo'),
               }
 
   const catalogoVacio = products.length === 0 && !search.trim() && !stockFiltro
@@ -433,12 +453,12 @@ export default function Products({
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="shrink-0">
         <PageHeader
-          title="Productos"
-          description="El catálogo del que salen los precios y el stock que contestan tus agentes."
+          title={t('productos.titulo')}
+          description={t('productos.bajada')}
           actions={
             <Button onClick={openCreate}>
               <IconPlus size={14} />
-              Nuevo producto
+              {t('productos.nuevoProducto')}
             </Button>
           }
         />
@@ -470,19 +490,27 @@ export default function Products({
             {(sinStockCarpeta > 0 || stockFiltro === 'cero') && (
               <FilterChip
                 active={stockFiltro === 'cero'}
-                title={stockFiltro === 'cero' ? 'Mostrar todos' : 'Ver solo los que no tienen stock'}
+                title={
+                  stockFiltro === 'cero' ? t('productos.mostrarTodos') : t('productos.verSinStock')
+                }
                 onClick={() => setStockFiltro((f) => (f === 'cero' ? null : 'cero'))}
               >
-                <Badge tone="red">Sin stock {sinStockCarpeta}</Badge>
+                <Badge tone="red">
+                  {t('productos.sinStock')} {sinStockCarpeta}
+                </Badge>
               </FilterChip>
             )}
             {(bajoCarpeta > 0 || stockFiltro === 'bajo') && (
               <FilterChip
                 active={stockFiltro === 'bajo'}
-                title={stockFiltro === 'bajo' ? 'Mostrar todos' : 'Ver solo los de stock bajo'}
+                title={
+                  stockFiltro === 'bajo' ? t('productos.mostrarTodos') : t('productos.verStockBajo')
+                }
                 onClick={() => setStockFiltro((f) => (f === 'bajo' ? null : 'bajo'))}
               >
-                <Badge tone="amber">Stock bajo {bajoCarpeta}</Badge>
+                <Badge tone="amber">
+                  {t('productos.stockBajo')} {bajoCarpeta}
+                </Badge>
               </FilterChip>
             )}
           </div>
@@ -494,8 +522,8 @@ export default function Products({
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar…"
-              aria-label="Buscar producto"
+              placeholder={t('productos.buscarPlaceholder')}
+              aria-label={t('productos.buscarProducto')}
               className="w-52 rounded-lg border border-tint/[0.12] bg-transparent py-1.5 pl-8 pr-7 text-[12px] text-ink-primary
                 placeholder:text-ink-faint transition-colors duration-150
                 focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30"
@@ -504,8 +532,8 @@ export default function Products({
               <button
                 type="button"
                 onClick={() => setSearch('')}
-                title="Limpiar búsqueda"
-                aria-label="Limpiar búsqueda"
+                title={t('productos.limpiarBusqueda')}
+                aria-label={t('productos.limpiarBusqueda')}
                 className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded
                   text-ink-faint transition-colors duration-150 hover:text-ink-primary
                   focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet/50"
@@ -523,13 +551,13 @@ export default function Products({
                 dragging ? 'text-violet' : 'text-ink-muted'
               }`}
             >
-              {dragging ? 'Soltá para mover' : 'Carpetas'}
+              {dragging ? t('productos.soltaParaMover') : t('productos.carpetas')}
             </p>
 
-            <nav aria-label="Carpetas del catálogo" className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-1.5">
+            <nav aria-label={t('productos.carpetasDelCatalogo')} className="min-h-0 flex-1 overflow-y-auto px-1.5 pb-1.5">
               <FolderRow
                 icon={<IconBox size={15} />}
-                label="Todos"
+                label={t('productos.todos')}
                 count={products.length}
                 active={view === TODOS}
                 onSelect={() => setView(TODOS)}
@@ -552,10 +580,19 @@ export default function Products({
                         dropProps={dropProps(folder.id, folder.id)}
                         actions={
                           <>
-                            <IconAction box="h-5 w-5" title={`Renombrar ${folder.name}`} onClick={() => setFolderModal(folder)}>
+                            <IconAction
+                              box="h-5 w-5"
+                              title={t('productos.renombrarNombre', { nombre: folder.name })}
+                              onClick={() => setFolderModal(folder)}
+                            >
                               <IconPencil size={13} />
                             </IconAction>
-                            <IconAction box="h-5 w-5" title={`Eliminar ${folder.name}`} danger onClick={() => setConfirmFolder(folder)}>
+                            <IconAction
+                              box="h-5 w-5"
+                              title={t('productos.eliminarNombre', { nombre: folder.name })}
+                              danger
+                              onClick={() => setConfirmFolder(folder)}
+                            >
                               <IconTrash size={13} />
                             </IconAction>
                           </>
@@ -566,7 +603,7 @@ export default function Products({
                     {(sueltos > 0 || dragging) && (
                       <FolderRow
                         icon={<IconFolder size={15} />}
-                        label="Sin carpeta"
+                        label={t('productos.sinCarpeta')}
                         count={sueltos}
                         active={view === SUELTOS}
                         dropActive={dropKey === SUELTOS}
@@ -587,13 +624,17 @@ export default function Products({
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet/50"
               >
                 <IconPlus size={15} className="shrink-0" />
-                <span className="truncate">Nueva carpeta</span>
+                <span className="truncate">{t('productos.nuevaCarpeta')}</span>
               </button>
             </nav>
           </aside>
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            {visibles.length === 0 ? (
+            {/* Ver el comentario de Agentes: el estado vacío del catálogo no
+                se puede afirmar hasta que contestó el server. */}
+            {cargando && products.length === 0 ? (
+              <Skeleton cards={4} lineas={2} className="grid grid-cols-1 gap-2 overflow-y-auto" />
+            ) : visibles.length === 0 ? (
               <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto">
                 <EmptyState
                   icon={<IconBox size={19} />}
@@ -603,7 +644,7 @@ export default function Products({
                     catalogoVacio && (
                       <Button onClick={openCreate}>
                         <IconPlus size={14} />
-                        Nuevo producto
+                        {t('productos.nuevoProducto')}
                       </Button>
                     )
                   }
@@ -630,16 +671,16 @@ export default function Products({
         {products.length > 0 && (
           <div className="flex shrink-0 items-end justify-between gap-4 border-t border-tint/[0.06] bg-tint/[0.02] px-4 py-3">
             <div className="flex min-w-0 gap-6">
-              <Dato label="productos" value={visibles.length} />
+              <Dato label={t('productos.datoProductos')} value={visibles.length} />
               {sinStock > 0 && (
-                <Dato label="sin stock" value={sinStock} tone="text-status-critical" />
+                <Dato label={t('productos.datoSinStock')} value={sinStock} tone="text-status-critical" />
               )}
               {bajo > 0 && stockFiltro !== 'cero' && (
-                <Dato label="stock bajo" value={bajo} tone="text-status-warning" />
+                <Dato label={t('productos.datoStockBajo')} value={bajo} tone="text-status-warning" />
               )}
             </div>
             <Dato
-              label="en inventario"
+              label={t('productos.datoInventario')}
               value={compacto.format(inventoryValue(visibles))}
               align="right"
             />
@@ -648,7 +689,10 @@ export default function Products({
       </Card>
 
       {modalMode && (
-        <Modal title={modalMode === 'edit' ? 'Editar producto' : 'Nuevo producto'} onClose={closeModal}>
+        <Modal
+          title={modalMode === 'edit' ? t('productos.editarProducto') : t('productos.nuevoProducto')}
+          onClose={closeModal}
+        >
           <ProductForm
             initial={editingProduct}
             folders={folders}
@@ -660,17 +704,18 @@ export default function Products({
       )}
 
       {confirmDelete && (
-        <Modal title="Eliminar producto" onClose={() => setConfirmDelete(null)}>
+        <Modal title={t('productos.eliminarProducto')} onClose={() => setConfirmDelete(null)}>
           <p className="text-[13px] leading-relaxed text-ink-secondary">
-            Se va a eliminar <span className="text-ink-primary">{confirmDelete.name}</span>. Los
-            agentes dejan de ofrecerlo cuando alguien pregunte por el catálogo.
+            {t('productos.seVaAEliminar')}{' '}
+            <span className="text-ink-primary">{confirmDelete.name}</span>.{' '}
+            {t('productos.confirmarBorrado')}
           </p>
           <div className="mt-5 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmDelete(null)}>
-              Cancelar
+              {t('comun.cancelar')}
             </Button>
             <Button variant="danger" onClick={handleDelete}>
-              Eliminar
+              {t('comun.eliminar')}
             </Button>
           </div>
         </Modal>
@@ -686,23 +731,24 @@ export default function Products({
       )}
 
       {confirmFolder && (
-        <Modal title="Eliminar carpeta" onClose={() => setConfirmFolder(null)}>
+        <Modal title={t('productos.eliminarCarpeta')} onClose={() => setConfirmFolder(null)}>
           <p className="text-[13px] leading-relaxed text-ink-secondary">
-            Se va a eliminar la carpeta <span className="text-ink-primary">{confirmFolder.name}</span>.{' '}
+            {t('productos.seVaAEliminarCarpeta')}{' '}
+            <span className="text-ink-primary">{confirmFolder.name}</span>.{' '}
             {/* La frase se arma en singular o en plural: con un solo producto
                 adentro decía "Los 1 productos que tiene adentro no se borran". */}
             {adentro === 0
-              ? 'No tiene productos adentro.'
+              ? t('productos.carpetaVacia')
               : adentro === 1
-                ? 'El producto que tiene adentro no se borra: queda sin carpeta.'
-                : `Los ${adentro} productos que tiene adentro no se borran: quedan sin carpeta.`}
+                ? t('productos.carpetaUno')
+                : t('productos.carpetaVarios', { n: adentro })}
           </p>
           <div className="mt-5 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmFolder(null)}>
-              Cancelar
+              {t('comun.cancelar')}
             </Button>
             <Button variant="danger" onClick={handleDeleteFolder}>
-              Eliminar carpeta
+              {t('productos.eliminarCarpeta')}
             </Button>
           </div>
         </Modal>

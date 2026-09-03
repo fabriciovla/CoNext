@@ -10,6 +10,7 @@ import {
   IconPlus,
 } from './ui/icons'
 import { formatTime as horaDe } from '../utils/time'
+import { useIdioma } from '../lib/i18n.jsx'
 
 // Acá el argumento puede venir en null (un día que todavía no se abrió), así
 // que el helper compartido se envuelve en vez de usarse pelado.
@@ -17,8 +18,10 @@ function formatTime(iso) {
   return iso ? horaDe(iso) : null
 }
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })
+// El mes abreviado sale del locale activo: en español es "27 ago" y en inglés
+// "Aug 27", incluido el orden, que no se arma concatenando a mano.
+function formatDate(iso, locale) {
+  return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: 'short' })
 }
 
 // Barra de navegación de toda la app, no solo de la bandeja: las secciones
@@ -53,6 +56,7 @@ export default function AppNav({
   theme,
   onToggleTheme,
 }) {
+  const { t, locale } = useIdioma()
   const [openSections, setOpenSections] = useState({
     carpetas: true,
     agentes: true,
@@ -102,14 +106,20 @@ export default function AppNav({
               />
             </span>
             <p className="truncate text-[12px] font-medium text-ink-primary">
-              {dayOpen ? 'Día abierto' : 'Día cerrado'}
+              {dayOpen ? t('dia.abierto') : t('dia.cerrado')}
             </p>
             {/* La hora va al lado y no debajo: es una sola línea corta y así el
                 pie ocupa un renglón menos. Sin hora todavía (primer render,
                 antes de que conteste /days/current) no se inventa una:
                 `new Date(null)` cae en el epoch y mostraría una hora falsa. */}
             <span className="truncate text-[10.5px] text-ink-faint">
-              {dayOpen ? (desde ? `desde ${desde}` : 'en curso') : hasta ? `a las ${hasta}` : '—'}
+              {dayOpen
+                ? desde
+                  ? t('dia.desde', { hora: desde })
+                  : t('dia.enCurso')
+                : hasta
+                  ? t('dia.alas', { hora: hasta })
+                  : '—'}
             </span>
           </div>
           <button
@@ -120,36 +130,36 @@ export default function AppNav({
                 : 'bg-violet text-ink-inverted hover:bg-violet/90'
             }`}
           >
-            {dayOpen ? 'Cerrar día' : 'Abrir nuevo día'}
+            {dayOpen ? t('dia.cerrarDia') : t('dia.abrirNuevo')}
           </button>
         </div>
       }
     >
-      <NavSection title="Carpetas" open={openSections.carpetas} onToggle={() => toggleSection('carpetas')}>
+      <NavSection title={t('nav.carpetas')} open={openSections.carpetas} onToggle={() => toggleSection('carpetas')}>
         <NavRow
           icon={<IconInbox size={16} />}
-          label="Todas"
+          label={t('nav.todas')}
           count={groups.length}
           active={is('todos')}
           onClick={() => select('todos')}
         />
         <NavRow
           icon={<IconUser size={16} />}
-          label="Mías"
+          label={t('nav.mias')}
           count={mios}
           active={is('mios')}
           onClick={() => select('mios')}
         />
         <NavRow
           icon={<IconUsers size={16} />}
-          label="Sin asignar"
+          label={t('nav.sinAsignar')}
           count={sinAsignar}
           active={is('sinAsignar')}
           onClick={() => select('sinAsignar')}
         />
         <NavRow
           icon={<IconClock size={16} />}
-          label="Pendientes"
+          label={t('nav.pendientes')}
           count={pendientes}
           active={is('pendientes')}
           onClick={() => select('pendientes')}
@@ -159,7 +169,7 @@ export default function AppNav({
       {/* Los agentes no son una carpeta más: entrar a uno abre su configuración
           (cuándo interviene, cómo responde, si manda solo). El número sigue
           siendo cuántas conversaciones está atendiendo. */}
-      <NavSection title="Agentes IA" open={openSections.agentes} onToggle={() => toggleSection('agentes')}>
+      <NavSection title={t('nav.agents')} open={openSections.agentes} onToggle={() => toggleSection('agentes')}>
         {agents.map((agent) => (
           <NavRow
             key={agent.key}
@@ -178,13 +188,13 @@ export default function AppNav({
             onClick={() => onOpenAgent(agent)}
           />
         ))}
-        <NavRow icon={<IconPlus size={16} />} label="Nuevo agente" onClick={onNewAgent} />
+        <NavRow icon={<IconPlus size={16} />} label={t('nav.nuevoAgente')} onClick={onNewAgent} />
       </NavSection>
 
-      <NavSection title="Días archivados" open={openSections.dias} onToggle={() => toggleSection('dias')}>
+      <NavSection title={t('nav.diasArchivados')} open={openSections.dias} onToggle={() => toggleSection('dias')}>
         {archivedDays.length === 0 ? (
           <p className="px-2.5 py-2 text-[11px] leading-relaxed text-ink-faint">
-            Todavía no cerraste ningún día.
+            {t('nav.sinDiasCerrados')}
           </p>
         ) : (
           archivedDays.map((day) => {
@@ -193,7 +203,7 @@ export default function AppNav({
               <NavRow
                 key={day.id}
                 icon={<IconArchive size={16} />}
-                label={`${formatDate(day.openedAt)} · ${formatTime(day.openedAt)}`}
+                label={`${formatDate(day.openedAt, locale)} · ${formatTime(day.openedAt)}`}
                 count={entrantes.length}
                 active={enBandeja && viewingDayId === day.id}
                 onClick={() => onSelectDay(day)}
@@ -204,7 +214,7 @@ export default function AppNav({
       </NavSection>
 
       <div className="mt-3 border-t border-tint/[0.07] pt-2">
-        <NavRow icon={<IconBlock size={16} />} label="Contactos bloqueados" />
+        <NavRow icon={<IconBlock size={16} />} label={t('nav.bloqueados')} />
       </div>
     </SideNav>
   )

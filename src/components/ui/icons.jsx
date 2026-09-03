@@ -372,6 +372,13 @@ export const IconTrash = (props) => (
   </Svg>
 )
 
+export const IconCopy = (props) => (
+  <Svg {...props}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M15 6.2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.2" />
+  </Svg>
+)
+
 export const IconPencil = (props) => (
   <Svg {...props}>
     <path d="M4.5 19.5h3.2L18.4 8.8a1.8 1.8 0 0 0 0-2.5l-.7-.7a1.8 1.8 0 0 0-2.5 0L4.5 16.3Z" />

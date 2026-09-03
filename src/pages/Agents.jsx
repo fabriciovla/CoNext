@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import PageHeader from '../components/PageHeader'
 import Card from '../components/ui/Card'
 import EmptyState from '../components/ui/EmptyState'
+import Skeleton from '../components/ui/Skeleton'
 import Button from '../components/ui/Button'
 import { LABEL_CLASS } from '../components/ui/Input'
 import Modal from '../components/ui/Modal'
 import Switch from '../components/ui/Switch'
 import { IconPlus, IconChevronDown, IconSparkles, IconTrash } from '../components/ui/icons'
+import { useT } from '../lib/i18n.jsx'
 
 const EMPTY = { name: '', role: '', instructions: '', enabled: true, autoSend: true }
 
@@ -60,6 +62,7 @@ function Dato({ label, value, tone = 'text-ink-primary', align = 'left' }) {
 }
 
 function AgentForm({ agent, onSubmit, onCancel }) {
+  const t = useT()
   const [draft, setDraft] = useState(agent ?? EMPTY)
   const set = (field) => (e) => setDraft((prev) => ({ ...prev, [field]: e.target.value }))
   const toggle = (field) => (value) => setDraft((prev) => ({ ...prev, [field]: value }))
@@ -76,12 +79,12 @@ function AgentForm({ agent, onSubmit, onCancel }) {
           línea de ayuda debajo del rótulo; el rótulo en sí sale de la misma
           clase (`LABEL_CLASS`), así no hay dos tamaños de etiqueta conviviendo
           en el mismo formulario. */}
-      <Field id="name" label="¿Cómo se llama?">
+      <Field id="name" label={t('agentes.campoNombre')}>
         <input
           id="name"
           value={draft.name}
           onChange={set('name')}
-          placeholder="Agente de ventas"
+          placeholder={t('agentes.campoNombrePlaceholder')}
           className="w-full rounded-lg border border-tint/[0.12] bg-transparent px-3 py-2 text-[13px] text-ink-primary
             placeholder:text-ink-faint transition-colors duration-150
             focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30"
@@ -90,30 +93,30 @@ function AgentForm({ agent, onSubmit, onCancel }) {
 
       <Field
         id="role"
-        label="¿De qué se encarga?"
-        hint="Los temas que tiene que atender. Con esto se decide a cuál de tus agentes le toca cada mensaje que llega."
+        label={t('agentes.campoRol')}
+        hint={t('agentes.campoRolHint')}
       >
         <textarea
           id="role"
           rows={3}
           value={draft.role}
           onChange={set('role')}
-          placeholder="Precios, stock, formas de pago y si hacemos envíos."
+          placeholder={t('agentes.campoRolPlaceholder')}
           className={TEXTAREA_CLASS}
         />
       </Field>
 
       <Field
         id="instructions"
-        label="¿Cómo tiene que contestar?"
-        hint="El tono y lo que no puede olvidarse. Los precios, el catálogo y los horarios los saca de tu configuración, no se los inventa."
+        label={t('agentes.campoInstrucciones')}
+        hint={t('agentes.campoInstruccionesHint')}
       >
         <textarea
           id="instructions"
           rows={4}
           value={draft.instructions}
           onChange={set('instructions')}
-          placeholder="Contestá corto y amable, y ofrecé siempre el envío a domicilio."
+          placeholder={t('agentes.campoInstruccionesPlaceholder')}
           className={TEXTAREA_CLASS}
         />
       </Field>
@@ -122,22 +125,24 @@ function AgentForm({ agent, onSubmit, onCancel }) {
         <Switch
           checked={draft.enabled}
           onChange={toggle('enabled')}
-          label="Encendido"
-          hint="Apagado, este agente no contesta nada y sus mensajes pasan al primero de la lista."
+          label={t('agentes.switchEncendido')}
+          hint={t('agentes.switchEncendidoHint')}
         />
         <Switch
           checked={draft.autoSend}
           onChange={toggle('autoSend')}
-          label="Contesta solo"
-          hint="Apagado, escribe la respuesta igual pero te la deja como borrador para que la revises antes de mandarla."
+          label={t('agentes.switchAutoSend')}
+          hint={t('agentes.switchAutoSendHint')}
         />
       </div>
 
       <div className="flex justify-end gap-2 pt-1">
         <Button variant="secondary" onClick={onCancel}>
-          Cancelar
+          {t('comun.cancelar')}
         </Button>
-        <Button type="submit">{agent ? 'Guardar cambios' : 'Crear agente'}</Button>
+        <Button type="submit">
+          {agent ? t('agentes.guardarCambios') : t('agentes.crearAgente')}
+        </Button>
       </div>
     </form>
   )
@@ -146,6 +151,7 @@ function AgentForm({ agent, onSubmit, onCancel }) {
 export default function Agents({
   agents,
   stats,
+  cargando = false,
   error,
   focus = null,
   onFocusHandled,
@@ -154,6 +160,7 @@ export default function Agents({
   onDelete,
   onReorder,
 }) {
+  const t = useT()
   const [editing, setEditing] = useState(null) // agente | 'nuevo' | null
   const [confirmDelete, setConfirmDelete] = useState(null)
 
@@ -197,12 +204,12 @@ export default function Agents({
           dice solo lo que no se ve: que el agente lo elige la consulta y que la
           tarjeta entera abre la configuración. */}
       <PageHeader
-        title="Agentes IA"
-        description="Contesta el agente que mejor encaje con la consulta. Tocá uno para configurarlo."
+        title={t('agentes.titulo')}
+        description={t('agentes.bajada')}
         actions={
           <Button onClick={() => setEditing('nuevo')}>
             <IconPlus size={14} />
-            Nuevo agente
+            {t('agentes.nuevoAgente')}
           </Button>
         }
       />
@@ -238,7 +245,7 @@ export default function Agents({
               <button
                 type="button"
                 onClick={() => setEditing(agent)}
-                aria-label={`Editar ${agent.name}`}
+                aria-label={t('agentes.editarNombre', { nombre: agent.name })}
                 className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2
                   focus-visible:ring-violet/50"
               />
@@ -250,21 +257,24 @@ export default function Agents({
                   className={`h-1.5 w-1.5 shrink-0 rounded-full ${agent.enabled ? 'bg-status-good' : 'bg-tint/30'}`}
                 />
                 <span className="text-[12px] text-ink-secondary">
-                  {agent.enabled ? 'Encendido' : 'Apagado'}
+                  {agent.enabled ? t('agentes.encendido') : t('agentes.apagado')}
                 </span>
                 {/* Los estados van como una palabra y no como pastillas de
                     color: son dos casos puntuales, no etiquetas de todos. */}
                 {esPorDefecto && (
-                  <span className="truncate text-[12px] text-violet" title="Contesta cuando ningún agente encaja">
-                    · por defecto
+                  <span
+                    className="truncate text-[12px] text-violet"
+                    title={t('agentes.porDefectoTitle')}
+                  >
+                    {t('agentes.porDefecto')}
                   </span>
                 )}
                 {agent.enabled && !agent.autoSend && (
                   <span
                     className="truncate text-[12px] text-status-warning"
-                    title="Escribe la respuesta pero te la deja como borrador"
+                    title={t('agentes.dejaBorradorTitle')}
                   >
-                    · deja borrador
+                    {t('agentes.dejaBorrador')}
                   </span>
                 )}
 
@@ -274,20 +284,24 @@ export default function Agents({
                 <div className="pointer-events-auto ml-auto flex shrink-0 items-center gap-1">
                   <div className="flex opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover:opacity-100">
                     <IconAction
-                      title="Subir en la lista"
+                      title={t('agentes.subirEnLista')}
                       disabled={index === 0}
                       onClick={() => move(index, -1)}
                     >
                       <IconChevronDown size={13} className="rotate-180" />
                     </IconAction>
                     <IconAction
-                      title="Bajar en la lista"
+                      title={t('agentes.bajarEnLista')}
                       disabled={index === agents.length - 1}
                       onClick={() => move(index, 1)}
                     >
                       <IconChevronDown size={13} />
                     </IconAction>
-                    <IconAction title={`Borrar ${agent.name}`} danger onClick={() => setConfirmDelete(agent)}>
+                    <IconAction
+                      title={t('agentes.borrarNombre', { nombre: agent.name })}
+                      danger
+                      onClick={() => setConfirmDelete(agent)}
+                    >
                       <IconTrash size={15} />
                     </IconAction>
                   </div>
@@ -295,7 +309,11 @@ export default function Agents({
                     block={false}
                     checked={agent.enabled}
                     onChange={(enabled) => onUpdate(agent.id, { enabled }).catch(() => {})}
-                    title={agent.enabled ? `Apagar ${agent.name}` : `Encender ${agent.name}`}
+                    title={
+                      agent.enabled
+                        ? t('agentes.apagarNombre', { nombre: agent.name })
+                        : t('agentes.encenderNombre', { nombre: agent.name })
+                    }
                   />
                 </div>
               </div>
@@ -309,18 +327,18 @@ export default function Agents({
                     llegan hasta el borde derecho— y el rol se corta antes,
                     donde un renglón todavía se lee de un barrido. */}
                 <p className="mt-1 line-clamp-2 max-w-3xl text-[13px] leading-relaxed text-ink-secondary">
-                  {agent.role || 'Todavía no dijiste de qué se encarga.'}
+                  {agent.role || t('agentes.sinRol')}
                 </p>
               </div>
 
               <div className="pointer-events-none relative flex items-end justify-between gap-4 border-t border-tint/[0.06] bg-tint/[0.02] px-4 py-3">
                 <div className="flex min-w-0 gap-6">
-                  <Dato label="conversaciones" value={s.conversations} />
-                  <Dato label="mensajes" value={s.handled} />
-                  <Dato label="contestó solo" value={s.automatic} />
+                  <Dato label={t('agentes.datoConversaciones')} value={s.conversations} />
+                  <Dato label={t('agentes.datoMensajes')} value={s.handled} />
+                  <Dato label={t('agentes.datoContestoSolo')} value={s.automatic} />
                 </div>
                 <Dato
-                  label="para revisar"
+                  label={t('agentes.datoParaRevisar')}
                   value={s.pending}
                   align="right"
                   tone={s.pending > 0 ? 'text-status-warning' : 'text-ink-muted'}
@@ -331,16 +349,23 @@ export default function Agents({
         })}
       </div>
 
-      {agents.length === 0 && (
+      {/* "Todavía no hay agentes" es una afirmación, y mientras la lista viaja
+          todavía no se sabe: dibujarla es contarle al cliente algo falso
+          durante medio segundo. */}
+      {cargando && agents.length === 0 && (
+        <Skeleton cards={3} lineas={2} className="grid grid-cols-1 gap-2" />
+      )}
+
+      {!cargando && agents.length === 0 && (
         <Card bodyClassName="p-0">
           <EmptyState
             icon={<IconSparkles size={19} />}
-            title="Todavía no hay agentes"
-            description="Sin al menos uno encendido, todos los mensajes te quedan a vos para contestar a mano."
+            title={t('agentes.vacioTitulo')}
+            description={t('agentes.vacioTexto')}
             action={
               <Button onClick={() => setEditing('nuevo')}>
                 <IconPlus size={14} />
-                Nuevo agente
+                {t('agentes.nuevoAgente')}
               </Button>
             }
           />
@@ -350,7 +375,11 @@ export default function Agents({
       {editing && (
         <Modal
           width="lg"
-          title={editing === 'nuevo' ? 'Nuevo agente' : `Editar ${editing.name}`}
+          title={
+            editing === 'nuevo'
+              ? t('agentes.nuevoAgente')
+              : t('agentes.editarNombre', { nombre: editing.name })
+          }
           onClose={() => setEditing(null)}
         >
           <AgentForm
@@ -365,18 +394,17 @@ export default function Agents({
       )}
 
       {confirmDelete && (
-        <Modal title="Borrar agente" onClose={() => setConfirmDelete(null)}>
+        <Modal title={t('agentes.borrarAgente')} onClose={() => setConfirmDelete(null)}>
           <p className="text-sm leading-relaxed text-ink-secondary">
-            Se va a borrar <span className="text-ink-primary">{confirmDelete.name}</span>. Las
-            conversaciones que venía atendiendo pasan al primer agente encendido; los mensajes que ya
-            mandó quedan como están.
+            {t('agentes.seVaABorrar')} <span className="text-ink-primary">{confirmDelete.name}</span>.{' '}
+            {t('agentes.borrarDetalle')}
           </p>
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setConfirmDelete(null)}>
-              Cancelar
+              {t('comun.cancelar')}
             </Button>
             <Button variant="danger" onClick={handleDelete}>
-              Borrar agente
+              {t('agentes.borrarAgente')}
             </Button>
           </div>
         </Modal>

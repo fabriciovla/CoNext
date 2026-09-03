@@ -19,6 +19,7 @@
          `crossorigin` no es opcional aunque sea del mismo origen: sin él el
          navegador se baja el archivo dos veces. -->
     <link rel="preload" href="/fonts/satoshi-var.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="robots" content="noindex, nofollow" />
     <title>conext</title>
     <script>
       // Antes de pintar nada: si el tema elegido es el oscuro, el atributo tiene
@@ -28,6 +29,13 @@
         var t = localStorage.getItem('wsp-crm:theme')
         if (t === 'dark') document.documentElement.dataset.theme = 'dark'
       } catch (e) {}
+      // Adentro de la app de escritorio hay una barra de título propia y la
+      // altura de la ventana no es toda para la dashboard. El preload corre
+      // antes que esto, así que `window.conext` ya está: puesto acá, el alto
+      // sale bien en el primer cuadro y no hay un salto de 32px al montar.
+      if (window.conext && window.conext.escritorio) {
+        document.documentElement.dataset.escritorio = ''
+      }
     </script>
   </head>
   <body>

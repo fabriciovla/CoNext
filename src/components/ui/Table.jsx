@@ -2,9 +2,12 @@
 // arrastre de un producto hacia una carpeta) sin que la tabla sepa de qué se
 // trata. Su `className` se concatena en vez de pisar la de la fila, que es lo
 // que trae el hover y el escalonado.
-export default function Table({ columns, data, emptyMessage = 'Sin datos por el momento.', rowProps }) {
+import { useT } from '../../lib/i18n.jsx'
+
+export default function Table({ columns, data, emptyMessage, rowProps }) {
+  const t = useT()
   if (!data.length) {
-    return <p className="animate-fade-in py-10 text-center text-[13px] text-ink-muted">{emptyMessage}</p>
+    return <p className="animate-fade-in py-10 text-center text-[13px] text-ink-muted">{emptyMessage ?? t('ui.sinDatos')}</p>
   }
 
   return (

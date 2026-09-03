@@ -49,6 +49,12 @@
    es el que vive en `:root` para que sea también lo que se ve antes de que
    corra el JS. */
 :root {
+  /* Alto de la barra de título de la app de escritorio. En el navegador es 0 y
+     ninguna pantalla cambia: es lo que le restan a la altura de la ventana el
+     Layout y la pantalla de ingreso, que si no se pasarían de largo por esos
+     32px y aparecería una barra de scroll en toda la app. El atributo lo pone
+     index.html antes de pintar, mirando el puente del preload. */
+  --barra-titulo: 0px;
   --tint: 18 23 34;
   --surface-page: 250 249 247;
   --surface-card: 255 255 255;
@@ -89,6 +95,10 @@
   --scrim: rgba(18, 23, 34, 0.45);
   --scrollbar-thumb: rgba(18, 23, 34, 0.18);
   --scrollbar-thumb-hover: rgba(18, 23, 34, 0.3);
+}
+
+:root[data-escritorio] {
+  --barra-titulo: 32px;
 }
 
 :root[data-theme='dark'] {

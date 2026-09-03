@@ -1,5 +1,6 @@
+import { useT } from '../lib/i18n.jsx'
 import Avatar from './ui/Avatar'
-import Logo from './ui/Logo'
+import Logo, { NOMBRE_MARCA } from './ui/Logo'
 import {
   IconHome,
   IconInbox,
@@ -13,13 +14,15 @@ import {
   IconMoon,
 } from './ui/icons'
 
+// El rótulo sale del diccionario por la misma clave que la página, así que
+// agregar una sección es una entrada acá y otra en `textos/comun.js`.
 const NAV_ITEMS = [
-  { key: 'home', label: 'Inicio', Icon: IconHome },
-  { key: 'inbox', label: 'Bandeja', Icon: IconInbox },
-  { key: 'agents', label: 'Agentes IA', Icon: IconSparkles },
-  { key: 'products', label: 'Productos', Icon: IconBox },
-  { key: 'templates', label: 'Plantillas', Icon: IconTemplate },
-  { key: 'settings', label: 'Configuración', Icon: IconSettings },
+  { key: 'home', Icon: IconHome },
+  { key: 'inbox', Icon: IconInbox },
+  { key: 'agents', Icon: IconSparkles },
+  { key: 'products', Icon: IconBox },
+  { key: 'templates', Icon: IconTemplate },
+  { key: 'settings', Icon: IconSettings },
 ]
 
 // Fila de la barra: ícono (o emoji), nombre y cantidad a la derecha. Es el
@@ -102,20 +105,31 @@ export default function SideNav({
   children,
   footer,
 }) {
+  const t = useT()
+
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-nav">
-      {/* El logotipo y, debajo, de qué negocio es esta bandeja. Antes iba el
-          logotipo solo y centrado: centrado no se alinea con nada —las filas de
-          abajo arrancan a 18px del borde— y solo, no dice cuál de los clientes
-          se está mirando, que en una app multi-cliente es lo primero que hay
-          que poder responder de un vistazo. El logotipo hereda el color por
-          `currentColor`, así sirve en los dos temas.
-          Los 18px son los mismos que la fila: `px-2` del contenedor más `px-2.5`
-          de `NavRow`, así el logotipo empieza donde empiezan los íconos. */}
-      <header className="min-w-0 shrink-0 px-[18px] pb-5 pt-4">
+      {/* El logotipo y, debajo, de qué negocio es esta bandeja.
+
+          El bloque va **centrado** en la columna. Estuvo alineado a la
+          izquierda a 18px —los mismos que las filas de abajo, que es `px-2` del
+          contenedor más `px-2.5` de `NavRow`— con el argumento de que centrado
+          no se alinea con nada. Son dos renglones de distinto largo y funciona
+          mejor como bloque: es el rótulo de la barra entera y no una fila más.
+
+          El nombre del negocio está para contestar de un vistazo cuál de los
+          clientes se está mirando, que en una app multi-cliente es lo primero
+          que hay que poder responder. Pero se calla cuando dice lo mismo que el
+          logotipo que tiene justo arriba: ahí no contesta nada, es la misma
+          palabra dos veces —una dibujada y otra escrita— una abajo de la otra.
+          Le pasa al tenant nuestro y a ningún cliente.
+
+          El logotipo hereda el color por `currentColor`, así sirve en los dos
+          temas. */}
+      <header className="flex min-w-0 shrink-0 flex-col items-center px-[18px] pb-5 pt-4">
         <Logo className="h-4 w-auto text-ink-primary" />
-        {storeName && (
-          <p className="mt-2 truncate text-[11.5px] text-ink-faint" title={storeName}>
+        {storeName && storeName.trim().toLowerCase() !== NOMBRE_MARCA && (
+          <p className="mt-2 max-w-full truncate text-center text-[11.5px] text-ink-faint" title={storeName}>
             {storeName}
           </p>
         )}
@@ -123,11 +137,11 @@ export default function SideNav({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
         <div className="stagger space-y-px" style={{ '--stagger-base': '60ms' }}>
-          {NAV_ITEMS.map(({ key, label, Icon }) => (
+          {NAV_ITEMS.map(({ key, Icon }) => (
             <NavRow
               key={key}
               icon={<Icon size={16} />}
-              label={label}
+              label={t(`nav.${key}`)}
               count={key === 'inbox' && pendingCount > 0 ? pendingCount : null}
               active={current === key}
               onClick={() => onNavigate(key)}
@@ -144,18 +158,18 @@ export default function SideNav({
         <Avatar name={username} size={28} className="!rounded-full !text-[11px]" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[12px] font-medium capitalize text-ink-primary">{username}</p>
-          <p className="truncate text-[10.5px] text-ink-faint">Administrador</p>
+          <p className="truncate text-[10.5px] text-ink-faint">{t('comun.administrador')}</p>
         </div>
         <button
           onClick={onToggleTheme}
-          title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+          title={theme === 'dark' ? t('comun.temaClaro') : t('comun.temaOscuro')}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
         >
           {theme === 'dark' ? <IconSun size={15} /> : <IconMoon size={15} />}
         </button>
         <button
           onClick={onLogout}
-          title="Cerrar sesión"
+          title={t('comun.cerrarSesion')}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-200 hover:bg-tint/[0.06] hover:text-ink-primary"
         >
           <IconLogOut size={15} />

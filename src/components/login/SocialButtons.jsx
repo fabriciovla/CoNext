@@ -9,7 +9,9 @@ const ICONOS = {
 // Grilla de proveedores. Vive afuera de la tarjeta del correo: son otro camino,
 // no un campo más del formulario. El click se lo come el padre (`onElegir`)
 // para que el mismo bloque sirva en "Iniciar sesión" y en "Crear cuenta".
-export default function SocialButtons({ onElegir, pending = false, separador = 'o con tu correo' }) {
+// El separador ya llega traducido de la pantalla, que es la que sabe si dice
+// "o con tu correo" o "o si ya tenés cuenta".
+export default function SocialButtons({ onElegir, pending = false, separador = '' }) {
   return (
     <div>
       <div className="grid grid-cols-2 gap-2">
