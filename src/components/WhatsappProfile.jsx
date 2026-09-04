@@ -72,17 +72,24 @@ export default function WhatsappProfile({ className = '' }) {
       campos.vertical !== (perfil.vertical ?? '') ||
       campos.website !== (perfil.websites?.[0] ?? ''))
 
+  // Se manda solo lo que cambió, no el perfil entero. Meta pisa únicamente los
+  // campos que recibe, así que reenviar los demás no aporta nada — y con la
+  // frase de estado vacía (que es como viene de fábrica un perfil sin tocar)
+  // rechazaba el guardado entero con un error que no nombra el campo.
   const onGuardar = async () => {
     if (!sucio) return
     const sitio = campos.website.trim()
-    const ok = await guardar({
-      about: campos.about.trim(),
-      description: campos.description.trim(),
-      address: campos.address.trim(),
-      email: campos.email.trim(),
-      vertical: campos.vertical || undefined,
-      websites: sitio ? [sitio, ...campos.resto] : campos.resto,
-    })
+    const cambios = {}
+    for (const campo of ['about', 'description', 'address', 'email']) {
+      const valor = campos[campo].trim()
+      if (valor !== (perfil[campo] ?? '')) cambios[campo] = valor
+    }
+    if (campos.vertical !== (perfil.vertical ?? '')) cambios.vertical = campos.vertical
+    if (sitio !== (perfil.websites?.[0] ?? '')) {
+      cambios.websites = sitio ? [sitio, ...campos.resto] : campos.resto
+    }
+
+    const ok = await guardar(cambios)
     if (!ok) return
     setGuardado(true)
     clearTimeout(avisoTimer.current)

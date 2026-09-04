@@ -71,6 +71,15 @@ export async function getPerfil(phoneNumberId, accessToken) {
 // Devuelve el mensaje del primer campo que no pasa, o null. Va antes de pedir
 // las credenciales por el mismo motivo que en plantillas.
 export function validarPerfil(campos) {
+  // La frase de estado no se puede vaciar: WhatsApp siempre muestra una (de
+  // fábrica, "Hey there! I am using WhatsApp"), así que Meta rechaza el vacío
+  // con un "(#131000) Something went wrong" que no dice qué campo era. Se corta
+  // acá para poder explicarlo; el resto de los campos sí se pueden dejar en
+  // blanco.
+  if (campos.about !== undefined && !String(campos.about).trim()) {
+    return 'La frase de estado no puede quedar vacía: WhatsApp siempre muestra una'
+  }
+
   for (const [campo, tope] of Object.entries(LIMITES)) {
     const valor = campos[campo]
     if (typeof valor === 'string' && valor.length > tope) {
