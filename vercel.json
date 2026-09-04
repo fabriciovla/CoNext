@@ -6,12 +6,6 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.conext.lat" }],
-      "destination": "https://conext.lat/:path*",
-      "statusCode": 308
-    },
-    {
       "source": "/sitemap.xml",
       "destination": "/sitemap-index.xml",
       "statusCode": 301
