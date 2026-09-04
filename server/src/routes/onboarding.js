@@ -8,6 +8,8 @@ import {
   getMetaCredentials,
   setMetaCredentials,
   setCanalMeta,
+  clearWhatsappCredentials,
+  clearMetaCredentials,
 } from '../services/tenantsService.js'
 import multer from 'multer'
 import { connectWhatsappAccount, getPhoneNumberInfo } from '../services/whatsappOnboarding.js'
@@ -398,6 +400,27 @@ router.post(
     } catch (err) {
       res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
     }
+  }),
+)
+
+// Soltar la conexión. No toca nada del lado de Meta —los permisos que dio el
+// cliente siguen ahí— y no borra mensajes: desconectar no es borrar la bandeja.
+//
+// Hace falta para poder volver a filmar el alta, que es lo que pide el App
+// Review, y porque un cliente tiene que poder desengancharse sin escribirnos.
+router.post(
+  '/disconnect',
+  ah(async (req, res) => {
+    await clearWhatsappCredentials(req.tenantId)
+    res.json({ conectado: false })
+  }),
+)
+
+router.post(
+  '/meta/disconnect',
+  ah(async (req, res) => {
+    await clearMetaCredentials(req.tenantId)
+    res.json({ conectado: false })
   }),
 )
 

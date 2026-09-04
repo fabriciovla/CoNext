@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import Button from './ui/Button'
+import Modal from './ui/Modal'
 import { SkeletonLinea } from './ui/Skeleton'
 import Switch from './ui/Switch'
 import ChannelCard, { AvisoCanal, Dato, DatosConexion, EstadoCanal } from './ui/ChannelCard'
@@ -55,9 +57,11 @@ export default function MetaConnection({ className = '' }) {
     conectarPagina,
     cambiarCanal,
     cancelarSeleccion,
+    desconectar,
     refrescar,
   } = useMetaConnection()
   const t = useT()
+  const [confirmar, setConfirmar] = useState(false)
 
   // Estas dos tarjetas son de las que más tardan: cada una le pregunta a Graph
   // por el estado del token antes de poder decir nada. Un "Cargando…" suelto
@@ -199,6 +203,9 @@ export default function MetaConnection({ className = '' }) {
           <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
             {conectando ? t('canales.conectando') : t('canales.conectarOtraPagina')}
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setConfirmar(true)}>
+            {t('comun.desconectar')}
+          </Button>
         </>
       }
     >
@@ -250,6 +257,30 @@ export default function MetaConnection({ className = '' }) {
       </DatosConexion>
 
       {problemas && <div className="mt-3">{problemas}</div>}
+
+      {/* La conexión es una sola para los dos canales, así que el modal lo dice
+          con todas las letras: desconectar acá apaga Instagram y Messenger. */}
+      {confirmar && (
+        <Modal title={t('canales.desconectarMetaTitulo')} onClose={() => setConfirmar(false)}>
+          <p className="text-[13px] leading-relaxed text-ink-secondary">
+            {t('canales.desconectarMetaTexto')}
+          </p>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setConfirmar(false)}>
+              {t('comun.cancelar')}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                await desconectar()
+                setConfirmar(false)
+              }}
+            >
+              {t('comun.desconectar')}
+            </Button>
+          </div>
+        </Modal>
+      )}
     </Marco>
   )
 }

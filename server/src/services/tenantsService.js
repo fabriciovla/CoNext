@@ -219,6 +219,36 @@ export async function setWhatsappCredentials(tenantId, { wabaId, phoneNumberId, 
   return getTenant(tenantId)
 }
 
+// Soltar la conexión de un canal.
+//
+// Borra lo nuestro y **no toca nada del lado de Meta**: la Página, el WABA y
+// los permisos que dio el cliente quedan como estaban, y volver a conectar es
+// apretar el botón otra vez. Desuscribir la app sería lo prolijo, pero exige un
+// token que justamente estamos por borrar y fallaría dejando la fila a medias;
+// además, un webhook que llega para un tenant sin credenciales ya se descarta
+// solo, porque no resuelve por ninguna de las columnas.
+//
+// Los mensajes y conversaciones no se tocan: son historia del negocio y no de
+// la conexión. Desconectar no es borrar la bandeja.
+export async function clearWhatsappCredentials(tenantId) {
+  await run(
+    `UPDATE tenants SET waba_id = NULL, phone_number_id = NULL, access_token = NULL,
+       connected_at = NULL, updated_at = $1 WHERE id = $2`,
+    [new Date().toISOString(), tenantId],
+  )
+  return getTenant(tenantId)
+}
+
+export async function clearMetaCredentials(tenantId) {
+  await run(
+    `UPDATE tenants SET page_id = NULL, ig_account_id = NULL, page_access_token = NULL,
+       page_name = NULL, ig_username = NULL, meta_connected_at = NULL, updated_at = $1
+     WHERE id = $2`,
+    [new Date().toISOString(), tenantId],
+  )
+  return getTenant(tenantId)
+}
+
 // Rotación de la clave: devuelve la nueva en plano una sola vez, igual que el alta.
 export async function rotateApiKey(tenantId) {
   const apiKey = generateApiKey()

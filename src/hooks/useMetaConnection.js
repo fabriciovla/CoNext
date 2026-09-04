@@ -198,6 +198,21 @@ export function useMetaConnection() {
     tokenRef.current = null
   }, [])
 
+  // Suelta la conexión de nuestro lado. Es una sola para los dos canales, como
+  // el token: no se puede desconectar Instagram y dejar Messenger.
+  const desconectar = useCallback(async () => {
+    setError(null)
+    try {
+      await apiPost('/onboarding/meta/disconnect')
+      setAvisos([])
+      await refrescar()
+      return true
+    } catch (err) {
+      setError(err.message)
+      return false
+    }
+  }, [refrescar])
+
   return {
     config,
     estado,
@@ -209,6 +224,7 @@ export function useMetaConnection() {
     paginas,
     conectar,
     conectarPagina,
+    desconectar,
     cambiarCanal,
     cancelarSeleccion,
     refrescar,

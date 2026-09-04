@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import Button from './ui/Button'
+import Modal from './ui/Modal'
 import { SkeletonLinea } from './ui/Skeleton'
 import ChannelCard, { AvisoCanal, Dato, DatosConexion, EstadoCanal } from './ui/ChannelCard'
 import ChannelLogo from './ui/ChannelLogo'
@@ -29,8 +31,9 @@ function Marco({ className = '', descripcion, subtitulo, distintivo, acciones, c
 
 export default function WhatsappConnection({ className = '' }) {
   const t = useT()
-  const { config, estado, cargando, conectando, error, avisos, sdkListo, conectar, refrescar } =
+  const { config, estado, cargando, conectando, error, avisos, sdkListo, conectar, desconectar, refrescar } =
     useWhatsappConnection()
+  const [confirmar, setConfirmar] = useState(false)
 
   // Estas dos tarjetas son de las que más tardan: cada una le pregunta a Graph
   // por el estado del token antes de poder decir nada. Un "Cargando…" suelto
@@ -139,6 +142,9 @@ export default function WhatsappConnection({ className = '' }) {
           <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
             {conectando ? t('canales.conectando') : t('canales.conectarOtroNumero')}
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setConfirmar(true)}>
+            {t('comun.desconectar')}
+          </Button>
         </>
       }
     >
@@ -157,6 +163,30 @@ export default function WhatsappConnection({ className = '' }) {
       </DatosConexion>
 
       {problemas && <div className="mt-3">{problemas}</div>}
+
+      {/* Desconectar es destructivo: deja de entrar y de salir todo por este
+          canal. Como cualquier destructiva de la app, pregunta antes. */}
+      {confirmar && (
+        <Modal title={t('canales.desconectarWaTitulo')} onClose={() => setConfirmar(false)}>
+          <p className="text-[13px] leading-relaxed text-ink-secondary">
+            {t('canales.desconectarWaTexto')}
+          </p>
+          <div className="mt-5 flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => setConfirmar(false)}>
+              {t('comun.cancelar')}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={async () => {
+                await desconectar()
+                setConfirmar(false)
+              }}
+            >
+              {t('comun.desconectar')}
+            </Button>
+          </div>
+        </Modal>
+      )}
     </Marco>
   )
 }

@@ -188,5 +188,32 @@ export function useWhatsappConnection() {
     )
   }, [config, enviarAlServer])
 
-  return { config, estado, cargando, conectando, error, avisos, sdkListo, conectar, refrescar }
+  // Suelta la conexión de nuestro lado. No toca los permisos que el cliente le
+  // dio a la app en Meta, así que volver a conectar es apretar el botón otra
+  // vez — y por eso el modal lo dice, para que no se lea como "revocar".
+  const desconectar = useCallback(async () => {
+    setError(null)
+    try {
+      await apiPost('/onboarding/disconnect')
+      setAvisos([])
+      await refrescar()
+      return true
+    } catch (err) {
+      setError(err.message)
+      return false
+    }
+  }, [refrescar])
+
+  return {
+    config,
+    estado,
+    cargando,
+    conectando,
+    error,
+    avisos,
+    sdkListo,
+    conectar,
+    desconectar,
+    refrescar,
+  }
 }

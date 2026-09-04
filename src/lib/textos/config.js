@@ -283,6 +283,20 @@ const CANALES = {
     es: 'Contestar desde el CRM los mensajes de la Página',
     en: "Reply to the Page's messages from the CRM",
   },
+  // Desconectar no toca nada del lado de Meta: los permisos que dio el cliente
+  // quedan, y volver a conectar es apretar el botón otra vez. El texto lo dice
+  // porque si no se lee como "revocar el acceso", que es otra cosa.
+  desconectarWaTitulo: { es: 'Desconectar WhatsApp', en: 'Disconnect WhatsApp' },
+  desconectarWaTexto: {
+    es: 'Dejan de entrar y de salir mensajes por WhatsApp. No se borra ninguna conversación ni se toca nada en tu cuenta de Meta: podés volver a conectar cuando quieras.',
+    en: "WhatsApp messages stop coming in and going out. No conversation is deleted and nothing changes in your Meta account — you can reconnect whenever you want.",
+  },
+  desconectarMetaTitulo: { es: 'Desconectar Instagram y Messenger', en: 'Disconnect Instagram and Messenger' },
+  desconectarMetaTexto: {
+    es: 'La conexión es una sola para los dos canales, así que se apagan juntos: dejan de entrar y de salir mensajes por Instagram y por Messenger. No se borra ninguna conversación ni se toca nada en tu cuenta de Meta.',
+    en: 'One connection covers both channels, so they go together: messages stop coming in and going out on Instagram and Messenger. No conversation is deleted and nothing changes in your Meta account.',
+  },
+
   apagarNoDesconecta: {
     es: 'Apagarlo no desconecta el canal: el CRM deja de atenderlo.',
     en: "Turning it off doesn't disconnect the channel: the CRM just stops handling it.",
