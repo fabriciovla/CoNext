@@ -36,44 +36,12 @@ const API = String(import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '')
 // dos servidores distintos y hace falta decirlo (VITE_SITE_URL).
 const SITIO = String(import.meta.env.VITE_SITE_URL ?? '').trim().replace(/\/$/, '')
 
-// Una sola vuelta a la encuesta por pestaña. Sin esto, alguien sin plan que
-// vuelve de /empezar sin haber comprado rebota otra vez apenas la dashboard
-// monta, y las dos pantallas se quedan pasándose la pelota.
-const CLAVE_REBOTE = 'wsp-crm:sin-plan'
-
-// `?reintento=1` lo pone el botón "Volver a intentar entrar" del final de la
-// encuesta: es alguien pidiendo explícitamente que se revise de nuevo, así que
-// la reserva de "ya lo mandé una vez" se suelta. Se saca de la URL enseguida —
-// una recarga después no tiene por qué volver a saltearla.
-function soltarReservaSiPiden() {
-  try {
-    const url = new URL(window.location.href)
-    if (url.searchParams.get('reintento') !== '1') return
-    url.searchParams.delete('reintento')
-    window.history.replaceState({}, '', url.pathname + url.search + url.hash)
-    sessionStorage.removeItem(CLAVE_REBOTE)
-  } catch {
-    /* ver yaRebotó */
-  }
-}
-
-function yaRebotó(correo) {
-  try {
-    return sessionStorage.getItem(CLAVE_REBOTE) === correo
-  } catch {
-    // Sin sessionStorage no hay red de contención posible, y la alternativa
-    // —no cortar nunca— desarma el corte entero. Se sigue de largo.
-    return false
-  }
-}
-
-function marcarRebote(correo) {
-  try {
-    sessionStorage.setItem(CLAVE_REBOTE, correo)
-  } catch {
-    /* ver yaRebotó */
-  }
-}
+// No hace falta una reserva de "ya lo mandé una vez": `urlEncuesta` siempre
+// pone `correo` y `sinplan` en la vuelta, y el atajo de `/empezar` que manda
+// solo a la app (`propio` en Empezar.astro) se apaga apenas hay `correo` o
+// `sinplan` en la URL. Así que la encuesta nunca rebota de nuevo hacia acá por
+// sí sola, y no hay loop que frenar: cada carga de `/app` puede volver a
+// preguntar sin riesgo de pasarse la pelota con la encuesta.
 
 // `sinplan=1` es lo que hace que el cuestionario termine ofreciendo los precios
 // en vez de mandar a la dashboard. Es cosmético y no autoriza nada: quien lo
@@ -89,8 +57,6 @@ function urlEncuesta(correo) {
 // cualquier otro caso —incluido el de no poder averiguarlo—.
 export async function encuestaPendiente(correo) {
   if (!correo || esEscritorio()) return null
-  soltarReservaSiPiden()
-  if (yaRebotó(correo)) return null
 
   const auth = clienteAuth()
   if (!auth) return null
@@ -109,6 +75,5 @@ export async function encuestaPendiente(correo) {
     return null
   }
 
-  marcarRebote(correo)
   return urlEncuesta(correo)
 }

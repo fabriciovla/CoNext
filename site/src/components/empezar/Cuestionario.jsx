@@ -430,12 +430,6 @@ function SinPlan({ copy, planes, appUrl, correo }) {
   const volver = () => {
     const url = new URL(appUrl || '/', window.location.origin)
     if (correo) url.searchParams.set('u', correo.split('@')[0])
-    // La dashboard no vuelve a mandar acá dos veces en la misma pestaña —es lo
-    // que evita el ida y vuelta automático—, pero este click es justamente
-    // pedirle que revise de nuevo. `reintento` es lo que le dice que suelte esa
-    // reserva; sin esto, quien vuelve a entrar sin plan se queda adentro de una
-    // dashboard en la que cada request muere con 403 y nada lo explica.
-    url.searchParams.set('reintento', '1')
     window.location.assign(url.toString())
   }
 
