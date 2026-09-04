@@ -158,6 +158,71 @@ const CONFIG = {
   },
   idiomaHint: { es: 'El cambio se aplica al instante.', en: 'The change applies instantly.' },
   idiomaAria: { es: 'Idioma de la dashboard', en: 'Dashboard language' },
+
+  // --- Perfil del negocio en WhatsApp -------------------------------------
+  //
+  // Lo que el dueño editaba desde la app del celular y deja de poder tocar
+  // cuando el número pasa a la Cloud API.
+  perfilWaTitulo: { es: 'Perfil de WhatsApp', en: 'WhatsApp profile' },
+  perfilWaDesc: {
+    es: 'La foto, la descripción y los datos de contacto que ve tu cliente cuando abre el chat. Es lo mismo que editabas desde la app WhatsApp Business, que deja de estar disponible cuando el número pasa a conext.',
+    en: 'The photo, description and contact details your customer sees when they open the chat. Same thing you used to edit in the WhatsApp Business app, which stops being available once the number moves to conext.',
+  },
+  perfilWaHint: {
+    es: 'Se guarda en Meta, no acá. Puede tardar unos minutos en verse en el chat.',
+    en: 'Saved on Meta, not here. It can take a few minutes to show up in the chat.',
+  },
+  perfilWaSinCanal: {
+    es: 'Conectá WhatsApp en Canales para poder editar el perfil.',
+    en: 'Connect WhatsApp under Channels to edit the profile.',
+  },
+  perfilWaNoSePudo: {
+    es: 'No se pudo leer el perfil. Probá reconectar WhatsApp en Canales.',
+    en: "Couldn't read the profile. Try reconnecting WhatsApp under Channels.",
+  },
+  perfilWaSinFoto: { es: 'Sin foto', en: 'No photo' },
+  perfilWaCambiarFoto: { es: 'Cambiar foto', en: 'Change photo' },
+  perfilWaFotoRegla: {
+    es: 'JPG o PNG, cuadrada y de 192px o más. Se sube al elegirla.',
+    en: 'JPG or PNG, square and at least 192px. Uploads as soon as you pick it.',
+  },
+  perfilWaAbout: { es: 'Frase de estado', en: 'Status line' },
+  perfilWaAboutPlaceholder: {
+    es: 'Respondemos en el día',
+    en: 'We reply same day',
+  },
+  perfilWaDescripcion: { es: 'Descripción', en: 'Description' },
+  perfilWaDescripcionPlaceholder: {
+    es: 'Qué vende tu negocio, en dos renglones.',
+    en: 'What your business sells, in two lines.',
+  },
+  perfilWaDireccion: { es: 'Dirección', en: 'Address' },
+  perfilWaEmail: { es: 'Correo', en: 'Email' },
+  perfilWaSitio: { es: 'Sitio web', en: 'Website' },
+  perfilWaRubro: { es: 'Rubro', en: 'Industry' },
+
+  // El rubro es una lista cerrada de Meta: las claves son sus valores tal
+  // cual, para que el componente arme `config.rubro${valor}` sin traducir
+  // dos veces.
+  rubroUNDEFINED: { es: 'Sin especificar', en: 'Unspecified' },
+  rubroOTHER: { es: 'Otro', en: 'Other' },
+  rubroAUTO: { es: 'Automotor', en: 'Automotive' },
+  rubroBEAUTY: { es: 'Belleza y cuidado personal', en: 'Beauty & personal care' },
+  rubroAPPAREL: { es: 'Indumentaria', en: 'Apparel' },
+  rubroEDU: { es: 'Educación', en: 'Education' },
+  rubroENTERTAIN: { es: 'Entretenimiento', en: 'Entertainment' },
+  rubroEVENT_PLAN: { es: 'Organización de eventos', en: 'Event planning' },
+  rubroFINANCE: { es: 'Finanzas y banca', en: 'Finance & banking' },
+  rubroGROCERY: { es: 'Almacén y supermercado', en: 'Grocery' },
+  rubroGOVT: { es: 'Sector público', en: 'Public sector' },
+  rubroHOTEL: { es: 'Hotelería', en: 'Hotel & lodging' },
+  rubroHEALTH: { es: 'Salud', en: 'Health' },
+  rubroNONPROFIT: { es: 'Organización sin fines de lucro', en: 'Non-profit' },
+  rubroPROF_SERVICES: { es: 'Servicios profesionales', en: 'Professional services' },
+  rubroRETAIL: { es: 'Comercio minorista', en: 'Retail' },
+  rubroTRAVEL: { es: 'Viajes y turismo', en: 'Travel' },
+  rubroRESTAURANT: { es: 'Gastronomía', en: 'Restaurant' },
+  rubroNOT_A_BIZ: { es: 'No es un negocio', en: 'Not a business' },
 }
 
 const CANALES = {

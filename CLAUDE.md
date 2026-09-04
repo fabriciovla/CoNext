@@ -154,6 +154,19 @@ Son los mensajes con los que se puede escribir **primero**: pasadas las 24h de l
 - Lo que se puede validar sin salir del server va **antes** de pedir las credenciales: son errores de lo que la persona escribió y se contestan igual esté o no conectado el WhatsApp.
 - `AUTHENTICATION` queda afuera de las categorías a propósito: son las de código de un solo uso, con su propio formato de botones y su propia tarifa.
 - Se borra **por nombre**, y eso borra todos los idiomas de esa plantilla — es lo que la consola de Meta llama eliminar.
+### Perfil del negocio en WhatsApp
+
+La foto, la frase de estado, la descripción, la dirección, el correo, el sitio y el rubro que ve el cliente al abrir el chat. Está porque **migrar el número a la Cloud API apaga la app WhatsApp Business del celular**, que es donde el dueño editaba todo esto: sin la pantalla, pasarse al CRM incluye perder el perfil sin forma de volver a tocarlo.
+
+**No se guarda en nuestra base**, igual que las plantillas: vive en Meta, el dueño también puede cambiarlo desde el Business Manager, y una copia local sería una copia desactualizada. `whatsappProfile.js` lo lee en vivo en cada visita y `useWhatsappProfile` no hace nada optimista.
+
+- Los topes (`about` 139, `description` 512, `address` 256, `email` 128, dos sitios) y la lista cerrada de rubros se cortan **antes** de pedir las credenciales, por el mismo motivo que en plantillas: son errores de lo que la persona escribió y se contestan igual esté o no vigente el token.
+- **La foto son tres llamadas, no una**: se sube el binario a la Resumable Upload API (`/{app_id}/uploads`, que cuelga del APP_ID porque es una subida de la app, no del cliente), eso devuelve un handle y recién ahí se guarda en el perfil. El segundo paso va con `Authorization: OAuth` y **no** `Bearer` — es la única llamada de Graph con ese esquema, y con Bearer contesta un 400 que no explica nada. El binario pasa por memoria y no toca nuestro disco.
+- Los campos vacíos **se mandan igual**: borrar la descripción es un cambio tan legítimo como escribirla, y omitir los vacíos haría que nunca se pueda vaciar nada.
+- La tarjeta va **abajo de las dos fichas de conexión y a todo el ancho**, no adentro de la de WhatsApp: esa ficha contesta "¿está conectado?" de un vistazo y un formulario de siete campos la convierte en otra cosa.
+- La foto se manda al elegirla y el resto espera al botón, el mismo criterio que el resto de Configuración.
+- **El catálogo de productos no está.** Lo que la app del celular llama catálogo vive en Commerce Manager, se ata a la WABA y es otra API (`/{catalog_id}/products`) con su propio permiso de App Review (`catalog_management`). Ojo con confundirlo con nuestra pantalla de Productos, que es de nuestra base y solo alimenta a la IA: no se ve del lado del cliente.
+
 ### Adjuntos (salientes)
 
 Mandar un archivo son **dos llamadas a Graph**, no una: primero se sube el binario a `/{phone_number_id}/media` como multipart y Meta devuelve un id, y recién después se manda el mensaje citando ese id (`adapter.sendMedia`). El pipeline entero es `POST /messages/media` (multipart, multer en memoria) → `guardarAdjunto` → `sendOutboundMedia`.
@@ -165,6 +178,17 @@ Mandar un archivo son **dos llamadas a Graph**, no una: primero se sube el binar
 - Si el envío falla en cualquier punto, `sendOutboundMedia` **borra el archivo** antes de propagar: si no, cada rechazo de Meta dejaría un archivo huérfano que ninguna fila referencia.
 - El audio no acepta epígrafe del lado de Meta. El composer, si había texto escrito, manda la nota de voz y después el texto como mensaje aparte.
 - **Los adjuntos entrantes siguen sin procesarse**: el webhook mira solo `type: 'text'`. Recibirlos es el camino inverso (media id → URL firmada de Graph → bajar con el token del cliente) y todavía no está.
+
+### Coexistencia (el número en la app y en la API a la vez)
+
+Meta permite que un número siga usándose en la app WhatsApp Business del celular **y** por la Cloud API, con el historial sincronizado. Se activa suscribiendo tres campos más del webhook `whatsapp_business_account`: `history`, `smb_app_state_sync` y `smb_message_echoes`. No hay toggle: con eso, la pantalla de selección de WABA del alta pasa a ofrecer "conectar tu cuenta existente". Pide ser Solution Partner o Tech Provider, o sea que **depende del App Review**.
+
+Eso rompe un supuesto viejo del webhook: que todo `change` con `phone_number_id` traía mensajes del cliente. Un eco lleva lo que el dueño escribió desde el celular, y entraba como entrante — la IA contestándole al propio negocio, el mismo bucle que en Messenger corta `is_echo`. Por eso `procesarWhatsapp` rutea por `change.field`.
+
+- Los ecos se guardan como salientes con `author: 'admin'` (`registrarSalienteDeLaApp`). Sin adapter y sin exigir día abierto: el mensaje ya salió del celular, y rechazarlo sería perder media conversación en el hilo. Va con el día más reciente.
+- **El corte del bucle es doble**: además del ruteo, se descarta el eco cuyo `external_id` ya está en `messages`. Meta no promete que los ecos sean solo de la app, y sin eso cada respuesta de la IA aparecería dos veces.
+- Guardar el eco limpia el borrador de la IA: si la persona ya contestó a mano, ofrecer el borrador es ofrecer repetir la respuesta.
+- `history` y `smb_app_state_sync` llegan y **todavía no se procesan**: quedan logueados y no descartados en silencio, porque el día que el historial de un número migrado no aparezca en la bandeja, eso es lo que lo explica. Hay **24 horas desde el alta** para sincronizarlo; pasadas, hay que desconectar y volver a empezar.
 
 ### Base de datos
 
@@ -197,6 +221,8 @@ La pantalla es la misma de los dos lados, y si cambia una hay que cambiar la otr
 En la versión de Astro, /login no usa `.reveal`: eso se muestra recién cuando el observer del layout lo cruza, y en una pantalla que no scrollea la fila de abajo se quedaba invisible para siempre (cae dentro del `rootMargin` negativo). Entra con `.animate-in` al cargar. El logo del panel comparte `view-transition-name: conext-logo` con el de la barra: al hacer clic en "Iniciar sesión" crece desde ahí (Chrome/Safari; Firefox recarga y anima igual, sin el morph). Los dos extremos ya no son el mismo dibujo —arriba el logotipo entero, en el panel la marca sola—, así que ahí las opacidades **sí** se cruzan; mientras fueron idénticos iba en `animation: none`, que era mejor. Es también la única página que se pide con `pantallaCompleta` en `Base.astro`, que le saca la barra, el pie y el fondo con cuadrícula.
 
 `src/data/mockData.js` todavía existe y aporta constantes de UI (por ejemplo `weekDays`), no datos.
+
+**El gráfico de los últimos 12 meses cuenta mensajes de verdad.** Era la última pantalla alimentada por `mockData`: una curva en subida inventada que la dashboard le dibujaba igual a un cliente recién dado de alta, que todavía no había recibido un solo mensaje —o sea, el único gráfico que nunca podía estar vacío era el que más razones tenía para estarlo—. Ahora sale de `monthlyActivity` (`utils/metrics.js`), que cuenta lo mismo que `dayStats` (solo los entrantes, y de ellos los `automatico`) sobre lo que la dashboard ya tiene cargado: los mensajes del día abierto más los de todos los archivados, que `listClosedDays` trae enteros de una sola vez. No hay endpoint nuevo: preguntar nuestra propia historia otra vez sería pedir dos veces lo mismo. Los doce baldes salen siempre, con ceros donde no hubo nada —un mes salteado pegaría un enero contra un marzo como si fueran vecinos—, y **si están todos en cero la tarjeta muestra el estado vacío**, porque una línea plana apoyada en el piso no se lee como "todavía no pasó nada" sino como un gráfico roto. El rótulo "Últimos 12 meses" se va con el gráfico: rotularía una línea que no está. El eje X lleva el mes solo, que es lo que entra en doce columnas de 10px, y el tooltip y la tabla llevan mes y año (`xLongKey`), porque la ventana cruza el fin de año y ahí "Ene" solo no dice cuál. El techo del eje también dejó de saltar de a diez: con tres mensajes en el mes, un eje que arrancaba en 10 dibujaba la línea aplastada contra la base.
 
 **El hilo es un chat, no una lista de tarjetas.** Las decisiones del hilo salen de mirar lo que hace WhatsApp, que es lo que esta pantalla está reflejando, y de una regla: nada se dice dos veces.
 

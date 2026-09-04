@@ -6,6 +6,7 @@ import SettingCard from '../components/ui/SettingCard'
 import { IconCheck, IconChevronDown, IconCopy, IconMoon, IconSun } from '../components/ui/icons'
 import WhatsappConnection from '../components/WhatsappConnection'
 import MetaConnection from '../components/MetaConnection'
+import WhatsappProfile from '../components/WhatsappProfile'
 import { PASOS as PASOS_TOUR } from '../components/Tour'
 import { weekDays } from '../data/mockData'
 import { formatPhone } from '../utils/phone'
@@ -643,12 +644,20 @@ export default function Settings({
             // altura: la ficha de Meta tiene dos interruptores que la de
             // WhatsApp no tiene, e igualarlas deja cien píxeles de nada adentro
             // de la de WhatsApp.
-            <div
-              data-tour="config-canales"
-              className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2"
-            >
-              <WhatsappConnection />
-              <MetaConnection />
+            <div className="flex flex-col gap-4">
+              <div
+                data-tour="config-canales"
+                className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2"
+              >
+                <WhatsappConnection />
+                <MetaConnection />
+              </div>
+
+              {/* El perfil va abajo y a todo el ancho: no es una conexión, es
+                  lo que se edita una vez conectado. Adentro de la ficha de
+                  WhatsApp le arruinaría la única pregunta que esa ficha
+                  contesta de un vistazo. */}
+              <WhatsappProfile />
             </div>
           )}
 

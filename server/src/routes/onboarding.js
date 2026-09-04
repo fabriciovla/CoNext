@@ -9,7 +9,15 @@ import {
   setMetaCredentials,
   setCanalMeta,
 } from '../services/tenantsService.js'
+import multer from 'multer'
 import { connectWhatsappAccount, getPhoneNumberInfo } from '../services/whatsappOnboarding.js'
+import {
+  RUBROS,
+  getPerfil,
+  validarPerfil,
+  actualizarPerfil,
+  subirFotoPerfil,
+} from '../services/whatsappProfile.js'
 import {
   PERMISOS,
   aTokenLargo,
@@ -306,5 +314,91 @@ router.post(
   }),
 )
 
+
+// ---------------------------------------------------------------------------
+// Perfil del negocio en WhatsApp
+//
+// Es lo que el dueño editaba desde la app del celular y deja de poder tocar
+// cuando el número pasa a la Cloud API. Vive en Meta, no en nuestra base: se
+// lee en vivo en cada visita, igual que las plantillas.
+// ---------------------------------------------------------------------------
+
+// La foto pasa por memoria: no se guarda de nuestro lado, se reenvía a Meta y
+// se descarta. El tope acá es el de Meta para la foto de perfil.
+const subirFoto = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+}).single('file')
+
+// Sin número conectado no hay perfil que leer, y es un estado normal —no un
+// error—: la pantalla tiene que poder decir "conectá WhatsApp primero".
+async function credencialesDeWhatsapp(req, res) {
+  const creds = await getWhatsappCredentials(req.tenantId)
+  if (!creds) {
+    res.status(409).json({ error: 'No hay un WhatsApp conectado', codigo: 'sin-whatsapp' })
+    return null
+  }
+  return creds
+}
+
+router.get(
+  '/whatsapp/profile',
+  ah(async (req, res) => {
+    const creds = await credencialesDeWhatsapp(req, res)
+    if (!creds) return
+
+    try {
+      res.json({ perfil: await getPerfil(creds.phoneNumberId, creds.accessToken), rubros: RUBROS })
+    } catch (err) {
+      // Un token vencido o un permiso que falta son errores del cliente, no
+      // nuestros: se contestan para que la pantalla los muestre y ofrezca
+      // reconectar, en vez de un 500 que se lee como una caída del CRM.
+      res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
+    }
+  }),
+)
+
+router.put(
+  '/whatsapp/profile',
+  ah(async (req, res) => {
+    // Lo que se puede validar sin salir del server va primero: son errores de
+    // lo que la persona escribió y se contestan igual esté o no vigente el
+    // token.
+    const invalido = validarPerfil(req.body ?? {})
+    if (invalido) return res.status(400).json({ error: invalido })
+
+    const creds = await credencialesDeWhatsapp(req, res)
+    if (!creds) return
+
+    try {
+      res.json({ perfil: await actualizarPerfil(creds.phoneNumberId, creds.accessToken, req.body ?? {}) })
+    } catch (err) {
+      res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
+    }
+  }),
+)
+
+router.post(
+  '/whatsapp/profile/photo',
+  (req, res, next) =>
+    subirFoto(req, res, (err) => {
+      if (err?.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'La foto supera los 5 MB' })
+      }
+      next(err)
+    }),
+  ah(async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'Falta la foto' })
+
+    const creds = await credencialesDeWhatsapp(req, res)
+    if (!creds) return
+
+    try {
+      res.json({ perfil: await subirFotoPerfil(creds.phoneNumberId, creds.accessToken, req.file) })
+    } catch (err) {
+      res.status(400).json({ error: err.message, metaCode: err.metaCode ?? null })
+    }
+  }),
+)
 
 export default router
