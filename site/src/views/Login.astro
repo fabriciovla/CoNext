@@ -4,7 +4,7 @@ import Boton from '../components/Boton.jsx'
 import Logo, { LogoMarca } from '../components/Logo.jsx'
 import LangSwitch from '../components/LangSwitch.astro'
 import { IconBolt, IconSparkles, IconShield, IconGoogle, IconGitHub } from '../components/icons.jsx'
-import { API_URL, APP_URL, WHATSAPP_URL } from '../config'
+import { APP_URL, WHATSAPP_URL } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 
 const lang = getLocale(Astro)
@@ -151,7 +151,6 @@ const VENTAJAS = [
             novalidate
             class="space-y-4 rounded-2xl border border-tint/10 bg-surface-card p-5 shadow-card"
             data-app={APP_URL}
-            data-api={API_URL}
             data-error-vacio={c.errorVacio}
             data-error-correo={c.errorCorreo}
           >
@@ -284,24 +283,7 @@ const VENTAJAS = [
     if (error) error.hidden = true
   })
 
-  // El cuestionario de /empezar es parte de entrar, no un desvío del checkout:
-  // quien todavía no lo contestó pasa por ahí antes de ver la dashboard. Quién
-  // contestó lo sabe el server y no este navegador — el flag local valía solo
-  // en la máquina donde se compró, así que con una cuenta nueva no saltaba nunca.
-  //
-  // Si el server no contesta se entra igual. Dejar a alguien afuera de su propio
-  // CRM porque nuestra API está caída es peor que repetirle cuatro preguntas.
-  const yaContesto = async (api, correo) => {
-    try {
-      const r = await fetch(`${api}/altas/estado?correo=${encodeURIComponent(correo)}`)
-      if (!r.ok) return true
-      return Boolean((await r.json()).contesto)
-    } catch {
-      return true
-    }
-  }
-
-  form?.addEventListener('submit', async (evento) => {
+  form?.addEventListener('submit', (evento) => {
     evento.preventDefault()
     const datos = new FormData(form)
     const correo = String(datos.get('email') ?? '').trim()
@@ -318,21 +300,6 @@ const VENTAJAS = [
 
     const destino = form.dataset.app
     if (!destino) return
-
-    const api = form.dataset.api
-    if (api) {
-      // Mientras se pregunta, el botón queda apagado: sin eso un doble Enter
-      // dispara dos consultas y dos navegaciones encimadas.
-      const enviar = form.querySelector('[type="submit"]')
-      if (enviar) enviar.disabled = true
-      const contesto = await yaContesto(api, correo)
-      if (enviar) enviar.disabled = false
-      if (!contesto) {
-        window.location.assign(`/empezar?correo=${encodeURIComponent(correo)}`)
-        return
-      }
-    }
-
     const usuario = correo.split('@')[0]
     window.location.assign(`${destino}/?u=${encodeURIComponent(usuario)}`)
   })

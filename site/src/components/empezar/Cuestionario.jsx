@@ -12,7 +12,32 @@ const LETRAS = 'ABCDEFGH'
 const CAMPO =
   'w-full rounded-xl border border-tint/[0.12] bg-transparent px-3.5 py-2.5 text-[15px] text-ink-primary placeholder:text-ink-faint transition-colors duration-150 focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30'
 
-export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }) {
+// **La query se lee acá y no en el frontmatter de Astro.** /empezar es una
+// página estática: lo que se lea allá queda horneado en el HTML del build y es
+// el mismo para toda URL. Este componente corre en el navegador, así que es el
+// único de los dos lados que ve la dirección de verdad.
+//
+// - `plan`: qué se compró. Lo pone el `redirect_url` del checkout de Dodo.
+// - `correo`: de quién es esto. Lo pone la dashboard cuando corta acá.
+// - `sinplan`: que no hay plan activo detrás de esa cuenta, así que el final
+//   ofrece los precios en vez de mandar a una app donde no va a poder entrar.
+function leerQuery(copy) {
+  if (typeof window === 'undefined') return { plan: 'gratis', correo: '', sinPlan: false }
+  const q = new URLSearchParams(window.location.search)
+  const pedido = q.get('plan')
+  return {
+    // Un plan que no existe en el catálogo no es un plan: cae en el de entrada.
+    plan: copy.planes[pedido] ? pedido : 'gratis',
+    correo: (q.get('correo') ?? '').trim(),
+    sinPlan: q.get('sinplan') === '1',
+  }
+}
+
+export default function Cuestionario({ copy, planes = [], appUrl, apiUrl }) {
+  // Una sola lectura, al montar: la URL no cambia mientras se contesta, y
+  // releerla en cada render haría que `sacar el ?correo=` de la barra a mitad
+  // del cuestionario cambiara a qué cuenta se le atribuye lo contestado.
+  const [{ plan, correo, sinPlan }] = useState(() => leerQuery(copy))
   const pasos = copy.pasos
   const total = pasos.length
   const preguntaId = useId()
@@ -22,8 +47,15 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
   const [respuestas, setRespuestas] = useState({})
   const [bloqueado, setBloqueado] = useState(false)
   const avanzarTimer = useRef(0)
+  // Quien no tiene plan pasa por acá cada vez que intenta entrar. Contestar las
+  // mismas cuatro preguntas en cada intento no aporta un dato nuevo y se lee
+  // como un peaje, así que si ya contestó se salta derecho al final —que es la
+  // parte que le importa: qué le falta y cuánto sale—. Arranca en null: hasta
+  // que el server conteste no se sabe, y adivinar es dibujar la pregunta 1 para
+  // taparla un cuadro después.
+  const [yaContesto, setYaContesto] = useState(null)
 
-  const enListo = i >= total
+  const enListo = i >= total || yaContesto === true
   const paso = !enListo ? pasos[i] : null
   const progreso = enListo ? 1 : (i + 1) / total
 
@@ -79,8 +111,35 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
     ir(i + 1)
   }
 
+  // ¿Ya había contestado? Solo se pregunta en el camino de "sin plan": el que
+  // viene del checkout acaba de comprar y contesta por primera vez.
+  useEffect(() => {
+    if (!sinPlan) return undefined
+    if (!apiUrl || !correo) {
+      // Sin a quién preguntarle, se contesta. Repetir cuatro preguntas es
+      // molesto; saltearlas cuando no consta que estén contestadas es perder
+      // el único dato que esta pantalla existe para juntar.
+      setYaContesto(false)
+      return undefined
+    }
+    let cancelado = false
+    fetch(`${apiUrl}/altas/estado?correo=${encodeURIComponent(correo)}`)
+      .then((r) => (r.ok ? r.json() : { contesto: false }))
+      .catch(() => ({ contesto: false }))
+      .then((d) => {
+        if (!cancelado) setYaContesto(Boolean(d.contesto))
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [sinPlan, apiUrl, correo])
+
   useEffect(() => {
     if (!enListo) return
+    // Llegar al final por haber contestado antes no vuelve a guardar nada: no
+    // hay respuestas nuevas, y un alta por intento de ingreso ensucia la tabla
+    // con copias de lo mismo.
+    if (yaContesto === true) return
     let cancelado = false
 
     const registrar = async () => {
@@ -105,6 +164,10 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
       } catch {
         /* private mode */
       }
+      // Sin plan no hay a dónde mandar: la pantalla final se queda acá
+      // ofreciendo los precios. Mandarlo igual a la app lo devuelve al corte
+      // del que acaba de venir, y esa vuelta se lee como que algo falló.
+      if (sinPlan) return
       const espera = Math.max(0, 1100 - (Date.now() - empezó))
       await new Promise((r) => setTimeout(r, espera))
       if (cancelado) return
@@ -124,7 +187,7 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
     return () => {
       cancelado = true
     }
-  }, [enListo, apiUrl, appUrl, plan, correo, respuestas])
+  }, [enListo, yaContesto, sinPlan, apiUrl, appUrl, plan, correo, respuestas])
 
   useEffect(() => {
     const onTecla = (evento) => {
@@ -162,6 +225,15 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
     !enListo &&
     (paso?.tipo === 'campos' || (paso?.tipo === 'opciones' && respuestas[paso.id] && !bloqueado))
 
+  // Mientras se averigua si ya había contestado no se dibuja nada. Dibujar la
+  // primera pregunta para taparla un cuadro después con la pantalla final se ve
+  // como un parpadeo, y encima invita a empezar a contestar algo que se va a ir.
+  if (sinPlan && yaContesto === null) return <div className="h-full" />
+
+  // El final sin plan es más ancho que una pregunta: adentro entran cuatro
+  // tarjetas de precio.
+  const anchoColumna = enListo && sinPlan ? 'max-w-5xl' : 'max-w-[34rem]'
+
   return (
     <div className="relative flex h-full min-h-0 flex-col">
       <div className="empezar-progreso" aria-hidden="true">
@@ -182,7 +254,9 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
       </header>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden px-5 sm:px-8">
-        <div className="mx-auto flex min-h-0 w-full max-w-[34rem] flex-1 flex-col items-center justify-center py-4">
+        <div
+          className={`mx-auto flex min-h-0 w-full flex-1 flex-col items-center justify-center py-4 ${anchoColumna}`}
+        >
           {!enListo && (
             <div className="mb-6 inline-flex w-fit text-violet">
               <LogoMarca className="h-11 w-auto sm:h-12" />
@@ -210,7 +284,12 @@ export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }
                 onSubmit={intentarSeguir}
               />
             )}
-            {enListo && <Listo copy={copy} />}
+            {enListo &&
+              (sinPlan ? (
+                <SinPlan copy={copy} planes={planes} appUrl={appUrl} correo={correo} />
+              ) : (
+                <Listo copy={copy} />
+              ))}
           </div>
         </div>
       </div>
@@ -337,6 +416,84 @@ function Campos({ paso, preguntaId, valores, onChange, onSubmit }) {
         ))}
       </div>
     </form>
+  )
+}
+
+// El otro final: contestó, pero atrás de esa cuenta no hay plan. Los precios van
+// acá mismo y no en un enlace a /precios — mandar a empezar de nuevo en otra
+// página a alguien que acaba de contestar cuatro preguntas es cobrarle dos
+// veces la misma paciencia.
+//
+// Sin la marca arriba ni el tilde verde de `Listo`: no se terminó nada. Lo que
+// encabeza es la frase que explica por qué esta pantalla no es la dashboard.
+function SinPlan({ copy, planes, appUrl, correo }) {
+  const volver = () => {
+    const url = new URL(appUrl || '/', window.location.origin)
+    if (correo) url.searchParams.set('u', correo.split('@')[0])
+    // La dashboard no vuelve a mandar acá dos veces en la misma pestaña —es lo
+    // que evita el ida y vuelta automático—, pero este click es justamente
+    // pedirle que revise de nuevo. `reintento` es lo que le dice que suelte esa
+    // reserva; sin esto, quien vuelve a entrar sin plan se queda adentro de una
+    // dashboard en la que cada request muere con 403 y nada lo explica.
+    url.searchParams.set('reintento', '1')
+    window.location.assign(url.toString())
+  }
+
+  return (
+    <div className="w-full">
+      <h1 className="animate-in text-center text-balance text-[28px] font-medium leading-[1.15] tracking-tight text-ink-primary sm:text-[32px]">
+        {copy.sinPlanTitulo}
+      </h1>
+      <p
+        className="animate-in mx-auto mt-3 max-w-xl text-center text-[15px] leading-relaxed text-ink-secondary"
+        style={{ '--d': '80ms' }}
+      >
+        {copy.sinPlanBajada}
+      </p>
+
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {planes.map((p, idx) => (
+          <a
+            key={p.id}
+            href={p.href}
+            style={{ '--i': idx }}
+            className={`empezar-opcion flex min-w-0 flex-col rounded-xl border p-4 text-left transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet ${
+              p.destacado
+                ? 'border-violet/35 bg-violet/[0.055]'
+                : 'border-tint/[0.12] bg-surface-card hover:border-tint/25 hover:bg-surface-hover'
+            }`}
+          >
+            <span className="text-[14px] font-medium text-ink-primary">{p.nombre}</span>
+            <span className="mt-0.5 text-[12.5px] text-ink-muted">{p.bajada}</span>
+            <span className="mt-3 text-[22px] font-medium tracking-tight text-ink-primary">
+              {p.precio}
+            </span>
+            {/* El periodo aguanta dos renglones ("de prueba, después $49/mes"),
+                así que la fila crece con él y no se trunca: es la mitad del
+                precio que decide si algo es caro. */}
+            <span className="mt-0.5 text-[12px] leading-snug text-ink-muted">{p.periodo}</span>
+            <span className="mt-4 text-[13px] font-medium text-violet">{p.cta} →</span>
+          </a>
+        ))}
+      </div>
+
+      {/* Un pago recién hecho puede tardar en llegar por el webhook. Sin esto,
+          quien acaba de comprar y cae igual acá no tiene forma de saber si le
+          falta algo o si solo tiene que esperar. */}
+      <p
+        className="animate-in mt-7 text-center text-[12.5px] leading-relaxed text-ink-muted"
+        style={{ '--d': '160ms' }}
+      >
+        {copy.sinPlanNota}{' '}
+        <button
+          type="button"
+          onClick={volver}
+          className="rounded font-medium text-violet underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet"
+        >
+          {copy.sinPlanVolver}
+        </button>
+      </p>
+    </div>
   )
 }
 

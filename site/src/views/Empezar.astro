@@ -1,30 +1,59 @@
 ---
 import Base from '../layouts/Base.astro'
 import Cuestionario from '../components/empezar/Cuestionario.jsx'
-import { APP_URL, API_URL, ALTA_CLAVE } from '../config'
+import { APP_URL, API_URL, ALTA_CLAVE, WHATSAPP_URL, dodoCheckout } from '../config'
 import { getLocale, t } from '../i18n/utils'
 
 const lang = getLocale(Astro)
 const copy = t(lang).empezar
-const pedido = Astro.url.searchParams.get('plan')
-const plan = copy.planes[pedido] ? pedido : 'gratis'
-// De quién es este cuestionario. Lo pone el login cuando corta acá antes de
-// dejar entrar; la vuelta de Dodo todavía no lo trae. Es lo que enlaza el alta
-// con la cuenta, y sin él el "ya contestó" vuelve a valer solo en este
-// navegador — que es como no saltaba nunca al entrar con una cuenta nueva.
-const correo = Astro.url.searchParams.get('correo')?.trim() ?? ''
+
+// **La query no se lee acá.** Esta página es estática: el frontmatter corre una
+// sola vez, en el build, y el HTML que se sirve es el mismo para toda URL. Un
+// `Astro.url.searchParams.get('plan')` queda horneado —se puede ver en
+// `dist/empezar/index.html`, con `"plan":[0,"gratis"]` adentro de las props— y
+// en producción ignora lo que venga en la dirección. Así estuvo `?plan=` desde
+// que existe la vuelta de Dodo: toda alta se guardaba como "gratis" sin importar
+// qué habían comprado. En desarrollo parecía andar porque Astro prerrenderiza y
+// cachea la página, y la primera visita fija el valor para las siguientes.
+//
+// Los tres parámetros —plan, correo, sinplan— los lee el navegador: el script de
+// abajo y `Cuestionario`, que corre con `client:load`.
+
+// Los precios salen de la misma fuente que /precios, y los destinos se calculan
+// acá: resolverlos al hacer clic obligaría a bajar el catálogo al navegador.
+// Van solo los mensuales. Elegir entre mensual y anual es una decisión más
+// arriba de esta pantalla, y quien está acá viene de contestar cuatro preguntas
+// para poder entrar; el interruptor de periodicidad vive en /precios, que es
+// donde se compara de verdad.
+const planes = t(lang).precios.planes.map((p) => ({
+  id: p.id,
+  nombre: p.nombre,
+  bajada: p.bajada,
+  precio: p.precio,
+  periodo: p.periodo,
+  cta: p.cta,
+  destacado: Boolean(p.destacado),
+  href: p.destino === 'whatsapp' ? WHATSAPP_URL : dodoCheckout(p.id, 'mensual'),
+}))
 ---
 
 <Base title={copy.title} description={copy.description} pantallaCompleta noindex>
-  {/* El atajo del navegador solo manda cuando no vino correo. Con correo el que
-      decide es el server —ya contestó el login antes de mandar acá—, y hacerle
-      caso al flag local dejaría afuera del cuestionario a alguien que entra con
-      otra cuenta en la misma máquina, que es la mitad del bug que esto arregla. */}
+  {/* El atajo del navegador solo manda cuando no vino ni correo ni sinplan. Con
+      correo el que decide es el server —la dashboard ya preguntó por el plan
+      antes de mandar acá—, y hacerle caso al flag local dejaría afuera del
+      cuestionario a alguien que entra con otra cuenta en la misma máquina. Y
+      mandar a la app a quien no tiene plan es devolverlo al corte del que acaba
+      de venir.
+
+      Va inline y antes de pintar, como el script del tema: decidido desde React,
+      la pantalla aparece y se va. */}
   <script
     is:inline
     set:html={`
       try {
-        var d = ${correo ? 'null' : `JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null')`};
+        var q = new URLSearchParams(location.search);
+        var propio = !q.get('correo') && q.get('sinplan') !== '1';
+        var d = propio ? JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null') : null;
         if (d && d.listo) location.replace(${JSON.stringify(APP_URL)});
         else document.documentElement.classList.add('empezar-vivo');
       } catch (e) {
@@ -36,6 +65,6 @@ const correo = Astro.url.searchParams.get('correo')?.trim() ?? ''
   <div class="empezar-pagina">
     <div class="orbe -left-40 -top-36 h-[28rem] w-[28rem]" style="--d: 80ms" aria-hidden="true"></div>
     <div class="orbe -bottom-40 -right-36 h-[24rem] w-[24rem]" style="--d: 200ms" aria-hidden="true"></div>
-    <Cuestionario client:load copy={copy} plan={plan} correo={correo} appUrl={APP_URL} apiUrl={API_URL} />
+    <Cuestionario client:load copy={copy} planes={planes} appUrl={APP_URL} apiUrl={API_URL} />
   </div>
 </Base>

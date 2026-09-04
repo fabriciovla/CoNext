@@ -90,6 +90,55 @@ export const ui = {
       funcionesTitulo: 'Un CRM para tus canales, no un chatbot.',
       funcionesTexto:
         'Conext centraliza los mensajes de tus canales para que una pyme no tenga que atenderlos en tres pantallas. La IA trabaja adentro, con tu catálogo y tus horarios, no con un árbol de opciones.',
+      // Las cinco tarjetas de la línea: cada una es una ventaja de tener a los
+      // agentes atendiendo, con su número grande. El `tag` monoespaciado es el
+      // rótulo corto de qué mide, y la última cierra la cuenta y va en oscuro.
+      ahorroEtiqueta: 'Lo que se gana',
+      ahorroTitulo: 'Cinco números de un día con Conext.',
+      ahorroTexto:
+        'Lo que pasa cuando los agentes atienden: nadie espera, nada se pierde y la última palabra sigue siendo tuya.',
+      ahorros: [
+        {
+          id: 'respuesta',
+          tag: 'RESPUESTA',
+          figura: '30 s',
+          metrica: 'Primera respuesta',
+          contexto: 'El agente contesta apenas entra el mensaje, a cualquier hora del día.',
+        },
+        {
+          id: 'simultaneo',
+          tag: 'VOLUMEN',
+          figura: '20+',
+          metrica: 'Chats a la vez',
+          contexto: 'Veinte personas preguntando al mismo tiempo reciben respuesta al mismo tiempo.',
+        },
+        {
+          id: 'horario',
+          tag: 'HORARIO',
+          figura: '24/7',
+          metrica: 'Siempre atendido',
+          contexto: 'A las tres de la mañana contesta el aviso de horario, no el silencio.',
+        },
+        {
+          id: 'canales',
+          tag: 'CANALES',
+          figura: '3',
+          metrica: 'Canales, una bandeja',
+          contexto: 'WhatsApp, Instagram y Messenger entran al mismo lugar y el hilo sigue.',
+        },
+        {
+          id: 'tiempo',
+          tag: 'TU DÍA',
+          figura: '4 h',
+          metrica: 'Que vuelven al día',
+          contexto: 'El rato que se iba en repetir precios, stock y horarios, de vuelta en el negocio.',
+        },
+      ],
+      ahorroResumen: [
+        { figura: '0', label: 'Mensajes sin responder' },
+        { figura: '2', label: 'Modos: automático o borrador' },
+        { figura: '100 %', label: 'Sobre la API oficial de Meta' },
+      ],
       funciones: [
         {
           id: 'bandeja',
@@ -493,6 +542,15 @@ export const ui = {
       progreso: 'Paso {n} de {total}',
       listoTitulo: 'Listo. Te preparamos el espacio.',
       listoBajada: 'En un momento entras a conext.',
+      // El otro final: contestó, pero no hay plan activo detrás de esa cuenta.
+      // Los precios van acá mismo y no en un enlace a /precios — mandar a
+      // elegir plan a otra página es pedirle a alguien que ya hizo algo por
+      // nosotros que empiece de nuevo en otro lado.
+      sinPlanTitulo: 'Todavía no tenés un plan activo.',
+      sinPlanBajada:
+        'Guardamos tus respuestas. Para entrar a conext falta elegir un plan: podés arrancar con la prueba de 7 días y no pagar nada hoy.',
+      sinPlanNota: 'Ya elegiste uno y sigue diciendo esto: el pago puede tardar un minuto en llegar. Volvé a entrar en un rato.',
+      sinPlanVolver: 'Volver a intentar entrar',
       planes: {
         gratis: 'Prueba de 7 días',
         estandar: 'Plan Estándar',
@@ -726,6 +784,52 @@ export const ui = {
       funcionesTitulo: 'A CRM for your channels, not a chatbot.',
       funcionesTexto:
         'Conext puts your channel messages in one place so a small business is not answering from three screens. The AI works inside, with your catalog and hours, not a tree of options.',
+      ahorroEtiqueta: 'What you get',
+      ahorroTitulo: 'Five numbers from a day with Conext.',
+      ahorroTexto:
+        'What happens when the agents are on duty: nobody waits, nothing gets lost, and the last word is still yours.',
+      ahorros: [
+        {
+          id: 'respuesta',
+          tag: 'RESPONSE',
+          figura: '30 s',
+          metrica: 'First response',
+          contexto: 'The agent replies the moment the message lands, any time of day.',
+        },
+        {
+          id: 'simultaneo',
+          tag: 'VOLUME',
+          figura: '20+',
+          metrica: 'Chats at once',
+          contexto: 'Twenty people asking at the same time get an answer at the same time.',
+        },
+        {
+          id: 'horario',
+          tag: 'HOURS',
+          figura: '24/7',
+          metrica: 'Always covered',
+          contexto: 'At 3 a.m. what answers is the after-hours notice, not the silence.',
+        },
+        {
+          id: 'canales',
+          tag: 'CHANNELS',
+          figura: '3',
+          metrica: 'Channels, one inbox',
+          contexto: 'WhatsApp, Instagram, and Messenger land in the same place and the thread continues.',
+        },
+        {
+          id: 'tiempo',
+          tag: 'YOUR DAY',
+          figura: '4 h',
+          metrica: 'Back in your day',
+          contexto: 'The time that went into repeating prices, stock, and hours, back in the business.',
+        },
+      ],
+      ahorroResumen: [
+        { figura: '0', label: 'Messages left unanswered' },
+        { figura: '2', label: 'Modes: auto-send or draft' },
+        { figura: '100 %', label: 'On the official Meta API' },
+      ],
       funciones: [
         {
           id: 'bandeja',
@@ -1129,6 +1233,11 @@ export const ui = {
       progreso: 'Step {n} of {total}',
       listoTitulo: 'Done. We are setting up your workspace.',
       listoBajada: 'You will be in conext in a moment.',
+      sinPlanTitulo: "You don't have an active plan yet.",
+      sinPlanBajada:
+        'We saved your answers. To get into conext you still need a plan: you can start with the 7-day trial and pay nothing today.',
+      sinPlanNota: 'Already picked one and still seeing this? A payment can take a minute to reach us. Try again shortly.',
+      sinPlanVolver: 'Try entering again',
       planes: {
         gratis: '7-day trial',
         estandar: 'Standard plan',
