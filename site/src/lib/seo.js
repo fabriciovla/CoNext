@@ -1,12 +1,11 @@
-// URL canónica del sitio. El host que responde 200 es www: Vercel redirige
-// el apex (conext.lat) con 308, y una canónica que apunta al apex es una
-// canónica que redirige. Google la ignora y la página queda como duplicada
-// sin versión elegida, o rastreada y sin indexar.
+// Host canónico: el apex. www redirige acá (dominio primario en Vercel +
+// vercel.json). Una canónica que apunta al host que redirige la descarta
+// Google y deja la página como duplicada, sin versión elegida.
 
-const ORIGEN_FALLBACK = 'https://www.conext.lat'
+export const ORIGEN_CANONICO = 'https://conext.lat'
 
 export function origenDe(site) {
-  if (!site) return ORIGEN_FALLBACK
+  if (!site) return ORIGEN_CANONICO
   return (site instanceof URL ? site : new URL(String(site))).origin
 }
 

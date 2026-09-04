@@ -164,4 +164,83 @@ const BIENVENIDA = {
   hacer: { es: 'Hacer el tour', en: 'Take the tour' },
 }
 
-export default { login: LOGIN, barra: BARRA, errores: ERRORES, ui: UI, bienvenida: BIENVENIDA }
+// El recorrido guiado (`components/Tour.jsx`). Cada paso habla de lo que está
+// señalando en la pantalla en ese momento, así que las bajadas dicen lo que no
+// se ve —qué decide esa pieza, qué pasa si no se toca— y no lo que ya está a la
+// vista. Dos renglones cada una: la tarjeta es chica a propósito.
+const TOUR = {
+  aria: { es: 'Recorrido guiado', en: 'Guided tour' },
+  progreso: {
+    es: ({ n, total }) => `Paso ${n} de ${total}`,
+    en: ({ n, total }) => `Step ${n} of ${total}`,
+  },
+  atras: { es: 'Atrás', en: 'Back' },
+  siguiente: { es: 'Siguiente', en: 'Next' },
+  terminar: { es: 'Empezar', en: 'Get started' },
+  salir: { es: 'Salir del recorrido', en: 'Exit the tour' },
+
+  inicioTitulo: { es: 'Tu día, de un vistazo', en: 'Your day at a glance' },
+  inicioBajada: {
+    es: 'Cuántos mensajes entraron, cuántos quedaron esperando y qué parte contestó sola la IA. Los números son siempre los del día abierto.',
+    en: 'How many messages came in, how many are still waiting and how much the AI answered on its own. The numbers always belong to the open day.',
+  },
+  barraTitulo: { es: 'Todo se navega desde acá', en: 'Everything starts here' },
+  barraBajada: {
+    es: 'Inicio, bandeja, agentes, catálogo, plantillas y ajustes. La barra es la misma en todas las pantallas, así que nunca hay que volver atrás para cambiar de sección.',
+    en: 'Home, inbox, agents, catalog, templates and settings. The sidebar is the same on every screen, so you never have to go back to switch sections.',
+  },
+  carpetasTitulo: { es: 'Tus carpetas y tus agentes', en: 'Your folders and your agents' },
+  carpetasBajada: {
+    es: 'Mías, sin asignar y pendientes filtran la bandeja desde cualquier pantalla. Abajo va cada agente, con las conversaciones que está atendiendo.',
+    en: 'Mine, unassigned and pending filter the inbox from any screen. Below sits each agent, with the conversations it is handling.',
+  },
+  diaTitulo: { es: 'El día se abre y se cierra a mano', en: 'The day opens and closes by hand' },
+  diaBajada: {
+    es: 'Es la unidad de trabajo del CRM, y no la fecha: sin un día abierto no se envían mensajes ni se agregan notas. Al cerrarlo queda archivado y se puede volver a leer.',
+    en: "It's the CRM's unit of work, not the calendar date: with no open day nothing can be sent and no notes can be added. Closing it files the day away, still readable.",
+  },
+  listaTitulo: { es: 'Los tres canales, una sola lista', en: 'Three channels, one list' },
+  listaBajada: {
+    es: 'WhatsApp, Instagram y Messenger entran acá mezclados. El distintivo del avatar es lo único que dice por dónde se contesta cada conversación.',
+    en: 'WhatsApp, Instagram and Messenger all land here together. The badge on the avatar is the one thing telling you which channel each conversation answers through.',
+  },
+  hiloTitulo: { es: 'La conversación completa', en: 'The whole conversation' },
+  hiloBajada: {
+    es: 'Lo que contestó la IA lleva un rayo al lado de la hora. Lo que sigue pendiente se ve por el tinte del globo, sin que haya que leer ningún cartel.',
+    en: 'Whatever the AI answered carries a bolt next to the time. Anything still pending shows in the tint of the bubble, with no label to read.',
+  },
+  composerTitulo: { es: 'Contestar, adjuntar o anotar', en: 'Reply, attach or take a note' },
+  composerBajada: {
+    es: 'Texto, emojis, archivos y notas de voz. La nota interna es para el equipo y no le llega al cliente: mientras esté puesta, el cuadro entero se tiñe.',
+    en: 'Text, emojis, files and voice notes. An internal note is for your team and never reaches the customer: while it is on, the whole box changes color.',
+  },
+  fichaTitulo: { es: 'La ficha del contacto', en: 'The contact card' },
+  fichaBajada: {
+    es: 'Quién atiende, qué etiquetas tiene y cuántos mensajes quedan pendientes. Desde acá se asigna, se resuelve y se busca adentro del hilo.',
+    en: 'Who is handling it, which tags it carries and how many messages are pending. Assign, resolve and search inside the thread from here.',
+  },
+  agentesTitulo: { es: 'Los agentes contestan por vos', en: 'The agents answer for you' },
+  agentesBajada: {
+    es: 'Cada uno sabe de un tema, tiene su tono y decide hasta dónde puede contestar sin preguntarte. El primero encendido atiende lo que no encaja en ninguno.',
+    en: "Each one knows a topic, has its own tone and decides how far it can answer without asking you. The first one enabled takes whatever fits none of them.",
+  },
+  canalesTitulo: { es: 'Enganchá tus canales', en: 'Connect your channels' },
+  canalesBajada: {
+    es: 'WhatsApp va por su lado; la Página de Facebook trae Instagram y Messenger juntos. Hasta que conectes al menos uno, la bandeja queda vacía.',
+    en: 'WhatsApp goes on its own; the Facebook Page brings Instagram and Messenger together. Until you connect at least one, the inbox stays empty.',
+  },
+  finalTitulo: { es: 'Listo, es tuya', en: "That's it — it's yours" },
+  finalBajada: {
+    es: 'Podés volver a ver este recorrido cuando quieras desde Configuración → General. Lo que sigue es conectar un canal y esperar el primer mensaje.',
+    en: 'You can take this tour again any time from Settings → General. What comes next is connecting a channel and waiting for the first message.',
+  },
+}
+
+export default {
+  login: LOGIN,
+  barra: BARRA,
+  errores: ERRORES,
+  ui: UI,
+  bienvenida: BIENVENIDA,
+  tour: TOUR,
+}

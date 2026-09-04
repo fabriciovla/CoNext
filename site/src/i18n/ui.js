@@ -1,4 +1,7 @@
-import { productoEn, productoEs } from './producto'
+import { compararEn, compararEs } from './comparar.js'
+import { docsEn, docsEs } from './docs.js'
+import { integracionesEn, integracionesEs } from './integraciones.js'
+import { productoEn, productoEs } from './producto.js'
 
 export const ui = {
   es: {
@@ -19,6 +22,12 @@ export const ui = {
       ayuda: 'Ayuda',
       ayudaBajada: 'Puesta en marcha y uso diario',
       githubBajada: 'El código del proyecto',
+      docs: 'Documentación',
+      docsBajada: 'Conectar canales y configurar la IA',
+      integraciones: 'Integraciones',
+      integracionesBajada: 'WhatsApp, Instagram y los eventos de Meta',
+      comparar: 'Comparar',
+      compararBajada: 'Conext frente a Respond.io, Wati y Manychat',
       iniciarSesion: 'Iniciar sesión',
       pedirDemo: 'Pedir una demo',
       empezarGratis: 'Empezar gratis',
@@ -49,6 +58,10 @@ export const ui = {
         operacion: 'Operación',
         recursos: 'Recursos',
         general: 'General',
+        llm: 'Recursos LLM',
+        comparar: 'Comparar',
+        integraciones: 'Integraciones',
+        docs: 'Documentación',
       },
       links: {
         funciones: 'Funciones',
@@ -67,18 +80,22 @@ export const ui = {
         seguridad: 'Seguridad',
         datos: 'Datos',
         precios: 'Precios',
+        docs: 'Documentación',
+        integraciones: 'Integraciones',
+        comparar: 'Comparar',
         demo: 'Pedir una demo',
         login: 'Iniciar sesión',
         legalesAyuda: 'Ayuda',
         privacidad: 'Privacidad',
         terminos: 'Términos',
         eliminar: 'Eliminación de datos',
+        llms: 'Leer llms.txt',
       },
     },
     landing: {
-      title: 'Conext | CRM de WhatsApp e Instagram para pequeñas empresas',
+      title: 'conext · unifica tus canales. Cada respuesta, con IA',
       description:
-        'Conext es el CRM para pequeñas empresas que junta WhatsApp, Instagram y Messenger en una bandeja. La IA responde sola o te deja el borrador. Pedí una demo.',
+        'Atiende el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas.',
       anuncio: 'El CRM sobre la API oficial de Meta',
       heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
       heroBajada:
@@ -696,6 +713,9 @@ export const ui = {
       envios: 'Envíos',
     },
     producto: productoEs,
+    comparar: compararEs,
+    integraciones: integracionesEs,
+    docs: docsEs,
   },
   en: {
     htmlLang: 'en',
@@ -715,6 +735,12 @@ export const ui = {
       ayuda: 'Help',
       ayudaBajada: 'Setup and day-to-day use',
       githubBajada: 'The project source',
+      docs: 'Docs',
+      docsBajada: 'Connect channels and set up the AI',
+      integraciones: 'Integrations',
+      integracionesBajada: 'WhatsApp, Instagram, and Meta events',
+      comparar: 'Compare',
+      compararBajada: 'Conext versus Respond.io, Wati, and Manychat',
       iniciarSesion: 'Log in',
       pedirDemo: 'Request a demo',
       empezarGratis: 'Start for free',
@@ -743,6 +769,10 @@ export const ui = {
         operacion: 'Operations',
         recursos: 'Resources',
         general: 'General',
+        llm: 'LLM Resources',
+        comparar: 'Compare',
+        integraciones: 'Integrations',
+        docs: 'Docs',
       },
       links: {
         funciones: 'Features',
@@ -761,12 +791,16 @@ export const ui = {
         seguridad: 'Security',
         datos: 'Data',
         precios: 'Pricing',
+        docs: 'Docs',
+        integraciones: 'Integrations',
+        comparar: 'Compare',
         demo: 'Request a demo',
         login: 'Log in',
         legalesAyuda: 'Help',
         privacidad: 'Privacy',
         terminos: 'Terms',
         eliminar: 'Data deletion',
+        llms: 'Read llms.txt',
       },
     },
     landing: {
@@ -1382,5 +1416,8 @@ export const ui = {
       envios: 'Shipping',
     },
     producto: productoEn,
+    comparar: compararEn,
+    integraciones: integracionesEn,
+    docs: docsEn,
   },
 }

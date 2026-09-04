@@ -5,6 +5,7 @@ import { classifyAndDraft } from './ai/classifyAndDraft.js'
 import { getSettings } from './settingsService.js'
 import { getProducts } from './productsService.js'
 import { getEnabledAgents, getAgentByKey } from './agentsService.js'
+import { getContenidoPorAgente } from './knowledgeService.js'
 import { resolveAdapter } from './channels/index.js'
 import { isWithinBusinessHours } from './businessHours.js'
 import { borrarAdjunto } from './mediaService.js'
@@ -479,9 +480,21 @@ export async function handleIncomingMessage(tenantId, { phone, channel = 'whatsa
   // atiende y escribe con esa voz de una. Antes eran dos viajes secuenciales
   // (la redacción necesitaba saber el agente para armar su prompt), o sea el
   // doble de cuota y el doble de espera para el cliente.
+  // Lo que subieron para entrenar a estos agentes. Va de todos los encendidos y
+  // no del que atiende, porque el que atiende lo elige el modelo en esta misma
+  // llamada; el prompt marca cada fuente con su agente. Si falla, se sigue sin
+  // material: un documento que no se pudo leer no puede dejar un mensaje sin
+  // contestar.
+  let conocimiento = {}
+  try {
+    conocimiento = await getContenidoPorAgente(tenantId, agents.map((a) => a.id))
+  } catch (err) {
+    console.error('[ai] no se pudo leer el material de entrenamiento:', err)
+  }
+
   let classification
   try {
-    classification = await classifyAndDraft({ settings, products, agents, currentAgent, history, text })
+    classification = await classifyAndDraft({ settings, products, agents, currentAgent, history, text, conocimiento })
   } catch (err) {
     console.error('[ai] classifyAndDraft failed, leaving message as pendiente:', err)
     // Sin clasificación tampoco hay agente elegido: dejamos el que ya venía

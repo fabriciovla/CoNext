@@ -1,0 +1,10 @@
+---
+import Articulo from '../../views/Articulo.astro'
+import { slugsIntegraciones } from '../../data/integraciones'
+
+export function getStaticPaths() {
+  return slugsIntegraciones().map((slug) => ({ params: { slug } }))
+}
+---
+
+<Articulo seccion="integraciones" />

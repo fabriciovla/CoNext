@@ -1,0 +1,10 @@
+---
+import Articulo from '../../../views/Articulo.astro'
+import { slugsComparar } from '../../../data/comparar'
+
+export function getStaticPaths() {
+  return slugsComparar().map((slug) => ({ params: { slug } }))
+}
+---
+
+<Articulo seccion="comparar" />

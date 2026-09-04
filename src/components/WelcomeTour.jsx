@@ -12,10 +12,10 @@ import pkg from '../../package.json'
 // que entre el primer mensaje, en el orden en que hay que tocarlos —sin
 // canal conectado no llega nada, y sin agente lo que llega no se contesta—.
 //
-// El paso a paso arriba de la pantalla (el resaltado que va señalando la
-// barra, la bandeja y el composer) es otra pieza y todavía no está; hasta que
-// exista, "Hacer el tour" lleva al primer paso, que es lo que la persona iba a
-// hacer igual.
+// "Hacer el tour" abre el recorrido guiado (`Tour.jsx`), que es el paso a paso
+// arriba de la pantalla señalando la barra, la bandeja y el composer. Las tres
+// filas siguen llevando directo a su pantalla: son para quien ya sabe qué es
+// esto y viene a enchufar su WhatsApp, no a que le expliquen la app.
 
 const CLAVE = 'wsp-crm:bienvenida'
 
@@ -65,7 +65,7 @@ const PASOS = [
   },
 ]
 
-export default function WelcomeTour({ nombre, onClose, onNavigate }) {
+export default function WelcomeTour({ nombre, onClose, onNavigate, onTour }) {
   // Arranca tildado. El interruptor está para que alguien que quiera volver a
   // ver esto lo destilde, y no para que la pantalla vuelva a aparecer en cada
   // recarga hasta que se acuerden de tildarlo: una bienvenida que insiste deja
@@ -81,6 +81,13 @@ export default function WelcomeTour({ nombre, onClose, onNavigate }) {
   const ir = (pagina) => {
     cerrar()
     onNavigate(pagina)
+  }
+
+  // El tour se hace cargo de la navegación desde el primer paso, así que acá no
+  // se navega a ningún lado: solo se marca visto y se le da paso.
+  const hacerTour = () => {
+    if (noMostrar) marcarVista()
+    onTour()
   }
 
   return (
@@ -151,7 +158,7 @@ export default function WelcomeTour({ nombre, onClose, onNavigate }) {
           <Button variant="ghost" onClick={cerrar}>
             {t('bienvenida.saltar')}
           </Button>
-          <Button onClick={() => ir(PASOS[0].pagina)}>{t('bienvenida.hacer')}</Button>
+          <Button onClick={hacerTour}>{t('bienvenida.hacer')}</Button>
         </div>
       </div>
     </Modal>

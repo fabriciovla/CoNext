@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "node scripts/write-llms.mjs && astro dev",
+    "build": "node scripts/write-llms.mjs && astro build",
+    "preview": "astro preview",
+    "llms": "node scripts/write-llms.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.2",

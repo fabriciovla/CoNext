@@ -2,41 +2,20 @@
 import Logo from './Logo.jsx'
 import Boton from './Boton.jsx'
 import {
-  IconAlert,
   IconArrowRight,
   IconBolt,
-  IconBox,
   IconChart,
   IconChevronDown,
   IconGitHub,
-  IconInbox,
-  IconLayers,
   IconLightbulb,
   IconNote,
-  IconShield,
   IconSparkles,
-  IconTag,
-  IconUsers,
   IconWhatsApp,
 } from './icons.jsx'
 import { dodoCheckout, GITHUB_URL, WHATSAPP_URL } from '../config'
 import { PRODUCTO_COLUMNAS, PRODUCTO_PAGINAS } from '../data/producto'
 import { t, pathFor } from '../i18n/utils'
-
-const ICONOS_MEGA = {
-  inbox: IconInbox,
-  tag: IconTag,
-  note: IconNote,
-  sparkles: IconSparkles,
-  bolt: IconBolt,
-  layers: IconLayers,
-  box: IconBox,
-  chart: IconChart,
-  alert: IconAlert,
-  whatsapp: IconWhatsApp,
-  users: IconUsers,
-  shield: IconShield,
-}
+import { ICONOS_PAGINA } from '../lib/iconosPagina.js'
 
 const { lang } = Astro.props
 const n = t(lang).nav
@@ -47,6 +26,14 @@ const precios = pathFor(lang, '/precios')
 const checkoutGratis = dodoCheckout('gratis')
 const ruta = Astro.url.pathname.replace(/\/+$/, '') || '/'
 const enProducto = ruta === pathFor(lang, '/producto') || ruta.includes('/producto/')
+const enRecursos =
+  ruta === pathFor(lang, '/ayuda') ||
+  ruta === pathFor(lang, '/docs') ||
+  ruta.includes('/docs/') ||
+  ruta === pathFor(lang, '/integraciones') ||
+  ruta.includes('/integraciones/') ||
+  ruta === pathFor(lang, '/comparar') ||
+  ruta.includes('/comparar/')
 
 const columnasProducto = PRODUCTO_COLUMNAS.map((columna) => ({
   titulo: prod.columnas[columna.id],
@@ -56,7 +43,7 @@ const columnasProducto = PRODUCTO_COLUMNAS.map((columna) => ({
       href: pathFor(lang, `/producto/${slug}`),
       label: prod.paginas[slug].nombre,
       bajada: prod.paginas[slug].menu,
-      Icono: ICONOS_MEGA[meta.icono],
+      Icono: ICONOS_PAGINA[meta.icono],
     }
   }),
 }))
@@ -71,9 +58,9 @@ const ENLACES = [
   { href: pathFor(lang, '/#clientes'), label: n.clientes, pendiente: true },
   {
     label: n.recursos,
-    // Los tres de Recursos llevan ícono igual que los doce de Producto. Antes
-    // eran texto pelado: dos desplegables de la misma barra dibujados con dos
-    // lenguajes distintos, y el segundo se leía como una lista provisoria.
+    // Documentación, integraciones y comparativas van acá: son recursos, no
+    // el mega de producto. Ayuda sigue siendo el FAQ; docs es el camino de
+    // conexión. GitHub queda último, como el único enlace que sale del sitio.
     panel: [
       {
         href: pathFor(lang, '/#preguntas'),
@@ -81,7 +68,15 @@ const ENLACES = [
         bajada: n.preguntasBajada,
         Icono: IconLightbulb,
       },
+      { href: pathFor(lang, '/docs'), label: n.docs, bajada: n.docsBajada, Icono: IconBolt },
       { href: pathFor(lang, '/ayuda'), label: n.ayuda, bajada: n.ayudaBajada, Icono: IconNote },
+      {
+        href: pathFor(lang, '/integraciones'),
+        label: n.integraciones,
+        bajada: n.integracionesBajada,
+        Icono: IconWhatsApp,
+      },
+      { href: pathFor(lang, '/comparar'), label: n.comparar, bajada: n.compararBajada, Icono: IconChart },
       { href: GITHUB_URL, label: 'GitHub', bajada: n.githubBajada, Icono: IconGitHub, externo: true },
     ],
   },
@@ -173,7 +168,7 @@ const BARRA =
                   para teclado y táctil. */}
               <button
                 type="button"
-                class:list={[CLASE_ENLACE, 'group', mega && enProducto && 'text-ink-primary']}
+                class:list={[CLASE_ENLACE, 'group', mega && enProducto && 'text-ink-primary', panel && enRecursos && 'text-ink-primary']}
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-controls={`panel-${label.toLowerCase()}`}

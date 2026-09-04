@@ -32,6 +32,7 @@ run('npm', ['run', 'build', '--', '--outDir', '../dist'], site)
 run('npx', ['vite', 'build', '--outDir', 'dist/app', '--base', '/app/'], root)
 
 const redirects = [
+  'https://www.conext.lat/*  https://conext.lat/:splat  301!',
   '/app/*  /app/index.html  200',
   '/sitemap.xml  /sitemap-index.xml  301',
   '/es  /  301',

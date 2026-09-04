@@ -401,6 +401,15 @@ export const IconFile = (props) => (
   </Svg>
 )
 
+// Los dos eslabones de una cadena. Es lo que marca una fuente de conocimiento
+// que salió de una página web, contra el archivo y el texto escrito a mano.
+export const IconLink = (props) => (
+  <Svg {...props}>
+    <path d="M10.3 13.7a3.6 3.6 0 0 0 5.4.4l2.2-2.2a3.6 3.6 0 0 0-5.1-5.1l-1.3 1.2" />
+    <path d="M13.7 10.3a3.6 3.6 0 0 0-5.4-.4l-2.2 2.2a3.6 3.6 0 0 0 5.1 5.1l1.2-1.2" />
+  </Svg>
+)
+
 // Cuadrado y no dos barras: es el botón de frenar la grabación, y el símbolo de
 // pausa haría pensar que se puede seguir grabando después.
 export const IconStop = (props) => (

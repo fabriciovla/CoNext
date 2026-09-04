@@ -283,7 +283,8 @@ body {
   }
 }
 
-/* Barras de "mensajes por hora": crecen desde la base. */
+/* Barras que crecen desde la base: "mensajes por hora" y los sparklines de las
+   tarjetas de KPI de Inicio. */
 @keyframes ui-grow-up {
   from {
     transform: scaleY(0);
@@ -312,6 +313,19 @@ body {
   }
   50% {
     transform: translate3d(0, -10px, 0);
+  }
+}
+
+/* El destello con el que aterriza el recorte del tour: un anillo que se abre
+   una vez y se apaga. No late ni se repite —eso sería movimiento decorativo, y
+   encima al lado del texto que hay que leer—: es el punto final del viaje del
+   agujero, y lo único que dice es "quedó acá". */
+@keyframes ui-foco {
+  from {
+    box-shadow: 0 0 0 0 rgb(var(--violet) / 0.4);
+  }
+  to {
+    box-shadow: 0 0 0 14px rgb(var(--violet) / 0);
   }
 }
 
@@ -413,6 +427,9 @@ body {
   }
   .animate-pulse-ring {
     animation: ui-pulse-ring 2.4s var(--ease-out-soft) infinite;
+  }
+  .animate-foco {
+    animation: ui-foco 620ms var(--ease-out-expo) var(--d, 0ms) backwards;
   }
 
   /* Escalona los hijos directos sin calcular delays en JS. El contenedor puede

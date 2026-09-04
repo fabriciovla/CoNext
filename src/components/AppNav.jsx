@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import SideNav, { NavRow, NavSection } from './SideNav'
 import {
-  IconInbox,
   IconUser,
   IconUsers,
   IconClock,
@@ -70,6 +69,11 @@ export default function AppNav({
   const is = (type, value = null) => enBandeja && filter.type === type && filter.value === value
   const select = (type, value = null) => onFilterChange({ type, value })
 
+  // "Bandeja" es ahora la carpeta "Todas": tocarla no solo cambia de página,
+  // también deja puesto ese filtro, que es lo que antes hacía la fila que
+  // vivía en CARPETAS.
+  const handleNavigate = (key) => (key === 'inbox' ? select('todos') : onNavigate(key))
+
   const pendientes = groups.filter((g) => g.pendientes > 0).length
   const mios = groups.filter((g) => g.assignee === username).length
   const sinAsignar = groups.filter((g) => g.assignee === null).length
@@ -82,17 +86,18 @@ export default function AppNav({
   return (
     <SideNav
       current={current}
-      onNavigate={onNavigate}
+      onNavigate={handleNavigate}
       username={username}
       storeName={storeName}
       onLogout={onLogout}
       pendingCount={pendingCount}
       theme={theme}
       onToggleTheme={onToggleTheme}
+      inboxActive={is('todos')}
       footer={
         // Estado del día: define si se puede responder, así que vive fijo abajo
         // y no se va con el scroll de las carpetas.
-        <div className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
+        <div data-tour="nav-dia" className="shrink-0 border-t border-tint/[0.07] px-3 py-3">
           {/* El punto y el texto se centran como un bloque: el botón de abajo
               ocupa el ancho entero, así que un rótulo pegado a la izquierda
               quedaba descolgado de lo que rotula. */}
@@ -136,13 +141,6 @@ export default function AppNav({
       }
     >
       <NavSection title={t('nav.carpetas')} open={openSections.carpetas} onToggle={() => toggleSection('carpetas')}>
-        <NavRow
-          icon={<IconInbox size={16} />}
-          label={t('nav.todas')}
-          count={groups.length}
-          active={is('todos')}
-          onClick={() => select('todos')}
-        />
         <NavRow
           icon={<IconUser size={16} />}
           label={t('nav.mias')}

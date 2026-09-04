@@ -17,7 +17,10 @@ function leerRecientes() {
 // Panel de emojis del composer. Los dibuja la fuente del sistema del admin, así
 // que se ven igual que en el teclado de su computadora; acá solo se elige cuáles
 // se ofrecen, en qué orden y cómo se buscan.
-export default function EmojiPicker({ onPick, onClose }) {
+// `hacia` es para dónde se abre. Arriba es el caso del composer, que vive
+// pegado al borde de abajo de la pantalla; la ficha de un agente lo tiene arriba
+// de todo y ahí abrir hacia arriba lo dejaría cortado contra el encabezado.
+export default function EmojiPicker({ onPick, onClose, hacia = 'arriba', anclaje = 'right-0' }) {
   const t = useT()
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState(EMOJI_CATEGORIES[0].key)
@@ -58,7 +61,8 @@ export default function EmojiPicker({ onPick, onClose }) {
     // derecho del composer, y anclado a la izquierda el panel se iría 19.5rem
     // más allá del borde del hilo.
     <div
-      className="animate-scale-in absolute bottom-full right-0 z-30 mb-2 w-[19.5rem] overflow-hidden rounded-xl border border-tint/10 bg-surface-raised shadow-pop"
+      className={`animate-scale-in absolute z-30 w-[19.5rem] overflow-hidden rounded-xl border border-tint/10
+        bg-surface-raised shadow-pop ${anclaje} ${hacia === 'abajo' ? 'top-full mt-2' : 'bottom-full mb-2'}`}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           e.stopPropagation()

@@ -1,4 +1,4 @@
-import { ui } from './ui'
+import { ui } from './ui.js'
 
 export const locales = ['es', 'en']
 export const defaultLocale = 'es'

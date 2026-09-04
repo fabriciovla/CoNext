@@ -28,6 +28,7 @@ import { createApp } from '../src/app.js'
 
 import * as products from '../src/services/productsService.js'
 import * as agents from '../src/services/agentsService.js'
+import * as knowledge from '../src/services/knowledgeService.js'
 import * as quickReplies from '../src/services/quickRepliesService.js'
 import * as settings from '../src/services/settingsService.js'
 import * as days from '../src/services/dayService.js'
@@ -91,8 +92,24 @@ try {
   await quickReplies.addQuickReply(b.id, { shortcut: 'saludo', text: 'RESPUESTA-BETA' })
   check('el mismo atajo puede existir en los dos clientes', true)
 
-  await agents.addAgent(a.id, { name: 'AGENTE-ALFA' })
+  const agenteA = await agents.addAgent(a.id, { name: 'AGENTE-ALFA' })
   await agents.addAgent(b.id, { name: 'AGENTE-BETA' })
+
+  // El material de entrenamiento es texto que el negocio subió: una fuga acá es
+  // el documento interno de un cliente adentro del prompt de otro.
+  const fuenteA = await knowledge.addSource(a.id, {
+    kind: 'texto',
+    title: 'MATERIAL-ALFA',
+    content: 'Los envios de ALFA salen 3500 pesos.',
+    agentId: agenteA.id,
+  })
+  const agenteBeta = (await agents.getAgents(b.id))[0]
+  const fuenteB = await knowledge.addSource(b.id, {
+    kind: 'texto',
+    title: 'MATERIAL-BETA',
+    content: 'Los envios de BETA son gratis.',
+    agentId: agenteBeta.id,
+  })
 
   await settings.updateSettings(a.id, { storeName: 'TIENDA-ALFA' })
   await settings.updateSettings(b.id, { storeName: 'TIENDA-BETA' })
@@ -151,6 +168,19 @@ try {
   check('getAgents', !contiene(await agents.getAgents(a.id), 'BETA'))
   check('getEnabledAgents', !contiene(await agents.getEnabledAgents(a.id), 'BETA'))
   check('getAgentStats', !contiene(await agents.getAgentStats(a.id), 'BETA'))
+  check('getSources', !contiene(await knowledge.getSources(a.id), 'BETA'))
+  check('getSourcesForAgent', !contiene(await knowledge.getSourcesForAgent(a.id, agenteA.id), 'BETA'))
+  check('getUsoPorFuente', !contiene(await knowledge.getUsoPorFuente(a.id), fuenteB.id))
+  // Esta es la que termina adentro del prompt: si filtra, el modelo de un
+  // negocio contesta con el documento de otro.
+  check(
+    'getContenidoPorAgente',
+    !contiene(await knowledge.getContenidoPorAgente(a.id, [agenteA.id]), 'BETA'),
+  )
+  check(
+    'getContenidoPorAgente con el id de un agente de B no devuelve nada',
+    Object.keys(await knowledge.getContenidoPorAgente(a.id, [agenteBeta.id])).length === 0,
+  )
   check('getSettings', !contiene(await settings.getSettings(a.id), 'BETA'))
   check('getConversationsMeta', !contiene(await conversations.getConversationsMeta(a.id), 'BETA'))
   check('getConversationTags', !contiene(await conversations.getConversationTags(a.id, telefonoCompartido), 'BETA'))
@@ -227,6 +257,20 @@ try {
   const borrado = await agents.deleteAgent(a.id, agenteB.id)
   check('deleteAgent con el id de B da not-found', borrado.deleted === false && borrado.reason === 'not-found')
   check('el agente de B sigue vivo', contiene(await agents.getAgents(b.id), 'AGENTE-BETA'))
+
+  check('renameSource con la fuente de B no la toca', !(await knowledge.renameSource(a.id, fuenteB.id, 'X')))
+  check('deleteSource con la fuente de B devuelve false', (await knowledge.deleteSource(a.id, fuenteB.id)) === false)
+  check('la fuente de B sigue viva', contiene(await knowledge.getSources(b.id), 'MATERIAL-BETA'))
+
+  // Encender la fuente de otro cliente para un agente de otro cliente: la clave
+  // foránea compuesta lleva el tenant adelante, así que ni siquiera se puede
+  // escribir la fila. Que tire error es correcto; lo que se verifica es que B no
+  // termine con un enganche que no pidió.
+  await knowledge.setAgentSource(a.id, agenteBeta.id, fuenteB.id, true).catch(() => {})
+  check(
+    'no se puede enganchar la fuente de B a un agente de B desde A',
+    Object.keys(await knowledge.getContenidoPorAgente(a.id, [agenteBeta.id])).length === 0,
+  )
 
   const qrB = (await quickReplies.getQuickReplies(b.id)).find((q) => q.text === 'RESPUESTA-BETA')
   check('updateQuickReply con el id de B devuelve null', (await quickReplies.updateQuickReply(a.id, qrB.id, { text: 'X' })) === null)
@@ -307,7 +351,7 @@ try {
     return { status: res.status, body: await res.text() }
   }
 
-  for (const ruta of ['/products', '/products/folders', '/agents', '/quick-replies', '/settings', '/conversations/meta', '/messages', '/members']) {
+  for (const ruta of ['/products', '/products/folders', '/agents', '/agents/knowledge', '/quick-replies', '/settings', '/conversations/meta', '/messages', '/members']) {
     const rA = await pedir(ruta, a.apiKey)
     check(`GET ${ruta} con la clave de A no filtra nada de B`, rA.status === 200 && !rA.body.includes('BETA'), `status ${rA.status}`)
   }
@@ -335,6 +379,8 @@ try {
           + (SELECT COUNT(*) FROM messages WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM conversations WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM agents WHERE tenant_id = ANY($1))::int
+          + (SELECT COUNT(*) FROM knowledge_sources WHERE tenant_id = ANY($1))::int
+          + (SELECT COUNT(*) FROM agent_knowledge WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM conversation_tags WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM tenant_members WHERE tenant_id = ANY($1))::int
           + (SELECT COUNT(*) FROM tenant_invites WHERE tenant_id = ANY($1))::int AS n`,

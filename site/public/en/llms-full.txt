@@ -1,0 +1,1054 @@
+﻿# Conext — full text for language models
+
+Index: https://conext.lat/en/llms.txt. Host: https://conext.lat.
+
+# All your channels, one inbox. Conext.
+
+Fuente: https://conext.lat/en
+
+AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.
+
+## Five numbers from a day with Conext.
+
+What happens when the agents are on duty: nobody waits, nothing gets lost, and the last word is still yours.
+
+### 30 s — First response
+
+The agent replies the moment the message lands, any time of day.
+
+### 20+ — Chats at once
+
+Twenty people asking at the same time get an answer at the same time.
+
+### 24/7 — Always covered
+
+At 3 a.m. what answers is the after-hours notice, not the silence.
+
+### 3 — Channels, one inbox
+
+WhatsApp, Instagram, and Messenger land in the same place and the thread continues.
+
+### 4 h — Back in your day
+
+The time that went into repeating prices, stock, and hours, back in the business.
+
+## AI writes. You decide if it sends.
+
+Topics it already handles well can go out on their own. Anything that touches money, a discount, or an angry customer waits for you in the CRM. You change your mind with one click, agent by agent.
+
+## How Conext works, in three steps.
+
+1. **You connect your channels.** Your WhatsApp Business, professional Instagram, and Messenger are linked to your own Meta account. The number is yours and so is the account: if you leave one day, you take them with you.
+
+2. **You explain how your business works.** You load products with price and stock, your days and hours, and the replies you already use. Then you set up the agents you need.
+
+3. **You watch the Conext inbox.** The agents handle it. You step in when something needs a person, and the inbox shows you exactly which ones.
+
+## Automate WhatsApp without putting your number at risk.
+
+Tools that hitch a ride on WhatsApp Web or the phone app work until Meta catches them. Conext goes in through the official API, the door Meta opens for a CRM.
+
+### Your number is not at risk
+
+Everything goes through the official WhatsApp Business API, the path Meta enables for automation. No cloned session, no phone left plugged in in a corner.
+
+### Several people, one number
+
+Your team and the agents work from the same inbox, each with their own user. Nobody has to borrow the shop phone.
+
+### Your data is yours
+
+Each business has its conversations kept apart from the rest, and its WhatsApp credentials stored encrypted. If you want to leave, everything is deleted.
+
+## Frequently asked questions about Conext
+
+### What is Conext?
+
+Conext is a CRM for small businesses that brings WhatsApp, Instagram, and Messenger messages into one inbox. AI agents send what is safe or leave a draft ready: the last word is still yours. It runs on the official Meta API, not WhatsApp Web or unofficial apps.
+
+### Is Conext only for WhatsApp?
+
+No. The CRM brings WhatsApp, Instagram, and Messenger, if your Page has it, into the same inbox. WhatsApp comes in through the official WhatsApp Business API; Instagram and Messenger, through the business Facebook Page.
+
+### Do I need a new number?
+
+No. You can use the one you already have, with one catch: a number connected to the API cannot also be in the WhatsApp app on a phone. If you handle it by hand from the phone today and you are not ready to cut that yet, the easy path is to start with a spare number and move the main one when you are comfortable.
+
+### What if the agent does not know something or gets it wrong?
+
+That is what draft mode is for: the agent writes but does not send until you approve. That is the way to start for the first weeks, until you see how it replies to real customers. When it handles a topic well, you turn on auto-send for that agent only and leave the rest waiting.
+
+### Will my customers know an AI is answering?
+
+The message arrives like any other from your business, and the agent replies in the tone you set. On the inside we do log who answered each one, so you can review any thread later.
+
+### What happens to my conversation data?
+
+It is yours and it is not mixed with another business: each customer has their own space in the database. WhatsApp tokens are stored encrypted. We do not sell data or pass it on. The footer has the privacy policy and how to request deletion.
+
+### How much does it cost?
+
+There is a 7-day Standard trial (then $49/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate. We do not add a markup.
+
+
+---
+
+# Conext, page by page.
+
+Fuente: https://conext.lat/en/producto
+
+The inbox, the agents, the catalog, and what holds the number. Each piece has its own page.
+
+Conext is the CRM that puts the business chats in one place. These pages cover each piece: what it does, how you use it, and what stays on Meta’s side.
+
+---
+
+# Every conversation, in one place.
+
+Fuente: https://conext.lat/en/producto/bandeja
+
+No more “did someone already reply to this?”. The business chat stops living on a phone and becomes an inbox the whole team can see.
+
+In Conext each contact has one thread. It does not matter which channel they wrote on: the history, the agent, and what is pending stay in the same place.
+
+## One thread per number, not per person at the shop.
+
+A conversation is identified by the contact’s phone. It does not matter who opened the chat: the thread is the same, with the history, the agent on it, and whether something is still pending. Nobody has to borrow the till phone to pick up a sale.
+
+Messages come in through Meta’s official APIs. WhatsApp, Instagram, and Messenger land on that contact’s thread, with the delivery status the channel sends. The CRM will not let a late receipt overwrite a newer one.
+
+## What still needs a reply is marked.
+
+If a message has no reply, the inbox counts it. Agents can leave a draft; you send it or you edit it. What is already resolved is not mixed with what is waiting, so the next shift does not have to guess where to start.
+
+WhatsApp gives a 24-hour window from the customer’s last message. The CRM knows that: outside the window it does not pretend you can write as usual. And if the work day is closed, nothing goes out.
+
+## En la práctica
+
+1. **The message arrives.** Meta signs it, the CRM stores it once, and the thread for that number updates.
+
+2. **It shows in the inbox.** Pending, assigned, or on the agent that took it. The rest of the team sees the same thing.
+
+3. **You reply from here.** Text, an attachment, or the AI suggestion. The customer gets a normal WhatsApp, not a menu bot.
+
+The inbox is the workplace. Folders, notes, and assignment live inside it, not in another app.
+
+---
+
+# Find a chat without scrolling the whole list.
+
+Fuente: https://conext.lat/en/producto/carpetas
+
+The left bar is not decoration. It is the questions you ask on a shift: what is mine, what nobody took, what still needs a reply.
+
+Conext folders come from the shift’s work. Tags mark the topic of the chat. Both live in the same inbox, not in another app.
+
+## Folders that come with the work.
+
+All, Mine, Unassigned, and Pending. You do not build them: they come from who owns the conversation and whether it still needs a reply. The number next to each one is how many threads are in that folder now, not a lifetime total that does not help at 3 p.m.
+
+Picking a folder is always a question about the inbox. If you are on Home or Products and you tap Pending, you land in the inbox with that filter on. The column does not change shape as you move around the app.
+
+## Tags on the contact, not in a spreadsheet.
+
+Each thread has a contact panel. You add and remove tags there (sales, shipping, wholesale) without leaving the conversation. They mark what the chat is about when the customer’s name is not enough.
+
+Assignment lives in the same place: someone responsible, or no one. Mine and Unassigned read that field. It is not a ten-step workflow; it is who is looking at it today.
+
+## En la práctica
+
+1. **You open the folder.** Pending, mine, or unassigned. The list shrinks to what this shift needs.
+
+2. **You open the thread.** The right-hand panel shows the contact, the agent, and the tags it already has.
+
+3. **You tag or assign.** A new tag or a person. Everyone else’s folder updates on its own.
+
+Folders sort the shift. Tags sort the topic. Both live in the same inbox.
+
+---
+
+# What the team needs to know, without sending it to the customer.
+
+Fuente: https://conext.lat/en/producto/notas
+
+“They asked for an invoice”, “don’t offer a discount”, “waiting on yesterday’s payment”. That is not a WhatsApp. It is a note on the thread, visible to whoever opens it next.
+
+Conext internal notes stay on the contact. The next shift reads them. The customer gets nothing.
+
+## The same box, another mode.
+
+The composer has a message mode and a note mode. The island tints when you are writing for the inside, so an internal remark does not go out to the customer’s number. Shortcut: Ctrl + \. Enter saves the note; it does not send it to WhatsApp.
+
+If you use an AI suggestion, the box switches back to message mode before the text drops in. Otherwise the reply to the customer would be saved as a note and nobody on the other side would see it.
+
+## They live on the contact, not in a side chat.
+
+The right-hand panel has an internal notes tab. That is the history of what the team left on that person. You do not hunt for it in another system or on a sticky note at the till.
+
+A note is text. It does not take a photo or a voice note: those are for the customer. Mixing an attachment with an internal note is exactly how something goes to the wrong person, so the CRM will not let you.
+
+## En la práctica
+
+1. **You switch to note.** The box makes it clear you are writing for the team, not for WhatsApp.
+
+2. **You save.** It stays on the thread and on the contact’s notes tab. The customer gets nothing.
+
+3. **The next shift reads it.** They open the same chat and see the context without asking around the back.
+
+The note is the remark that used to go in the shop’s WhatsApp group. Now it sits on the right thread.
+
+---
+
+# One agent per topic, written in your language.
+
+Fuente: https://conext.lat/en/producto/agentes
+
+It is not a single chatbot with a tree of options. It is several virtual people, each with a role, and the model picks which one takes the message.
+
+Conext agents are not a menu. You write the tone and what they may promise. The CRM picks who speaks, and you can change it.
+
+## Name, role, instructions. No code.
+
+Each agent has a name you see in the inbox, a role (who they are for the business), and the instructions you write: tone, what they may promise, what they may not. You turn them on and off. You reorder them. You delete them, always after a confirmation.
+
+The auto-send switch belongs to each agent, not to the whole CRM. Sales can send list prices on their own; complaints leave the text for a person to look at. That ceiling always wins: if it is off, the model does not go out to WhatsApp even if it feels sure.
+
+## The model picks who speaks. You can change it.
+
+On every inbound message, Gemini picks the agent and writes the reply in the same step. If the contact already had one, that is context; if the model names one that does not exist, the one already on the thread stays.
+
+You can change the agent by hand in the thread. The panel shows if it is off. Opening an agent from the bar opens its settings, not another filter: it is a different screen, with how many conversations it is handling.
+
+## En la práctica
+
+1. **You create it.** Name, role, and instructions. Auto-send off at first if you do not know it yet.
+
+2. **It handles the chat.** The model picks it when the topic fits, or you assign it from the thread.
+
+3. **You tune it.** If it gets ahead of itself, you drop it to draft. If it already replies well, you let it send.
+
+Agents do not replace the team. They take the work you already know how to answer.
+
+---
+
+# AI writes. You decide if it sends.
+
+Fuente: https://conext.lat/en/producto/borrador
+
+Topics it already handles well can go out on their own. Anything that touches a discount, money, or an angry customer waits for you. You change your mind with one click.
+
+A Conext reply does not go out just because the model feels sure. The agent has to be on, the day open, and you inside hours. If one is missing, it stays a draft.
+
+## The model feeling sure is not enough.
+
+For a reply to go out on its own, several things have to be true at once: the message was classified as automatic, the model marked it safe to send, the agent has auto-send on, a work day is open, and you are inside business hours. If one is missing, it stays a draft.
+
+That draft lives on the thread. You see it, you edit it, you send it. If the send to Meta fails, it stays there too: the text is not lost and the CRM does not pretend it went out.
+
+## What you review is what the customer would see.
+
+WhatsApp is not Markdown. Bold is *this*, with one asterisk. Models tend to write **this**; the CRM translates before showing the draft, not only when sending. Translate too late and you would be approving extra asterisks.
+
+Draft mode is the way to start for the first weeks. When an agent already handles a topic well, you turn auto-send on for that one only and leave the rest waiting.
+
+## En la práctica
+
+1. **The message comes in.** It is classified and a reply is drafted in the same model call.
+
+2. **The CRM decides if it goes out.** Agent, category, hours, and an open day. If something does not fit, it does not send.
+
+3. **You see it, or the customer does.** A draft on the thread, or a WhatsApp already sent. Never a limbo.
+
+Control is not a hidden prompt. It is a switch you see on every agent.
+
+---
+
+# Pick an agent, classify, and write, in one step.
+
+Fuente: https://conext.lat/en/producto/clasificacion
+
+There is no classifier and then a writer waiting on it. One call, a fixed schema, and the message already knows who owns it and whether it can go out alone.
+
+Conext classification is not a label for a report. It is the door that decides whether someone on the team has to look.
+
+## The model does not invent the shape of the answer.
+
+Gemini has to call a function with the agent, the category (`automatico` or `pendiente`), whether it can auto-send, and the text. There is no free paragraph to parse afterwards: if it does not fit, there is no classification.
+
+`automatico` is for what the catalog and the hours can resolve. `pendiente` is what needs a person’s judgment. `canAutoSend` is stricter: only if the reply is complete and safe. The agent’s switch can force it to false even if the model said yes.
+
+## The context is your business, not a generic one.
+
+The prompt carries products with price and stock, hours, agents, and the recent thread. That is why it can say “yes, we have size M” or “we close at 6 today” without a tree you had to build.
+
+If the same Meta message arrives twice (they retry if you are slow), the CRM ignores the second: the message id is already there. And if they write after hours, the away notice goes first, with a cap so it is not sent every five minutes.
+
+## En la práctica
+
+1. **The text comes in.** History, catalog, and the list of agents are assembled.
+
+2. **The model fills the schema.** Agent, category, whether it can send, and the reply already in WhatsApp format.
+
+3. **The CRM applies the rules.** Open day, hours, the agent’s ceiling. Only then it sends or stays a draft.
+
+Classification is not a label for a report. It is the door that decides whether a person has to look.
+
+---
+
+# The reply is automated, not the decision tree.
+
+Fuente: https://conext.lat/en/producto/automatizaciones
+
+You do not build a flow for every “hello” and every “price”. The model picks an agent, decides whether it can go out on its own, and writes from your catalog.
+
+In Conext automation is the pipeline of each message: classify, draft, send or leave a draft, and notify if the shop is closed. It is not a keyword canvas.
+
+## It is not a “if they say X, send Y” bot.
+
+There are no keyword triggers and no shift routing you have to draw. The model reads the thread, picks the agent whose role fits, marks whether the reply is safe, and writes the text. “Do you have the jacket in M, and can you do a price with the leather one?” does not fit a tree; it goes to sales, stays pending if it touches a discount, and both items’ stock go in the same reply.
+
+What is routed in advance are the shift folders: Mine, Unassigned, Pending. Assigning a thread to someone is the only people “flow”. There is no round-robin and no queue per employee hours: there is an owner, or nobody.
+
+## Four brakes, not a hidden prompt.
+
+For a reply to go out on its own, all of these have to be true at once: category `automatico`, the model said it can send, the agent’s switch is on, there is an open day, and you are inside hours. One missing, and the text stays a draft in the thread. The team sends it or edits it. There is no limbo.
+
+Outside hours the away notice goes out, with a twelve-hour cap so it is not repeated every five minutes. That notice is reserved with a conditional update: two messages at the same time do not send two “we are closed”.
+
+## No canned replies. A catalog, yes.
+
+The composer has no strip of macros. What gets reused is the catalog and the agent’s role: the price is not pasted by hand into ten chats, it is cited. If you need to write first after 24 hours, the WABA templates go out — Meta approves them, not a local copy.
+
+The last word still belongs to a person. Auto-send is a ceiling per agent, not a pilot you turn on for the whole CRM on signup day.
+
+## En la práctica
+
+1. **The message comes in.** Agent, classification, and the reply happen in one call, with the catalog in view.
+
+2. **The rules are applied.** Switch, open day, hours. After hours, the away notice. If it does not close, a draft.
+
+3. **It goes out or you look at it.** The customer gets a WhatsApp from the business, or the team sees the text ready in the thread.
+
+If what you need is a flow builder with Instagram comments and sequences, that is another tool. Here what is automated is answering what the customer already wrote.
+
+---
+
+# Agents answer with your products, not from memory.
+
+Fuente: https://conext.lat/en/producto/catalogo
+
+Price and stock live where you handle the chat. The AI has them in view when it writes; you see them on the products screen and on Home if they are about to run out.
+
+The Conext catalog is what the agent looks at when a customer asks for a size or a price. It is not a PDF on the side or a separate sheet.
+
+## A catalog that gets used, not a PDF on the side.
+
+Each product has a name, a price, and stock. They group into folders so you are not staring at a flat list of a hundred items. You search, edit, delete, always after a confirmation. Inventory value is computed from what is already loaded; there is no parallel number that goes stale.
+
+That same list goes into the model’s instruction. When a customer asks “do you have the black one in M?”, the answer comes from here, not from a generic prompt that invents sizes.
+
+## Low stock looks the same everywhere.
+
+Zero units is out of stock. Ten or fewer is low. The threshold is the same in Products and in the Home alerts: an item cannot be critical on one screen and fine on the other.
+
+Plans cap how many products fit in the catalog. Free is enough to try; as volume grows, the ceiling goes up. What does not change is that the AI and the team look at the same list.
+
+## En la práctica
+
+1. **You add the product.** Name, price, stock, folder. That is what the agent will quote.
+
+2. **The question arrives.** The model sees the catalog with the message and answers with those numbers.
+
+3. **You update stock.** The next reply already uses the new figure. So do the Home alerts.
+
+If the catalog is stale, the AI will say the stale thing. That is why it lives in the CRM, not in a separate sheet.
+
+---
+
+# The day, measured. Not the calendar.
+
+Fuente: https://conext.lat/en/producto/metricas
+
+The unit of work is not the date: it is the day you open. With no open day you cannot send or leave a note. When you close it, it is archived so you can compare.
+
+Conext metrics come from that shift’s messages. There is no parallel dashboard, and no invented “yesterday” if you have not closed a day yet.
+
+## Opening and closing is a decision, not a cron job.
+
+There is one open day per business. Provisioning opens the first so the inbox is not stuck on closed. Closing stores the time; the next shift opens a new one. Closed days sit in the bar, with how many messages came in.
+
+With no open day, nothing sends and no notes are added. That is on purpose: the shift has a start and an end, and the metrics are computed on that block, not on “today” according to the clock.
+
+## The numbers come from the messages, not another dashboard.
+
+Messages in the day, pending, automation percentage, time to first reply, activity by hour, how much the AI took and how much a person did. Change is measured against the last closed day. If you have not closed one yet, it does not invent a “yesterday”.
+
+Only inbound messages count as customer activity. An outbound one is our reply. Unanswered inbound messages do not go into the average time: they are the pending ones, and they show separately.
+
+## En la práctica
+
+1. **You open the day.** The inbox can send. The bar footer says so, with the time.
+
+2. **You handle it.** KPIs are built from what comes in and what goes out. Nothing is typed in by hand.
+
+3. **You close it.** It is archived. The next one is compared against this, not against a calendar day.
+
+If the shop closes at 8 and Saturday is a fair, the CRM day is that shift, not the server’s 24 hours.
+
+---
+
+# Know before the customer asks and there is none.
+
+Fuente: https://conext.lat/en/producto/stock
+
+The AI answers with the stock you loaded. If that number is wrong or zero, it will say there is none. Alerts are there so you see it first.
+
+A Conext alert is the slice a counter needs: what is running out, what is gone, and a click to go fix it. The agent looks at the same number.
+
+## The same threshold on Home and in Products.
+
+Zero is out of stock, red. Ten units or fewer is low, amber. There is no gentler rule on Home so it does not scare you: if it is low, it is low on both screens. The list shows the first alerts and a shortcut to Products.
+
+Underneath, the product count and inventory value. That is price times units of what is already in the catalog, not a sales target.
+
+## They matter because the AI uses them too.
+
+When the model writes a reply, it looks at that stock. An alert you ignore is a “yes, we have it” that is no longer true. Updating the number fixes both at once: what you see and what the customer is told.
+
+It is not a replenishment system or an ERP. It is the slice a counter needs: what is running out, what is gone, and a click to go fix it.
+
+## En la práctica
+
+1. **Stock drops.** Products marks it. Home shows it in alerts, in the same color.
+
+2. **You see it when you come in.** You do not have to open the catalog to find out. The first five sit on Home.
+
+3. **You update it.** The alert goes away. The next agent reply already uses the new number.
+
+The alert does not replace the person who buys stock. It stops the CRM selling what the shelf no longer has.
+
+---
+
+# Automate WhatsApp without putting the number at risk.
+
+Fuente: https://conext.lat/en/producto/api-whatsapp
+
+Tools that hitch a ride on the phone app work until Meta catches them. This is the door Meta opens for this.
+
+Conext goes in through Meta’s official API. WhatsApp, Instagram, and Messenger use that door. The number is yours: if you leave one day, you take it with you.
+
+## Your number, your Meta account.
+
+WhatsApp Business is linked to your own account. The number is yours: if you leave one day, you take it with you. No cloned session, no phone left in a drawer on a charger.
+
+A number on the API cannot also be in the WhatsApp app on a phone. If you handle it by hand today and you are not ready to cut that yet, you start with a spare number and move the main one when you are comfortable.
+
+## Meta signs. The CRM does not improvise.
+
+The webhook is signed by Meta. If the payload is not one of our numbers, it is dropped. The CRM answers 200 immediately and processes after: if it were slow, Meta would retry and the same message would duplicate. The message id stops it from being processed twice.
+
+All three Meta channels come in today: WhatsApp text, Instagram, and Messenger. Outbound WhatsApp attachments upload to Graph and then send; the copy that stays in the thread is ours, because Meta deletes theirs after 30 days. Inbound customer media is not downloaded yet.
+
+## En la práctica
+
+1. **You connect the number.** Meta account, token, phone_number_id. It is stored encrypted in your space, not in a shared env file.
+
+2. **Events arrive.** Meta signs, the CRM resolves the business by the number, and the pipeline runs.
+
+3. **Replies go out.** Text or media through Graph. Without credentials, development simulates; production does not pretend.
+
+Meta charges for conversations on your Meta account, at their rate. Conext does not add a markup. What you pay here is the software.
+
+---
+
+# Several people, one number. Nobody borrows the phone.
+
+Fuente: https://conext.lat/en/producto/equipo
+
+The team and the agents work from the same inbox. Each person comes in with their user. The shop WhatsApp stops being a device you lend out.
+
+People are not the Conext customer: they join a business with a role. The number stays one. What multiplies is the hands that handle it.
+
+## One business, several members.
+
+People are not the Conext customer: they join a business with a role (owner, admin, or operator). They only see the businesses they belong to. The WhatsApp number stays one; what multiplies is the hands that handle it.
+
+Assigning a thread to someone is what fills Mine and empties Unassigned. Everyone else sees who has it. You do not need a side WhatsApp group to say “Ana is taking this”.
+
+## Agents count as extra hands, not as another number.
+
+An agent works on the same thread as a person. Who answered each one is logged (model or human) so you can review later. The customer gets a WhatsApp from the business, with no “you are talking to a bot” banner, and on the inside you do know.
+
+Plans measure seats: how many people fit. Free is to try; Standard and Premium add team. An extra seat is added when the shift no longer fits in the ones that came with the plan.
+
+## En la práctica
+
+1. **Each person comes in.** A member of the business, with a role. They see that number’s inbox, not another conext customer’s.
+
+2. **Threads get assigned.** Mine, unassigned, pending. The shift’s work splits without passing the phone.
+
+3. **You can see who replied.** Agent or person, in the same history. It is there to tune instructions, not to watch people.
+
+The number belongs to the business. People rotate. The inbox should not have to rotate with them.
+
+---
+
+# Your data is yours. And it is kept apart from everyone else’s.
+
+Fuente: https://conext.lat/en/producto/datos
+
+Each business is a space. A WhatsApp token cannot sit in the clear in a dumped database. If you want to leave, it is deleted.
+
+In Conext nothing is queried without a customer. Tokens are encrypted. If you leave, the space is deleted: conversations, catalog, agents, and credentials.
+
+## Nothing is queried “without a customer”.
+
+Every row carries the business first. CRM queries have no global variant: no business, no row. That is what stops one person’s message from showing up in another’s inbox. There is a check built only for that, and it runs when a query is touched.
+
+People in the dashboard see, by database rules, only the businesses they belong to. Meta’s webhook has no one’s session: it comes in by number and the business is resolved from that, not from a logged-in user.
+
+## Secrets are not stored in the clear.
+
+Each customer’s WhatsApp token is encrypted with AES-256-GCM before it hits the database. A dump is not enough to send messages as someone else. API keys are hashed: you can look up the business by the key that arrives, but you cannot rebuild it.
+
+We do not sell data or pass it on. The footer has the privacy policy and how to request deletion. If you leave, that business’s space is deleted: conversations, catalog, agents, credentials.
+
+## En la práctica
+
+1. **A piece of data comes in.** Always tied to a business. The webhook resolves which one from Meta’s number.
+
+2. **It is stored.** Conversations in their space. Tokens encrypted. Keys hashed.
+
+3. **It can be deleted.** The deletion request is published. There is no file of ours with your inbox “just in case”.
+
+Isolation is not a marketing seal. It is the first column of every table and the first argument of every function.
+
+
+---
+
+# Conext, next to the alternatives.
+
+Fuente: https://conext.lat/en/comparar
+
+Three tools that show up in the same search. They do not do the same job. These pages say which job is whose.
+
+Conext is the CRM that puts WhatsApp, Instagram, and Messenger in one inbox and lets AI reply from your catalog, or leave you the draft. If what you want is a flow builder, a broadcast megaphone, or a twenty-channel contact center, there are products that were born for that.
+
+---
+
+# The same kind of inbox. Not the same project.
+
+Fuente: https://conext.lat/en/comparar/conext-vs-respondio
+
+Respond.io covers many channels and builds contact-center flows. Conext covers Meta’s three and is set up like a shop: catalog, hours, agents.
+
+Both put chats in one place. The difference is who the product is built for, and how much you have to set up before the first message is answered.
+
+## Respond.io is a contact center. Conext is the counter.
+
+Respond.io enters the conversation when the team already has several channels (WhatsApp, email, Telegram, SMS, webchat) and needs routing, SLAs, and a platform onboarding. That makes sense in a company with someone dedicated to support operations. In a small business that person does not exist: the owner answers between one order and the next.
+
+Conext comes from that counter. WhatsApp, Instagram, and Messenger —the three the customer already uses— land in one inbox. AI agents answer prices, stock, and shipping from the catalog you loaded, or leave the text ready. You do not draw a flow for every recurring question.
+
+## Conext’s AI looks at the business, not a tree.
+
+In Conext each agent has a role written in plain language and the catalog in view. One model call picks who handles it, whether it can go out on its own, and how to reply. The auto-send switch is per agent: sales can wait for your OK and shipping can go out alone.
+
+Respond.io has automations and assistants, built as pieces of a wider platform. If you need ten channels and a workflow builder with nested conditions, that is their field. If you want “do you have size M?” not to wake you at eleven, Conext already handles it with the stock you loaded.
+
+## The path is the official API. The number is yours.
+
+Conext comes in through Meta’s Cloud API. The number and the Page belong to the business: if you leave one day, you take them with you. There is no cloning a WhatsApp Web session or leaving a phone plugged in. Meta bills conversations to your account at their rate; here you pay for the software.
+
+Setup lives in the CRM: Channels, an agent, the catalog. There is no implementation project and no specialist to assemble the workspaces. That is why the plan starts with a one-week trial, not an enterprise quote.
+
+## En la práctica
+
+1. **Count the channels you actually use.** If they are WhatsApp, Instagram, and Messenger, Conext covers them. If you also need email, SMS, and a website bot, Respond.io was built for that.
+
+2. **Look at who will configure it.** If it is the owner between orders, a catalog-and-agents CRM fits. A contact center asks for someone to run it.
+
+3. **Ask for a demo with your questions.** Twenty minutes with the real catalog say more than a feature table. The two tools look different when they answer yours.
+
+Respond.io is the right tool for a support team with many channels. Conext is the right one for the small business that already attends on Meta and does not want a second job of configuring a platform.
+
+---
+
+# Wati is WhatsApp. Conext is the three channels.
+
+Fuente: https://conext.lat/en/comparar/conext-vs-wati
+
+If the job is sending WhatsApp campaigns and building a menu bot, Wati was born for that. If the job is answering Instagram and WhatsApp DMs in the same thread, with stock in view, it is Conext.
+
+Both run on the official WhatsApp Business API. From there they split: one stays on that channel and pushes outreach; the other opens Instagram and Messenger and pushes the day’s attention.
+
+## Customers do not only write on WhatsApp.
+
+Wati was built as a WhatsApp tool: templates, lists, flow chatbots, a team inbox. That works when the business already concentrated attention on one number and wants to fire campaigns on that base.
+
+In Conext the same contact can write on Instagram in the afternoon and on WhatsApp at night. The thread is one. The agent sees the catalog and does not ask for the size twice. Wati can add other channels; the product and the search are still WhatsApp’s. Conext puts Meta’s three in the same place from day one.
+
+## A menu bot versus an agent with a catalog.
+
+Wati’s chatbot is a tree: keywords, buttons, the customer picks 1, 2, or 3. It works for a closed menu. It breaks when someone asks “the denim jacket in M, and can you do a price with the leather one?”.
+
+Conext agents do not walk a tree. You write the role in plain language, load products with price and stock, and the model drafts. What is safe goes out on its own; anything that touches a discount stays a draft. You do not redraw the flow every time a price changes.
+
+## The inbox is for answering, not blasting.
+
+Wati shines when you go out to find the customer: lists, broadcasts, bulk templates. Conext shines when the customer already wrote: pending, assignment, internal notes, the day measured. WhatsApp templates exist in Conext because after 24 hours Meta will not let free text through; they are not the product, they are the door Meta asks for.
+
+If your priority is a weekly campaign to ten thousand numbers, Wati is closer. If your priority is not losing the 3 p.m. Instagram DM, Conext is closer.
+
+## En la práctica
+
+1. **Where do people write you today?.** WhatsApp only, Wati covers it. WhatsApp plus Instagram or Messenger, Conext joins them without a second product.
+
+2. **Is the job outreach or answering?.** Campaigns and lists point to Wati. Answering what already comes in, with stock and a small team, points to Conext.
+
+3. **Try it with a real question.** Send the message you are tired of repeating. If a button menu is enough, a tree is enough. If the catalog is needed, an agent is needed.
+
+Wati is a WhatsApp tool with campaigns and bots. Conext is the CRM for Meta’s three channels, with the AI inside the inbox and not beside it.
+
+---
+
+# Manychat grows the audience. Conext answers whoever already wrote.
+
+Fuente: https://conext.lat/en/comparar/conext-vs-manychat
+
+If the job is turning an Instagram comment into a funnel, Manychat was born for that. If the job is sales seeing the same thread as the agent and not losing a DM, it is Conext.
+
+Both touch Instagram and WhatsApp. One does it to capture. The other, so the person who already asked the price is not left hanging.
+
+## A marketing bot is not a team inbox.
+
+Manychat builds visual flows: a comment triggers a DM, a story triggers a sequence, the contact enters a funnel. That is growth. An inbox exists, but the product is measured by automating capture, not by the three-person shift handing off a thread.
+
+Conext does not reply to comments or story mentions. The webhook looks at text messages in the chat: WhatsApp, Instagram Direct, Messenger. What comes in goes to an inbox with folders, assignment, and notes the customer does not see. The job is the counter’s, not the campaign’s.
+
+## Conext’s AI sells with stock. Not with a funnel.
+
+In Manychat the bot says what you wrote on the canvas. If the price changes, you touch the flow. In Conext the price lives in the catalog; the agent cites it. A switch per agent decides whether that reply goes out on its own or waits for someone in sales to look.
+
+Manychat is strong when the goal is a sequence: welcome, reminder, close. Conext is strong when the goal is not contradicting stock and not auto-sending anything that touches money. Those are two kinds of “automation” that do not replace each other.
+
+## The team joins the same number, not a separate bot.
+
+In Conext several people attend the same WhatsApp, each with their own user. What is pending is marked. The owner is visible. The customer gets a message from the business, with no banner that says “you are talking to a flow”.
+
+If what you need is growth from comments and ads, Manychat is still the tool for that leg. Conext does not pretend to be it. If what you need is that a DM from someone who already bought does not get lost between the till phone and the owner’s, that is the inbox.
+
+## En la práctica
+
+1. **Split capture from answering.** Comments, stories, and sequences are Manychat. The day’s DMs, stock, and a team on one number are Conext.
+
+2. **Look at who has to see the thread.** If sales and the shop have to pick up the same conversation, you need an inbox. A flow canvas is not that.
+
+3. **Do not use either for the other’s job.** A CRM will not multiply comments. A growth bot will not be the afternoon shift. Ask for the demo of the one that actually fits.
+
+Manychat is the marketing bot. Conext is the inbox CRM. They can overlap on Instagram; they do not substitute for each other.
+
+
+---
+
+# Official channels, without an extra server.
+
+Fuente: https://conext.lat/en/integraciones
+
+WhatsApp, Instagram, and Messenger come in through the door Meta opens. There is no cloning a session or hosting your own webhook.
+
+Conext is a single Meta app. When you connect the number or the Page from Settings, events arrive at our URL. The CRM resolves which business they belong to and stores them in that inbox.
+
+---
+
+# The official number, with the team on it.
+
+Fuente: https://conext.lat/en/integraciones/whatsapp
+
+Cloud API is the path Meta opens for a CRM. The number is yours. The shop phone stops being the one people borrow.
+
+Conext does not hang off WhatsApp Web or the phone app. It links WhatsApp Business to your Meta account. If you leave one day, you take the number with you.
+
+## Why the official path.
+
+Tools that clone the session or read the phone app work until Meta detects them. A banned number is not an argument with the CRM: it is gone. Cloud API is the door Meta opens for automation, with a token from the business account and a webhook they sign.
+
+A number on the API cannot be on the WhatsApp phone app at the same time. If you still answer by hand and do not want to cut that yet, start with a separate number and move the main one when you are ready.
+
+## Several people, one number.
+
+The team signs in each with their own user. AI agents attend in the same thread. Nobody borrows the till phone. The “Mine” and “Unassigned” folders come from who owns each conversation, not from who holds the device.
+
+Meta bills conversations straight to your account at their rate. conext does not add a margin. What you pay here is the software: the inbox, the agents, the catalog.
+
+## What comes in, and what does not yet.
+
+Text messages are processed today. Sent, delivered, read, and failed receipts update the bubble. Outbound attachments are uploaded to Graph and copied in the CRM, because Meta deletes theirs after 30 days. Inbound ones are not downloaded yet: the thread shows the text; a photo they send does not open yet.
+
+Past 24 hours from the customer’s last message, Meta rejects free text. That is when approved templates from your WABA go out. They live in Meta, not in a copy of ours: approval status is asked of Graph, not guessed.
+
+## En la práctica
+
+1. **Open Channels.** Settings has the WhatsApp card. Meta’s embedded signup links the number to your account, not ours.
+
+2. **The CRM subscribes.** The token (encrypted) and the phone_number_id are stored. From then on, events for that number arrive at Conext.
+
+3. **Send a test.** A “hello” to the connected number should show up in the inbox. If it does not, Meta’s signup did not finish or the app is not subscribed to the webhook.
+
+The API is not a badge. It is the difference between a CRM Meta lets run and a cloned session that one day stops existing.
+
+---
+
+# The Instagram DM, next to WhatsApp.
+
+Fuente: https://conext.lat/en/integraciones/instagram
+
+A single Page connects Instagram and Messenger. The customer writes wherever is handy; the thread in Conext is one.
+
+The professional Instagram account hangs off the Page. Meta issues a token with permission over both faces. That is why Settings has one “Instagram and Messenger” card, not two buttons.
+
+## Direct, not the comment or the story.
+
+Conext processes the chat’s text message. A comment on a post or a mention in a story does not open a thread: those webhook events are not handled yet. If the job is turning a comment into a funnel, that is not this integration.
+
+The DM is. It arrives with the Instagram identifier (IGSID), which the CRM stores with a prefix so it is not mixed with a WhatsApp number of the same length. The inbox shows the channel mark: answering on the wrong side cannot be undone.
+
+## Messenger rides on the same token.
+
+Instagram and Messenger are the Messenger Platform: the same webhook shape, the same send path, the same 24-hour window. What separates them is the payload `object` —`instagram` or `page`— and where the contact id came from. A Page with no Instagram attached still runs Messenger; the connection warns, it does not fail.
+
+The contact’s name does not come with the message. The CRM asks Graph. If the profile permission is not approved, the thread is titled with the id: better that than a message that is not stored.
+
+## What Meta asks of you.
+
+Until the App Review for `instagram_manage_messages` and `pages_messaging` goes through, this works with accounts that have a role on the app: enough for development and for the demo. In Meta’s console the app has to be subscribed to the `messages` webhook for Messenger and Instagram. Without that the card says connected and not a single message arrives.
+
+Outbound attachments over Instagram do not go out yet: Instagram wants a public URL for the file, and ours are served behind the session. That signed URL is still missing. DM text does go both ways.
+
+## En la práctica
+
+1. **Connect the Page.** From Settings, the Instagram and Messenger card. Facebook’s embedded signup has to finish inside Conext, not in another tab.
+
+2. **The Page token is stored.** Encrypted, same as WhatsApp’s. Instagram DMs and Messenger DMs both go out with it.
+
+3. **Send a test Direct.** It should appear in the inbox with the Instagram mark. If it does not, the `messages` webhook subscription is missing in the console.
+
+Instagram in Conext is the chat. The comment and the story, not yet. The DM from the customer who already asked the price, yes.
+
+---
+
+# Meta’s events, without a server of yours.
+
+Fuente: https://conext.lat/en/integraciones/webhooks
+
+There is no webhook to paste into Make and no URL you have to host. You connect the channel in Settings and messages start coming in.
+
+Every Conext customer shares the same Meta app subscription. What says who each event belongs to is the id Meta puts in the payload: the number, the Page, or the Instagram account.
+
+## It is not a webhook into your database.
+
+Conext does not fire events toward an ERP, a spreadsheet, or Zapier. What exists is the other way: Meta tells us, we store the thread, and the AI drafts. If you need to sync contacts with another system, there is no connector today. The inbox is the system.
+
+We host the URL. The verification challenge (`hub.challenge`) and the signature on every POST are handled with the app secret. On your side there is no webhook token to copy: there is a connect button in Channels.
+
+## How it knows which business it is.
+
+WhatsApp brings the `phone_number_id` in the payload. Instagram and Messenger bring `entry[].id`, which is the IGID or the PAGE_ID depending on the `object`. Those three columns are unique: two businesses cannot claim the same number. If the id matches no one, the event is dropped. Guessing would write it in the wrong inbox.
+
+The CRM answers 200 immediately and processes afterwards. If it were slow, Meta would retry and the same message would duplicate. The message id (the wamid, or Messenger’s mid) is the lock: the second delivery does not create another row.
+
+## What is processed today.
+
+Text. An audio, a photo, or a location is logged and does not open a reply: the customer would be waiting for something the team cannot see. Receipts do: on WhatsApp each status names the message; on Messenger and Instagram a watermark arrives (“everything before this is delivered”) and that thread’s outbound messages are updated.
+
+If the app is subscribed to `message_echoes`, Meta sends our own outbound back. That echo is dropped: otherwise the AI would answer itself. The objects and statuses are in the documentation reference.
+
+## En la práctica
+
+1. **Connect the channel.** WhatsApp or the Page, from Settings. That is where the ids used to resolve each event are stored.
+
+2. **Meta posts to our URL.** There is nothing to paste into an “outbound webhook” panel. The subscription belongs to Conext’s app.
+
+3. **The thread shows up in the inbox.** If it does not, Meta’s id is not tied to your business or the app is not subscribed to `messages`.
+
+The webhook is from Meta into Conext, not from Conext out to the rest of your tools. That is why connecting the channel is enough, and why there is no Zapier card.
+
+
+---
+
+# What it takes to answer the first message.
+
+Fuente: https://conext.lat/en/docs
+
+Connect the channels, tell the AI how the business talks, and understand which events come in. Day-to-day questions live in Help.
+
+These three guides are the setup path. Billing, accounts, and data deletion live in the help center; here is what you have to touch so a “hello” shows up in the inbox and gets a reply.
+
+---
+
+# From signup to the first message, without a project.
+
+Fuente: https://conext.lat/en/docs/primeros-pasos
+
+The connection in the CRM is short. What can stretch the day is Meta’s side: the WABA, the Page, and, in production, App Review.
+
+Conext does not ask for a server or a webhook of yours. You get access, sign in, and Settings has the two cards: WhatsApp, and Instagram with Messenger.
+
+## Before you connect.
+
+You need a Meta Business account, a WhatsApp Business number you will attend, and, if you want Instagram or Messenger, a Facebook Page with the professional account attached. A number on Cloud API cannot be on the phone app at the same time: if you still answer by hand, the comfortable path is a test number and moving the main one later.
+
+Conext access is given by the business owner or a demo. The create-account tab on the login screen does not open a signup. With access, the first work day is already open: with no open day you cannot send or leave a note.
+
+## The two Channel cards.
+
+WhatsApp is linked with Meta’s embedded signup. The token (encrypted) and the `phone_number_id` are stored. Instagram and Messenger are linked through the Page, with one token for both. A Page with no Instagram attached still runs Messenger; the card warns, it does not fail.
+
+Connecting is not enough if in Meta’s console the app is not subscribed to `messages`. It is the same silence on both sides: the card says connected and not a single message comes in. A test “hello” to the number or a Direct to the account is what confirms the path is whole.
+
+## Catalog, hours, one agent.
+
+Agents reply with what is loaded. A product with price and stock, the days and hours, and an agent with the role written in plain language are enough so “do you have size M?” does not sit on read. Reply language is chosen in Settings: Spanish, English, Portuguese, or the customer’s.
+
+The first weeks it is better to leave auto-send off. The draft appears in the thread, you edit it and send it. When a topic already comes out right, you turn the switch on for that agent only.
+
+## En la práctica
+
+1. **Connect WhatsApp.** Settings → Channels. The number stays on your Meta account. A test message should show in the inbox.
+
+2. **Connect the Page, if it applies.** The same screen, the Instagram and Messenger card. A test Direct confirms that side.
+
+3. **Load what the AI will cite.** Products, hours, one agent. Without that the model improvises; with it, it cites the size and closing time.
+
+Ten minutes is the CRM. Meta’s clock (WABA, permissions, Review) is another one, and it is not solved from this screen.
+
+---
+
+# The agent is a written role, not a drawn flow.
+
+Fuente: https://conext.lat/en/docs/configurar-ia
+
+You do not upload a PDF or build a tree. You write what it handles, you load the products, and a switch decides whether that reply goes out on its own.
+
+A Conext agent is a name, a role, and a ceiling: whether it can auto-send. The model picks which one handles each message. You do not have to route it.
+
+## The role is the knowledge.
+
+In Agents you create one per topic —front desk, sales, shipping, after-sales— and you write the role in the language the shop works in. That is how it greets, what it can promise, and what has to go to a person. There is no separate article base: the catalog, the hours, and this text are what the model sees.
+
+Reply language is a business setting, not an agent’s. It lives in Settings → Automatic replies: `auto` (the customer’s), Spanish, English, or Portuguese. An “Argentine” tone travels inside each language; asking for English and a Buenos Aires voice at once fights itself.
+
+## The catalog goes in the same call.
+
+Price and stock are loaded in Products, not in the prompt. When the model drafts, it has them in view: it can say “yes, there is an M” or “that’s gone” without a branch you built. If the number is wrong, the reply is wrong. Updating stock is what fixes both screens at once.
+
+Plans cap how many products go in the catalog. The free one is enough to try. What does not change is that the team and the AI look at the same list.
+
+## The switch is the ceiling, not the pilot.
+
+Even if the model marks that it can send, the reply does not go out if the agent has auto-send off, if the day is closed, or if you are outside hours. One missing, and it stays a draft in the thread. The first weeks that is the path: you see what it would write, you correct it, and only then you give a topic slack.
+
+Classification is `automatico` or `pendiente`. Pending is what needs a person —a discount, a complaint, something the catalog does not cover. You do not need a flow of “if they say claim, assign to Ana”: the message is marked and the Pending folder counts it.
+
+## En la práctica
+
+1. **Create the agent.** Name and role. Sales should not greet like shipping. The model chooses among the ones that exist.
+
+2. **Load what it will cite.** Products with price and stock, hours, the after-hours message. Without that, it improvises.
+
+3. **Leave auto-send off.** Until the draft no longer needs your hand. The switch is per agent, not for the whole CRM.
+
+Setting up AI in Conext is writing how the business works and loading the shelf. The flow canvas belongs to another tool.
+
+---
+
+# What Conext does with each Meta event.
+
+Fuente: https://conext.lat/en/docs/webhooks-api
+
+There is no public API to push contacts into another system. This page says what comes in from Meta, how it is verified, and what stays in the inbox.
+
+A single URL receives every customer. The CRM does not read an API key on the webhook: Meta signs it, and the business is resolved from an id in the payload.
+
+## Authentication: Meta’s signature, not a key of yours.
+
+The verification GET echoes `hub.challenge` if `hub.verify_token` matches the app’s. The POST carries Meta’s HMAC signature in the header; if it does not match, it is dropped. We handle that with the app secret. When you connect the channel there is no webhook token to paste into a panel.
+
+If the payload id belongs to no business —a `phone_number_id`, a PAGE_ID, or an IGID nobody connected— the event is thrown away. The recipient is not guessed.
+
+## The three objects.
+
+WhatsApp arrives with `object: whatsapp_business_account` and `entry[].changes[]`. The business comes from `value.metadata.phone_number_id`. Text is in `messages[]` when `type` is `text`; any other type is ignored and logged. Receipts come in `statuses[]` (sent, delivered, read, failed) and name the outbound wamid.
+
+Instagram and Messenger arrive with `entry[].messaging[]`. The `instagram` object resolves by IGID (`entry[].id`); the `page` object, by PAGE_ID. A `message.is_echo` is dropped. The contact id is stored with a prefix (`ig:…`, `fb:…`) so it does not collide with a `wa_id` of the same shape. On these two channels the receipt is a watermark: everything before that mark is delivered or read, without listing messages.
+
+## Statuses, dedup, and what does not come in.
+
+The CRM answers 200 and processes afterwards, so Meta does not retry on time. The message id is inserted into an events table; if it was already there, the pipeline does not run again. A receipt that arrives out of order cannot lower the status: delivered does not overwrite read.
+
+Inbound attachments, comments, mentions, and non-text messages are not processed. There is no outbound webhook into your database, and no schema for Make or Zapier. What stays in Conext is the thread, the bubble status, and, if it applies, the AI draft.
+
+## En la práctica
+
+1. **Connect the channel in the CRM.** That is where the ids are stored. Without them Meta’s webhook has no one to attribute the event to.
+
+2. **Meta POSTs to our URL.** The signature is checked. The business is resolved. 200 is returned.
+
+3. **The pipeline runs or it is dropped.** New text: classify and draft. Receipt: update the bubble. Echo, attachment, or unknown id: it does not enter the inbox.
+
+This reference describes the path from Meta into Conext. It is not an API for another system to write to us, and not a connector going out.
+
+
+---
+
+# Conext Pricing
+
+Fuente: https://conext.lat/en/precios
+
+Choose the package that’s right for your company.
+
+Prices are in US dollars (USD). WhatsApp conversations are billed by Meta to your account, at their rate. We do not add a markup.
+
+## Free: 7 days free trial, then $49/month
+
+7 days of Standard
+
+Yearly: 7 days free trial, then $39/month billed annually
+
+## Standard: $49 per month
+
+For growing teams
+
+Yearly: $39 per month, billed annually ($468)
+
+## Premium: $149 per month
+
+For scaling teams
+
+Yearly: $119 per month, billed annually ($1,428)
+
+## Enterprise: Custom annual contract
+
+For large organizations
+
+Yearly: Custom annual contract
+
+## Seats
+
+- Users included: Free 5; Standard 5; Premium 10; Enterprise 25+
+- Additional seats: Free $15/mo; Standard $15/mo; Premium $15/mo; Enterprise Custom
+
+## Inbox
+
+- WhatsApp numbers: Free 1; Standard 1; Premium 2; Enterprise Unlimited
+- Conversations: Free Unlimited; Standard Unlimited; Premium Unlimited; Enterprise Unlimited
+- Folders and tags: Free included; Standard included; Premium included; Enterprise included
+- Business hours: Free included; Standard included; Premium included; Enterprise included
+
+## Intelligence
+
+- AI agents: Free 3; Standard 3; Premium Unlimited; Enterprise Unlimited
+- Auto-send: Free included; Standard included; Premium included; Enterprise included
+- Products in catalog: Free 100; Standard 100; Premium 250; Enterprise Unlimited
+- Drafts for review: Free included; Standard included; Premium included; Enterprise included
+
+## Operations
+
+- Day metrics: Free included; Standard included; Premium included; Enterprise included
+- Outbound attachments: Free included; Standard included; Premium included; Enterprise included
+- Official WhatsApp API: Free included; Standard included; Premium included; Enterprise included
+- Support: Free Email; Standard Email; Premium Priority; Enterprise Dedicated
+
+### How does the free plan work?
+
+It is one week of Standard, with no charge. We ask for a card when you start, and on day 8 we bill $49/month unless you cancel first. During the trial you get the full plan, not a cut-down version.
+
+### Do you bill WhatsApp conversations?
+
+No. Meta charges them directly to your Meta account, at their rate. We do not invoice that charge or add a markup. What you pay here is the software.
+
+### Can I change plans later?
+
+Yes. Write us with the business name and we will adjust: more people, more agents, or the custom package if Premium no longer fits.
+
+
+---
+
+# Questions, by topic.
+
+Fuente: https://conext.lat/en/ayuda
+
+Billing, accounts, security, and data. If the topic is not here, the rail ends in a contact.
+
+## Billing
+
+### How much does conext cost?
+
+Plans and what each one includes are on Pricing. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate. We do not add a markup. If the volume does not fit a package, write us and we will put a custom one together.
+
+### Do you bill WhatsApp conversations?
+
+No. Meta charges conversations directly to your Meta account, at their rate. We do not invoice that charge or add a markup.
+
+### How do I request an invoice or a plan change?
+
+Write to email with the business name. If the change is about volume (more people, more conversations), keep it in the same thread so it does not get mixed with a new signup.
+
+## Accounts
+
+### How do I create an account?
+
+Signup is not self-serve today: the business owner creates it, or we do after a demo. The create-account tab on login does not open a registration form. Request a demo and we will set up access.
+
+### Can more than one person handle the same number?
+
+Yes. The team works from the same inbox, each with their own user. Nobody has to borrow the shop phone: the number is connected to the business account, not to a device.
+
+### How do I get into the dashboard?
+
+From Log in, with the user the business owner gave you. If you arrive from this site, the name is passed to the dashboard so you are not asked for it again.
+
+## Security
+
+### Do you use the official WhatsApp API?
+
+Yes. Everything in and out goes through Meta’s Cloud API. No cloned session, no phone left plugged in. The number and the WhatsApp Business account are yours: if you leave one day, you take them with you.
+
+### How are credentials stored?
+
+Each business’s WhatsApp token is encrypted at rest (AES-256-GCM) before it is stored. Access keys are hashed; they are not kept in plaintext. One customer cannot see another’s data.
+
+## Data
+
+### Who owns the conversations?
+
+You do. Each business has its own space and it is not mixed with anyone else’s. We do not sell data or use it for ads. The detail is in the privacy policy.
+
+### What does the AI see?
+
+The message text and the context the agent needs (catalog, instructions, recent history) are sent to Gemini to classify and draft. We do not train our own model on your threads.
+
+### How do I ask you to delete everything?
+
+Instructions are in Data deletion. Write to email with the business name and the connected number, if you have it.
+
+
+---
+
+# Privacy policy
+
+Fuente: https://conext.lat/en/privacidad
+
+What data Conext processes, why, who it is shared with, and how to ask for deletion.
+
+# Terms and conditions
+
+Fuente: https://conext.lat/en/terminos
+
+Terms of use for the Conext CRM and the WhatsApp Business connection.
+
+# User data deletion
+
+Fuente: https://conext.lat/en/eliminar-datos
+
+How to ask us to delete your account, your conversations, and data tied to Facebook Login in Conext.

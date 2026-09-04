@@ -1,0 +1,105 @@
+---
+import TarjetaAhorro from './TarjetaAhorro.astro'
+
+// La línea de tiempo de "Lo que se ahorra": una hebra de 1px con cinco nodos y
+// las tarjetas alternándose arriba y abajo.
+//
+// Horizontal a partir de `lg` y no de `md`: cinco columnas en 768px dan 140px
+// cada una, que es menos de lo que necesita un número grande con su renglón de
+// contexto. Abajo de eso la hebra se para y las tarjetas se apilan a su
+// derecha, que es la misma línea leída en vertical.
+//
+// El encaje no se calcula: la grilla es una sola, de tres filas
+// (`1fr auto 1fr`), y por eso las dos mitades miden igual en las cinco
+// columnas y la hebra cae exactamente en el medio. Con una grilla por columna
+// cada una repartiría su sobrante por su cuenta y los nodos quedarían a
+// distinta altura.
+const { items = [], resumen = [] } = Astro.props
+
+// Las clases de columna van escritas enteras y elegidas por índice: Tailwind
+// lee el archivo como texto, así que una clase armada por concatenación
+// (`col-start-${i}`) no existiría en la hoja.
+const COLUMNA = ['col-start-1', 'col-start-2', 'col-start-3', 'col-start-4', 'col-start-5']
+const ultimo = items.length - 1
+---
+
+{/* ---------------------------------------------------------------------- */}
+{/* Horizontal (lg+)                                                        */}
+{/* ---------------------------------------------------------------------- */}
+<div class="mt-12 hidden lg:block">
+  <div class="grid grid-cols-5 grid-rows-[1fr_auto_1fr] gap-x-4">
+    {/* La hebra cruza las cinco columnas por el medio de la fila del nodo. */}
+    <div class="col-span-5 row-start-2 h-px self-center bg-tint/15"></div>
+
+    {
+      items.map((item, i) => (
+        <Fragment>
+          <div
+            class:list={[
+              COLUMNA[i],
+              i % 2 === 0 ? 'row-start-1 self-end pb-5' : 'row-start-3 self-start pt-5',
+            ]}
+          >
+            <TarjetaAhorro {...item} oscura={i === ultimo} />
+          </div>
+
+          {/* Relleno el pasado, contorneado el último: es el que está pasando
+              ahora y el que cierra la cuenta, y va con la tarjeta oscura. */}
+          <div class:list={[COLUMNA[i], 'row-start-2 self-center justify-self-center']}>
+            <span
+              class:list={[
+                'block h-[9px] w-[9px] rounded-full',
+                i === ultimo ? 'border-2 border-ink-primary bg-surface-page' : 'bg-ink-primary',
+              ]}
+            ></span>
+          </div>
+        </Fragment>
+      ))
+    }
+  </div>
+</div>
+
+{/* ---------------------------------------------------------------------- */}
+{/* Vertical (abajo de lg)                                                  */}
+{/* ---------------------------------------------------------------------- */}
+<div class="relative mt-10 lg:hidden">
+  <div class="absolute bottom-5 left-1 top-5 w-px bg-tint/15"></div>
+
+  <ol class="space-y-3">
+    {
+      items.map((item, i) => (
+        <li class="relative pl-7">
+          <span
+            class:list={[
+              'absolute left-0 top-5 block h-[9px] w-[9px] rounded-full',
+              i === ultimo ? 'border-2 border-ink-primary bg-surface-page' : 'bg-ink-primary',
+            ]}
+          ></span>
+          <TarjetaAhorro {...item} oscura={i === ultimo} />
+        </li>
+      ))
+    }
+  </ol>
+</div>
+
+{/* ---------------------------------------------------------------------- */}
+{/* Resumen                                                                 */}
+{/* ---------------------------------------------------------------------- */}
+{/* Tres celdas partidas por una línea vertical. La raya va como borde
+    izquierdo de la segunda en adelante y no como separador aparte: apilado en
+    teléfono, ese borde se apaga solo. */}
+<div class="mt-10 grid grid-cols-1 rounded-2xl border border-tint/10 sm:grid-cols-3">
+  {
+    resumen.map(({ figura, label }, i) => (
+      <div
+        class:list={[
+          'px-5 py-6 text-center',
+          i > 0 && 'border-t border-tint/10 sm:border-l sm:border-t-0',
+        ]}
+      >
+        <p class="text-[24px] font-medium leading-none tracking-tight text-ink-primary">{figura}</p>
+        <p class="mt-2.5 text-[10px] uppercase tracking-[0.12em] text-ink-muted">{label}</p>
+      </div>
+    ))
+  }
+</div>

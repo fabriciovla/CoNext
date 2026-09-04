@@ -217,12 +217,12 @@ const AGENTES = {
   bajarEnLista: { es: 'Bajar en la lista', en: 'Move down' },
   encendido: { es: 'Encendido', en: 'On' },
   apagado: { es: 'Apagado', en: 'Off' },
-  porDefecto: { es: '· por defecto', en: '· default' },
+  porDefecto: { es: 'Por defecto', en: 'Default' },
   porDefectoTitle: {
     es: 'Contesta cuando ningún agente encaja',
     en: 'Answers when no agent clearly fits',
   },
-  dejaBorrador: { es: '· deja borrador', en: '· leaves a draft' },
+  dejaBorrador: { es: 'Deja borrador', en: 'Leaves a draft' },
   dejaBorradorTitle: {
     es: 'Escribe la respuesta pero te la deja como borrador',
     en: 'Writes the reply but leaves it as a draft for you',
@@ -273,6 +273,173 @@ const AGENTES = {
   guardarCambios: { es: 'Guardar cambios', en: 'Save changes' },
   crearAgente: { es: 'Crear agente', en: 'Create agent' },
   borrarAgente: { es: 'Borrar agente', en: 'Delete agent' },
+
+  // --- la tarjeta de la lista ---
+  configurar: { es: 'Configurar', en: 'Configure' },
+  verAgente: { es: 'Abrir {nombre}', en: 'Open {nombre}' },
+  atiende: { es: 'Atiende', en: 'Handles' },
+  sinEntrenar: { es: 'sin material', en: 'no material' },
+  materialUna: { es: '1 fuente', en: '1 source' },
+  materialVarias: { es: '{n} fuentes', en: '{n} sources' },
+
+  // --- la pantalla del agente ---
+  volverALista: { es: 'Volver a los agentes', en: 'Back to agents' },
+  nuevoTitulo: { es: 'Nuevo agente', en: 'New agent' },
+  identidad: { es: 'Quién es y de qué se encarga', en: 'Who it is and what it handles' },
+  identidadDesc: {
+    es: 'Con esto se decide a cuál de tus agentes le toca cada mensaje y con qué voz contesta.',
+    en: 'This decides which of your agents gets each message, and the voice it answers with.',
+  },
+  queHace: { es: 'Lo que hace', en: 'What it does' },
+  accionRutea: { es: 'Toma los mensajes de su tema', en: 'Takes messages on its topic' },
+  accionCatalogo: { es: 'Contesta precios y stock del catálogo', en: 'Answers prices and stock from the catalog' },
+  accionHorario: { es: 'Respeta tu horario de atención', en: 'Respects your business hours' },
+  accionMarca: { es: 'Te marca lo que necesita una persona', en: 'Flags what needs a person' },
+  accionEnvia: { es: 'Manda la respuesta solo', en: 'Sends the reply on its own' },
+  accionBorrador: { es: 'Te deja la respuesta como borrador', en: 'Leaves the reply as a draft for you' },
+  accionMaterial: { es: 'Usa el material que le cargaste', en: 'Uses the material you loaded' },
+  consejos: { es: 'Para que conteste mejor', en: 'To make it answer better' },
+  consejoRol: {
+    es: 'Escribí el rol como una lista de temas, no como un puesto: es lo que se compara contra cada mensaje.',
+    en: "Write the role as a list of topics, not as a job title: it's what each message gets compared against.",
+  },
+  consejoMaterial: {
+    es: 'Subí lo que ya tenés escrito —preguntas frecuentes, política de cambios, formas de pago—: son las respuestas que hoy no puede dar.',
+    en: "Upload what you already have written — FAQs, return policy, payment methods: they're the answers it can't give today.",
+  },
+  consejoProbar: {
+    es: 'Probalo acá al lado antes de prenderlo. En la prueba no se manda nada a nadie.',
+    en: "Test it right here before turning it on. Nothing gets sent to anyone in the test.",
+  },
+  comportamiento: { es: 'Cómo trabaja', en: 'How it works' },
+  hacerPorDefecto: { es: 'Que conteste por defecto', en: 'Make it the default' },
+  esElPorDefecto: {
+    es: 'Es el que contesta cuando ningún agente encaja claro con la consulta.',
+    en: "It's the one that answers when no agent clearly fits the question.",
+  },
+  noEsPorDefecto: {
+    es: 'Cuando ninguno encaja claro contesta {nombre}, que es el primero encendido de la lista.',
+    en: '{nombre} answers when none clearly fits — the first one on the list that is turned on.',
+  },
+  rendimiento: { es: 'Lo que viene haciendo', en: 'What it has been doing' },
+  rendimientoDesc: {
+    es: 'Totales de siempre, no del día abierto.',
+    en: 'All-time totals, not just the open day.',
+  },
+  guardadoAviso: { es: 'Hay cambios sin guardar', en: 'You have unsaved changes' },
+  descartar: { es: 'Descartar', en: 'Discard' },
+
+  // --- material de entrenamiento ---
+  entrenar: { es: 'Entrená a tu agente', en: 'Train your AI agent' },
+  entrenarDesc: {
+    es: 'Los documentos y enlaces con los que contesta lo que no está en el catálogo ni en los horarios.',
+    en: "The documents and links it answers from when something isn't in the catalog or the hours.",
+  },
+  entrenarVacioTitulo: { es: 'Todavía no le cargaste nada', en: 'Nothing loaded yet' },
+  entrenarVacio: {
+    es: 'Sin material, este agente solo sabe lo que escribiste arriba más tu catálogo y tu horario.',
+    en: 'Without material, this agent only knows what you wrote above plus your catalog and hours.',
+  },
+  agregarFuente: { es: 'Agregar material', en: 'Add material' },
+  buscarFuente: { es: 'Buscar en el material', en: 'Search the material' },
+  sinResultadosFuente: { es: 'Ninguna fuente coincide con “{query}”.', en: 'No source matches “{query}”.' },
+  fuenteArchivo: { es: 'Archivo', en: 'File' },
+  fuenteEnlace: { es: 'Enlace', en: 'Link' },
+  fuenteTexto: { es: 'Texto', en: 'Text' },
+  fuenteCaracteres: { es: '{n} caracteres', en: '{n} characters' },
+  fuenteUsada: {
+    es: ({ n }) => (n <= 1 ? 'la usa solo este agente' : `la usan ${n} agentes`),
+    en: ({ n }) => (n <= 1 ? 'used only by this agent' : `used by ${n} agents`),
+  },
+  encenderFuente: { es: 'Usar {nombre} en este agente', en: 'Use {nombre} in this agent' },
+  apagarFuente: { es: 'Dejar de usar {nombre} en este agente', en: 'Stop using {nombre} in this agent' },
+  borrarFuente: { es: 'Borrar {nombre} del negocio', en: 'Delete {nombre} from the business' },
+  borrarFuenteTitulo: { es: 'Borrar material', en: 'Delete material' },
+  borrarFuenteDetalle: {
+    es: 'Se borra para todos los agentes del negocio, no solo para este. Para que deje de usarlo solo este agente, apagá el interruptor.',
+    en: 'It gets deleted for every agent in the business, not just this one. To stop only this agent from using it, turn the switch off.',
+  },
+  nuevaFuenteTitulo: { es: 'Agregar material', en: 'Add material' },
+  nuevaFuenteDesc: {
+    es: 'Lo que se guarda es el texto, no el archivo: si el documento cambia, hay que subirlo de nuevo.',
+    en: 'What gets saved is the text, not the file: if the document changes, upload it again.',
+  },
+  fuenteTipoArchivo: { es: 'Un archivo', en: 'A file' },
+  fuenteTipoEnlace: { es: 'Un enlace', en: 'A link' },
+  fuenteTipoTexto: { es: 'Escribirlo acá', en: 'Write it here' },
+  soltarArchivo: { es: 'Arrastrá el archivo o buscalo', en: 'Drag the file here or browse' },
+  formatosAceptados: { es: 'PDF, TXT, MD, CSV, JSON o HTML, hasta 10 MB', en: 'PDF, TXT, MD, CSV, JSON or HTML, up to 10 MB' },
+  elegirArchivo: { es: 'Elegir archivo', en: 'Choose file' },
+  campoEnlace: { es: 'Dirección', en: 'Address' },
+  campoEnlaceHint: {
+    es: 'Se lee el texto de esa página una sola vez, ahora. Tiene que ser pública.',
+    en: "The text of that page is read once, now. It has to be public.",
+  },
+  campoTituloFuente: { es: 'Nombre', en: 'Name' },
+  campoTituloFuenteHint: {
+    es: 'Con el que lo vas a encontrar en la lista.',
+    en: "The one you'll find it by in the list.",
+  },
+  campoContenido: { es: 'Texto', en: 'Text' },
+  campoContenidoPlaceholder: {
+    es: 'Los envíos salen $3500 dentro de la ciudad y son gratis a partir de $50.000…',
+    en: 'Shipping is $3500 within the city and free over $50,000…',
+  },
+  leyendo: { es: 'Leyendo…', en: 'Reading…' },
+  agregar: { es: 'Agregar', en: 'Add' },
+
+  // --- probar el agente ---
+  probar: { es: 'Probar el agente', en: 'Test the agent' },
+  probarTab: { es: 'Chat', en: 'Chat' },
+  contextoTab: { es: 'Con qué contesta', en: 'What it answers with' },
+  probarVacioTitulo: { es: 'Escribile como si fueras un cliente', en: 'Write to it as a customer would' },
+  probarVacio: {
+    es: 'Contesta con tu catálogo, tu horario y el material que le cargaste. No se manda nada a nadie.',
+    en: "It answers using your catalog, your hours and the material you loaded. Nothing is sent to anyone.",
+  },
+  probarSinGuardar: {
+    es: 'Guardá el agente y probalo acá mismo.',
+    en: 'Save the agent and test it right here.',
+  },
+  probarPlaceholder: { es: 'Escribí un mensaje…', en: 'Type a message…' },
+  reiniciarChat: { es: 'Empezar de nuevo', en: 'Reset chat' },
+  pensando: { es: 'Escribiendo…', en: 'Typing…' },
+  probarPie: {
+    es: 'Es una prueba: no se guarda en la bandeja ni le llega a ningún cliente.',
+    en: "This is a test: nothing is saved to the inbox and no customer receives it.",
+  },
+  seHubieraMandado: { es: 'Esto salía solo', en: 'This would have been sent' },
+  seHubieraMandadoTitle: {
+    es: 'Con un mensaje real, esta respuesta se enviaba sin que la mires (si el día está abierto y estás en horario)',
+    en: "With a real message, this reply would go out without you seeing it (if the day is open and you're within hours)",
+  },
+  quedabaBorrador: { es: 'Esto te quedaba para revisar', en: 'This would wait for you' },
+  quedabaBorradorTitle: {
+    es: 'Con un mensaje real, esta respuesta quedaba como borrador para que la revises antes de mandarla',
+    en: 'With a real message, this reply would be left as a draft for you to review before sending',
+  },
+  contextoDesc: {
+    es: 'Todo esto viaja en cada respuesta. Si algo de acá está mal, la respuesta va a estar mal.',
+    en: "All of this travels with every reply. If something here is wrong, the reply will be wrong.",
+  },
+  contextoNegocio: { es: 'Negocio', en: 'Business' },
+  contextoHorario: { es: 'Horario', en: 'Hours' },
+  contextoCatalogo: { es: 'Catálogo', en: 'Catalog' },
+  contextoIdioma: { es: 'Idioma de las respuestas', en: 'Reply language' },
+  contextoMaterial: { es: 'Material del agente', en: "Agent's material" },
+  contextoProductos: {
+    es: ({ n }) => `${n} producto${n === 1 ? '' : 's'}`,
+    en: ({ n }) => `${n} product${n === 1 ? '' : 's'}`,
+  },
+  contextoFuentes: {
+    es: ({ n }) => (n === 0 ? 'sin material' : `${n} fuente${n === 1 ? '' : 's'} encendida${n === 1 ? '' : 's'}`),
+    en: ({ n }) => (n === 0 ? 'no material' : `${n} source${n === 1 ? '' : 's'} on`),
+  },
+  contextoIrA: { es: 'Cambiar', en: 'Change' },
+  contextoDiasAbiertos: {
+    es: ({ n }) => (n === 0 ? 'sin días de atención cargados' : `${n} día${n === 1 ? '' : 's'} de atención`),
+    en: ({ n }) => (n === 0 ? 'no business days set' : `${n} business day${n === 1 ? '' : 's'}`),
+  },
   seVaABorrar: { es: 'Se va a borrar', en: 'This will delete' },
   borrarDetalle: {
     es: 'Las conversaciones que venía atendiendo pasan al primer agente encendido; los mensajes que ya mandó quedan como están.',

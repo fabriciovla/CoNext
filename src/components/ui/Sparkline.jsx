@@ -1,92 +1,40 @@
-import { useId } from 'react'
-import { smoothPath } from '../../utils/curve'
-
-// Miniatura de una serie: línea violeta y el degradé que cae hasta la base. Sin
-// ejes, sin grilla y sin tooltip a propósito — no se lee un valor acá, se lee
-// una forma; el número exacto ya está al lado, en grande.
-const W = 240
-const H = 64
-// Margen vertical: sin él, el pico y el valle quedan cortados por el borde del
-// viewBox (el trazo tiene grosor y se dibuja centrado sobre la curva).
-const PAD_Y = 5
+// Miniatura de una serie: franja de barras que crecen desde la base, la misma
+// convención que "Mensajes por hora" (`HourlyActivity`) y no una curva SVG.
+// Sin ejes, sin grilla y sin tooltip a propósito — acá no se lee un valor, se
+// lee una forma; el número exacto ya está al lado, en grande. La última barra
+// es la del momento actual y va en violeta pleno; el resto, en el mismo
+// violeta apagado, así el ojo la encuentra sin que las demás compitan por
+// atención (mismo criterio que la barra pico de `HourlyActivity`).
+//
+// La escala es de mínimo a máximo de la propia serie, no desde cero: la
+// tarjeta muestra la variación del día, y contra un piso fijo en 0 una serie
+// que se mueve poco se aplana hasta desaparecer. `FLOOR` le deja un alto
+// mínimo visible al valor más bajo, para que siga leyéndose como una barra y
+// no como una raya.
+const FLOOR = 0.12
 
 export default function Sparkline({ data = [], className = '', delay = 0 }) {
-  const gradientId = useId()
   const points = data.filter((v) => Number.isFinite(v))
+  if (points.length === 0) return null
 
-  // La escala es de mínimo a máximo de la propia serie, no desde cero: la
-  // tarjeta muestra la variación del día, y contra un eje fijo en 0 una serie
-  // que se mueve poco se aplana hasta parecer una raya.
   const max = Math.max(...points)
   const min = Math.min(...points)
-  const flat = points.length < 2 || max === min
-
-  if (flat) {
-    return (
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
-        className={className}
-        aria-hidden="true"
-      >
-        <line
-          x1="0"
-          x2={W}
-          y1={H / 2}
-          y2={H / 2}
-          stroke="rgb(var(--tint) / 0.18)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    )
-  }
-
-  const step = W / (points.length - 1)
-  const coords = points.map((v, i) => ({
-    x: i * step,
-    y: PAD_Y + (1 - (v - min) / (max - min)) * (H - PAD_Y * 2),
-  }))
-
-  const line = smoothPath(coords)
-  const area = `${line} L ${W} ${H} L 0 ${H} Z`
+  const range = max - min
 
   return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      className={className}
-      aria-hidden="true"
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="rgb(var(--violet))" stopOpacity="0.32" />
-          <stop offset="100%" stopColor="rgb(var(--violet))" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      <path
-        d={area}
-        fill={`url(#${gradientId})`}
-        className="animate-fade-in"
-        style={{ '--d': `${delay + 320}ms` }}
-      />
-      {/* El SVG se estira horizontalmente (preserveAspectRatio="none"), así que
-          sin `non-scaling-stroke` el grosor de la línea cambiaría con el ancho
-          de la tarjeta y las cuatro de la fila se verían distintas. */}
-      <path
-        d={line}
-        pathLength="1"
-        fill="none"
-        stroke="rgb(var(--violet))"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-        className="animate-draw"
-        style={{ '--d': `${delay + 120}ms` }}
-      />
-    </svg>
+    <div className={`flex items-end gap-[3px] ${className}`} aria-hidden="true">
+      {points.map((v, i) => {
+        const pct = range === 0 ? 55 : Math.round((FLOOR + (1 - FLOOR) * ((v - min) / range)) * 100)
+        const actual = i === points.length - 1
+        return (
+          <div key={i} className="flex h-full min-w-0 flex-1 items-end">
+            <div
+              className={`animate-grow-up w-full rounded-full ${actual ? 'bg-violet' : 'bg-violet/25'}`}
+              style={{ height: `${pct}%`, '--d': `${delay + 320 + i * 24}ms` }}
+            />
+          </div>
+        )
+      })}
+    </div>
   )
 }

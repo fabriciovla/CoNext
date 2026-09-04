@@ -38,7 +38,7 @@ export const productoEs = {
       'Cómo está armado Conext: bandeja única, agentes de IA, catálogo, métricas y la API oficial de Meta. El CRM, página por página.',
     titulo: 'Conext, página por página.',
     bajada:
-      'Doce piezas. La bandeja, los agentes, el catálogo y lo que sostiene el número. Cada una con su propia página.',
+      'La bandeja, los agentes, el catálogo y lo que sostiene el número. Cada pieza con su propia página.',
     intro:
       'Conext es el CRM que junta los chats del negocio en un solo lugar. Estas páginas cuentan cada pieza: qué hace, cómo se usa y qué queda del lado de Meta.',
   },
@@ -247,6 +247,48 @@ export const productoEs = {
         { titulo: 'El CRM aplica las reglas', texto: 'Día abierto, horario, techo del agente. Recién ahí sale o queda borrador.' },
       ],
       cierre: 'Clasificar no es una etiqueta para un reporte. Es la puerta que decide si alguien tiene que mirar.',
+    }),
+    automatizaciones: pagina({
+      nombre: 'Automatizaciones y flujos',
+      menu: 'Cuándo sale solo, sin un árbol',
+      title: 'Automatizaciones y flujos | Conext',
+      description:
+        'Conext clasifica cada mensaje, responde lo seguro, deja borrador lo demás y avisa fuera de horario. Sin árboles de palabras clave ni un constructor de flujos.',
+      titulo: 'Se automatiza la respuesta, no el árbol de decisiones.',
+      bajada:
+        'No hay que armar un flujo por cada “hola” y cada “precio”. El modelo elige agente, decide si puede salir solo y redacta con tu catálogo.',
+      intro:
+        'En Conext la automatización es el pipeline de cada mensaje: clasificar, redactar, mandar o dejar borrador, y avisar si el local está cerrado. No es un lienzo de palabras clave.',
+      secciones: [
+        {
+          titulo: 'No es un bot de “si dice X, mandá Y”.',
+          parrafos: [
+            'No hay disparadores por palabra clave ni un enrutamiento por turnos que haya que dibujar. El modelo lee el hilo, elige el agente cuyo rol calza, marca si la respuesta es segura y escribe el texto. Un “¿tenés la campera en M y me hacen precio con la de cuero?” no entra en un árbol; entra en ventas, queda pendiente si toca descuento, y el stock de las dos prendas va en la misma respuesta.',
+            'Lo que sí está ruteado de antemano son las carpetas del turno: Mías, Sin asignar, Pendientes. Asignar un hilo a alguien es el único “flujo” de personas. No hay round-robin ni colas por horario de cada empleado: hay un responsable, o nadie.',
+          ],
+        },
+        {
+          titulo: 'Cuatro frenos, no un prompt escondido.',
+          parrafos: [
+            'Para que una respuesta salga sola tienen que cumplirse a la vez: categoría `automatico`, el modelo dijo que se puede enviar, el agente tiene el interruptor prendido, hay un día abierto y estás en horario. Si falta una, el texto queda de borrador en el hilo. El equipo lo manda o lo edita. No hay un limbo.',
+            'Fuera de horario va el aviso de ausencia, con un tope de doce horas para no repetirlo cada cinco minutos. Ese aviso se reserva con un update condicional: dos mensajes a la misma hora no mandan dos “estamos cerrados”.',
+          ],
+        },
+        {
+          titulo: 'Respuestas rápidas no. Catálogo sí.',
+          parrafos: [
+            'El composer no trae una tira de macros. Lo que se reutiliza es el catálogo y el rol del agente: el precio no se pega a mano en diez chats, se cita. Si hace falta escribir primero después de las 24 horas, salen las plantillas de la WABA —las aprueba Meta, no una copia local.',
+            'La última palabra sigue siendo de una persona. El automático es un techo por agente, no un piloto que se prende para todo el CRM el día del alta.',
+          ],
+        },
+      ],
+      pasos: [
+        { titulo: 'Entra el mensaje', texto: 'Se elige agente, se clasifica y se redacta en una sola llamada, con el catálogo a la vista.' },
+        { titulo: 'Se aplican las reglas', texto: 'Interruptor, día abierto, horario. Fuera de hora, el aviso de ausencia. Si no cierra, borrador.' },
+        { titulo: 'Sale o lo mirás vos', texto: 'El cliente recibe un WhatsApp del negocio, o el equipo ve el texto listo en el hilo.' },
+      ],
+      cierre:
+        'Si lo que necesitás es un constructor de flujos con comentarios de Instagram y secuencias, esa es otra herramienta. Acá se automatiza atender lo que ya escribió el cliente.',
     }),
     catalogo: pagina({
       nombre: 'Catálogo y stock',
@@ -471,7 +513,7 @@ export const productoEn = {
       'How Conext is put together: one inbox, AI agents, catalog, metrics, and the official Meta API. The CRM, page by page.',
     titulo: 'Conext, page by page.',
     bajada:
-      'Twelve pieces. The inbox, the agents, the catalog, and what holds the number. Each one has its own page.',
+      'The inbox, the agents, the catalog, and what holds the number. Each piece has its own page.',
     intro:
       'Conext is the CRM that puts the business chats in one place. These pages cover each piece: what it does, how you use it, and what stays on Meta’s side.',
   },
@@ -679,6 +721,48 @@ export const productoEn = {
         { titulo: 'The CRM applies the rules', texto: 'Open day, hours, the agent’s ceiling. Only then it sends or stays a draft.' },
       ],
       cierre: 'Classification is not a label for a report. It is the door that decides whether a person has to look.',
+    }),
+    automatizaciones: pagina({
+      nombre: 'Automations and flows',
+      menu: 'When it sends on its own, with no tree',
+      title: 'Automations and flows | Conext',
+      description:
+        'Conext classifies every message, replies to what is safe, leaves a draft for the rest, and notifies after hours. No keyword trees and no flow builder.',
+      titulo: 'The reply is automated, not the decision tree.',
+      bajada:
+        'You do not build a flow for every “hello” and every “price”. The model picks an agent, decides whether it can go out on its own, and writes from your catalog.',
+      intro:
+        'In Conext automation is the pipeline of each message: classify, draft, send or leave a draft, and notify if the shop is closed. It is not a keyword canvas.',
+      secciones: [
+        {
+          titulo: 'It is not a “if they say X, send Y” bot.',
+          parrafos: [
+            'There are no keyword triggers and no shift routing you have to draw. The model reads the thread, picks the agent whose role fits, marks whether the reply is safe, and writes the text. “Do you have the jacket in M, and can you do a price with the leather one?” does not fit a tree; it goes to sales, stays pending if it touches a discount, and both items’ stock go in the same reply.',
+            'What is routed in advance are the shift folders: Mine, Unassigned, Pending. Assigning a thread to someone is the only people “flow”. There is no round-robin and no queue per employee hours: there is an owner, or nobody.',
+          ],
+        },
+        {
+          titulo: 'Four brakes, not a hidden prompt.',
+          parrafos: [
+            'For a reply to go out on its own, all of these have to be true at once: category `automatico`, the model said it can send, the agent’s switch is on, there is an open day, and you are inside hours. One missing, and the text stays a draft in the thread. The team sends it or edits it. There is no limbo.',
+            'Outside hours the away notice goes out, with a twelve-hour cap so it is not repeated every five minutes. That notice is reserved with a conditional update: two messages at the same time do not send two “we are closed”.',
+          ],
+        },
+        {
+          titulo: 'No canned replies. A catalog, yes.',
+          parrafos: [
+            'The composer has no strip of macros. What gets reused is the catalog and the agent’s role: the price is not pasted by hand into ten chats, it is cited. If you need to write first after 24 hours, the WABA templates go out — Meta approves them, not a local copy.',
+            'The last word still belongs to a person. Auto-send is a ceiling per agent, not a pilot you turn on for the whole CRM on signup day.',
+          ],
+        },
+      ],
+      pasos: [
+        { titulo: 'The message comes in', texto: 'Agent, classification, and the reply happen in one call, with the catalog in view.' },
+        { titulo: 'The rules are applied', texto: 'Switch, open day, hours. After hours, the away notice. If it does not close, a draft.' },
+        { titulo: 'It goes out or you look at it', texto: 'The customer gets a WhatsApp from the business, or the team sees the text ready in the thread.' },
+      ],
+      cierre:
+        'If what you need is a flow builder with Instagram comments and sequences, that is another tool. Here what is automated is answering what the customer already wrote.',
     }),
     catalogo: pagina({
       nombre: 'Catalog and stock',

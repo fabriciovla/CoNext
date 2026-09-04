@@ -96,7 +96,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
 ---
 
 <div
-  class="film relative h-[440px] w-full overflow-hidden bg-surface-page text-left sm:h-[500px] lg:h-[560px]"
+  class="film relative h-[500px] w-full overflow-hidden bg-surface-page text-left sm:h-[600px]"
   data-film
   data-escena="martin"
   data-sugerencia="si"
@@ -104,7 +104,12 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
   data-cursor="no"
   aria-hidden="true"
 >
-  <div class="flex h-full">
+  {/* Igual que en el Hero: se dibuja un 14% más grande y se escala 0.88, así
+      la interfaz se lee a tamaño de escritorio y no estirada al alto de la
+      tarjeta. Sin esto, al llevar el marco a la altura del Hero, el contenido
+      quedaba con el mismo tamaño chico de antes flotando en un marco más
+      alto. */}
+  <div class="absolute left-1/2 top-0 flex h-[114%] w-[114%] origin-top -translate-x-1/2 scale-[0.88]">
     <BarraMock className="hidden w-[212px] lg:flex" lang={lang} />
 
     {/* ------------------------------------------------------------------ */}

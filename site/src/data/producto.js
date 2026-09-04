@@ -1,10 +1,10 @@
-// Las doce páginas de producto. El menú, el pie y las rutas leen de acá:
+// Las páginas de producto. El menú, el pie y las rutas leen de acá:
 // un slug nuevo es una fila, no tres archivos que se desincronizan.
 // Los textos viven en i18n (`producto.paginas[slug]`); acá solo la forma.
 
 export const PRODUCTO_COLUMNAS = [
   { id: 'atencion', slugs: ['bandeja', 'carpetas', 'notas'] },
-  { id: 'inteligencia', slugs: ['agentes', 'borrador', 'clasificacion'] },
+  { id: 'inteligencia', slugs: ['agentes', 'borrador', 'clasificacion', 'automatizaciones'] },
   { id: 'operacion', slugs: ['catalogo', 'metricas', 'stock'] },
   { id: 'plataforma', slugs: ['api-whatsapp', 'equipo', 'datos'] },
 ]
@@ -16,6 +16,7 @@ export const PRODUCTO_PAGINAS = [
   { slug: 'agentes', columna: 'inteligencia', icono: 'sparkles' },
   { slug: 'borrador', columna: 'inteligencia', icono: 'bolt' },
   { slug: 'clasificacion', columna: 'inteligencia', icono: 'layers' },
+  { slug: 'automatizaciones', columna: 'inteligencia', icono: 'clock' },
   { slug: 'catalogo', columna: 'operacion', icono: 'box' },
   { slug: 'metricas', columna: 'operacion', icono: 'chart' },
   { slug: 'stock', columna: 'operacion', icono: 'alert' },

@@ -51,7 +51,10 @@ export default function ConversationList({
   const [searchOpen, setSearchOpen] = useState(false)
 
   return (
-    <div className="flex h-full w-[336px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-card">
+    <div
+      data-tour="inbox-lista"
+      className="flex h-full w-[336px] shrink-0 flex-col border-r border-tint/[0.07] bg-surface-card"
+    >
       <header className="shrink-0 px-3 pt-2.5">
         <div className="flex items-center justify-between gap-2 border-b border-tint/[0.07]">
           <div className="flex items-center gap-4">

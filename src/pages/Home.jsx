@@ -90,7 +90,10 @@ export default function Home({
       <div role="status" aria-label={t('inicio.cargando')}>
         <PageHeader title={t('inicio.titulo')} description={`${fecha} · ${contexto}`} />
 
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* El hueco también lleva el `data-tour`: el recorrido guiado empieza
+            justo acá, y arrancando con los datos todavía en viaje el primer
+            paso no tendría a quién señalar y se saltearía solo. */}
+        <div data-tour="home-kpis" className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <SkeletonCard key={i} lineas={1} />
           ))}
@@ -117,7 +120,10 @@ export default function Home({
       {/* La grilla de KPIs entra escalonada de izquierda a derecha; el mismo
           retraso se le pasa al contador para que el número arranque con la
           tarjeta y no antes. */}
-      <div className="stagger mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        data-tour="home-kpis"
+        className="stagger mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
         <StatCard
           label={t('inicio.kpiMensajes')}
           value={total}

@@ -7,4 +7,41 @@ Allow: /
 Disallow: /app$
 Disallow: /app/
 
-Sitemap: https://www.conext.lat/sitemap-index.xml
+# Catálogo para modelos (GEO). El índice es el formato de llmstxt.org;
+# el -full trae el cuerpo de cada página, sin parsear HTML.
+# https://conext.lat/llms.txt
+# https://conext.lat/llms-full.txt
+# https://conext.lat/en/llms.txt
+# https://conext.lat/en/llms-full.txt
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://conext.lat/sitemap-index.xml

@@ -303,6 +303,14 @@ export const IconGoogle = ({ size = 16, className = '', ...rest }) => (
   </svg>
 )
 
+export const IconInstagram = (props) => (
+  <Svg {...props}>
+    <rect x="4" y="4" width="16" height="16" rx="4.5" />
+    <circle cx="12" cy="12" r="3.5" />
+    <circle cx="16.7" cy="7.3" r="0.9" />
+  </Svg>
+)
+
 // Marca de WhatsApp: de relleno, la silueta de línea no se reconoce. Va con
 // viewBox propio porque el trazado original no está en la grilla de 24.
 export const IconWhatsApp = ({ size = 20, className = '', ...rest }) => (

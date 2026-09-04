@@ -75,14 +75,17 @@ const esquemaSitio = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- El PNG va primero: Chrome no pinta un SVG con máscara en la pestaña,
-         deja el ícono en blanco y pone la inicial del <title> (la C de
-         conext). Pasa justo al volver del checkout de Dodo, que recarga el
-         favicon. El SVG sigue detrás, ya sin máscara, para quien sí lo dibuja.
-         El apple-touch-icon va aparte: iOS compone la transparencia sobre negro. -->
+    <!-- Google Search exige un favicon en múltiplo de 48px (o SVG). El PNG
+         de 32 que iba primero es el que se veía borroso en los resultados.
+         El SVG sigue detrás: Chrome no pinta máscaras en la pestaña, y este
+         archivo ya no las trae, pero un raster de 48/96 es lo que el crawler
+         de Google toma. apple-touch-icon va aparte: iOS recorta sobre negro. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <!-- El manifiesto existe solo para que Android encuentre los íconos de 192 y
          512 que vinieron con el diseño; va con `display: browser` porque esto es
          una landing y no una app para instalar. -->
@@ -97,6 +100,18 @@ const esquemaSitio = {
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonica} />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href={new URL(lang === 'en' ? '/en/llms.txt' : '/llms.txt', `${origen}/`).href}
+      title="llms.txt"
+    />
+    <link
+      rel="alternate"
+      type="text/plain"
+      href={new URL(lang === 'en' ? '/en/llms-full.txt' : '/llms-full.txt', `${origen}/`).href}
+      title="llms-full.txt"
+    />
     <link rel="alternate" hreflang="es" href={altEs} />
     <link rel="alternate" hreflang="en" href={altEn} />
     <link rel="alternate" hreflang="x-default" href={altEs} />

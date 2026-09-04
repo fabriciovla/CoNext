@@ -542,6 +542,7 @@ export default function ChatPanel({
           mismo poll: apareciendo juntos no se lee que una contesta a la otra. */}
       <ul
         ref={threadRef}
+        data-tour="inbox-hilo"
         className="min-h-0 flex-1 overflow-y-auto px-[max(1.25rem,calc((100%-56rem)/2))] py-5"
       >
         {visibleMessages.map((message, i) => {
@@ -592,7 +593,7 @@ export default function ChatPanel({
           Sin línea divisoria arriba: lo que separa al composer del hilo es el
           aire y su propia forma, no una raya cruzando el panel. Esa raya, más
           el borde del cuadro, eran dos separaciones para lo mismo. */}
-      <div className="mx-auto w-full max-w-[48rem] shrink-0 px-5 pb-4 pt-2">
+      <div data-tour="inbox-composer" className="mx-auto w-full max-w-[48rem] shrink-0 px-5 pb-4 pt-2">
         {/* La sugerencia de la IA es una tarjeta propia apoyada arriba del
             cuadro, no algo metido adentro: el cuadro es lo que uno escribe y
             esto es lo que propone el bot. Adentro competía con el texto

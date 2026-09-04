@@ -6,6 +6,7 @@ import SettingCard from '../components/ui/SettingCard'
 import { IconCheck, IconChevronDown, IconCopy, IconMoon, IconSun } from '../components/ui/icons'
 import WhatsappConnection from '../components/WhatsappConnection'
 import MetaConnection from '../components/MetaConnection'
+import { PASOS as PASOS_TOUR } from '../components/Tour'
 import { weekDays } from '../data/mockData'
 import { formatPhone } from '../utils/phone'
 import { storeSchedule } from '../utils/metrics'
@@ -461,11 +462,30 @@ function BotonCopiar({ texto, ariaLabel }) {
   )
 }
 
-export default function Settings({ settings, onUpdate, theme, onToggleTheme }) {
+export default function Settings({
+  settings,
+  onUpdate,
+  theme,
+  onToggleTheme,
+  onTour,
+  // Sección que se pide abrir desde afuera (hoy, el paso de canales del
+  // recorrido guiado). Se consume y se suelta enseguida, igual que el `focus`
+  // de Agentes: así pedir la misma sección dos veces vuelve a abrirla, y una
+  // vez consumido la persona puede navegar a otra sin que esto la traiga de
+  // vuelta.
+  focusSeccion = null,
+  onFocusHandled,
+}) {
   const { t, idioma, setIdioma, locale } = useIdioma()
-  const [seccion, setSeccion] = useState('general')
+  const [seccion, setSeccion] = useState(focusSeccion ?? 'general')
   const [zona, setZona] = useState(settings.timezone || ZONA_POR_DEFECTO)
   const zonaRemota = useRef(settings.timezone)
+
+  useEffect(() => {
+    if (!focusSeccion) return
+    if (SECCIONES.includes(focusSeccion)) setSeccion(focusSeccion)
+    onFocusHandled?.()
+  }, [focusSeccion, onFocusHandled])
 
   // Igual que en los campos de texto: la zona elegida no se pisa mientras no se
   // guarde, pero sí adopta lo que llega del server la primera vez.
@@ -593,6 +613,25 @@ export default function Settings({ settings, onUpdate, theme, onToggleTheme }) {
                   <p className="text-[13px] text-ink-faint">{t('config.sinNumero')}</p>
                 )}
               </SettingCard>
+
+              {/* Volver a hacer el recorrido guiado. Va en General y no en
+                  Apariencia porque no es una preferencia de cómo se ve la app:
+                  es la ayuda de la app, y este es el primer lugar donde alguien
+                  la busca. La tarjeta no tiene control en el medio —lo único que
+                  hace es empezar—, así que su cuerpo es la explicación y la
+                  acción va en la franja de siempre. */}
+              {onTour && (
+                <SettingCard
+                  title={t('config.tourTitulo')}
+                  description={t('config.tourDesc')}
+                  hint={t('config.tourHint', { n: PASOS_TOUR.length })}
+                  action={
+                    <Button size="sm" variant="secondary" onClick={onTour}>
+                      {t('config.tourAccion')}
+                    </Button>
+                  }
+                />
+              )}
             </>
           )}
 
@@ -604,7 +643,10 @@ export default function Settings({ settings, onUpdate, theme, onToggleTheme }) {
             // altura: la ficha de Meta tiene dos interruptores que la de
             // WhatsApp no tiene, e igualarlas deja cien píxeles de nada adentro
             // de la de WhatsApp.
-            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+            <div
+              data-tour="config-canales"
+              className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2"
+            >
               <WhatsappConnection />
               <MetaConnection />
             </div>

@@ -5,6 +5,7 @@ import TitleBar from './components/TitleBar'
 import AppNav from './components/AppNav'
 import ApiErrorBanner from './components/ApiErrorBanner'
 import WelcomeTour, { bienvenidaPendiente } from './components/WelcomeTour'
+import Tour from './components/Tour'
 import Modal from './components/ui/Modal'
 import Button from './components/ui/Button'
 import Inbox from './pages/Inbox'
@@ -118,6 +119,13 @@ export default function App() {
   // leyera el flag al dibujar, marcarlo visto desde adentro del propio modal lo
   // haría desaparecer sin la animación de salida y antes de navegar.
   const [bienvenida, setBienvenida] = useState(bienvenidaPendiente)
+  // El recorrido guiado. Se prende desde la bienvenida y desde Configuración, y
+  // mientras está prendido es él quien maneja la navegación: cada paso pide su
+  // pantalla por `irDelTour`.
+  const [tour, setTour] = useState(false)
+  // Sección de Configuración que se pide abrir desde afuera. Como el `focus` de
+  // Agentes: la página la consume y la suelta.
+  const [settingsFocus, setSettingsFocus] = useState(null)
   // El cuestionario de alta va antes que la dashboard. El login del sitio ya
   // corta a quien entra con el correo, pero el social vuelve acá y quién entró
   // lo resuelve Supabase de este lado: este es el único lugar donde se lo puede
@@ -174,6 +182,33 @@ export default function App() {
   }
 
   const clearAgentFocus = useCallback(() => setAgentFocus(null), [])
+  const clearSettingsFocus = useCallback(() => setSettingsFocus(null), [])
+
+  // Lo que el tour necesita de la app: llevarla a la pantalla del paso. Va con
+  // `useCallback` sin dependencias porque el tour la guarda y la llama una vez
+  // por paso; una función nueva en cada render lo haría rehacer el paso entero.
+  //
+  // Un paso no toca lo que no nombra: sin `pagina` se queda donde está —los
+  // pasos de la barra sirven en cualquier pantalla— y sin `seccion` no le
+  // manda nada a Configuración.
+  const irDelTour = useCallback((paso) => {
+    if (paso.pagina) {
+      setPage(paso.pagina)
+      setFocusPhone(null)
+      if (paso.pagina !== 'inbox') setViewingDayId(null)
+    }
+    if (paso.seccion) setSettingsFocus(paso.seccion)
+  }, [])
+
+  // Empezar el tour cierra lo que haya abierto y arranca desde Inicio, que es
+  // el primer paso: entrando desde Configuración, el recorrido tiene que
+  // empezar por el principio y no por donde quedó la pantalla.
+  const empezarTour = useCallback(() => {
+    setBienvenida(false)
+    setTour(true)
+  }, [])
+
+  const cerrarTour = useCallback(() => setTour(false), [])
 
   const selectDay = (day) => {
     setViewingDayId((prev) => (prev === day.id ? null : day.id))
@@ -372,6 +407,11 @@ export default function App() {
           <Agents
             agents={agents}
             stats={agentStats}
+            // La pantalla de un agente muestra con qué contesta —el negocio, el
+            // horario, el catálogo, el idioma—: es lo primero que hay que mirar
+            // cuando la prueba devuelve algo raro, y lleva a dónde se cambia.
+            settings={settings}
+            productCount={products.length}
             cargando={agentsCargando}
             error={agentsError}
             focus={agentFocus}
@@ -380,6 +420,7 @@ export default function App() {
             onUpdate={updateAgent}
             onDelete={deleteAgent}
             onReorder={reorderAgents}
+            onNavigate={navigate}
           />
         )}
         {page === 'templates' && (
@@ -399,6 +440,9 @@ export default function App() {
             onUpdate={updateSettings}
             theme={theme}
             onToggleTheme={toggleTheme}
+            onTour={empezarTour}
+            focusSeccion={settingsFocus}
+            onFocusHandled={clearSettingsFocus}
           />
         )}
       </Layout>
@@ -412,8 +456,14 @@ export default function App() {
           nombre={user.username}
           onClose={() => setBienvenida(false)}
           onNavigate={navigate}
+          onTour={empezarTour}
         />
       )}
+
+      {/* El recorrido guiado va arriba de todo lo demás —incluida la barra de
+          la izquierda, que es lo primero que señala— y afuera del Layout: no es
+          una pantalla más de la app, es algo apoyado sobre la app. */}
+      {tour && <Tour onIr={irDelTour} onClose={cerrarTour} />}
 
       {/* El botón de cerrar el día está en la barra, que ahora se ve en toda la
           app: la confirmación tiene que vivir igual de arriba. */}

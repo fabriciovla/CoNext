@@ -1,58 +1,42 @@
 ---
 import Base from '../layouts/Base.astro'
-import {
-  IconAlert,
-  IconBox,
-  IconBolt,
-  IconChart,
-  IconInbox,
-  IconLayers,
-  IconNote,
-  IconShield,
-  IconSparkles,
-  IconTag,
-  IconUsers,
-  IconWhatsApp,
-} from '../components/icons.jsx'
-import { PRODUCTO_COLUMNAS, PRODUCTO_PAGINAS } from '../data/producto'
+import { SECCIONES } from '../data/secciones'
 import { getLocale, t, pathFor } from '../i18n/utils'
+import { ICONOS_PAGINA } from '../lib/iconosPagina.js'
 import { origenDe, urlCanonico } from '../lib/seo'
 
-const ICONOS = {
-  inbox: IconInbox,
-  tag: IconTag,
-  note: IconNote,
-  sparkles: IconSparkles,
-  bolt: IconBolt,
-  layers: IconLayers,
-  box: IconBox,
-  chart: IconChart,
-  alert: IconAlert,
-  whatsapp: IconWhatsApp,
-  users: IconUsers,
-  shield: IconShield,
-}
-
+const { seccion } = Astro.props
+const def = SECCIONES[seccion]
 const lang = getLocale(Astro)
-const p = t(lang).producto
-const indice = p.indice
+const copy = t(lang)[def.i18n]
+const indice = copy.indice
 const canonica = urlCanonico(Astro.url.pathname, Astro.site).href
 
-const columnas = PRODUCTO_COLUMNAS.map((columna) => ({
-  id: columna.id,
-  titulo: p.columnas[columna.id],
-  paginas: columna.slugs.map((slug) => {
-    const meta = PRODUCTO_PAGINAS.find((item) => item.slug === slug)
-    const pagina = p.paginas[slug]
-    return {
-      slug,
-      href: pathFor(lang, `/producto/${slug}`),
-      nombre: pagina.nombre,
-      menu: pagina.menu,
-      Icono: ICONOS[meta.icono],
-    }
-  }),
-}))
+const itemDe = (slug) => {
+  const meta = def.paginas.find((item) => item.slug === slug)
+  const pagina = copy.paginas[slug]
+  return {
+    slug,
+    href: pathFor(lang, `${def.path}/${slug}`),
+    nombre: pagina.nombre,
+    menu: pagina.menu,
+    Icono: ICONOS_PAGINA[meta.icono],
+  }
+}
+
+const grupos = def.columnas
+  ? def.columnas.map((columna) => ({
+      id: columna.id,
+      titulo: copy.columnas[columna.id],
+      paginas: columna.slugs.map(itemDe),
+    }))
+  : [
+      {
+        id: seccion,
+        titulo: null,
+        paginas: def.paginas.map((item) => itemDe(item.slug)),
+      },
+    ]
 
 const origen = origenDe(Astro.site)
 const ESQUEMA = {
@@ -66,8 +50,8 @@ const ESQUEMA = {
       inLanguage: lang === 'en' ? 'en' : 'es',
       isPartOf: { '@id': `${origen}/#aplicacion` },
       about: { '@id': `${origen}/#org` },
-      hasPart: columnas.flatMap((columna) =>
-        columna.paginas.map((pagina) => ({
+      hasPart: grupos.flatMap((grupo) =>
+        grupo.paginas.map((pagina) => ({
           '@type': 'WebPage',
           name: pagina.nombre,
           url: urlCanonico(pagina.href, Astro.site).href,
@@ -93,6 +77,8 @@ const ESQUEMA = {
     },
   ],
 }
+
+const variasColumnas = grupos.length > 1
 ---
 
 <Base title={indice.title} description={indice.description}>
@@ -116,13 +102,18 @@ const ESQUEMA = {
       }
     </div>
 
-    <div class="mt-16 grid grid-cols-1 gap-14 sm:grid-cols-2 xl:grid-cols-4 xl:gap-10">
+    <div
+      class:list={[
+        'mt-16 grid grid-cols-1 gap-14',
+        variasColumnas ? 'sm:grid-cols-2 xl:grid-cols-4 xl:gap-10' : 'sm:grid-cols-2 lg:grid-cols-3 lg:gap-8',
+      ]}
+    >
       {
-        columnas.map((columna) => (
-          <section id={columna.id} class="min-w-0">
-            <h2 class="text-[13px] font-medium text-ink-muted">{columna.titulo}</h2>
-            <ul class="mt-4 space-y-1">
-              {columna.paginas.map(({ href, nombre, menu, Icono }) => (
+        grupos.map((grupo) => (
+          <section id={grupo.id} class="min-w-0">
+            {grupo.titulo && <h2 class="text-[13px] font-medium text-ink-muted">{grupo.titulo}</h2>}
+            <ul class:list={[grupo.titulo ? 'mt-4' : 'mt-0', 'space-y-1']}>
+              {grupo.paginas.map(({ href, nombre, menu, Icono }) => (
                 <li>
                   <a
                     href={href}

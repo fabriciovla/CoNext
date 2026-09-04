@@ -5,47 +5,23 @@ import Boton from '../components/Boton.jsx'
 import { LogoMarca } from '../components/Logo.jsx'
 import AppMock from '../components/landing/AppMock.jsx'
 import ControlFilm from '../components/landing/ControlFilm.astro'
+import LineaAhorro from '../components/landing/LineaAhorro.astro'
 import Faq from '../components/landing/Faq.astro'
 import {
   IconArrowRight,
-  IconBolt,
-  IconBox,
-  IconChart,
   IconCheck,
   IconChevronRight,
-  IconClock,
-  IconInbox,
   IconShield,
-  IconSparkles,
   IconTag,
   IconWhatsApp,
 } from '../components/icons.jsx'
 import { WHATSAPP_URL } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
-import { LANDING_A_PRODUCTO } from '../data/producto'
 import { origenDe, urlCanonico } from '../lib/seo.js'
 
 const lang = getLocale(Astro)
 const l = t(lang).landing
 const ayudaHref = pathFor(lang, '/ayuda')
-
-const ICONOS = {
-  bandeja: IconInbox,
-  agentes: IconSparkles,
-  automatico: IconBolt,
-  productos: IconBox,
-  horarios: IconClock,
-  dia: IconChart,
-}
-
-const FUNCIONES = Object.fromEntries(
-  l.funciones.map((f) => [f.id, { ...f, Icono: ICONOS[f.id] }]),
-)
-
-const GRUPOS_FUNCIONES = l.grupos.map((grupo) => ({
-  ...grupo,
-  funciones: grupo.ids.map((id) => FUNCIONES[id]),
-}))
 
 const ICONOS_GARANTIA = [IconShield, IconTag, IconCheck]
 const GARANTIAS = l.garantias.map((item, i) => ({ ...item, Icono: ICONOS_GARANTIA[i] }))
@@ -174,55 +150,20 @@ const ESQUEMA = {
   </section>
 
   {/* ---------------------------------------------------------------------- */}
-  {/* Funciones                                                               */}
+  {/* Lo que se ahorra                                                        */}
   {/* ---------------------------------------------------------------------- */}
+  {/* Reemplaza a la grilla de funciones ("Qué es Conext"): esas seis
+      capacidades ya tienen su propia página por `/producto/*` y siguen
+      alimentando el featureList del schema.org de más arriba. Acá lo que
+      importa no es qué hace el CRM sino qué cambia al usarlo — la misma
+      pregunta del cliente resuelta a mano contra resuelta por Conext. El id
+      "funciones" se mantiene porque el pie de página todavía linkea `/#funciones`
+      desde la columna Recursos. */}
   <section id="funciones" class="scroll-mt-24 py-24 sm:py-32">
     <div class={CONTENEDOR}>
-      <Titulo etiqueta={l.funcionesEtiqueta} titulo={l.funcionesTitulo} texto={l.funcionesTexto} />
-
-      <div class="mt-16 border-y border-tint/10">
-        {
-          GRUPOS_FUNCIONES.map(({ nombre, bajada, funciones }, grupo) => (
-            <div
-              class:list={[
-                'grid grid-cols-1 lg:grid-cols-[0.72fr_1fr_1fr]',
-                grupo > 0 && 'border-t border-tint/10',
-              ]}
-            >
-              <div class="py-7 sm:py-8 lg:pr-10">
-                <span class="text-[12px] font-semibold text-violet">0{grupo + 1}</span>
-                <h3 class="mt-3 text-[18px] font-medium text-ink-primary">{nombre}</h3>
-                <p class="mt-1.5 text-[19px] font-normal leading-[28px] text-ink-secondary">{bajada}</p>
-              </div>
-
-              {funciones.map(({ id, Icono, titulo, texto }, funcion) => {
-                const destino = LANDING_A_PRODUCTO[id]
-                const href = destino ? pathFor(lang, `/producto/${destino}`) : undefined
-                const Tag = href ? 'a' : 'div'
-                return (
-                <Tag
-                  id={id}
-                  {...(href ? { href } : {})}
-                  class:list={[
-                    'group min-w-0 scroll-mt-24 border-t border-tint/10 py-7 sm:py-8 lg:border-l lg:border-t-0 lg:px-8',
-                    funcion === 1 && 'lg:pr-0',
-                    href && 'transition-colors duration-200 hover:bg-tint/[0.03]',
-                  ]}
-                >
-                  <div class="flex items-center gap-3">
-                    <Icono
-                      size={20}
-                      className="shrink-0 text-violet transition-colors duration-200 group-hover:text-ink-primary"
-                    />
-                    <h4 class="text-[18px] font-medium text-ink-primary">{titulo}</h4>
-                  </div>
-                  <p class="mt-3 max-w-md text-[15px] leading-relaxed text-ink-secondary">{texto}</p>
-                </Tag>
-                )
-              })}
-            </div>
-          ))
-        }
+      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{l.ahorroEtiqueta}</p>
+      <div class="mt-6 border-t border-tint/10 pt-16 sm:pt-20">
+        <LineaAhorro items={l.ahorros} resumen={l.ahorroResumen} />
       </div>
     </div>
   </section>
@@ -232,9 +173,9 @@ const ESQUEMA = {
   {/* ---------------------------------------------------------------------- */}
   <section id="control" class="fondo-seccion scroll-mt-24 pt-20 sm:pt-28">
     <div class={CONTENEDOR}>
-      <Titulo etiqueta={l.controlEtiqueta} titulo={l.controlTitulo} texto={l.controlTexto} />
+      <p class="text-[12px] font-semibold uppercase tracking-[0.12em] text-violet">{l.controlEtiqueta}</p>
+      <div class="mt-6 border-t border-tint/10"></div>
     </div>
-
     <div class={`${CONTENEDOR_MUESTRA} mt-14 sm:mt-16`}>
       <div class="relative contain-paint overflow-hidden rounded-2xl border border-tint/10 bg-surface-nav shadow-pop">
         <div class="flex items-center gap-1.5 border-b border-tint/[0.07] px-4 py-2.5">

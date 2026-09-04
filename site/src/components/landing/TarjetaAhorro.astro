@@ -1,0 +1,53 @@
+---
+// Una tarjeta de la línea de "Lo que se gana". Cuatro renglones y siempre los
+// mismos: el rótulo corto en monoespaciada, el número grande, qué mide y una
+// línea de contexto.
+//
+// `oscura` es la última de la línea, la que cierra la cuenta. Ahí el texto va
+// sobre `ink-primary`, así que sale de `ink-inverted`. Los dos niveles con alfa
+// son la excepción a "el texto nunca lleva alfa": esa regla existe porque el
+// mismo alfa sobre fondo claro y sobre oscuro no se lee igual, y acá el fondo
+// es fijo —el sitio no tiene tema oscuro— y no hay un token de texto apagado
+// para lo que va encima de la tinta.
+const { tag, figura, metrica, contexto, oscura = false } = Astro.props
+---
+
+<div
+  class:list={[
+    'rounded-xl border p-4',
+    oscura ? 'border-ink-primary bg-ink-primary' : 'border-tint/10 bg-surface-card',
+  ]}
+>
+  <p
+    class:list={[
+      'font-mono text-[10px] tracking-wide',
+      oscura ? 'text-ink-inverted/60' : 'text-ink-faint',
+    ]}
+  >
+    {tag}
+  </p>
+  <p
+    class:list={[
+      'mt-2 text-[24px] font-medium leading-none tracking-tight',
+      oscura ? 'text-ink-inverted' : 'text-ink-primary',
+    ]}
+  >
+    {figura}
+  </p>
+  <p
+    class:list={[
+      'mt-1.5 text-[13px] font-medium',
+      oscura ? 'text-ink-inverted' : 'text-ink-primary',
+    ]}
+  >
+    {metrica}
+  </p>
+  <p
+    class:list={[
+      'mt-1.5 text-[12px] leading-relaxed',
+      oscura ? 'text-ink-inverted/70' : 'text-ink-secondary',
+    ]}
+  >
+    {contexto}
+  </p>
+</div>

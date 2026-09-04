@@ -42,7 +42,16 @@ function buildFunction(agents) {
   }
 }
 
-export async function classifyAndDraft({ settings, products, agents, currentAgent, history, text }) {
+export async function classifyAndDraft({
+  settings,
+  products,
+  agents,
+  currentAgent,
+  history,
+  text,
+  // Lo que se subió para entrenar a cada agente, por key. Ver `systemPrompt`.
+  conocimiento = {},
+}) {
   const contents = [
     ...history.map((m) => ({
       role: m.direction === 'in' ? 'user' : 'model',
@@ -56,7 +65,7 @@ export async function classifyAndDraft({ settings, products, agents, currentAgen
     model: DRAFT_MODEL,
     contents,
     config: {
-      systemInstruction: buildSystemPrompt(settings, products, agents, currentAgent),
+      systemInstruction: buildSystemPrompt(settings, products, agents, currentAgent, conocimiento),
       tools: [{ functionDeclarations: [declaration] }],
       toolConfig: {
         functionCallingConfig: {

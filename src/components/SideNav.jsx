@@ -36,7 +36,7 @@ export function NavRow({ icon, emoji, label, count, active, onClick }) {
       // llevaba además una barrita violeta pegada al borde izquierdo: era una
       // segunda marca para lo mismo, y con una por cada sección, carpeta y
       // agente, la columna quedaba con una fila de rayitas al costado.
-      className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13.5px]
+      className={`group flex w-full items-center gap-2.5 rounded-2xl px-2.5 py-2 text-left text-[13.5px]
         transition-colors duration-150
         ${active ? 'bg-tint/[0.09] font-medium text-ink-primary' : 'text-ink-muted hover:bg-tint/[0.05] hover:text-ink-primary'}`}
     >
@@ -104,6 +104,10 @@ export default function SideNav({
   onToggleTheme,
   children,
   footer,
+  // "Bandeja" hace de carpeta "Todas": se marca activo con esto y no con
+  // `current === key`, porque `current` sigue siendo 'inbox' aunque esté
+  // elegida otra carpeta (Mías, Sin asignar…) y ahí no tiene que remarcarse.
+  inboxActive = false,
 }) {
   const t = useT()
 
@@ -136,20 +140,23 @@ export default function SideNav({
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
-        <div className="stagger space-y-px" style={{ '--stagger-base': '60ms' }}>
+        {/* Los `data-tour` son a quién señala el recorrido guiado (`Tour.jsx`).
+            Van como atributo y no como una ref que suba hasta App a propósito:
+            así el tour sabe de la barra sin que la barra sepa nada del tour. */}
+        <div data-tour="nav-secciones" className="stagger space-y-px" style={{ '--stagger-base': '60ms' }}>
           {NAV_ITEMS.map(({ key, Icon }) => (
             <NavRow
               key={key}
               icon={<Icon size={16} />}
               label={t(`nav.${key}`)}
               count={key === 'inbox' && pendingCount > 0 ? pendingCount : null}
-              active={current === key}
+              active={key === 'inbox' ? inboxActive : current === key}
               onClick={() => onNavigate(key)}
             />
           ))}
         </div>
 
-        {children}
+        <div data-tour="nav-carpetas">{children}</div>
       </div>
 
       {footer}

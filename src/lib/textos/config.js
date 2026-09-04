@@ -51,6 +51,22 @@ const CONFIG = {
   sinNumero: { es: 'Todavía no hay ningún número conectado.', en: 'No number is connected yet.' },
   copiarNumero: { es: 'Copiar el número de WhatsApp', en: 'Copy the WhatsApp number' },
 
+  // El recorrido guiado se hace sobre la app misma, así que la bajada dice eso:
+  // que no es un video ni una ayuda aparte, y que se sale cuando uno quiere.
+  tourTitulo: { es: 'Recorrido guiado', en: 'Guided tour' },
+  tourDesc: {
+    es: 'El mismo recorrido de la primera vez, señalando cada parte sobre la pantalla de verdad: la barra, el día, la bandeja, los agentes y los canales.',
+    en: 'The same tour you get the first time, pointing at each part on the real screen: the sidebar, the day, the inbox, the agents and the channels.',
+  },
+  // La cantidad de pasos la pone quien dibuja la tarjeta, con el largo real de
+  // la lista: escrita acá con todas las letras, se queda vieja el día que se
+  // agrega un paso y nadie se acuerda de venir a cambiarla.
+  tourHint: {
+    es: ({ n }) => `Son ${n} pasos y se sale con Escape en cualquier momento.`,
+    en: ({ n }) => `${n} steps, and Escape gets you out at any point.`,
+  },
+  tourAccion: { es: 'Hacer el recorrido', en: 'Take the tour' },
+
   horarioTitulo: { es: 'Horario de atención', en: 'Business hours' },
   horarioDesc: {
     es: 'Los días y las horas en las que la IA puede responder sola. Fuera de esa franja se manda el aviso de ausencia y las respuestas quedan como borrador.',

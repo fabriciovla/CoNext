@@ -2,14 +2,14 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <!-- El PNG va primero: Chrome no pinta un SVG con máscara en la pestaña,
-         deja el ícono en blanco y pone la inicial del <title> (la C de
-         conext). Pasa justo al volver del checkout de Dodo, que recarga el
-         favicon. El SVG sigue detrás, ya sin máscara, para quien sí lo dibuja.
-         El apple-touch-icon va aparte: iOS compone la transparencia sobre negro. -->
+    <!-- Google Search exige un favicon en múltiplo de 48px (o SVG). El PNG
+         de 32 que iba primero es el que se veía borroso en los resultados. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/conext-mark.svg" sizes="any" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Satoshi se sirve desde acá y no desde Google Fonts, que era de donde
          venía Inter. Un `<link>` a un CDN de fuentes es una hoja de estilo

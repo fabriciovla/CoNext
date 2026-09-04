@@ -88,7 +88,7 @@ export default function ContactSidebar({
   const ultimaRespuesta = [...(group?.messages ?? [])].reverse().find((m) => m.direction === 'out')
 
   return (
-    <div className="flex h-full shrink-0">
+    <div data-tour="inbox-ficha" className="flex h-full shrink-0">
       {/* El panel se anima desde ancho cero: montado siempre, así abrir y cerrar
           se ve como un cajón y no como un salto. Sin conversación elegida no hay
           nada que mostrar, y ahí sí queda en cero. */}
