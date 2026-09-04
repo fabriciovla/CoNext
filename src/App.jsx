@@ -121,8 +121,12 @@ export default function App() {
   // El cuestionario de alta va antes que la dashboard. El login del sitio ya
   // corta a quien entra con el correo, pero el social vuelve acá y quién entró
   // lo resuelve Supabase de este lado: este es el único lugar donde se lo puede
-  // preguntar. Hasta que conteste no se dibuja la bienvenida —si no, el modal
-  // aparece y se lo lleva puesto la navegación un cuadro después—.
+  // preguntar. Hasta que conteste no se dibuja nada de la dashboard —ni
+  // siquiera de fondo—: `encuestaPendiente` manda a `/empezar` a quien no tiene
+  // plan, pero eso tarda un viaje a `/me`, y mientras tanto ya se había pintado
+  // la dashboard entera. El resultado era un parpadeo real: la bandeja completa
+  // un instante, y al toque la pantalla de la encuesta pisándola. Por eso el
+  // render de abajo espera a `altaVerificada` igual que espera a `listo`.
   const [altaVerificada, setAltaVerificada] = useState(false)
 
   // Un día archivado se navega igual que el día en vivo: mismas carpetas, misma
@@ -243,6 +247,17 @@ export default function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
+      </>
+    )
+  }
+
+  // Ver el comentario de `altaVerificada` más arriba: sin este corte, la
+  // dashboard se pinta entera antes de saber si hay que mandar a la encuesta.
+  if (!altaVerificada) {
+    return (
+      <>
+        <TitleBar theme={theme} onToggleTheme={toggleTheme} />
+        <div className="min-h-dvh bg-surface-page" />
       </>
     )
   }
@@ -392,7 +407,7 @@ export default function App() {
           abierta: es lo primero que se ve, pero arriba de la dashboard armada y
           no en lugar de ella —abrir sobre una pantalla vacía la haría parecer un
           paso más del alta y no la app—. */}
-      {bienvenida && altaVerificada && (
+      {bienvenida && (
         <WelcomeTour
           nombre={user.username}
           onClose={() => setBienvenida(false)}
