@@ -233,22 +233,3 @@ export const initialSettings = {
 }
 
 export const weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-
-// Tendencia mensual de ejemplo para el gráfico de Inicio.
-// El mes va como número (0 = enero) y no como "Ene": el rótulo lo arma Inicio
-// con el locale que esté puesto, así la abreviatura sale en el idioma de la
-// dashboard sin tener que mantener doce nombres por idioma acá adentro.
-export const monthlyActivity = [
-  { month: 0, total: 12, automaticos: 8 },
-  { month: 1, total: 15, automaticos: 10 },
-  { month: 2, total: 14, automaticos: 9 },
-  { month: 3, total: 18, automaticos: 13 },
-  { month: 4, total: 21, automaticos: 15 },
-  { month: 5, total: 19, automaticos: 14 },
-  { month: 6, total: 23, automaticos: 17 },
-  { month: 7, total: 27, automaticos: 20 },
-  { month: 8, total: 24, automaticos: 18 },
-  { month: 9, total: 29, automaticos: 22 },
-  { month: 10, total: 26, automaticos: 19 },
-  { month: 11, total: 31, automaticos: 24 },
-]

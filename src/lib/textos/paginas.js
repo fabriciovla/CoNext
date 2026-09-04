@@ -37,9 +37,22 @@ const INICIO = {
   esperando: { es: '{tiempo} esperando', en: 'waiting {tiempo}' },
 
   actividadMensajes: { es: 'Actividad de mensajes', en: 'Message activity' },
+  actividadMensajesAria: {
+    es: 'Mensajes recibidos por mes, últimos 12 meses',
+    en: 'Messages received per month, last 12 months',
+  },
   ultimos12Meses: { es: 'Últimos 12 meses', en: 'Last 12 months' },
   serieMensajes: { es: 'Mensajes', en: 'Messages' },
   serieAutomaticos: { es: 'Automáticos', en: 'Automated' },
+  columnaMes: { es: 'Mes', en: 'Month' },
+  sinActividadMensual: {
+    es: 'Todavía no hay actividad para graficar',
+    en: 'No activity to chart yet',
+  },
+  sinActividadMensualDetalle: {
+    es: 'Apenas empiecen a entrar mensajes vas a ver acá cómo se mueven mes a mes, y cuántos contestó el bot.',
+    en: 'As soon as messages start coming in you will see them month by month here, and how many the bot answered.',
+  },
 
   mensajesPorHora: { es: 'Mensajes por hora (hoy)', en: 'Messages by hour (today)' },
   pico: {

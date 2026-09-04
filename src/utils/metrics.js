@@ -105,6 +105,52 @@ export function dayStats(messages) {
   }
 }
 
+// Actividad mes a mes de los últimos doce, para el gráfico de Inicio.
+//
+// Cuenta lo mismo que `dayStats` —solo los entrantes, y de ellos los que
+// resolvió el bot—, así la línea es el KPI de arriba medido por mes y no otro
+// dato con el mismo nombre. Sale de lo que la dashboard ya tiene cargado: los
+// mensajes del día abierto más los de todos los días archivados, que
+// `listClosedDays` trae enteros de una sola vez. Antes esto era una constante
+// inventada en `mockData`, así que la tarjeta le dibujaba una curva en subida a
+// un cliente que todavía no había recibido un solo mensaje.
+//
+// Los meses se arman con la hora local del navegador, igual que
+// `messagesByHour`: es la de quien mira la pantalla, y un mensaje de las once
+// de la noche del 31 tiene que caer en el mes que dice el reloj.
+//
+// Devuelve siempre los doce baldes, en orden y con ceros donde no hubo nada: un
+// mes salteado dibujaría un enero pegado a un marzo como si fueran vecinos.
+// Quién decide qué hacer si están todos en cero es quien lo llama — la tarjeta
+// de Inicio muestra el estado vacío, porque una línea plana contra el piso no
+// se lee como "todavía no pasó nada" sino como un gráfico roto.
+export function monthlyActivity(messages, archivedDays = [], now = new Date(), meses = 12) {
+  const clave = (fecha) => `${fecha.getFullYear()}-${fecha.getMonth()}`
+
+  const baldes = []
+  const porMes = new Map()
+  for (let i = meses - 1; i >= 0; i -= 1) {
+    // El día 1 y el mes en negativo: el constructor de Date arregla solo el
+    // año, así que la ventana cruza diciembre sin ninguna cuenta aparte.
+    const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const balde = { date: fecha, total: 0, automaticos: 0 }
+    baldes.push(balde)
+    porMes.set(clave(fecha), balde)
+  }
+
+  for (const lista of [messages, ...archivedDays.map((d) => d.messages ?? [])]) {
+    for (const message of lista) {
+      if (message.direction !== 'in') continue
+      const balde = porMes.get(clave(new Date(message.createdAt)))
+      if (!balde) continue // Más viejo que la ventana (o con fecha inválida).
+      balde.total += 1
+      if (message.type === 'automatico') balde.automaticos += 1
+    }
+  }
+
+  return baldes
+}
+
 // Serie por hora de cada KPI, para la miniatura de su tarjeta. Cada punto se
 // calcula con los mensajes que había *hasta* esa hora (acumulado), así el
 // último punto es exactamente el número grande que la tarjeta muestra al lado:

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import PageHeader from '../components/PageHeader'
 import { SkeletonCard } from '../components/ui/Skeleton'
 import Card from '../components/ui/Card'
+import EmptyState from '../components/ui/EmptyState'
 import StatCard from '../components/ui/StatCard'
 import AreaChart from '../components/ui/AreaChart'
 import GaugeChart from '../components/ui/GaugeChart'
@@ -12,12 +13,12 @@ import HourlyActivity from '../components/home/HourlyActivity'
 import StockAlerts from '../components/home/StockAlerts'
 import ReplySplit from '../components/home/ReplySplit'
 import { IconChart } from '../components/ui/icons'
-import { monthlyActivity } from '../data/mockData'
 import {
   averageResponseMinutes,
   dayStats,
   formatDuration,
   kpiTrends,
+  monthlyActivity,
   percentChange,
 } from '../utils/metrics'
 import { groupMessagesByPhone } from '../utils/groupMessages'
@@ -70,15 +71,22 @@ export default function Home({
         : t('inicio.contextoCerradoSinHora')
     : t('inicio.contextoSinAbrir')
 
-  // La abreviatura del mes sale del locale activo: "ago" contra "Aug", con la
-  // mayúscula que le corresponde a cada idioma.
+  // Los rótulos salen del locale activo: "ago" contra "Aug", con la mayúscula
+  // que le corresponde a cada idioma. El eje lleva el mes solo, que es lo que
+  // entra en 12 columnas de 10px; el mes con año va al tooltip y a la tabla,
+  // porque la ventana cruza el fin de año y ahí "Ene" solo no dice cuál.
   const actividadMensual = useMemo(() => {
-    const mes = new Intl.DateTimeFormat(locale, { month: 'short' })
-    return monthlyActivity.map((fila) => {
-      const nombre = mes.format(new Date(2024, fila.month, 1)).replace('.', '')
-      return { ...fila, month: nombre.charAt(0).toUpperCase() + nombre.slice(1) }
-    })
-  }, [locale])
+    const corto = new Intl.DateTimeFormat(locale, { month: 'short' })
+    const largo = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' })
+    const capitalizar = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1)
+    return monthlyActivity(messages, archivedDays).map((fila) => ({
+      ...fila,
+      month: capitalizar(corto.format(fila.date).replace('.', '')),
+      periodo: capitalizar(largo.format(fila.date)),
+    }))
+  }, [messages, archivedDays, locale])
+
+  const hayActividadMensual = actividadMensual.some((fila) => fila.total > 0)
 
   // Los números de Inicio salen de tres consultas distintas y hasta que
   // contestan valen todos cero. Un tablero de ceros no se lee como "todavía no
@@ -172,23 +180,38 @@ export default function Home({
             onNavigate={onNavigate}
           />
 
+          {/* El rótulo de la ventana solo se dibuja si hay gráfico: rotulando
+              el estado vacío diría de qué doce meses es la línea que no está. */}
           <Card
             title={t('inicio.actividadMensajes')}
             actions={
-              <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
-                <IconChart size={13} />
-                {t('inicio.ultimos12Meses')}
-              </span>
+              hayActividadMensual && (
+                <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
+                  <IconChart size={13} />
+                  {t('inicio.ultimos12Meses')}
+                </span>
+              )
             }
           >
-            <AreaChart
-              data={actividadMensual}
-              xKey="month"
-              series={[
-                { key: 'total', label: t('inicio.serieMensajes') },
-                { key: 'automaticos', label: t('inicio.serieAutomaticos'), dashed: true },
-              ]}
-            />
+            {hayActividadMensual ? (
+              <AreaChart
+                data={actividadMensual}
+                xKey="month"
+                xLongKey="periodo"
+                xLabel={t('inicio.columnaMes')}
+                ariaLabel={t('inicio.actividadMensajesAria')}
+                series={[
+                  { key: 'total', label: t('inicio.serieMensajes') },
+                  { key: 'automaticos', label: t('inicio.serieAutomaticos'), dashed: true },
+                ]}
+              />
+            ) : (
+              <EmptyState
+                icon={<IconChart size={18} />}
+                title={t('inicio.sinActividadMensual')}
+                description={t('inicio.sinActividadMensualDetalle')}
+              />
+            )}
           </Card>
 
           <HourlyActivity messages={messages} settings={settings} />

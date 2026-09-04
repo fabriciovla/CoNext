@@ -11,14 +11,32 @@ const PAD = { top: 10, right: 8, bottom: 8, left: 8 }
 const CHART_W = WIDTH - PAD.left - PAD.right
 const CHART_H = HEIGHT - PAD.top - PAD.bottom
 
-export default function AreaChart({ data, xKey, series }) {
+// El techo del eje se redondea a un número "redondo" y no de a decenas fijas:
+// un cliente nuevo con tres mensajes en el mes dibujaba la línea pegada al piso
+// de un eje que arrancaba en 10. Los candidatos se filtran por par, porque el
+// tick del medio es la mitad del techo y 7,5 mensajes no es una cantidad.
+const ESCALONES = [1, 1.5, 2, 3, 4, 5, 6, 8, 10]
+
+function techoEje(valor) {
+  if (valor <= 6) return Math.max(2, Math.ceil(valor / 2) * 2)
+  const magnitud = 10 ** Math.floor(Math.log10(valor))
+  const techo = ESCALONES.map((n) => n * magnitud).find((n) => n >= valor && n % 2 === 0)
+  return techo ?? 10 * magnitud
+}
+
+export default function AreaChart({ data, xKey, series, xLongKey, xLabel = '', ariaLabel }) {
   const gradientId = useId()
   const containerRef = useRef(null)
   const [hoverIndex, setHoverIndex] = useState(null)
   const [showTable, setShowTable] = useState(false)
 
+  // El eje X tiene dos rótulos: el corto, que es lo único que entra en doce
+  // columnas de diez píxeles, y el largo del tooltip y de la tabla, donde sí
+  // hay lugar para decir de qué año habla ese "Ene".
+  const nombreX = (d) => (xLongKey ? (d[xLongKey] ?? d[xKey]) : d[xKey])
+
   const maxRaw = Math.max(1, ...data.flatMap((d) => series.map((s) => d[s.key])))
-  const maxY = Math.max(10, Math.ceil(maxRaw / 10) * 10)
+  const maxY = techoEje(maxRaw)
   const xStep = data.length > 1 ? CHART_W / (data.length - 1) : 0
 
   const x = (i) => PAD.left + i * xStep
@@ -44,7 +62,7 @@ export default function AreaChart({ data, xKey, series }) {
           <table className="w-full min-w-max text-left text-sm">
             <thead>
               <tr className="border-b border-tint/[0.08] text-[12px] text-ink-faint">
-                <th className="px-3 pb-2 font-normal">Mes</th>
+                <th className="px-3 pb-2 font-normal">{xLabel}</th>
                 {series.map((s) => (
                   <th key={s.key} className="px-3 pb-2 font-normal">{s.label}</th>
                 ))}
@@ -53,7 +71,7 @@ export default function AreaChart({ data, xKey, series }) {
             <tbody className="divide-y divide-tint/[0.05]">
               {data.map((d) => (
                 <tr key={d[xKey]}>
-                  <td className="px-3 py-2 text-ink-secondary">{d[xKey]}</td>
+                  <td className="px-3 py-2 text-ink-secondary">{nombreX(d)}</td>
                   {series.map((s) => (
                     <td key={s.key} className="px-3 py-2 tabular-nums text-ink-secondary">{d[s.key]}</td>
                   ))}
@@ -105,7 +123,7 @@ export default function AreaChart({ data, xKey, series }) {
 
         <div className="min-w-0 flex-1">
           <div ref={containerRef} className="relative" onMouseMove={handleMove} onMouseLeave={() => setHoverIndex(null)}>
-            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" className="h-[220px] w-full" role="img" aria-label="Actividad de mensajes por mes">
+            <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" className="h-[220px] w-full" role="img" aria-label={ariaLabel ?? xLabel}>
               <defs>
                 {/* La serie principal es la única con color: el violeta de marca.
                     La secundaria queda en gris punteado, que es justamente lo
@@ -207,7 +225,7 @@ export default function AreaChart({ data, xKey, series }) {
                 className="animate-fade-in pointer-events-none absolute top-2 -translate-x-1/2 rounded-lg border border-tint/10 bg-surface-raised px-3 py-2 text-xs shadow-pop transition-[left] duration-200 ease-out"
                 style={{ left: `${Math.min(90, Math.max(10, (x(hoverIndex) / WIDTH) * 100))}%` }}
               >
-                <p className="mb-1 font-medium text-ink-primary">{data[hoverIndex][xKey]}</p>
+                <p className="mb-1 font-medium text-ink-primary">{nombreX(data[hoverIndex])}</p>
                 {series.map((s) => (
                   <p key={s.key} className="flex items-center gap-1.5 text-ink-secondary">
                     <span
