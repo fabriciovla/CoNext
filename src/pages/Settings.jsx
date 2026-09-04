@@ -633,6 +633,13 @@ export default function Settings({
                   }
                 />
               )}
+
+              {/* El perfil del negocio va acá y no en Canales: Canales son los
+                  conectores —enganchar una cuenta y ver si está viva—, y esto
+                  es un formulario de datos del negocio, hermano del nombre y la
+                  zona horaria. Va último porque es el más largo y el único que
+                  puede no aplicar (sin WhatsApp conectado no hay perfil). */}
+              <WhatsappProfile />
             </>
           )}
 
@@ -644,20 +651,12 @@ export default function Settings({
             // altura: la ficha de Meta tiene dos interruptores que la de
             // WhatsApp no tiene, e igualarlas deja cien píxeles de nada adentro
             // de la de WhatsApp.
-            <div className="flex flex-col gap-4">
-              <div
-                data-tour="config-canales"
-                className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2"
-              >
-                <WhatsappConnection />
-                <MetaConnection />
-              </div>
-
-              {/* El perfil va abajo y a todo el ancho: no es una conexión, es
-                  lo que se edita una vez conectado. Adentro de la ficha de
-                  WhatsApp le arruinaría la única pregunta que esa ficha
-                  contesta de un vistazo. */}
-              <WhatsappProfile />
+            <div
+              data-tour="config-canales"
+              className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2"
+            >
+              <WhatsappConnection />
+              <MetaConnection />
             </div>
           )}
 
