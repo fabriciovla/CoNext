@@ -8,14 +8,23 @@ const lang = getLocale(Astro)
 const copy = t(lang).empezar
 const pedido = Astro.url.searchParams.get('plan')
 const plan = copy.planes[pedido] ? pedido : 'gratis'
+// De quién es este cuestionario. Lo pone el login cuando corta acá antes de
+// dejar entrar; la vuelta de Dodo todavía no lo trae. Es lo que enlaza el alta
+// con la cuenta, y sin él el "ya contestó" vuelve a valer solo en este
+// navegador — que es como no saltaba nunca al entrar con una cuenta nueva.
+const correo = Astro.url.searchParams.get('correo')?.trim() ?? ''
 ---
 
 <Base title={copy.title} description={copy.description} pantallaCompleta noindex>
+  {/* El atajo del navegador solo manda cuando no vino correo. Con correo el que
+      decide es el server —ya contestó el login antes de mandar acá—, y hacerle
+      caso al flag local dejaría afuera del cuestionario a alguien que entra con
+      otra cuenta en la misma máquina, que es la mitad del bug que esto arregla. */}
   <script
     is:inline
     set:html={`
       try {
-        var d = JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null');
+        var d = ${correo ? 'null' : `JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null')`};
         if (d && d.listo) location.replace(${JSON.stringify(APP_URL)});
         else document.documentElement.classList.add('empezar-vivo');
       } catch (e) {
@@ -27,6 +36,6 @@ const plan = copy.planes[pedido] ? pedido : 'gratis'
   <div class="empezar-pagina">
     <div class="orbe -left-40 -top-36 h-[28rem] w-[28rem]" style="--d: 80ms" aria-hidden="true"></div>
     <div class="orbe -bottom-40 -right-36 h-[24rem] w-[24rem]" style="--d: 200ms" aria-hidden="true"></div>
-    <Cuestionario client:load copy={copy} plan={plan} appUrl={APP_URL} apiUrl={API_URL} />
+    <Cuestionario client:load copy={copy} plan={plan} correo={correo} appUrl={APP_URL} apiUrl={API_URL} />
   </div>
 </Base>

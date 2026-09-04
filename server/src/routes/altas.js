@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { ah } from '../middleware/asyncHandler.js'
-import { guardarAlta } from '../services/altasService.js'
+import { contestoAlta, guardarAlta } from '../services/altasService.js'
 
 const router = Router()
 
@@ -11,9 +11,23 @@ const router = Router()
 router.post(
   '/',
   ah(async (req, res) => {
-    const { plan, respuestas } = req.body ?? {}
-    const alta = await guardarAlta({ plan, respuestas })
+    const { plan, correo, respuestas } = req.body ?? {}
+    const alta = await guardarAlta({ plan, correo, respuestas })
     res.status(201).json(alta)
+  }),
+)
+
+// Lo pregunta el login —el del sitio y el de la dashboard— antes de dejar
+// entrar: si esta cuenta todavía no contestó, va primero a /empezar.
+//
+// Contesta un booleano pelado y nunca el contenido del alta. Aun así dice si un
+// correo pasó por el cuestionario, que es tanto como decir si compró: cuando
+// haya sesión de verdad, esto se scopea a la propia. Hasta entonces es el mismo
+// recinto abierto en el que ya vive el POST de al lado.
+router.get(
+  '/estado',
+  ah(async (req, res) => {
+    res.json({ contesto: await contestoAlta(req.query.correo) })
   }),
 )
 

@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import TitleBar from './components/TitleBar'
 import AppNav from './components/AppNav'
 import ApiErrorBanner from './components/ApiErrorBanner'
+import WelcomeTour, { bienvenidaPendiente } from './components/WelcomeTour'
 import Modal from './components/ui/Modal'
 import Button from './components/ui/Button'
 import Inbox from './pages/Inbox'
@@ -21,6 +22,7 @@ import useTemplates from './hooks/useTemplates'
 import useTheme from './hooks/useTheme'
 import { groupMessagesByPhone } from './utils/groupMessages'
 import { alTocarAviso } from './lib/entorno'
+import { encuestaPendiente } from './lib/alta'
 import { useT } from './lib/i18n.jsx'
 
 export default function App() {
@@ -112,6 +114,16 @@ export default function App() {
   // La página de Agentes lo consume y lo suelta enseguida, así volver a tocar el
   // mismo agente lo abre otra vez.
   const [agentFocus, setAgentFocus] = useState(null)
+  // La bienvenida se decide una sola vez, al montar, y no en cada render: si se
+  // leyera el flag al dibujar, marcarlo visto desde adentro del propio modal lo
+  // haría desaparecer sin la animación de salida y antes de navegar.
+  const [bienvenida, setBienvenida] = useState(bienvenidaPendiente)
+  // El cuestionario de alta va antes que la dashboard. El login del sitio ya
+  // corta a quien entra con el correo, pero el social vuelve acá y quién entró
+  // lo resuelve Supabase de este lado: este es el único lugar donde se lo puede
+  // preguntar. Hasta que conteste no se dibuja la bienvenida —si no, el modal
+  // aparece y se lo lleva puesto la navegación un cuadro después—.
+  const [altaVerificada, setAltaVerificada] = useState(false)
 
   // Un día archivado se navega igual que el día en vivo: mismas carpetas, misma
   // lista y mismo panel de chat, solo que de solo lectura.
@@ -175,6 +187,23 @@ export default function App() {
   useEffect(() => {
     document.title = isAuthenticated ? t(`titulos.${page}`) : t('titulos.entrar')
   }, [isAuthenticated, page, t])
+
+  // Ver `lib/alta.js`: solo un "no contestó" explícito manda a la encuesta.
+  // Cualquier otra cosa —sin correo, sin API, la consulta que falla— deja
+  // entrar, porque el precio de equivocarse es dejar a alguien afuera de su CRM.
+  const correo = user?.email
+  useEffect(() => {
+    if (!isAuthenticated) return undefined
+    let cancel = false
+    encuestaPendiente(correo).then((url) => {
+      if (cancel) return
+      if (url) window.location.assign(url)
+      else setAltaVerificada(true)
+    })
+    return () => {
+      cancel = true
+    }
+  }, [isAuthenticated, correo])
 
   // Tocar una notificación del escritorio abre esa conversación. Sin esto el
   // aviso deja a la persona parada en la pantalla en la que estaba y hay que
@@ -358,6 +387,18 @@ export default function App() {
           />
         )}
       </Layout>
+
+      {/* La bienvenida va después de todo lo demás y solo con la sesión ya
+          abierta: es lo primero que se ve, pero arriba de la dashboard armada y
+          no en lugar de ella —abrir sobre una pantalla vacía la haría parecer un
+          paso más del alta y no la app—. */}
+      {bienvenida && altaVerificada && (
+        <WelcomeTour
+          nombre={user.username}
+          onClose={() => setBienvenida(false)}
+          onNavigate={navigate}
+        />
+      )}
 
       {/* El botón de cerrar el día está en la barra, que ahora se ve en toda la
           app: la confirmación tiene que vivir igual de arriba. */}

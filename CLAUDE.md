@@ -270,6 +270,28 @@ Detalles menores: la ventana recuerda tamaño y posición (`ventana.js`, en user
 
 El ícono del instalador es `desktop/build/icon.png`, que es una copia del `icon-512.png` del sitio — la marca sobre la baldosa crema. electron-builder saca de ahí el `.ico`. **Es una cuarta copia del mismo dibujo**: si se retoca la marca, va también.
 
+### La primera vez que alguien entra
+
+Son dos pantallas seguidas y cada una vive en un proyecto distinto: el **cuestionario** está en el sitio (`/empezar`) y la **bienvenida** en la dashboard. El orden importa —primero se contesta, después se entra— y quién decide ese orden es el server.
+
+**El cuestionario es parte de entrar, no un desvío del checkout.** Nació colgando del `redirect_url` de Dodo, y el "ya contestó" era `localStorage['conext:alta']` en el origen del sitio. Eso tenía dos agujeros: la encuesta se repetía en cada máquina y en incógnito, y **no saltaba nunca al entrar con una cuenta nueva**, porque el login no la nombraba — iba derecho a `APP_URL/?u=…`. Ahora `altas` guarda el `correo` (migración `012`) y `GET /altas/estado?correo=` contesta un booleano pelado; el login pregunta antes de dejar pasar. El correo se normaliza a minúscula y recortado, porque quien escribe `Ana@Gmail.com` al comprar escribe `ana@gmail.com` al entrar y sin eso son dos cuentas.
+
+El corte está en dos lados porque **ninguno de los dos ve todos los caminos**. El formulario de correo de `site/src/views/Login.astro` corta antes de salir del sitio, que es donde se conoce el correo tipeado. El login social no: Google y GitHub vuelven a `/app` y quién entró lo resuelve Supabase adentro de la dashboard, así que esa mitad es `src/lib/alta.js`, llamada desde `App.jsx`. El login de mentira (usuario + contraseña sin Supabase) no se corta: ahí no hay correo, solo un nombre escrito a mano.
+
+Tres cosas que el corte no hace, y las tres a propósito:
+
+- **Si la consulta falla, se entra.** Solo un `contesto: false` explícito manda a la encuesta; la API caída, mal configurada o que contesta un 500 dejan pasar. Es el mismo criterio que `verificarTokenPagina` —un problema nuestro no se muestra como un problema de la cuenta— y acá el costo de equivocarse es dejar a alguien afuera de su propio CRM.
+- **No corta en la app de escritorio.** La página vive en `app://conext`, que no tiene un `/empezar` al lado, y mandar a alguien al navegador del sistema en medio del ingreso es sacarlo de la app para que vuelva a entrar.
+- **Una sola vuelta por pestaña** (`sessionStorage`, `wsp-crm:alta-rebote`). Sin eso, un cuestionario contestado cuyo POST no llegó deja el alta sin guardar y la dashboard vuelve a mandar a `/empezar` apenas se entra: las cuatro preguntas en un bucle del que no se sale.
+
+Con `?correo=` en la URL, `/empezar` **ignora el flag local**: manda el server. Si no, otra persona entrando con otra cuenta en la misma máquina se saltearía la encuesta, que es la mitad del bug. Y al terminar, el cuestionario devuelve a la app con el `?u=` puesto — sin eso se contestan las cuatro preguntas y aparece el formulario de ingreso otra vez, que es la misma puerta dos veces.
+
+**`VITE_SITE_URL` solo hace falta en desarrollo.** Publicada, la dashboard cuelga de `/app` del mismo dominio que el sitio y `/empezar` sale del propio origen; en local son dos servidores (Astro en el 5174).
+
+**La bienvenida es lo primero que se ve ya adentro** (`components/WelcomeTour.jsx`): la portada del tutorial, no el tutorial. Se dibuja recién cuando el corte de la encuesta contestó —si no, el modal aparece y se lo lleva puesto la navegación un cuadro después—. Es el único modal con `banner`, la franja a todo el ancho que `ui/Modal.jsx` dibuja arriba del encabezado: el resto son preguntas, y una ilustración arriba de una pregunta la disfraza de aviso. El degradé del banner es de tinta y no del acento, que es el único color con voz y ahí no señala nada.
+
+Los tres pasos que ofrece van **en el orden en que hay que tocarlos**, que no es un orden cualquiera: sin canal conectado no entra nada, sin agente lo que entra no se contesta, y recién ahí la bandeja tiene algo que mostrar. El interruptor de "No volver a mostrar" **arranca tildado**: está para que alguien que quiera volver a verla lo destilde, y no para que la pantalla reaparezca en cada recarga hasta que se acuerden de tildarlo — una bienvenida que insiste deja de ser una bienvenida. El paso a paso resaltando la barra, la bandeja y el composer todavía no existe; hasta que exista, "Hacer el tour" lleva al primer paso.
+
 ### Idiomas
 
 Hay **dos** idiomas y no se tocan entre sí. Confundirlos es el error que la propia pantalla se ocupa de aclarar en las dos bajadas.

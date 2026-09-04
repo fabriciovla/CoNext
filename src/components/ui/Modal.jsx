@@ -4,7 +4,10 @@ import { useT } from '../../lib/i18n.jsx'
 
 const WIDTHS = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-xl' }
 
-export default function Modal({ title, description, onClose, children, width = 'md' }) {
+// `banner` es una franja a todo el ancho arriba del encabezado, sin el padding
+// del cuerpo. La usa el modal de bienvenida y nada más: el resto de los modales
+// son preguntas y una ilustración arriba de una pregunta la disfraza de aviso.
+export default function Modal({ title, description, onClose, children, banner, width = 'md' }) {
   const t = useT()
   // Escape cierra, y mientras el modal está abierto la página de atrás no
   // scrollea. Las dos cosas son lo que separa un diálogo de un div flotante:
@@ -44,6 +47,7 @@ export default function Modal({ title, description, onClose, children, width = '
         onClick={(e) => e.stopPropagation()}
         className={`animate-pop-in flex max-h-[88vh] w-full flex-col rounded-xl border border-tint/10 bg-surface-raised shadow-pop ${WIDTHS[width]}`}
       >
+        {banner && <div className="shrink-0 overflow-hidden rounded-t-xl">{banner}</div>}
         {/* El título va a 15px y no a 13: es el título de la pantalla que está
             tapando todo lo demás, y al mismo tamaño que el rótulo de un campo
             del formulario de abajo no se leía como su encabezado. */}

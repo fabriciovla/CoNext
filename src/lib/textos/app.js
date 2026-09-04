@@ -131,4 +131,37 @@ const UI = {
   emojiClima: { es: 'Clima', en: 'Weather' },
 }
 
-export default { login: LOGIN, barra: BARRA, errores: ERRORES, ui: UI }
+// El modal que se ve una sola vez, la primera vez que alguien entra a la
+// dashboard. Habla en segunda persona y nombra a la persona: es lo único que
+// separa una bienvenida de un aviso.
+const BIENVENIDA = {
+  titulo: {
+    es: ({ nombre }) => `Te damos la bienvenida, ${nombre}`,
+    en: ({ nombre }) => `Welcome aboard, ${nombre}`,
+  },
+  bajada: {
+    es: 'Todos los mensajes de WhatsApp, Instagram y Messenger entran a una sola bandeja, y la IA contesta lo seguro y te deja el resto redactado. Son tres pasos hasta el primer mensaje.',
+    en: 'Every WhatsApp, Instagram and Messenger message lands in a single inbox, and the AI answers the safe ones and leaves the rest drafted for you. It takes three steps to your first message.',
+  },
+  empezaAca: { es: 'Empezá acá', en: 'Start here' },
+  pasoCanalesTitulo: { es: 'Conectá tus canales', en: 'Connect your channels' },
+  pasoCanalesBajada: {
+    es: 'WhatsApp por un lado, la Página de Facebook para Instagram y Messenger.',
+    en: 'WhatsApp on one side, the Facebook Page for Instagram and Messenger.',
+  },
+  pasoAgentesTitulo: { es: 'Armá tu primer agente', en: 'Build your first agent' },
+  pasoAgentesBajada: {
+    es: 'Qué sabe, cómo habla y hasta dónde puede contestar sin pedirte permiso.',
+    en: 'What it knows, how it talks and how far it can answer without asking you.',
+  },
+  pasoBandejaTitulo: { es: 'Mirá la bandeja', en: 'Take a look at the inbox' },
+  pasoBandejaBajada: {
+    es: 'Lo automático ya salió; lo pendiente te espera con el borrador escrito.',
+    en: 'The automatic ones already went out; the pending ones wait with a draft ready.',
+  },
+  noMostrar: { es: 'No volver a mostrar', en: "Don't show this again" },
+  saltar: { es: 'Saltar el tour', en: 'Skip the tour' },
+  hacer: { es: 'Hacer el tour', en: 'Take the tour' },
+}
+
+export default { login: LOGIN, barra: BARRA, errores: ERRORES, ui: UI, bienvenida: BIENVENIDA }

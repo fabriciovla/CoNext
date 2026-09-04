@@ -12,7 +12,7 @@ const LETRAS = 'ABCDEFGH'
 const CAMPO =
   'w-full rounded-xl border border-tint/[0.12] bg-transparent px-3.5 py-2.5 text-[15px] text-ink-primary placeholder:text-ink-faint transition-colors duration-150 focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30'
 
-export default function Cuestionario({ copy, plan, appUrl, apiUrl }) {
+export default function Cuestionario({ copy, plan, correo = '', appUrl, apiUrl }) {
   const pasos = copy.pasos
   const total = pasos.length
   const preguntaId = useId()
@@ -90,7 +90,7 @@ export default function Cuestionario({ copy, plan, appUrl, apiUrl }) {
           await fetch(`${apiUrl}/altas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan, respuestas }),
+            body: JSON.stringify({ plan, correo, respuestas }),
           })
         }
       } catch {
@@ -100,7 +100,7 @@ export default function Cuestionario({ copy, plan, appUrl, apiUrl }) {
       try {
         localStorage.setItem(
           ALTA_CLAVE,
-          JSON.stringify({ listo: true, plan, respuestas, at: Date.now() }),
+          JSON.stringify({ listo: true, plan, correo, respuestas, at: Date.now() }),
         )
       } catch {
         /* private mode */
@@ -108,16 +108,23 @@ export default function Cuestionario({ copy, plan, appUrl, apiUrl }) {
       const espera = Math.max(0, 1100 - (Date.now() - empezó))
       await new Promise((r) => setTimeout(r, espera))
       if (cancelado) return
-      const destino = appUrl || '/'
-      const sep = destino.includes('?') ? '&' : '?'
-      window.location.assign(`${destino}${sep}plan=${encodeURIComponent(plan)}`)
+      // El correo viaja también a la app. Quien llegó acá desde el login ya se
+      // identificó una vez: sin esto termina el cuestionario y se encuentra con
+      // el formulario de ingreso otra vez, que es la misma puerta dos veces.
+      const url = new URL(appUrl || '/', window.location.origin)
+      url.searchParams.set('plan', plan)
+      if (correo) url.searchParams.set('u', correo.split('@')[0])
+      // `toString()` y no `pathname + search`: en desarrollo APP_URL es otro
+      // origen (el Vite del puerto 5173) y quedarse con el path mandaría a
+      // /app del propio sitio, que no existe.
+      window.location.assign(url.toString())
     }
 
     registrar()
     return () => {
       cancelado = true
     }
-  }, [enListo, apiUrl, appUrl, plan, respuestas])
+  }, [enListo, apiUrl, appUrl, plan, correo, respuestas])
 
   useEffect(() => {
     const onTecla = (evento) => {
