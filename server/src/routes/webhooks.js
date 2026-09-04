@@ -6,6 +6,7 @@ import {
   handleIncomingMessage,
   updateDeliveryStatus,
   updateDeliveryStatusByWatermark,
+  registrarSalienteDeLaApp,
 } from '../services/conversationService.js'
 import {
   getTenantByPhoneNumberId,
@@ -45,7 +46,7 @@ function extractWhatsappChanges(body) {
       const value = change.value ?? {}
       const phoneNumberId = value.metadata?.phone_number_id
       if (!phoneNumberId) continue
-      cambios.push({ phoneNumberId, value })
+      cambios.push({ field: change.field, phoneNumberId, value })
     }
   }
   return cambios
@@ -88,28 +89,56 @@ function extractMessages(value) {
   return events
 }
 
+// Coexistencia: lo que el dueño contesta desde la app de WhatsApp del celular
+// vuelve como eco. Sin esto, el hilo de la dashboard mostraría lo que escribe
+// el cliente y las respuestas de la IA, pero no las de la persona — o sea,
+// media conversación, y encima con la IA contestando cosas ya contestadas.
+//
+// La conversación es la del cliente, así que la identidad sale de `to` (el
+// destinatario) y no de `from`, que es el número del negocio.
+function extractEcos(value) {
+  const ecos = []
+  for (const eco of value.message_echoes ?? []) {
+    if (eco.type !== 'text') {
+      console.warn(`[webhooks/meta] eco de tipo "${eco.type}" ignorado (solo se procesa texto)`)
+      continue
+    }
+    ecos.push({
+      phone: eco.to,
+      text: eco.text?.body ?? '',
+      externalId: eco.id ?? null,
+      // El timestamp de Meta viene en segundos; sin convertirlo el mensaje
+      // caería en 1970 y se ordenaría antes que todo el hilo.
+      createdAt: eco.timestamp ? new Date(Number(eco.timestamp) * 1000).toISOString() : undefined,
+    })
+  }
+  return ecos
+}
+
 // Un entrante ya normalizado se guarda igual venga del canal que venga: el
 // dedup por id de Meta y después el pipeline. Lo comparten los tres canales.
+// El INSERT hace de dedup: si el id ya estaba, no toca ninguna fila y
+// devolvemos false. Reemplaza al par SELECT-después-INSERT, que con dos
+// entregas simultáneas del mismo evento dejaba pasar las dos.
+async function esEventoNuevo(tenantId, externalId) {
+  if (!externalId) return true
+  const filas = await run(
+    `INSERT INTO webhook_events (id, tenant_id, received_at) VALUES ($1, $2, $3)
+     ON CONFLICT (id) DO NOTHING`,
+    [externalId, tenantId, new Date().toISOString()],
+  )
+  return filas > 0
+}
+
 async function guardarEntrante(tenantId, event) {
   if (!event.phone || !event.text) return
-
-  if (event.externalId) {
-    // El INSERT hace de dedup: si el id ya estaba, no toca ninguna fila y
-    // salimos. Reemplaza al par SELECT-después-INSERT, que con dos entregas
-    // simultáneas del mismo evento dejaba pasar las dos.
-    const filas = await run(
-      `INSERT INTO webhook_events (id, tenant_id, received_at) VALUES ($1, $2, $3)
-       ON CONFLICT (id) DO NOTHING`,
-      [event.externalId, tenantId, new Date().toISOString()],
-    )
-    if (filas === 0) return
-  }
+  if (!(await esEventoNuevo(tenantId, event.externalId))) return
 
   await handleIncomingMessage(tenantId, event)
 }
 
 async function procesarWhatsapp(body) {
-  for (const { phoneNumberId, value } of extractWhatsappChanges(body)) {
+  for (const { field, phoneNumberId, value } of extractWhatsappChanges(body)) {
     let tenant
     try {
       tenant = await getTenantByPhoneNumberId(phoneNumberId)
@@ -126,26 +155,56 @@ async function procesarWhatsapp(body) {
       continue
     }
 
-    // Los acuses van primero y sin dedup: son idempotentes (el rank impide
-    // retroceder de estado) y no cuesta nada reprocesarlos.
-    for (const { externalId, status, error } of extractStatuses(value)) {
-      try {
-        await updateDeliveryStatus(tenant.id, externalId, status, error)
-        if (status === 'failed') {
-          console.error(`[webhooks/meta] envío fallido (${externalId}): ${error ?? 'sin detalle'}`)
+    // Desde la coexistencia, la suscripción de WhatsApp trae más de un tipo de
+    // evento y hay que mirar cuál es. Antes se leía `value.messages` de
+    // cualquier change que tuviera phone_number_id, y un eco —que trae los
+    // mensajes que el dueño escribió desde el celular— habría entrado como si
+    // lo hubiera escrito el cliente: la IA contestándole al propio negocio, el
+    // mismo bucle que en Messenger corta `is_echo`.
+    if (field === 'messages') {
+      // Los acuses van primero y sin dedup: son idempotentes (el rank impide
+      // retroceder de estado) y no cuesta nada reprocesarlos.
+      for (const { externalId, status, error } of extractStatuses(value)) {
+        try {
+          await updateDeliveryStatus(tenant.id, externalId, status, error)
+          if (status === 'failed') {
+            console.error(`[webhooks/meta] envío fallido (${externalId}): ${error ?? 'sin detalle'}`)
+          }
+        } catch (err) {
+          console.error('[webhooks/meta] no se pudo actualizar el estado de entrega:', err)
         }
-      } catch (err) {
-        console.error('[webhooks/meta] no se pudo actualizar el estado de entrega:', err)
       }
+
+      for (const event of extractMessages(value)) {
+        try {
+          await guardarEntrante(tenant.id, event)
+        } catch (err) {
+          console.error('[webhooks/meta] failed to process incoming message:', err)
+        }
+      }
+      continue
     }
 
-    for (const event of extractMessages(value)) {
-      try {
-        await guardarEntrante(tenant.id, event)
-      } catch (err) {
-        console.error('[webhooks/meta] failed to process incoming message:', err)
+    if (field === 'smb_message_echoes') {
+      for (const eco of extractEcos(value)) {
+        try {
+          if (!eco.phone || !eco.text) continue
+          if (!(await esEventoNuevo(tenant.id, eco.externalId))) continue
+          await registrarSalienteDeLaApp(tenant.id, eco)
+        } catch (err) {
+          console.error('[webhooks/meta] no se pudo guardar el eco de la app:', err)
+        }
       }
+      continue
     }
+
+    // `history` (el historial que Meta sincroniza al conectar un número que ya
+    // venía usándose en la app) y `smb_app_state_sync` (altas y bajas de
+    // contactos de la agenda) llegan porque los pide la coexistencia, pero
+    // todavía no tienen quién los procese. Quedan logueados y no como un
+    // descarte silencioso: el día que el historial no aparezca en la bandeja,
+    // esto es lo que lo explica.
+    console.log(`[webhooks/meta] evento "${field}" recibido; todavía no se procesa`)
   }
 }
 

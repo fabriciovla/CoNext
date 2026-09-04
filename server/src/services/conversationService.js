@@ -585,3 +585,56 @@ export async function updateDeliveryStatusByWatermark(tenantId, phone, watermark
     [status, tenantId, phone, new Date(watermarkMs).toISOString(), superiores],
   )
 }
+
+// Coexistencia: el dueño del negocio contesta desde la app de WhatsApp del
+// celular y Meta nos devuelve ese envío como eco (`smb_message_echoes`).
+//
+// No lo mandamos nosotros, así que no hay adapter al que llamar ni día abierto
+// que exigir: el mensaje ya salió, y rechazarlo por estar el día cerrado sería
+// perder la mitad de la conversación en el hilo de la dashboard. Va con el día
+// más reciente, igual que cualquier otro registro que llega tarde.
+export async function registrarSalienteDeLaApp(tenantId, { phone, text, externalId, createdAt }) {
+  // Un eco de algo que mandamos nosotros por la Cloud API tiene el mismo wamid
+  // que ya guardamos al enviarlo. Meta no promete que los ecos sean solo de la
+  // app, así que se corta acá y no por confiar en el origen: sin esto, cada
+  // respuesta de la IA aparecería dos veces en el hilo.
+  if (externalId) {
+    const yaEsta = await one('SELECT id FROM messages WHERE tenant_id = $1 AND external_id = $2', [
+      tenantId,
+      externalId,
+    ])
+    if (yaEsta) return null
+  }
+
+  const dayId = await mostRecentDayId(tenantId)
+  if (!dayId) return null
+
+  // Puede ser un contacto que nunca vimos: el dueño escribió primero desde el
+  // celular y el cliente todavía no nos escribió a nosotros.
+  const conversation = await ensureConversation(tenantId, phone, { channel: 'whatsapp', customer: phone })
+
+  const message = await insertMessage(tenantId, {
+    id: `smb-${crypto.randomUUID()}`,
+    phone,
+    customer: conversation.customer,
+    text,
+    direction: 'out',
+    type: null,
+    status: null,
+    // Lo escribió una persona, no el bot. `author` solo acepta 'bot' o 'admin'.
+    author: 'admin',
+    externalId: externalId ?? null,
+    dayId,
+    createdAt: createdAt ?? new Date().toISOString(),
+  })
+
+  // Si el dueño ya contestó a mano, el borrador de la IA quedó viejo: dejarlo
+  // sería ofrecer mandar de nuevo algo que la persona ya respondió.
+  await clearDraft(tenantId, phone)
+  await run('UPDATE conversations SET updated_at = $1 WHERE tenant_id = $2 AND phone = $3', [
+    new Date().toISOString(),
+    tenantId,
+    phone,
+  ])
+  return message
+}
