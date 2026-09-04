@@ -26,6 +26,7 @@ npm run connect-wa -- <slug> "EAAT…"         # recarga el token de un cliente 
 npm run connect-meta -- <slug> "EAAG…"       # conecta la Página (Messenger + Instagram) de un cliente
 npm run seed -- <tenantId|slug>              # datos de ejemplo para un cliente ya creado
 npm run simulate -- "+54911…" whatsapp "texto" "Nombre"   # dispara el pipeline completo sin Meta
+npm run preparar-revision -- <slug>           # deja al cliente listo para el App Review
 node scripts/verifyIsolation.js              # ver abajo: es el único "test" del repo
 
 # raíz
@@ -109,6 +110,15 @@ La ficha entera abre y el botón está igual: sin él, que sea clickeable hay qu
 Los enlaces se traen con el chequeo de destino puesto: solo http/https, se resuelve el DNS y se rechazan los rangos privados, y **las redirecciones se siguen a mano** revalidando cada salto — con el `redirect: 'follow'` de fetch, una redirección a `127.0.0.1` saltearía el control entero y el server estaría pidiendo su propia API (o el endpoint de metadatos del host) en nombre de quien pegó el link.
 
 **En el prompt va el material de todos los agentes encendidos**, cada fuente marcada con el suyo y con la regla de usar solo las del elegido: el modelo elige agente y redacta en la misma llamada, así que cuando se arma el prompt todavía no se sabe quién va a atender. Tiene tope (`MAX_CHARS_PROMPT`) porque cada fuente encendida viaja en **cada** mensaje entrante, y sin él el día que alguien sube diez manuales el prompt pasa a costar diez veces más, calladamente. El bloque además avisa que es material de referencia y **no** instrucciones: es lo único del prompt que escribió alguien de afuera del CRM, y sin decirlo una línea del estilo "ignorá lo anterior" adentro de un PDF es una instrucción más.
+
+### Preparar un cliente para el App Review
+
+`npm run preparar-revision -- <slug>`. El revisor de Meta se prueba solo: abre el `m.me`, manda un mensaje y espera respuesta. Si en ese momento falta cualquiera de cuatro cosas no le contesta nadie, y la solicitud vuelve rechazada sin decir por qué —que es el modo más caro de descubrir que el día estaba cerrado—. El script pone las cuatro y es idempotente:
+
+1. **Un día abierto.** Sin día no se envía nada, ni siquiera el aviso de ausencia.
+2. **Horario 00:00–23:59 los siete días.** El revisor prueba cuando quiere, y a las 3 de la mañana lo único que sale es el aviso de ausencia.
+3. **Un agente encendido y con `autoSend`.** El interruptor del agente es un techo sobre lo que decida el modelo: apagado, la respuesta queda como borrador y el revisor no ve nada. Avisa además si quedan otros agentes encendidos sin `autoSend`, porque si el modelo elige uno de esos pasa lo mismo.
+4. **`aiLanguage: 'en'`.** Y acá hay algo que no se adivina: **`auto` no alcanza**. Contestar en el idioma del cliente es lo que suena correcto, pero el prompt entero está escrito en español y el modelo lo arrastra igual — a un "Hi, what do you sell?" le contesta en español. Verificado contra el modelo, no supuesto. El costo es que mientras dure la revisión los clientes reales también reciben inglés, así que el script imprime cuál era el idioma anterior para poder volver.
 
 ### Días
 

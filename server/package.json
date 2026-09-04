@@ -11,7 +11,8 @@
     "tenant": "node scripts/createTenant.js",
     "connect-wa": "node scripts/connectWa.js",
     "member": "node scripts/addMember.js",
-    "connect-meta": "node scripts/connectMeta.js"
+    "connect-meta": "node scripts/connectMeta.js",
+    "preparar-revision": "node scripts/prepararRevision.js"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",
