@@ -15,6 +15,7 @@ import membersRouter from './routes/members.js'
 import webhooksRouter from './routes/webhooks.js'
 import devRouter from './routes/dev.js'
 import altasRouter from './routes/altas.js'
+import postulacionesRouter from './routes/postulaciones.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { resolveTenant } from './middleware/resolveTenant.js'
 
@@ -81,6 +82,10 @@ export function createApp() {
   // El cuestionario de la landing: la persona acaba de pagar (o de probar) y
   // todavía no tiene API key. Misma excepción que los webhooks.
   app.use('/altas', altasRouter)
+
+  // La sección "Postulate en conext" de la landing: mismo motivo, todavía no
+  // hay tenant al que ponerle una API key.
+  app.use('/postulaciones', postulacionesRouter)
 
   // De acá para abajo, todo exige API key y todo queda scopeado a req.tenant.
   app.use(resolveTenant)

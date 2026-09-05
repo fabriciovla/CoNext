@@ -2,11 +2,11 @@
 import Base from '../layouts/Base.astro'
 import Titulo from '../components/landing/Titulo.astro'
 import Boton from '../components/Boton.jsx'
-import { LogoMarca } from '../components/Logo.jsx'
 import AppMock from '../components/landing/AppMock.jsx'
 import ControlFilm from '../components/landing/ControlFilm.astro'
 import LineaAhorro from '../components/landing/LineaAhorro.astro'
 import Faq from '../components/landing/Faq.astro'
+import { LogoMarca } from '../components/Logo.jsx'
 import {
   IconArrowRight,
   IconCheck,
@@ -106,8 +106,8 @@ const ESQUEMA = {
       </p>
 
       <div class="animate-in mt-9 flex flex-wrap items-center gap-3" style="--d: 240ms">
-        <Boton href={dodoCheckout('gratis')} tamano="lg" target="_self">
-          {l.empezarGratis}
+        <Boton href={pathFor(lang, '/postulate')} tamano="lg" target="_self">
+          {l.heroCta}
           <IconArrowRight size={17} />
         </Boton>
         <Boton href="#como-funciona" variante="secundario" tamano="lg">{l.verComo}</Boton>

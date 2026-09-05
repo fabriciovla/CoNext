@@ -99,7 +99,7 @@ export const ui = {
       heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
       heroBajada:
         'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio, o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
-      empezarGratis: 'Empezar gratis',
+      heroCta: 'Postulate',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
       funcionesEtiqueta: 'Qué es Conext',
@@ -287,6 +287,26 @@ export const ui = {
       ctaTexto:
         'Siete días del Estándar completo, con tu catálogo cargado y WhatsApp, Instagram y Messenger conectados.',
       ctaBoton: 'Empezar gratis',
+    },
+    postulate: {
+      title: 'Sumate al equipo | Conext',
+      description:
+        'Estamos armando el equipo que está construyendo conext. Dejanos tu nombre y un contacto, y te escribimos.',
+      etiqueta: 'Estamos armando el equipo',
+      titulo: 'Sumate al equipo de conext',
+      bajada:
+        'Buscamos gente para ayudarnos a construir conext desde el arranque. Dejanos tu nombre y un contacto, y te escribimos para charlar.',
+      countdownEtiqueta: 'Esta ronda de postulaciones cierra en',
+      dias: 'días',
+      horas: 'hs',
+      minutos: 'min',
+      segundos: 'seg',
+      nombrePh: 'Tu nombre',
+      contactoPh: 'Correo o WhatsApp',
+      cta: 'Postularme',
+      enviando: 'Enviando…',
+      listoTexto: '¡Listo! Recibimos tu postulación. Si hay un buen fit, te escribimos.',
+      errorTexto: 'No se pudo enviar. Probá de nuevo en un momento.',
     },
     precios: {
       title: 'Precios | Conext',
@@ -807,7 +827,7 @@ export const ui = {
       heroLineas: ['All your channels, one inbox.', 'Conext.'],
       heroBajada:
         'AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
-      empezarGratis: 'Start for free',
+      heroCta: 'Apply',
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
       funcionesEtiqueta: 'What Conext is',
@@ -992,6 +1012,26 @@ export const ui = {
       ctaTexto:
         'Seven days of the full Standard plan, with your catalog loaded and WhatsApp, Instagram, and Messenger connected.',
       ctaBoton: 'Start for free',
+    },
+    postulate: {
+      title: "Join the team | Conext",
+      description:
+        "We're putting together the team building conext. Leave your name and a contact, and we'll reach out.",
+      etiqueta: "We're building the team",
+      titulo: 'Join the conext team',
+      bajada:
+        "We're looking for people to help us build conext from the ground up. Leave your name and a contact, and we'll reach out to talk.",
+      countdownEtiqueta: 'This round of applications closes in',
+      dias: 'days',
+      horas: 'hrs',
+      minutos: 'min',
+      segundos: 'sec',
+      nombrePh: 'Your name',
+      contactoPh: 'Email or WhatsApp',
+      cta: 'Apply',
+      enviando: 'Sending…',
+      listoTexto: "Done! We got your application. If there's a good fit, we'll reach out.",
+      errorTexto: "Couldn't send it. Try again in a moment.",
     },
     precios: {
       title: 'Pricing | Conext',
