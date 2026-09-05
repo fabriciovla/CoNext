@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import Boton from '../components/Boton.jsx'
-import { WHATSAPP_URL } from '../config'
+import { dodoCheckout } from '../config'
 import { SECCIONES } from '../data/secciones'
 import { getLocale, t, pathFor } from '../i18n/utils'
 import { ICONOS_PAGINA } from '../lib/iconosPagina.js'
@@ -180,7 +180,7 @@ const ESQUEMA = {
       <h2 class="text-[24px] font-medium tracking-tight text-ink-primary sm:text-[28px]">{copy.ctaTitulo}</h2>
       <p class="mx-auto mt-3 max-w-md text-[16px] leading-relaxed text-ink-secondary">{copy.ctaTexto}</p>
       <div class="mt-8 flex justify-center">
-        <Boton href={WHATSAPP_URL} tamano="lg">{copy.ctaBoton}</Boton>
+        <Boton href={dodoCheckout('gratis')} tamano="lg" target="_self">{copy.ctaBoton}</Boton>
       </div>
     </div>
   </article>

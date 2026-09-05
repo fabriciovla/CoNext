@@ -568,7 +568,7 @@ Setup lives in the CRM: Channels, an agent, the catalog. There is no implementat
 
 2. **Look at who will configure it.** If it is the owner between orders, a catalog-and-agents CRM fits. A contact center asks for someone to run it.
 
-3. **Ask for a demo with your questions.** Twenty minutes with the real catalog say more than a feature table. The two tools look different when they answer yours.
+3. **Try them with your questions.** A week with the real catalog says more than a feature table. The two tools look different when they answer yours.
 
 Respond.io is the right tool for a support team with many channels. Conext is the right one for the small business that already attends on Meta and does not want a second job of configuring a platform.
 
@@ -644,7 +644,7 @@ If what you need is growth from comments and ads, Manychat is still the tool for
 
 2. **Look at who has to see the thread.** If sales and the shop have to pick up the same conversation, you need an inbox. A flow canvas is not that.
 
-3. **Do not use either for the other’s job.** A CRM will not multiply comments. A growth bot will not be the afternoon shift. Ask for the demo of the one that actually fits.
+3. **Do not use either for the other’s job.** A CRM will not multiply comments. A growth bot will not be the afternoon shift. Try the one that actually fits.
 
 Manychat is the marketing bot. Conext is the inbox CRM. They can overlap on Instagram; they do not substitute for each other.
 
@@ -721,7 +721,7 @@ The contact’s name does not come with the message. The CRM asks Graph. If the 
 
 ## What Meta asks of you.
 
-Until the App Review for `instagram_manage_messages` and `pages_messaging` goes through, this works with accounts that have a role on the app: enough for development and for the demo. In Meta’s console the app has to be subscribed to the `messages` webhook for Messenger and Instagram. Without that the card says connected and not a single message arrives.
+Until the App Review for `instagram_manage_messages` and `pages_messaging` goes through, this works with accounts that have a role on the app: enough for development and for recording the App Review video. In Meta’s console the app has to be subscribed to the `messages` webhook for Messenger and Instagram. Without that the card says connected and not a single message arrives.
 
 Outbound attachments over Instagram do not go out yet: Instagram wants a public URL for the file, and ours are served behind the session. That signed URL is still missing. DM text does go both ways.
 
@@ -798,7 +798,7 @@ Conext does not ask for a server or a webhook of yours. You get access, sign in,
 
 You need a Meta Business account, a WhatsApp Business number you will attend, and, if you want Instagram or Messenger, a Facebook Page with the professional account attached. A number on Cloud API cannot be on the phone app at the same time: if you still answer by hand, the comfortable path is a test number and moving the main one later.
 
-Conext access is given by the business owner or a demo. The create-account tab on the login screen does not open a signup. With access, the first work day is already open: with no open day you cannot send or leave a note.
+Conext access starts at Pricing: you pick a plan and you are in. The create-account tab on the login screen does not open a signup. With access, the first work day is already open: with no open day you cannot send or leave a note.
 
 ## The two Channel cards.
 
@@ -998,7 +998,7 @@ Write to email with the business name. If the change is about volume (more peopl
 
 ### How do I create an account?
 
-Signup is not self-serve today: the business owner creates it, or we do after a demo. The create-account tab on login does not open a registration form. Request a demo and we will set up access.
+Signup starts at Pricing: you pick a plan, answer four questions, and you are in. The create-account tab on login does not open a registration form. Teammates are added afterwards by the business owner.
 
 ### Can more than one person handle the same number?
 

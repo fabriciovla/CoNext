@@ -99,7 +99,7 @@ export const ui = {
       heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
       heroBajada:
         'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio, o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
-      pedirDemo: 'Pedir una demo',
+      empezarGratis: 'Empezar gratis',
       verComo: 'Ver cómo funciona',
       heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
       funcionesEtiqueta: 'Qué es Conext',
@@ -283,10 +283,10 @@ export const ui = {
             'Hay una prueba de 7 días del Estándar (después $49/mes), un Premium y un plan a medida: el detalle está en Precios. El software se paga por mes. Aparte, Meta cobra las conversaciones directo a tu cuenta de Meta, con su tarifa. No le agregamos nada encima.',
         },
       ],
-      ctaTitulo: 'Cuéntanos cómo atiendes hoy y te mostramos Conext.',
+      ctaTitulo: 'Probalo con las conversaciones de tu negocio.',
       ctaTexto:
-        'Una demo de veinte minutos, con tus productos y las preguntas que ya te llegan por WhatsApp, Instagram o Messenger.',
-      ctaBoton: 'Escríbenos por WhatsApp',
+        'Siete días del Estándar completo, con tu catálogo cargado y WhatsApp, Instagram y Messenger conectados.',
+      ctaBoton: 'Empezar gratis',
     },
     precios: {
       title: 'Precios | Conext',
@@ -304,7 +304,7 @@ export const ui = {
       desliza: 'Deslizá la tabla para comparar los cuatro planes.',
       indecisoTitulo: '¿No estás seguro de qué plan te queda?',
       indecisoTexto: 'Cuéntanos cómo atiendes hoy y lo vemos con los números de tu operación.',
-      indecisoCta: 'Pedir una demo',
+      indecisoCta: 'Escríbenos',
       faqTitulo: 'Preguntas sobre los planes.',
       periodicidad: 'Periodicidad del pago',
       mensual: 'Mensual',
@@ -354,7 +354,7 @@ export const ui = {
           precioAnual: 'A medida',
           periodoAnual: 'contrato anual',
           cta: 'Hablar con ventas',
-          destino: 'whatsapp',
+          destino: 'email',
         },
       ],
       grupos: [
@@ -433,7 +433,7 @@ export const ui = {
             {
               pregunta: '¿Cuánto cuesta conext?',
               respuesta:
-                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $49/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa. No le agregamos un margen. Si el volumen no entra en un paquete, <a href="{whatsapp}">escribinos</a> y armamos uno a medida.',
+                'Los planes y lo que incluye cada uno están en <a href="{precios}">Precios</a>. El software se paga por mes. Hay una prueba de 7 días del Estándar; después, $49/mes. Aparte, Meta cobra las conversaciones directo a tu cuenta, con su tarifa. No le agregamos un margen. Si el volumen no entra en un paquete, <a href="{correo}">escribinos</a> y armamos uno a medida.',
             },
             {
               pregunta: '¿Las conversaciones de WhatsApp las facturan ustedes?',
@@ -454,7 +454,7 @@ export const ui = {
             {
               pregunta: '¿Cómo creo una cuenta?',
               respuesta:
-                'Hoy el alta no es autoservicio: la da el dueño del negocio, o nosotros después de una demo. La pestaña de crear cuenta en el ingreso no abre un registro. <a href="{whatsapp}">Pide una demo</a> y te dejamos el acceso.',
+                'El alta sale de <a href="{precios}">Precios</a>: elegís un plan, contestás cuatro preguntas y entrás. La pestaña de crear cuenta en el ingreso no abre un registro. A las personas del equipo las suma después el dueño del negocio.',
             },
             {
               pregunta: '¿Puede atender el mismo número más de una persona?',
@@ -527,8 +527,6 @@ export const ui = {
       pedirAcceso: 'Pedí tu acceso',
       pedirBajada:
         'Creá la cuenta con el mismo proveedor que uses todos los días, o escribinos y te dejamos el número conectado.',
-      oDemo: 'o pedí una demo',
-      pedirDemo: 'Pedir una demo',
       errorVacio: 'Escribí tu correo y tu contraseña.',
       errorCorreo: 'Ese correo no parece válido.',
     },
@@ -804,12 +802,12 @@ export const ui = {
     landing: {
       title: 'Conext | WhatsApp & Instagram CRM for small businesses',
       description:
-        'Conext is the CRM for small businesses that brings WhatsApp, Instagram, and Messenger into one inbox. AI replies on its own or leaves a draft. Request a demo.',
+        'Conext is the CRM for small businesses that brings WhatsApp, Instagram, and Messenger into one inbox. AI replies on its own or leaves a draft. Free for seven days.',
       anuncio: 'The CRM on the official Meta API',
       heroLineas: ['All your channels, one inbox.', 'Conext.'],
       heroBajada:
         'AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
-      pedirDemo: 'Request a demo',
+      empezarGratis: 'Start for free',
       verComo: 'See how it works',
       heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
       funcionesEtiqueta: 'What Conext is',
@@ -990,10 +988,10 @@ export const ui = {
             'There is a 7-day Standard trial (then $49/month), a Premium, and a custom plan: the breakdown is on Pricing. The software is billed monthly. On top of that, Meta charges for conversations directly on your Meta account, at their rate. We do not add a markup.',
         },
       ],
-      ctaTitulo: 'Tell us how you handle it today and we will show you Conext.',
+      ctaTitulo: 'Try it with your own conversations.',
       ctaTexto:
-        'A twenty-minute demo, with your products and the questions you already get on WhatsApp, Instagram, or Messenger.',
-      ctaBoton: 'Write us on WhatsApp',
+        'Seven days of the full Standard plan, with your catalog loaded and WhatsApp, Instagram, and Messenger connected.',
+      ctaBoton: 'Start for free',
     },
     precios: {
       title: 'Pricing | Conext',
@@ -1011,7 +1009,7 @@ export const ui = {
       desliza: 'Swipe the table to compare all four plans.',
       indecisoTitulo: 'Not sure which plan fits?',
       indecisoTexto: 'Tell us how you handle it today and we will look at it with your numbers.',
-      indecisoCta: 'Request a demo',
+      indecisoCta: 'Write to us',
       faqTitulo: 'Questions about the plans.',
       periodicidad: 'Billing period',
       mensual: 'Monthly',
@@ -1061,7 +1059,7 @@ export const ui = {
           precioAnual: 'Custom',
           periodoAnual: 'annual contract',
           cta: 'Talk to sales',
-          destino: 'whatsapp',
+          destino: 'email',
         },
       ],
       grupos: [
@@ -1140,7 +1138,7 @@ export const ui = {
             {
               pregunta: 'How much does conext cost?',
               respuesta:
-                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate. We do not add a markup. If the volume does not fit a package, <a href="{whatsapp}">write us</a> and we will put a custom one together.',
+                'Plans and what each one includes are on <a href="{precios}">Pricing</a>. The software is billed monthly. There is a 7-day Standard trial; after that, $49/month. Meta charges conversations directly to your account, at their rate. We do not add a markup. If the volume does not fit a package, <a href="{correo}">write us</a> and we will put a custom one together.',
             },
             {
               pregunta: 'Do you bill WhatsApp conversations?',
@@ -1161,7 +1159,7 @@ export const ui = {
             {
               pregunta: 'How do I create an account?',
               respuesta:
-                'Signup is not self-serve today: the business owner creates it, or we do after a demo. The create-account tab on login does not open a registration form. <a href="{whatsapp}">Request a demo</a> and we will set up access.',
+                'Signup starts at <a href="{precios}">Pricing</a>: you pick a plan, answer four questions, and you are in. The create-account tab on login does not open a registration form. Teammates are added afterwards by the business owner.',
             },
             {
               pregunta: 'Can more than one person handle the same number?',
@@ -1234,8 +1232,6 @@ export const ui = {
       pedirAcceso: 'Request access',
       pedirBajada:
         'Create the account with the provider you already use every day, or write us and we will leave the number connected.',
-      oDemo: 'or request a demo',
-      pedirDemo: 'Request a demo',
       errorVacio: 'Enter your email and password.',
       errorCorreo: 'That email does not look valid.',
     },

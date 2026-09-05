@@ -10,7 +10,7 @@ import {
   IconLightbulb,
   IconUsers,
 } from '../components/icons.jsx'
-import { dodoCheckout, WHATSAPP_URL } from '../config'
+import { dodoCheckout, EMAIL } from '../config'
 import { getLocale, t } from '../i18n/utils'
 import { urlCanonico } from '../lib/seo'
 
@@ -24,13 +24,13 @@ const ICONOS = {
   lightbulb: IconLightbulb,
 }
 
-// Empresa va siempre a WhatsApp, mensual o anual: no hay checkout que armar.
+// Empresa va siempre al correo, mensual o anual: no hay checkout que armar.
 // Para el resto se calculan los dos destinos de una y se dejan puestos en el
 // boton; el interruptor solo cambia cual de los dos esta en el href. Resolverlo
 // al hacer clic obligaria a tener el catalogo en el navegador.
 const destinosDe = (plan) =>
-  plan.destino === 'whatsapp'
-    ? { mensual: WHATSAPP_URL, anual: WHATSAPP_URL }
+  plan.destino === 'email'
+    ? { mensual: `mailto:${EMAIL}`, anual: `mailto:${EMAIL}` }
     : { mensual: dodoCheckout(plan.id, 'mensual'), anual: dodoCheckout(plan.id, 'anual') }
 
 const ESQUEMA = {
@@ -373,7 +373,7 @@ const ESQUEMA = {
         {p.indecisoTexto}
       </p>
       <div class="mt-8 flex justify-center">
-        <Boton href={WHATSAPP_URL} tamano="lg">{p.indecisoCta}</Boton>
+        <Boton href={`mailto:${EMAIL}`} tamano="lg">{p.indecisoCta}</Boton>
       </div>
     </div>
 

@@ -6,8 +6,8 @@ export const integracionesEs = {
   verTambien: 'Otras integraciones',
   enLaPractica: 'En la práctica',
   ctaTitulo: '¿Querés verlo con tus conversaciones?',
-  ctaTexto: 'Una demo corta, con el catálogo y las preguntas que ya te llegan por WhatsApp.',
-  ctaBoton: 'Pedir una demo',
+  ctaTexto: 'Siete días del Estándar completo, con tu catálogo cargado y los tres canales conectados.',
+  ctaBoton: 'Empezar gratis',
   indice: {
     nombre: 'Integraciones',
     etiqueta: 'Integraciones',
@@ -92,7 +92,7 @@ export const integracionesEs = {
         {
           titulo: 'Qué pide Meta de tu lado.',
           parrafos: [
-            'Hasta que pase el App Review de `instagram_manage_messages` y `pages_messaging`, esto funciona con cuentas que tengan un rol en la app: alcanza para desarrollo y para la demo. En la consola de Meta hay que suscribir la app al webhook `messages` de Messenger e Instagram. Sin eso la ficha dice conectado y no llega ni un mensaje.',
+            'Hasta que pase el App Review de `instagram_manage_messages` y `pages_messaging`, esto funciona con cuentas que tengan un rol en la app: alcanza para desarrollo y para grabar el video del App Review. En la consola de Meta hay que suscribir la app al webhook `messages` de Messenger e Instagram. Sin eso la ficha dice conectado y no llega ni un mensaje.',
             'Los adjuntos salientes por Instagram todavía no salen: Instagram quiere una URL pública del archivo, y los nuestros se sirven detrás de la sesión. Falta esa URL firmada. El texto del DM sí va y vuelve.',
           ],
         },
@@ -154,8 +154,8 @@ export const integracionesEn = {
   verTambien: 'Other integrations',
   enLaPractica: 'In practice',
   ctaTitulo: 'Want to see it with your own threads?',
-  ctaTexto: 'A short demo, with the catalog and the questions you already get on WhatsApp.',
-  ctaBoton: 'Request a demo',
+  ctaTexto: 'Seven days of the full Standard plan, with your catalog loaded and all three channels connected.',
+  ctaBoton: 'Start for free',
   indice: {
     nombre: 'Integrations',
     etiqueta: 'Integrations',
@@ -240,7 +240,7 @@ export const integracionesEn = {
         {
           titulo: 'What Meta asks of you.',
           parrafos: [
-            'Until the App Review for `instagram_manage_messages` and `pages_messaging` goes through, this works with accounts that have a role on the app: enough for development and for the demo. In Meta’s console the app has to be subscribed to the `messages` webhook for Messenger and Instagram. Without that the card says connected and not a single message arrives.',
+            'Until the App Review for `instagram_manage_messages` and `pages_messaging` goes through, this works with accounts that have a role on the app: enough for development and for recording the App Review video. In Meta’s console the app has to be subscribed to the `messages` webhook for Messenger and Instagram. Without that the card says connected and not a single message arrives.',
             'Outbound attachments over Instagram do not go out yet: Instagram wants a public URL for the file, and ours are served behind the session. That signed URL is still missing. DM text does go both ways.',
           ],
         },

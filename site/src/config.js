@@ -9,18 +9,16 @@
 //   en este navegador.
 // - DODO_*: productos de test en Dodo Payments. Gratis es Estándar con
 //   7 días de prueba (tarjeta al entrar, cobro el día 8). Estándar y Premium
-//   cobran de una, cada uno en mensual o anual. Empresa sigue por WhatsApp.
+//   cobran de una, cada uno en mensual o anual. Empresa se arregla por correo.
 //   Cuando el pago o la prueba cierra, Dodo vuelve a /empezar?plan=… El alta
 //   del tenant todavía no sale del webhook: eso viene después.
 // - GITHUB_URL: el perfil; en la barra va solo el isotipo, sin texto.
-// - WHATSAPP_URL: wa.me quiere el número en dígitos, sin '+' ni espacios.
 // - EMAIL: el que reciba las consultas. Conviene uno del dominio.
 export const APP_URL = import.meta.env.DEV ? 'http://localhost:5173' : '/app'
 export const API_URL = import.meta.env.DEV
   ? 'http://localhost:3001'
   : import.meta.env.PUBLIC_API_URL || ''
 export const GITHUB_URL = 'https://github.com/fabriciovla'
-export const WHATSAPP_URL = 'https://wa.me/5490000000000'
 export const EMAIL = 'contact@conext.lat'
 // Apex: host canónico y allowlist del checkout de Dodo. www redirige acá.
 export const SITE_URL = 'https://conext.lat'

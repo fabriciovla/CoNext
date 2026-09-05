@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro'
 import Cuestionario from '../components/empezar/Cuestionario.jsx'
-import { APP_URL, API_URL, ALTA_CLAVE, WHATSAPP_URL, dodoCheckout } from '../config'
+import { APP_URL, API_URL, ALTA_CLAVE, EMAIL, dodoCheckout } from '../config'
 import { getLocale, t } from '../i18n/utils'
 
 const lang = getLocale(Astro)
@@ -33,7 +33,7 @@ const planes = t(lang).precios.planes.map((p) => ({
   periodo: p.periodo,
   cta: p.cta,
   destacado: Boolean(p.destacado),
-  href: p.destino === 'whatsapp' ? WHATSAPP_URL : dodoCheckout(p.id, 'mensual'),
+  href: p.destino === 'email' ? `mailto:${EMAIL}` : dodoCheckout(p.id, 'mensual'),
 }))
 ---
 

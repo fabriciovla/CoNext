@@ -568,7 +568,7 @@ La configuración vive en el CRM: Canales, un agente, el catálogo. No hay un pr
 
 2. **Mirá quién lo va a configurar.** Si es el dueño entre un pedido y el otro, un CRM de catálogo y agentes entra. Un contact center pide a alguien que lo administre.
 
-3. **Pedí una demo con tus preguntas.** Veinte minutos con el catálogo real dicen más que una tabla de funciones. Las dos herramientas se ven distintas cuando contestan lo tuyo.
+3. **Probalas con tus preguntas.** Una semana con el catálogo real dice más que una tabla de funciones. Las dos herramientas se ven distintas cuando contestan lo tuyo.
 
 Respond.io es la herramienta correcta para un equipo de atención con muchos canales. Conext es la correcta para la pyme que ya atiende por Meta y no quiere un segundo trabajo de configurar una plataforma.
 
@@ -644,7 +644,7 @@ Si lo que necesitás es crecer por comentarios y anuncios, Manychat sigue siendo
 
 2. **Mirá quién tiene que ver el hilo.** Si ventas y el local tienen que retomar la misma conversación, hace falta una bandeja. Un lienzo de flujos no es eso.
 
-3. **No las uses para el trabajo de la otra.** Un CRM no va a multiplicar comentarios. Un bot de crecimiento no va a ser el turno de la tarde. Pedí la demo de la que sí corresponde.
+3. **No las uses para el trabajo de la otra.** Un CRM no va a multiplicar comentarios. Un bot de crecimiento no va a ser el turno de la tarde. Probá la que sí corresponde.
 
 Manychat es el bot de marketing. Conext es el CRM de la bandeja. Se pueden cruzar en Instagram; no se sustituyen.
 
@@ -721,7 +721,7 @@ El nombre del contacto no viene en el mensaje. El CRM lo pregunta a Graph. Si el
 
 ## Qué pide Meta de tu lado.
 
-Hasta que pase el App Review de `instagram_manage_messages` y `pages_messaging`, esto funciona con cuentas que tengan un rol en la app: alcanza para desarrollo y para la demo. En la consola de Meta hay que suscribir la app al webhook `messages` de Messenger e Instagram. Sin eso la ficha dice conectado y no llega ni un mensaje.
+Hasta que pase el App Review de `instagram_manage_messages` y `pages_messaging`, esto funciona con cuentas que tengan un rol en la app: alcanza para desarrollo y para grabar el video del App Review. En la consola de Meta hay que suscribir la app al webhook `messages` de Messenger e Instagram. Sin eso la ficha dice conectado y no llega ni un mensaje.
 
 Los adjuntos salientes por Instagram todavía no salen: Instagram quiere una URL pública del archivo, y los nuestros se sirven detrás de la sesión. Falta esa URL firmada. El texto del DM sí va y vuelve.
 
@@ -798,7 +798,7 @@ Conext no pide un servidor ni un webhook tuyo. Pedís el acceso, entrás, y en C
 
 Hace falta una cuenta de Meta Business, un WhatsApp Business (el número que vas a atender) y, si querés Instagram o Messenger, una Página de Facebook con la cuenta profesional atada. Un número en la Cloud API no puede estar al mismo tiempo en la app del teléfono: si hoy lo atendés a mano, el camino cómodo es un número de prueba y pasar el principal después.
 
-El alta de Conext la da el dueño del negocio o una demo. La pestaña de crear cuenta en el ingreso no abre un registro. Con el acceso, el primer día de trabajo ya está abierto: sin día abierto no se envía ni se deja una nota.
+El alta de Conext sale de Precios: se elige un plan y se entra. La pestaña de crear cuenta en el ingreso no abre un registro. Con el acceso, el primer día de trabajo ya está abierto: sin día abierto no se envía ni se deja una nota.
 
 ## Las dos fichas de Canales.
 
@@ -998,7 +998,7 @@ Escribe a email con el nombre del negocio. Si el cambio es de volumen (más pers
 
 ### ¿Cómo creo una cuenta?
 
-Hoy el alta no es autoservicio: la da el dueño del negocio, o nosotros después de una demo. La pestaña de crear cuenta en el ingreso no abre un registro. Pide una demo y te dejamos el acceso.
+El alta sale de Precios: elegís un plan, contestás cuatro preguntas y entrás. La pestaña de crear cuenta en el ingreso no abre un registro. A las personas del equipo las suma después el dueño del negocio.
 
 ### ¿Puede atender el mismo número más de una persona?
 

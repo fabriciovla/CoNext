@@ -4,7 +4,7 @@ import Boton from '../components/Boton.jsx'
 import Logo, { LogoMarca } from '../components/Logo.jsx'
 import LangSwitch from '../components/LangSwitch.astro'
 import { IconBolt, IconSparkles, IconShield, IconGoogle, IconGitHub } from '../components/icons.jsx'
-import { APP_URL, WHATSAPP_URL } from '../config'
+import { APP_URL } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 
 const lang = getLocale(Astro)
@@ -198,11 +198,6 @@ const VENTAJAS = [
               </a>
             ))}
           </div>
-          <div class="relative my-5 text-center">
-            <span class="absolute inset-x-0 top-1/2 border-t border-tint/[0.08]"></span>
-            <span class="relative bg-surface-page px-2 text-[12px] text-ink-faint">{c.oDemo}</span>
-          </div>
-          <Boton href={WHATSAPP_URL} className="w-full">{c.pedirDemo}</Boton>
         </div>
 
         {/* /login no lleva pie: el cambio de idioma vive acá para no perder /en/login. */}

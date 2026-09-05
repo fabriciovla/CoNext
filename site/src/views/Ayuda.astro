@@ -1,15 +1,15 @@
 ---
 import Base from '../layouts/Base.astro'
 import Boton from '../components/Boton.jsx'
-import { EMAIL, WHATSAPP_URL } from '../config'
+import { EMAIL } from '../config'
 import { getLocale, t, fill, pathFor } from '../i18n/utils'
 
 const lang = getLocale(Astro)
 const a = t(lang).ayuda
 
 const vars = {
-  whatsapp: WHATSAPP_URL,
   email: EMAIL,
+  correo: `mailto:${EMAIL}`,
   login: pathFor(lang, '/login'),
   privacidad: pathFor(lang, '/privacidad'),
   eliminar: pathFor(lang, '/eliminar-datos'),
@@ -70,7 +70,7 @@ const TEMAS = a.temas.map((tema) => ({
           <p class="mt-1.5 text-[13px] leading-relaxed text-ink-muted">
             {a.atascadoTexto}
           </p>
-          <Boton href={WHATSAPP_URL} className="mt-4 w-full">
+          <Boton href={`mailto:${EMAIL}`} className="mt-4 w-full">
             {a.contactar}
           </Boton>
         </div>

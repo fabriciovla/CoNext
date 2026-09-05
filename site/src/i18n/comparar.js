@@ -9,8 +9,8 @@ export const compararEs = {
   verTambien: 'Otras comparativas',
   enLaPractica: 'Cómo decidir',
   ctaTitulo: '¿Querés verlo con tus conversaciones?',
-  ctaTexto: 'Una demo corta, con el catálogo y las preguntas que ya te llegan por WhatsApp.',
-  ctaBoton: 'Pedir una demo',
+  ctaTexto: 'Siete días del Estándar completo, con tu catálogo cargado y los tres canales conectados.',
+  ctaBoton: 'Empezar gratis',
   indice: {
     nombre: 'Comparar',
     etiqueta: 'Comparativas',
@@ -61,7 +61,7 @@ export const compararEs = {
       pasos: [
         { titulo: 'Contá los canales que de verdad usás', texto: 'Si son WhatsApp, Instagram y Messenger, Conext los cubre. Si además hace falta mail, SMS y un bot de la web, Respond.io está hecho para eso.' },
         { titulo: 'Mirá quién lo va a configurar', texto: 'Si es el dueño entre un pedido y el otro, un CRM de catálogo y agentes entra. Un contact center pide a alguien que lo administre.' },
-        { titulo: 'Pedí una demo con tus preguntas', texto: 'Veinte minutos con el catálogo real dicen más que una tabla de funciones. Las dos herramientas se ven distintas cuando contestan lo tuyo.' },
+        { titulo: 'Probalas con tus preguntas', texto: 'Una semana con el catálogo real dice más que una tabla de funciones. Las dos herramientas se ven distintas cuando contestan lo tuyo.' },
       ],
       cierre:
         'Respond.io es la herramienta correcta para un equipo de atención con muchos canales. Conext es la correcta para la pyme que ya atiende por Meta y no quiere un segundo trabajo de configurar una plataforma.',
@@ -145,7 +145,7 @@ export const compararEs = {
       pasos: [
         { titulo: 'Separá captar de atender', texto: 'Comentarios, historias y secuencias son Manychat. DMs del día, stock y un equipo en un número son Conext.' },
         { titulo: 'Mirá quién tiene que ver el hilo', texto: 'Si ventas y el local tienen que retomar la misma conversación, hace falta una bandeja. Un lienzo de flujos no es eso.' },
-        { titulo: 'No las uses para el trabajo de la otra', texto: 'Un CRM no va a multiplicar comentarios. Un bot de crecimiento no va a ser el turno de la tarde. Pedí la demo de la que sí corresponde.' },
+        { titulo: 'No las uses para el trabajo de la otra', texto: 'Un CRM no va a multiplicar comentarios. Un bot de crecimiento no va a ser el turno de la tarde. Probá la que sí corresponde.' },
       ],
       cierre:
         'Manychat es el bot de marketing. Conext es el CRM de la bandeja. Se pueden cruzar en Instagram; no se sustituyen.',
@@ -157,8 +157,8 @@ export const compararEn = {
   verTambien: 'Other comparisons',
   enLaPractica: 'How to decide',
   ctaTitulo: 'Want to see it with your own threads?',
-  ctaTexto: 'A short demo, with the catalog and the questions you already get on WhatsApp.',
-  ctaBoton: 'Request a demo',
+  ctaTexto: 'Seven days of the full Standard plan, with your catalog loaded and all three channels connected.',
+  ctaBoton: 'Start for free',
   indice: {
     nombre: 'Compare',
     etiqueta: 'Comparisons',
@@ -209,7 +209,7 @@ export const compararEn = {
       pasos: [
         { titulo: 'Count the channels you actually use', texto: 'If they are WhatsApp, Instagram, and Messenger, Conext covers them. If you also need email, SMS, and a website bot, Respond.io was built for that.' },
         { titulo: 'Look at who will configure it', texto: 'If it is the owner between orders, a catalog-and-agents CRM fits. A contact center asks for someone to run it.' },
-        { titulo: 'Ask for a demo with your questions', texto: 'Twenty minutes with the real catalog say more than a feature table. The two tools look different when they answer yours.' },
+        { titulo: 'Try them with your questions', texto: 'A week with the real catalog says more than a feature table. The two tools look different when they answer yours.' },
       ],
       cierre:
         'Respond.io is the right tool for a support team with many channels. Conext is the right one for the small business that already attends on Meta and does not want a second job of configuring a platform.',
@@ -293,7 +293,7 @@ export const compararEn = {
       pasos: [
         { titulo: 'Split capture from answering', texto: 'Comments, stories, and sequences are Manychat. The day’s DMs, stock, and a team on one number are Conext.' },
         { titulo: 'Look at who has to see the thread', texto: 'If sales and the shop have to pick up the same conversation, you need an inbox. A flow canvas is not that.' },
-        { titulo: 'Do not use either for the other’s job', texto: 'A CRM will not multiply comments. A growth bot will not be the afternoon shift. Ask for the demo of the one that actually fits.' },
+        { titulo: 'Do not use either for the other’s job', texto: 'A CRM will not multiply comments. A growth bot will not be the afternoon shift. Try the one that actually fits.' },
       ],
       cierre:
         'Manychat is the marketing bot. Conext is the inbox CRM. They can overlap on Instagram; they do not substitute for each other.',

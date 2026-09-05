@@ -7,12 +7,11 @@ import { ORIGEN_CANONICO } from './seo.js'
 // H1, bajada, y cada URL pública como `- [título SEO](url): descripción`.
 // El -full incrusta el cuerpo, para que no haga falta parsear el HTML.
 //
-// EMAIL y el wa.me van acá y no por config.js: este módulo lo corre un
-// script de Node al generar public/llms.txt, y config.js lee import.meta.env.
+// EMAIL va acá y no por config.js: este módulo lo corre un script de Node al
+// generar public/llms.txt, y config.js lee import.meta.env.
 
 const ORIGEN = ORIGEN_CANONICO
 const EMAIL = 'contact@conext.lat'
-const WHATSAPP_URL = 'https://wa.me/5490000000000'
 
 function abs(lang, path) {
   const ruta = pathFor(lang, path)
@@ -169,13 +168,6 @@ function itemsRecursos(lang) {
     item(copy.precios.title, abs(lang, '/precios'), copy.precios.description),
     item(copy.ayuda.title, abs(lang, '/ayuda'), copy.ayuda.description),
     item(
-      es ? 'Pedir una demo' : 'Book a demo',
-      WHATSAPP_URL,
-      es
-        ? 'Demo por WhatsApp: veinte minutos con el catálogo y las preguntas que ya te llegan.'
-        : 'WhatsApp demo: twenty minutes with your catalog and the questions you already get.',
-    ),
-    item(
       es ? 'Contacto' : 'Contact',
       `mailto:${EMAIL}`,
       `${EMAIL}. ${es ? 'Facturación, cuentas y datos.' : 'Billing, accounts, and data.'}`,
@@ -279,12 +271,12 @@ export function armarLlmsTxt(lang = 'es') {
     ? [
         'Conext es un CRM para pequeñas empresas. Junta WhatsApp, Instagram y Messenger en una sola bandeja. Los agentes de IA responden con el catálogo, el horario y el rol que cargó el negocio, o dejan el borrador para que una persona lo mande. Corre sobre la Cloud API oficial de Meta: el número y la Página son del cliente. No usa WhatsApp Web ni clientes no oficiales.',
         'No es un constructor de flujos de marketing (Manychat), ni un contact center de veinte canales (Respond.io), ni una herramienta de campañas masivas de WhatsApp (Wati). No responde comentarios ni menciones de historias de Instagram. No hay voz IA ni conectores a Make, Zapier o un ERP. El webhook es de Meta hacia Conext, no al revés.',
-        `Host canónico: ${ORIGEN}. Contacto: ${EMAIL}. Demo: ${WHATSAPP_URL}. El cuerpo completo de estas páginas está en ${ORIGEN}/llms-full.txt. La misma información en inglés: ${ORIGEN}/en y ${ORIGEN}/en/llms.txt.`,
+        `Host canónico: ${ORIGEN}. Contacto: ${EMAIL}. El cuerpo completo de estas páginas está en ${ORIGEN}/llms-full.txt. La misma información en inglés: ${ORIGEN}/en y ${ORIGEN}/en/llms.txt.`,
       ]
     : [
         'Conext is a CRM for small businesses. It puts WhatsApp, Instagram, and Messenger in one inbox. AI agents reply from the catalog, hours, and role the business loaded, or leave a draft for a person to send. It runs on Meta’s official Cloud API: the number and the Page belong to the customer. It does not use WhatsApp Web or unofficial clients.',
         'It is not a marketing flow builder (Manychat), not a twenty-channel contact center (Respond.io), and not a WhatsApp broadcast tool (Wati). It does not reply to Instagram comments or story mentions. There is no voice AI and no Make, Zapier, or ERP connector. The webhook is from Meta into Conext, not the other way around.',
-        `Canonical host: ${ORIGEN}. Contact: ${EMAIL}. Demo: ${WHATSAPP_URL}. Full page bodies: ${ORIGEN}/en/llms-full.txt. The same information in Spanish: ${ORIGEN}/ and ${ORIGEN}/llms.txt.`,
+        `Canonical host: ${ORIGEN}. Contact: ${EMAIL}. Full page bodies: ${ORIGEN}/en/llms-full.txt. The same information in Spanish: ${ORIGEN}/ and ${ORIGEN}/llms.txt.`,
       ]
 
   const otro = es ? 'en' : 'es'

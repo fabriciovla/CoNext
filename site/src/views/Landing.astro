@@ -15,7 +15,7 @@ import {
   IconTag,
   IconWhatsApp,
 } from '../components/icons.jsx'
-import { WHATSAPP_URL } from '../config'
+import { dodoCheckout } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 import { origenDe, urlCanonico } from '../lib/seo.js'
 
@@ -106,8 +106,8 @@ const ESQUEMA = {
       </p>
 
       <div class="animate-in mt-9 flex flex-wrap items-center gap-3" style="--d: 240ms">
-        <Boton href={WHATSAPP_URL} tamano="lg">
-          {l.pedirDemo}
+        <Boton href={dodoCheckout('gratis')} tamano="lg" target="_self">
+          {l.empezarGratis}
           <IconArrowRight size={17} />
         </Boton>
         <Boton href="#como-funciona" variante="secundario" tamano="lg">{l.verComo}</Boton>
@@ -277,9 +277,9 @@ const ESQUEMA = {
             {l.ctaTexto}
           </p>
           <div class="mt-8 flex flex-wrap justify-center">
-            <Boton href={WHATSAPP_URL} tamano="lg">
-              <IconWhatsApp size={17} />
+            <Boton href={dodoCheckout('gratis')} tamano="lg" target="_self">
               {l.ctaBoton}
+              <IconArrowRight size={17} />
             </Boton>
           </div>
         </div>

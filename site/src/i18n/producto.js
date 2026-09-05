@@ -27,8 +27,8 @@ export const productoEs = {
   verTambien: 'En esta sección',
   enLaPractica: 'En la práctica',
   ctaTitulo: '¿Querés verlo con tus conversaciones?',
-  ctaTexto: 'Una demo corta, con el catálogo y las preguntas que ya te llegan por WhatsApp.',
-  ctaBoton: 'Pedir una demo',
+  ctaTexto: 'Siete días del Estándar completo, con tu catálogo cargado y los tres canales conectados.',
+  ctaBoton: 'Empezar gratis',
   columnas: columnasEs,
   indice: {
     nombre: 'Visión general',
@@ -502,8 +502,8 @@ export const productoEn = {
   verTambien: 'In this section',
   enLaPractica: 'In practice',
   ctaTitulo: 'Want to see it with your own threads?',
-  ctaTexto: 'A short demo, with the catalog and the questions you already get on WhatsApp.',
-  ctaBoton: 'Request a demo',
+  ctaTexto: 'Seven days of the full Standard plan, with your catalog loaded and all three channels connected.',
+  ctaBoton: 'Start for free',
   columnas: columnasEn,
   indice: {
     nombre: 'Overview',

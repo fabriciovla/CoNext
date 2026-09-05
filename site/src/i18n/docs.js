@@ -6,8 +6,8 @@ export const docsEs = {
   verTambien: 'Otras guías',
   enLaPractica: 'En la práctica',
   ctaTitulo: '¿Querés verlo con tus conversaciones?',
-  ctaTexto: 'Una demo corta, con el catálogo y las preguntas que ya te llegan por WhatsApp.',
-  ctaBoton: 'Pedir una demo',
+  ctaTexto: 'Siete días del Estándar completo, con tu catálogo cargado y los tres canales conectados.',
+  ctaBoton: 'Empezar gratis',
   indice: {
     nombre: 'Documentación',
     etiqueta: 'Documentación',
@@ -37,7 +37,7 @@ export const docsEs = {
           titulo: 'Antes de conectar.',
           parrafos: [
             'Hace falta una cuenta de Meta Business, un WhatsApp Business (el número que vas a atender) y, si querés Instagram o Messenger, una Página de Facebook con la cuenta profesional atada. Un número en la Cloud API no puede estar al mismo tiempo en la app del teléfono: si hoy lo atendés a mano, el camino cómodo es un número de prueba y pasar el principal después.',
-            'El alta de Conext la da el dueño del negocio o una demo. La pestaña de crear cuenta en el ingreso no abre un registro. Con el acceso, el primer día de trabajo ya está abierto: sin día abierto no se envía ni se deja una nota.',
+            'El alta de Conext sale de Precios: se elige un plan y se entra. La pestaña de crear cuenta en el ingreso no abre un registro. Con el acceso, el primer día de trabajo ya está abierto: sin día abierto no se envía ni se deja una nota.',
           ],
         },
         {
@@ -154,8 +154,8 @@ export const docsEn = {
   verTambien: 'Other guides',
   enLaPractica: 'In practice',
   ctaTitulo: 'Want to see it with your own threads?',
-  ctaTexto: 'A short demo, with the catalog and the questions you already get on WhatsApp.',
-  ctaBoton: 'Request a demo',
+  ctaTexto: 'Seven days of the full Standard plan, with your catalog loaded and all three channels connected.',
+  ctaBoton: 'Start for free',
   indice: {
     nombre: 'Docs',
     etiqueta: 'Documentation',
@@ -185,7 +185,7 @@ export const docsEn = {
           titulo: 'Before you connect.',
           parrafos: [
             'You need a Meta Business account, a WhatsApp Business number you will attend, and, if you want Instagram or Messenger, a Facebook Page with the professional account attached. A number on Cloud API cannot be on the phone app at the same time: if you still answer by hand, the comfortable path is a test number and moving the main one later.',
-            'Conext access is given by the business owner or a demo. The create-account tab on the login screen does not open a signup. With access, the first work day is already open: with no open day you cannot send or leave a note.',
+            'Conext access starts at Pricing: you pick a plan and you are in. The create-account tab on the login screen does not open a signup. With access, the first work day is already open: with no open day you cannot send or leave a note.',
           ],
         },
         {
