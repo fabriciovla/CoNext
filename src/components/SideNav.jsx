@@ -168,7 +168,7 @@ export default function SideNav({
       {footer}
 
       <div className="flex shrink-0 items-center gap-2 border-t border-tint/[0.07] px-3 py-2.5">
-        <Avatar name={username} size={28} className="!rounded-full !text-[11px]" />
+        <Avatar admin name={username} size={28} className="!rounded-full !text-[11px]" />
         <div className="min-w-0 flex-1">
           <p className="truncate text-[12px] font-medium capitalize text-ink-primary">{username}</p>
           <p className="truncate text-[10.5px] text-ink-faint">{t('comun.administrador')}</p>
