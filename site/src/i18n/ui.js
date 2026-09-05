@@ -291,18 +291,18 @@ export const ui = {
     postulate: {
       title: 'Sumate al equipo | Conext',
       description:
-        'Estamos armando el equipo que está construyendo conext. Dejanos tu nombre y un contacto, y te escribimos.',
+        'Estamos armando el equipo que está construyendo conext. Dejanos tu nombre y tu correo, y te escribimos.',
       etiqueta: 'Estamos armando el equipo',
       titulo: 'Sumate al equipo de conext',
       bajada:
-        'Buscamos gente para ayudarnos a construir conext desde el arranque. Dejanos tu nombre y un contacto, y te escribimos para charlar.',
+        'Buscamos gente para ayudarnos a construir conext desde el arranque. Dejanos tu nombre y tu correo, y te escribimos para charlar.',
       countdownEtiqueta: 'Esta ronda de postulaciones cierra en',
       dias: 'días',
       horas: 'hs',
       minutos: 'min',
       segundos: 'seg',
       nombrePh: 'Tu nombre',
-      contactoPh: 'Correo o WhatsApp',
+      contactoPh: 'Tu correo',
       cta: 'Postularme',
       enviando: 'Enviando…',
       listoTexto: '¡Listo! Recibimos tu postulación. Si hay un buen fit, te escribimos.',
@@ -1016,18 +1016,18 @@ export const ui = {
     postulate: {
       title: "Join the team | Conext",
       description:
-        "We're putting together the team building conext. Leave your name and a contact, and we'll reach out.",
+        "We're putting together the team building conext. Leave your name and your email, and we'll reach out.",
       etiqueta: "We're building the team",
       titulo: 'Join the conext team',
       bajada:
-        "We're looking for people to help us build conext from the ground up. Leave your name and a contact, and we'll reach out to talk.",
+        "We're looking for people to help us build conext from the ground up. Leave your name and your email, and we'll reach out to talk.",
       countdownEtiqueta: 'This round of applications closes in',
       dias: 'days',
       horas: 'hrs',
       minutos: 'min',
       segundos: 'sec',
       nombrePh: 'Your name',
-      contactoPh: 'Email or WhatsApp',
+      contactoPh: 'Your email',
       cta: 'Apply',
       enviando: 'Sending…',
       listoTexto: "Done! We got your application. If there's a good fit, we'll reach out.",

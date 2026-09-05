@@ -124,6 +124,7 @@ export default function Postulate({ copy, apiUrl, idioma = 'es' }) {
               <span className="sr-only">{copy.contactoPh}</span>
               <input
                 id={`${formId}-contacto`}
+                type="email"
                 value={valores.contacto}
                 onChange={onChange('contacto')}
                 placeholder={copy.contactoPh}
