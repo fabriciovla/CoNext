@@ -136,11 +136,31 @@ export default function Cuestionario({ copy, planes = [], appUrl, apiUrl }) {
 
   useEffect(() => {
     if (!enListo) return
-    // Llegar al final por haber contestado antes no vuelve a guardar nada: no
-    // hay respuestas nuevas, y un alta por intento de ingreso ensucia la tabla
-    // con copias de lo mismo.
-    if (yaContesto === true) return
     let cancelado = false
+
+    // La marca de "este navegador ya contestó". Se escribe **también** cuando
+    // el que contestó fue otro día y lo sabemos por el server (`yaContesto`):
+    // es la misma verdad, y sin escribirla acá, quien vuelve del checkout cae
+    // en /empezar sin marca y se encuentra el cuestionario entero de nuevo,
+    // desde la pregunta 1, recién salido de pagar.
+    const marcar = () => {
+      try {
+        localStorage.setItem(
+          ALTA_CLAVE,
+          JSON.stringify({ listo: true, plan, correo, respuestas, at: Date.now() }),
+        )
+      } catch {
+        /* private mode */
+      }
+    }
+
+    // Llegar al final por haber contestado antes no vuelve a guardar el alta en
+    // la base: no hay respuestas nuevas, y una fila por intento de ingreso la
+    // ensucia con copias de lo mismo.
+    if (yaContesto === true) {
+      marcar()
+      return undefined
+    }
 
     const registrar = async () => {
       const empezó = Date.now()
@@ -156,14 +176,7 @@ export default function Cuestionario({ copy, planes = [], appUrl, apiUrl }) {
         /* si el server no responde, igual entra: el skip de este navegador
            vive en localStorage; el registro en la base se puede rehacer */
       }
-      try {
-        localStorage.setItem(
-          ALTA_CLAVE,
-          JSON.stringify({ listo: true, plan, correo, respuestas, at: Date.now() }),
-        )
-      } catch {
-        /* private mode */
-      }
+      marcar()
       // Sin plan no hay a dónde mandar: la pantalla final se queda acá
       // ofreciendo los precios. Mandarlo igual a la app lo devuelve al corte
       // del que acaba de venir, y esa vuelta se lee como que algo falló.

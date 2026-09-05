@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Button from './ui/Button'
 import {
+  IconBolt,
   IconCheck,
   IconChevronRight,
   IconClock,
@@ -14,6 +15,7 @@ import {
   IconSettings,
   IconSidebarToggle,
   IconSparkles,
+  IconUsers,
 } from './ui/icons'
 import { useT } from '../lib/i18n.jsx'
 
@@ -61,11 +63,50 @@ import { useT } from '../lib/i18n.jsx'
 // tarjeta viaja con él. Lo único que late es el anillo de la pieza que hay que
 // tocar, y late porque no adorna: es lo que la separa de las otras nueve que
 // quedaron a la vista adentro del mismo recorte.
+//
+// **El cambio de paso sale entero o no sale.** Cambiar de paso no es cambiar el
+// texto: es que el recorte arranque a viajar y la tarjeta cuente lo que va a
+// señalar. Las dos cosas pasan en el mismo cuadro, y ese cuadro es el primero
+// que tiene medido al objetivo nuevo (`mostrado`), no el del click. Antes eran
+// dos momentos distintos —el texto cambiaba al instante y el recorte esperaba a
+// que la página siguiente terminara de montar—, así que entre uno y otro la
+// tarjeta explicaba el composer con el agujero todavía puesto sobre la barra.
+//
+// Lo que se movía de golpe también se acomodó: el cuerpo de la tarjeta **morfea
+// de alto** en vez de saltar (los textos no miden lo mismo y la pista aparece y
+// desaparece, y el alto es lo que centra la tarjeta contra el recorte, así que
+// el salto la corría de lugar), y el texto entra desde el lado del que viene el
+// recorrido, que es lo único que distingue un paso adelante de uno atrás cuando
+// el recorte se corre dos filas.
 
-// Acá no hay ningún flag propio de "ya lo vio": quién ve esto la primera vez lo
-// decide la bienvenida (`WelcomeTour.jsx`, que guarda el suyo) y volver a verlo
-// lo pide la persona desde Configuración. Un segundo flag para lo mismo son dos
-// lugares donde apagar la misma pantalla.
+// El recorrido general no tiene flag propio de "ya lo vio": quién lo ve la
+// primera vez lo decide la bienvenida (`WelcomeTour.jsx`, que guarda el suyo) y
+// volver a verlo lo pide la persona desde Configuración. Un segundo flag para lo
+// mismo son dos lugares donde apagar la misma pantalla.
+//
+// El de armar un agente sí tiene el suyo, y no es una excepción a lo de arriba:
+// no lo abre nadie, arranca solo al entrar a Agentes por primera vez, así que
+// necesita recordar que ya pasó. Va acá al lado de la lista de pasos y no en un
+// hook, por lo mismo que el de la bienvenida: son dos líneas y un try, y en
+// incógnito con el almacenamiento bloqueado no poder recordarlo no es motivo
+// para que la pantalla no abra.
+const CLAVE_AGENTE = 'wsp-crm:tour-agente'
+
+export function tourAgentePendiente() {
+  try {
+    return localStorage.getItem(CLAVE_AGENTE) !== 'visto'
+  } catch {
+    return false
+  }
+}
+
+export function marcarTourAgenteVisto() {
+  try {
+    localStorage.setItem(CLAVE_AGENTE, 'visto')
+  } catch {
+    /* ver tourAgentePendiente */
+  }
+}
 //
 // Las claves van escritas enteras, igual que en la bienvenida: un
 // `t('tour.' + paso.clave + 'Titulo')` no lo encuentra ningún grep, que es como
@@ -147,7 +188,15 @@ export const PASOS = [
     lado: 'arriba',
     titulo: 'tour.composerTitulo',
     bajada: 'tour.composerBajada',
-    accion: { tipo: 'escribir', en: 'inbox-composer', pista: 'tour.accionComposer' },
+    // `cortaEnter`: mientras dure este paso el tour se come el Enter. Es de este
+    // paso y no de todos los que piden escribir — la prueba de un agente no
+    // escribe nada en ningún lado y ahí mandar es el punto.
+    accion: {
+      tipo: 'escribir',
+      en: 'inbox-composer',
+      cortaEnter: true,
+      pista: 'tour.accionComposer',
+    },
   },
   {
     clave: 'ficha',
@@ -179,6 +228,10 @@ export const PASOS = [
   },
   // El último no señala nada y cae en el medio de la bandeja, que es donde se
   // trabaja: el tour termina dejando a la persona parada donde va a estar.
+  //
+  // `cta` es el botón del cierre. Vive en el paso y no en el componente porque
+  // hay más de un recorrido: lo que sigue después de este es siempre conectar un
+  // canal, y después del de armar un agente es otra cosa.
   {
     clave: 'final',
     pagina: 'inbox',
@@ -186,12 +239,107 @@ export const PASOS = [
     Icono: IconCheck,
     titulo: 'tour.finalTitulo',
     bajada: 'tour.finalBajada',
+    cta: { texto: 'tour.finalConectar', ir: { pagina: 'settings', seccion: 'canales' } },
   },
 ]
 
-// Cuántos pasos piden que el admin haga algo. Se cuenta una vez, al cargar el
-// módulo: la lista es una constante y no cambia entre renders.
-const CON_ACCION = PASOS.filter((p) => p.accion).length
+// El segundo recorrido: **armar el primer agente, uno de verdad**. Arranca solo
+// la primera vez que alguien entra a Agentes (`App.jsx`), y no se superpone con
+// el general — ese señala el botón y explica qué es un agente; este se queda en
+// la pantalla y lo hace.
+//
+// Es de punta a punta del admin: los seis pasos con acción son los seis
+// movimientos que hay que hacer para tener un agente contestando, y ninguno lo
+// hace el tour. El agente que sale es un **recepcionista**, que es el que sirve
+// tenga el negocio que tenga: atiende al que escribe por primera vez, saluda,
+// entiende qué necesita y deriva. Un ejemplo de "vendedor de zapatillas" no se
+// puede copiar sin cambiarlo entero.
+//
+// Los textos de rol e instrucciones van escritos en la pista, listos para
+// copiar. Es la parte que de verdad cuesta: la pantalla ya dice que el rol es
+// "cuándo entra" y las instrucciones "cómo escribe", y aún así frente al campo
+// vacío no se sabe qué poner.
+export const PASOS_AGENTE = [
+  {
+    clave: 'aArmar',
+    pagina: 'agents',
+    target: 'agentes-nuevo',
+    Icono: IconSparkles,
+    lado: 'abajo',
+    titulo: 'tourAgente.abrirTitulo',
+    bajada: 'tourAgente.abrirBajada',
+    accion: { tipo: 'click', pista: 'tourAgente.accionAbrir' },
+  },
+  {
+    clave: 'nombre',
+    target: 'agente-identidad',
+    Icono: IconContactCard,
+    lado: 'derecha',
+    titulo: 'tourAgente.nombreTitulo',
+    bajada: 'tourAgente.nombreBajada',
+    accion: { tipo: 'escribir', en: 'agente-nombre', pista: 'tourAgente.accionNombre' },
+  },
+  {
+    clave: 'rol',
+    target: 'agente-rol',
+    Icono: IconUsers,
+    lado: 'derecha',
+    titulo: 'tourAgente.rolTitulo',
+    bajada: 'tourAgente.rolBajada',
+    accion: { tipo: 'escribir', pista: 'tourAgente.accionRol' },
+  },
+  {
+    clave: 'instrucciones',
+    target: 'agente-instrucciones',
+    Icono: IconCompose,
+    lado: 'derecha',
+    titulo: 'tourAgente.instruccionesTitulo',
+    bajada: 'tourAgente.instruccionesBajada',
+    accion: { tipo: 'escribir', pista: 'tourAgente.accionInstrucciones' },
+  },
+  {
+    clave: 'comportamiento',
+    target: 'agente-comportamiento',
+    Icono: IconBolt,
+    lado: 'derecha',
+    titulo: 'tourAgente.comportamientoTitulo',
+    bajada: 'tourAgente.comportamientoBajada',
+  },
+  {
+    clave: 'crear',
+    target: 'agente-guardar',
+    Icono: IconCheck,
+    lado: 'abajo',
+    titulo: 'tourAgente.crearTitulo',
+    bajada: 'tourAgente.crearBajada',
+    accion: { tipo: 'click', pista: 'tourAgente.accionCrear' },
+  },
+  // Acá el Enter **no** se corta: la prueba no escribe nada en ningún lado —ni
+  // conversación, ni mensaje, ni día— así que mandarlo es justamente el punto
+  // del paso. Es al revés que el composer de la bandeja, donde ese mismo Enter
+  // le llega a una persona de verdad.
+  {
+    clave: 'probar',
+    target: 'agente-prueba',
+    Icono: IconSparkles,
+    lado: 'izquierda',
+    titulo: 'tourAgente.probarTitulo',
+    bajada: 'tourAgente.probarBajada',
+    accion: { tipo: 'escribir', pista: 'tourAgente.accionProbar' },
+  },
+  {
+    clave: 'final',
+    Icono: IconCheck,
+    titulo: 'tourAgente.finalTitulo',
+    bajada: 'tourAgente.finalBajada',
+    cta: { texto: 'tourAgente.finalConectar', ir: { pagina: 'settings', seccion: 'canales' } },
+  },
+]
+
+// Cuántos pasos de un recorrido piden que el admin haga algo. Se cuenta por
+// lista y no una vez al cargar el módulo, porque ahora hay más de una: la del
+// recorrido general y la de armar un agente.
+const conAccion = (pasos) => pasos.filter((p) => p.accion).length
 
 // Cuánto se espera a que aparezca el objetivo de un paso antes de darlo por
 // inexistente y seguir. Alcanza para un cambio de página (que remonta el
@@ -199,7 +347,13 @@ const CON_ACCION = PASOS.filter((p) => p.accion).length
 const ESPERA_MAX_MS = 1200
 const AIRE_RECORTE = 8 // cuánto respira el agujero alrededor de la pieza
 const AIRE_ANILLO = 3 // el de la pieza que hay que tocar: pegado, para señalarla
-const ANCHO_TARJETA = 344
+// El ancho de la tarjeta. 400 y no los 344 de antes: adentro va un título, un
+// párrafo de tres o cuatro renglones y, en la mitad de los pasos, la pista de lo
+// que hay que hacer —que en el recorrido del agente es un texto para copiar—.
+// A 344 eso eran ocho renglones de 40 caracteres, que se lee como una nota al
+// pie de la app y no como quien la está explicando. El resto de la tarjeta
+// acompaña: 16px el título, 13.5 la bajada, 13 la pista.
+const ANCHO_TARJETA = 400
 const AIRE_TARJETA = 14 // entre el borde del recorte y la tarjeta
 const MARGEN = 16 // mínimo contra el borde de la pantalla
 const LADOS = ['derecha', 'izquierda', 'abajo', 'arriba']
@@ -273,6 +427,12 @@ const enElCentro = () => ({
 // propósito: el viaje es lo único que dice que el paso anterior y este son la
 // misma pantalla, y a mitad de esa velocidad se lee como un salto con estela.
 const DUR_VIAJE_MS = 520
+
+// Cuánto tarda el cuerpo de la tarjeta en pasar del alto de un paso al del
+// siguiente. Es bastante más corto que el viaje: el alto no es una distancia
+// que haya que recorrer con la vista, es una caja que se acomoda, y estirado
+// se lee como si la tarjeta respirara.
+const DUR_CUERPO_MS = 260
 
 // Arranca y frena, sin rebote: el recorte es una lupa, no un objeto con peso.
 const suavizar = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2)
@@ -378,7 +538,10 @@ function marco(caja) {
   ]
 }
 
-export default function Tour({ onIr, onClose }) {
+// `pasos` es qué recorrido se está haciendo. El componente no sabe cuál: mide
+// objetivos, mueve el recorte y escucha lo que el paso pidió. Lo único que
+// cambia entre uno y otro es la lista.
+export default function Tour({ pasos = PASOS, onIr, onClose }) {
   const t = useT()
   const [indice, setIndice] = useState(0)
   const [vista, setVista] = useState(null)
@@ -387,11 +550,42 @@ export default function Tour({ onIr, onClose }) {
   // decir cuántas hizo — que es toda la diferencia entre haber mirado la app y
   // haberla usado.
   const [hechos, setHechos] = useState([])
+  // Qué paso está mostrando la tarjeta, y hacia dónde se venía. **No siempre es
+  // `indice`**: la tarjeta no cambia de texto al cambiar de paso, cambia cuando
+  // el recorte arranca a viajar hacia el nuevo objetivo.
+  //
+  // Es la diferencia entre un cambio de paso que se lee y uno que se sufre. El
+  // objetivo del paso siguiente casi siempre está en otra pantalla, así que
+  // entre el click y la primera medición hay un remonte entero de por medio; y
+  // durante ese rato el recorte seguía parado sobre la pieza del paso anterior
+  // mientras la tarjeta ya explicaba la que venía. O sea: el texto señalando lo
+  // que no era, y recién después el salto. Ahora las dos cosas salen juntas.
+  const [mostrado, setMostrado] = useState({ i: 0, sentido: 1 })
   // El paso que se acaba de cumplir. Vive aparte de `hechos` porque es un
   // estado momentáneo —la tilde y la pausa antes de avanzar— y no un registro.
   const [festejando, setFestejando] = useState(null)
   const cajaRef = useRef(null)
   const tarjetaRef = useRef(null)
+  // El alto del cuerpo de la tarjeta. Existe para una sola cosa: que al cambiar
+  // de paso la tarjeta **crezca o se achique** en vez de saltar. Los textos no
+  // miden lo mismo y la pista punteada aparece y desaparece, así que sin esto
+  // el alto cambia de golpe justo mientras la tarjeta viaja — y como el alto es
+  // lo que centra la tarjeta contra el recorte, el salto también la corre de
+  // lugar. Se mide con un ResizeObserver y no al cambiar de paso: el cuerpo se
+  // reacomoda solo (la pista se enciende cuando el objetivo entra en pantalla,
+  // la tilde de "ya lo hiciste" la reemplaza) y esos cambios son igual de
+  // bruscos que el del paso.
+  const [altoCuerpo, setAltoCuerpo] = useState(null)
+  const observador = useRef(null)
+  const medirCuerpo = useCallback((nodo) => {
+    observador.current?.disconnect()
+    observador.current = null
+    if (!nodo) return
+    setAltoCuerpo(nodo.offsetHeight)
+    observador.current = new ResizeObserver(() => setAltoCuerpo(nodo.offsetHeight))
+    observador.current.observe(nodo)
+  }, [])
+  useEffect(() => () => observador.current?.disconnect(), [])
   // Hacia dónde se estaba yendo. Sirve para saltear en la dirección correcta:
   // volviendo atrás, un paso sin objetivo tiene que seguir yendo hacia atrás, o
   // los dos pasos se rebotarían la pelota para siempre.
@@ -401,28 +595,36 @@ export default function Tour({ onIr, onClose }) {
   // función de inicio es lo que evita consultar el media query en cada render.
   const [directo] = useState(sinMovimiento)
 
-  const paso = PASOS[indice]
-  const ultimo = indice === PASOS.length - 1
+  const paso = pasos[indice]
+  // El que se dibuja. Todo lo de la tarjeta —el texto, la pista, los botones,
+  // el contador— sale de acá y no de `paso`, para que nada de lo que se lee
+  // hable de una pieza que el recorte todavía no señala.
+  const pasoVisible = pasos[mostrado.i]
+  const ultimo = indice === pasos.length - 1
+  const ultimoVisible = mostrado.i === pasos.length - 1
   // El paso actual, para los listeners que se montan una sola vez y no pueden
   // tenerlo como dependencia (ver el del teclado).
   const pasoRef = useRef(paso)
   pasoRef.current = paso
 
-  const yaHecho = hechos.includes(paso.clave)
+  const yaHecho = hechos.includes(pasoVisible.clave)
   // Un paso pide algo solo si lo que hay que tocar está en pantalla.
-  const interactivo = Boolean(paso.accion && vista?.accion)
+  const interactivo = Boolean(pasoVisible.accion && vista?.accion)
   const esperando = interactivo && !yaHecho
 
   const terminar = onClose
 
-  const mover = useCallback((sentido) => {
-    sentidoRef.current = sentido
-    setIndice((i) => {
-      const siguiente = i + sentido
-      if (siguiente < 0 || siguiente >= PASOS.length) return i
-      return siguiente
-    })
-  }, [])
+  const mover = useCallback(
+    (sentido) => {
+      sentidoRef.current = sentido
+      setIndice((i) => {
+        const siguiente = i + sentido
+        if (siguiente < 0 || siguiente >= pasos.length) return i
+        return siguiente
+      })
+    },
+    [pasos],
+  )
 
   const siguiente = useCallback(() => {
     if (ultimo) terminar()
@@ -436,9 +638,9 @@ export default function Tour({ onIr, onClose }) {
   const saltear = useCallback(() => {
     const sentido = sentidoRef.current
     const destino = indice + sentido
-    if (destino < 0 || destino >= PASOS.length) terminar()
+    if (destino < 0 || destino >= pasos.length) terminar()
     else setIndice(destino)
-  }, [indice, terminar])
+  }, [indice, pasos, terminar])
 
   // Los efectos de abajo se montan una vez por paso y no una vez por render, y
   // para eso las acciones tienen que entrar por una ref. Con las funciones como
@@ -478,6 +680,9 @@ export default function Tour({ onIr, onClose }) {
     // agujero aparece directamente en su lugar, sin viajar desde una esquina.
     const desde = cajaRef.current
     let inicio = 0
+    // El cuadro en el que este paso pasa a ser el que muestra la tarjeta: el
+    // primero que ya tiene dónde dibujar el agujero. Uno solo por paso.
+    let anunciado = false
 
     const cuadro = () => {
       if (!vivo) return
@@ -485,7 +690,15 @@ export default function Tour({ onIr, onClose }) {
       const el = buscar(paso.target)
 
       if (paso.target && !el) {
-        if (performance.now() > limite) {
+        // Saltear es para el objetivo que **nunca** apareció: en esta app, en
+        // este estado, esa pieza no existe. Una que apareció y después se fue es
+        // otra cosa —y es lo normal en los pasos que piden tocar algo que abre
+        // otra pantalla: el botón "Nuevo agente" se lleva puesta la lista
+        // entera—. Ahí el recorte se queda donde estaba hasta que el paso
+        // cambie, que es un cuadro después; sin esta distinción el paso se
+        // salteaba en el acto por haberse cumplido, sin la tilde y sin el
+        // festejo, que es exactamente el acuse que hacía falta dar.
+        if (!encontrado && performance.now() > limite) {
           vivo = false
           acciones.current.saltear()
           return
@@ -512,6 +725,11 @@ export default function Tour({ onIr, onClose }) {
       const ahora = performance.now()
       if (!inicio) inicio = ahora
 
+      if (!anunciado) {
+        anunciado = true
+        setMostrado({ i: indice, sentido: sentidoRef.current })
+      }
+
       const destino = el ? recuadroDe(el) : enElCentro()
       const avance = suavizar(Math.min(1, (ahora - inicio) / DUR_VIAJE_MS))
       const caja = !desde || directo || avance >= 1 ? destino : mezclar(desde, destino, avance)
@@ -526,7 +744,11 @@ export default function Tour({ onIr, onClose }) {
       // Pedir que se escriba en un cuadro que hay que ir a buscar con el mouse
       // son dos cosas. El foco va una sola vez por paso, cuando el campo
       // aparece, y sin mover el scroll: de eso ya se ocupó el objetivo.
-      if (elAccion && !enfocado && paso.accion.tipo === 'escribir') {
+      // `disabled` cuenta como todavía no estar: el cuadro de la prueba de un
+      // agente se habilita recién cuando el agente existe, y el paso que pide
+      // escribir ahí viene justo detrás del que lo crea. Marcarlo enfocado
+      // mientras estaba apagado gastaba el único intento que hay por paso.
+      if (elAccion && !enfocado && !elAccion.disabled && paso.accion.tipo === 'escribir') {
         enfocado = true
         elAccion.focus({ preventScroll: true })
       }
@@ -544,7 +766,7 @@ export default function Tour({ onIr, onClose }) {
       vivo = false
       cancelAnimationFrame(raf)
     }
-  }, [paso, directo])
+  }, [paso, indice, directo])
 
   // Lo que convierte al recorrido en algo que se hace y no que se mira: mirar la
   // app de abajo hasta que pase lo que el paso pidió.
@@ -629,15 +851,20 @@ export default function Tour({ onIr, onClose }) {
       e.preventDefault()
     }
 
-    // El Enter del paso que pide escribir se lo come el tour, y va en captura
-    // para llegar antes que el `onKeyDown` del composer. Probar a escribir es
-    // parte del recorrido; que ese "hola" de prueba le salga a un cliente de
-    // verdad, no. Es lo que permite pedir la acción sin ninguna advertencia al
-    // lado, y lo que deja el texto escrito ahí para cuando el tour termine.
+    // El Enter de los pasos marcados con `cortaEnter` se lo come el tour, y va
+    // en captura para llegar antes que el `onKeyDown` del composer. Probar a
+    // escribir es parte del recorrido; que ese "hola" de prueba le salga a un
+    // cliente de verdad, no. Es lo que permite pedir la acción sin ninguna
+    // advertencia al lado, y lo que deja el texto escrito ahí para cuando el
+    // tour termine.
+    //
+    // La marca es del paso y no de todos los que piden escribir: la prueba de un
+    // agente no manda nada a ningún lado —ni conversación, ni mensaje, ni día—,
+    // así que ahí cortar el Enter sería impedir justo lo que se está enseñando.
     const alTecladoCaptura = (e) => {
       if (e.key !== 'Enter' || e.shiftKey) return
       const actual = pasoRef.current
-      if (actual?.accion?.tipo !== 'escribir') return
+      if (!actual?.accion?.cortaEnter) return
       if (e.target === elDeAccion(actual)) {
         e.preventDefault()
         e.stopPropagation()
@@ -670,8 +897,8 @@ export default function Tour({ onIr, onClose }) {
   if (!vista) return null
 
   const { caja, tarjeta, accion } = vista
-  const { Icono } = paso
-  const festejo = festejando === paso.clave
+  const { Icono } = pasoVisible
+  const festejo = festejando === pasoVisible.clave
 
   return (
     <div
@@ -713,7 +940,7 @@ export default function Tour({ onIr, onClose }) {
           Cuando adentro hay una pieza esperando que la toquen, este anillo se
           hace fino y se apaga: dos contornos del mismo color y del mismo peso,
           uno adentro del otro, no señalan nada. */}
-      {paso.target && (
+      {pasoVisible.target && (
         <div
           className="absolute rounded-2xl"
           style={{
@@ -764,9 +991,9 @@ export default function Tour({ onIr, onClose }) {
           viaje del recorte. Y va retrasado lo que dura el viaje —el `backwards`
           de la utilidad lo deja invisible hasta entonces—, para que suene
           cuando el agujero llega y no mientras todavía está en camino. */}
-      {paso.target && (
+      {pasoVisible.target && (
         <div
-          key={paso.clave}
+          key={pasoVisible.clave}
           className="animate-foco absolute rounded-2xl"
           style={{
             left: caja.left,
@@ -793,19 +1020,19 @@ export default function Tour({ onIr, onClose }) {
             y alcanza: el acento es el color que en esta dashboard señala. */}
         <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-violet/60 to-transparent" />
 
-        <div className="flex items-center gap-2 px-4 pt-3.5">
-          <span className="rounded-full bg-tint/[0.06] px-2 py-0.5 text-[10.5px] font-medium tabular-nums text-ink-muted">
-            {t('tour.progreso', { n: indice + 1, total: PASOS.length })}
+        <div className="flex items-center gap-2 px-5 pt-4">
+          <span className="rounded-full bg-tint/[0.06] px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-ink-muted">
+            {t('tour.progreso', { n: mostrado.i + 1, total: pasos.length })}
           </span>
           {esperando && (
-            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-violet-soft px-2 py-0.5 text-[10.5px] font-semibold text-violet">
-              <IconPointer size={11} />
+            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-violet-soft px-2.5 py-1 text-[11.5px] font-semibold text-violet">
+              <IconPointer size={12} />
               {t('tour.tuTurno')}
             </span>
           )}
           {festejo && (
-            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-status-good/[0.15] px-2 py-0.5 text-[10.5px] font-semibold text-status-good">
-              <IconCheck size={11} />
+            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-status-good/[0.15] px-2.5 py-1 text-[11.5px] font-semibold text-status-good">
+              <IconCheck size={12} />
               {t('tour.hecho')}
             </span>
           )}
@@ -815,75 +1042,107 @@ export default function Tour({ onIr, onClose }) {
             title={t('tour.salir')}
             className="-mr-1.5 ml-auto shrink-0 rounded-md p-1.5 text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
           >
-            <IconClose size={14} />
+            <IconClose size={15} />
           </button>
         </div>
 
-        {/* Solo el texto se renueva por paso, y entra con un fundido apenas
-            retrasado: lo que se mueve es la tarjeta, y dos movimientos a la vez
-            se pelean. El retraso es corto y no la mitad del viaje —el texto
-            viejo se va con el cambio de paso, no se desvanece—, así que estirarlo
-            deja la tarjeta volando vacía. */}
-        <div key={indice} className="animate-fade-in px-4 pb-3 pt-2.5" style={{ '--d': '140ms' }}>
-          <div className="flex items-start gap-2.5">
-            {/* La baldosa del ícono ubica el paso en la app —una casa, una
-                bandeja, un cuadro de escribir— antes de leer el título. */}
-            <span className="mt-px flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-soft text-violet">
-              <Icono size={15} />
-            </span>
-            <div className="min-w-0">
-              <h3 className="text-[14.5px] font-semibold tracking-[-0.01em] text-ink-primary">
-                {t(paso.titulo)}
-              </h3>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">{t(paso.bajada)}</p>
+        {/* El cuerpo cambia de alto entre pasos —los textos no miden lo mismo y la
+            pista aparece y desaparece—, y ese cambio se anima en vez de saltar.
+            El envoltorio lleva el alto medido y el recorte; adentro, el contenido
+            se renueva entero. Sin esto la tarjeta pega un tirón vertical justo en
+            el cuadro en que arranca a viajar, que es el momento en que más se ve.
+
+            Solo el texto se renueva por paso, y entra **desde el lado del que
+            viene el recorrido**: adelante entra por la derecha, atrás por la
+            izquierda. Es la excepción a "lo que se mueve es la tarjeta y dos
+            movimientos a la vez se pelean", y por un caso concreto: entre dos
+            pasos vecinos —la barra y sus carpetas, dos filas más abajo— el
+            recorte se corre treinta píxeles, y ahí un fundido a secas no alcanza
+            para decir que pasó un paso, mucho menos hacia dónde. Son catorce
+            píxeles y no le compite al viaje.
+
+            El retraso es corto y no la mitad del viaje —el texto viejo se va con
+            el cambio de paso, no se desvanece—, así que estirarlo deja la tarjeta
+            volando vacía. */}
+        <div
+          className="overflow-hidden"
+          style={{
+            height: altoCuerpo ?? undefined,
+            transition: `height ${DUR_CUERPO_MS}ms var(--ease-out-expo)`,
+          }}
+        >
+          <div
+            key={mostrado.i}
+            ref={medirCuerpo}
+            className={`px-5 pb-4 pt-3 ${
+              mostrado.sentido >= 0 ? 'animate-fade-left' : 'animate-fade-right'
+            }`}
+            style={{ '--d': '140ms' }}
+          >
+            <div className="flex items-start gap-3">
+              {/* La baldosa del ícono ubica el paso en la app —una casa, una
+                  bandeja, un cuadro de escribir— antes de leer el título. */}
+              <span className="mt-px flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-soft text-violet">
+                <Icono size={17} />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-ink-primary">
+                  {t(pasoVisible.titulo)}
+                </h3>
+                <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-muted">
+                  {t(pasoVisible.bajada)}
+                </p>
+              </div>
             </div>
+
+            {/* Lo que hay que hacer va en su propio recuadro y no como un renglón
+                más de la bajada: es lo único de la tarjeta que no se lee, se
+                obedece. Punteado y en el acento, que es el mismo lenguaje del
+                anillo que está latiendo del otro lado de la pantalla. */}
+            {esperando && (
+              <p className="mt-3.5 flex items-start gap-2.5 rounded-xl border border-dashed border-violet/40 bg-violet-soft px-3.5 py-2.5 text-[13px] leading-relaxed text-violet">
+                <IconPointer size={14} className="mt-0.5 shrink-0" />
+                {t(pasoVisible.accion.pista)}
+              </p>
+            )}
+            {/* "Ya lo hiciste" es para cuando se vuelve atrás a un paso cumplido.
+                En el momento de cumplirlo sería una respuesta rara a algo que se
+                acaba de hacer, y encima ahí ya está la tilde del encabezado. */}
+            {interactivo && yaHecho && !festejo && (
+              <p className="mt-3.5 flex items-center gap-2.5 rounded-xl bg-status-good/[0.10] px-3.5 py-2.5 text-[13px] font-medium text-status-good">
+                <IconCheck size={14} className="shrink-0" />
+                {t('tour.loHiciste')}
+              </p>
+            )}
+
+            {/* El final cuenta cuántas de las cosas que el recorrido pidió las hizo
+                la persona. No es un puntaje: es lo que hace que el último paso no
+                sea otro cartel de despedida, y lo único que se puede decir ahí que
+                no se sabía al empezar. */}
+            {ultimoVisible && hechos.length > 0 && (
+              <p className="mt-3.5 flex items-center gap-2.5 rounded-xl bg-tint/[0.04] px-3.5 py-2.5 text-[13px] text-ink-secondary">
+                <IconCheck size={14} className="shrink-0 text-status-good" />
+                {t('tour.finalHechos', { n: hechos.length, total: conAccion(pasos) })}
+              </p>
+            )}
+            {/* Lo que sigue después del recorrido es siempre lo mismo, así que el
+                último paso lo ofrece en vez de nombrarlo. Cuál es depende del
+                recorrido —después del general es conectar un canal, después del
+                de armar un agente también, porque un agente sin canal no tiene a
+                quién contestarle—, y por eso el destino viaja en el paso. */}
+            {pasoVisible.cta && (
+              <button
+                onClick={() => {
+                  irRef.current(pasoVisible.cta.ir)
+                  terminar()
+                }}
+                className="mt-2.5 flex w-full items-center justify-between gap-2 rounded-xl border border-tint/[0.12] px-3 py-2.5 text-left text-[13.5px] font-medium text-ink-primary transition-colors duration-150 hover:border-tint/25 hover:bg-tint/[0.03]"
+              >
+                {t(pasoVisible.cta.texto)}
+                <IconChevronRight size={15} className="shrink-0 text-ink-faint" />
+              </button>
+            )}
           </div>
-
-          {/* Lo que hay que hacer va en su propio recuadro y no como un renglón
-              más de la bajada: es lo único de la tarjeta que no se lee, se
-              obedece. Punteado y en el acento, que es el mismo lenguaje del
-              anillo que está latiendo del otro lado de la pantalla. */}
-          {esperando && (
-            <p className="mt-3 flex items-start gap-2 rounded-xl border border-dashed border-violet/40 bg-violet-soft px-3 py-2 text-[12px] leading-snug text-violet">
-              <IconPointer size={13} className="mt-px shrink-0" />
-              {t(paso.accion.pista)}
-            </p>
-          )}
-          {/* "Ya lo hiciste" es para cuando se vuelve atrás a un paso cumplido.
-              En el momento de cumplirlo sería una respuesta rara a algo que se
-              acaba de hacer, y encima ahí ya está la tilde del encabezado. */}
-          {interactivo && yaHecho && !festejo && (
-            <p className="mt-3 flex items-center gap-2 rounded-xl bg-status-good/[0.10] px-3 py-2 text-[12px] font-medium text-status-good">
-              <IconCheck size={13} className="shrink-0" />
-              {t('tour.loHiciste')}
-            </p>
-          )}
-
-          {/* El final cuenta cuántas de las cosas que el recorrido pidió las hizo
-              la persona. No es un puntaje: es lo que hace que el último paso no
-              sea otro cartel de despedida, y lo único que se puede decir ahí que
-              no se sabía al empezar. */}
-          {ultimo && hechos.length > 0 && (
-            <p className="mt-3 flex items-center gap-2 rounded-xl bg-tint/[0.04] px-3 py-2 text-[12px] text-ink-secondary">
-              <IconCheck size={13} className="shrink-0 text-status-good" />
-              {t('tour.finalHechos', { n: hechos.length, total: CON_ACCION })}
-            </p>
-          )}
-          {/* Lo que sigue después del recorrido es siempre lo mismo —sin canal
-              conectado no entra ni un mensaje—, así que el último paso lo ofrece
-              en vez de nombrarlo. */}
-          {ultimo && (
-            <button
-              onClick={() => {
-                irRef.current({ pagina: 'settings', seccion: 'canales' })
-                terminar()
-              }}
-              className="mt-2.5 flex w-full items-center justify-between gap-2 rounded-xl border border-tint/[0.12] px-3 py-2 text-left text-[12.5px] font-medium text-ink-primary transition-colors duration-150 hover:border-tint/25 hover:bg-tint/[0.03]"
-            >
-              {t('tour.finalConectar')}
-              <IconChevronRight size={14} className="shrink-0 text-ink-faint" />
-            </button>
-          )}
         </div>
 
         {/* Cuánto falta, en un segmento por paso. Era una barra de 2px pegada al
@@ -891,20 +1150,20 @@ export default function Tour({ onIr, onClose }) {
             se está hablando, que es justo lo que uno quiere saber cuando decide
             si lo hace ahora. Los pasos que se saltean por no tener su objetivo
             en pantalla pintan de a dos, que es exactamente lo que pasó. */}
-        <div className="flex items-center gap-[3px] px-4">
-          {PASOS.map((p, i) => (
+        <div className="flex items-center gap-[3px] px-5">
+          {pasos.map((p, i) => (
             <span
               key={p.clave}
               className={`h-[3px] flex-1 rounded-full transition-colors duration-300 ${
-                i <= indice ? 'bg-violet' : 'bg-tint/[0.10]'
+                i <= mostrado.i ? 'bg-violet' : 'bg-tint/[0.10]'
               }`}
             />
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-          <Button size="sm" variant="ghost" onClick={anterior} disabled={indice === 0}>
-            <IconChevronRight size={13} className="rotate-180" />
+        <div className="flex items-center justify-between gap-2 px-4 py-3">
+          <Button variant="ghost" onClick={anterior} disabled={indice === 0}>
+            <IconChevronRight size={14} className="rotate-180" />
             {t('tour.atras')}
           </Button>
           {/* Esperando una acción no hay botón de avanzar: si lo hubiera sería el
@@ -912,14 +1171,14 @@ export default function Tour({ onIr, onClose }) {
               bajo que hay — nadie puede quedar encerrado en un paso porque la
               app todavía no tenga una conversación que abrir. */}
           {esperando ? (
-            <Button size="sm" variant="ghost" onClick={siguiente}>
+            <Button variant="ghost" onClick={siguiente}>
               {t('tour.seguirSin')}
-              <IconChevronRight size={13} />
+              <IconChevronRight size={14} />
             </Button>
           ) : (
-            <Button size="sm" onClick={siguiente}>
-              {ultimo ? t('tour.terminar') : t('tour.siguiente')}
-              {!ultimo && <IconChevronRight size={13} />}
+            <Button onClick={siguiente}>
+              {ultimoVisible ? t('tour.terminar') : t('tour.siguiente')}
+              {!ultimoVisible && <IconChevronRight size={14} />}
             </Button>
           )}
         </div>

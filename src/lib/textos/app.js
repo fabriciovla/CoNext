@@ -131,6 +131,21 @@ const UI = {
   emojiClima: { es: 'Clima', en: 'Weather' },
 }
 
+// La espera de después de pagar, mientras el webhook de Dodo termina de llegar
+// (ver `lib/alta.js`). Dice dos cosas y nada más: que el pago se está
+// acreditando y que no hay nada que hacer. Quien lee esto todavía no vio la
+// dashboard nunca, así que no se la nombra como si ya la conociera.
+const ALTA = {
+  preparandoTitulo: {
+    es: 'Estamos preparando tu espacio',
+    en: 'Setting up your workspace',
+  },
+  preparandoBajada: {
+    es: 'Tu pago se está acreditando. Esto tarda unos segundos y no hace falta que hagas nada.',
+    en: 'Your payment is going through. This takes a few seconds and there is nothing you need to do.',
+  },
+}
+
 // El modal que se ve una sola vez, la primera vez que alguien entra a la
 // dashboard. Habla en segunda persona y nombra a la persona: es lo único que
 // separa una bienvenida de un aviso.
@@ -262,8 +277,8 @@ const TOUR = {
   },
   agentesTitulo: { es: 'Los agentes contestan por vos', en: 'The agents answer for you' },
   agentesBajada: {
-    es: 'Cada uno sabe de un tema, tiene su tono y decide hasta dónde puede contestar sin preguntarte. El primero encendido atiende lo que no encaja en ninguno.',
-    en: "Each one knows a topic, has its own tone and decides how far it can answer without asking you. The first one enabled takes whatever fits none of them.",
+    es: 'Un agente son dos cosas: el rol, que dice cuándo entra, y las instrucciones, que dicen cómo escribe. Entrá a Agentes cuando termine este recorrido y te acompaño a armar el primero, paso por paso.',
+    en: 'An agent is two things: the role, which says when it steps in, and the instructions, which say how it writes. Head into Agents when this tour ends and I will walk you through building the first one, step by step.',
   },
   canalesTitulo: { es: 'Enganchá tus canales', en: 'Connect your channels' },
   canalesBajada: {
@@ -279,8 +294,99 @@ const TOUR = {
   },
 }
 
+// El segundo recorrido: armar el primer agente, y que sea un recepcionista.
+//
+// Los textos de rol e instrucciones van escritos enteros, listos para copiar, y
+// no como una consigna ("describí cuándo entra"). Esa consigna ya está en la
+// pantalla, abajo de cada rótulo, y aún así frente al campo vacío no se sabe qué
+// poner: lo que falta no es la definición, es un ejemplo que sirva tal cual.
+//
+// Recepcionista y no vendedor: es el agente que le sirve a cualquier negocio
+// —atiende al que escribe por primera vez, entiende qué necesita y deriva— y el
+// ejemplo se puede dejar como está. Uno de un rubro puntual hay que reescribirlo
+// entero antes de que sirva, que es lo mismo que no darlo.
+const TOUR_AGENTE = {
+  abrirTitulo: { es: 'Armemos tu primer agente', en: "Let's build your first agent" },
+  abrirBajada: {
+    es: 'Un recepcionista: el que atiende al que escribe por primera vez, entiende qué necesita y lo deriva. Le sirve a cualquier negocio y es el que conviene tener andando primero.',
+    en: 'A receptionist: the one who greets whoever writes in for the first time, works out what they need and points them onward. It fits any business and it is the one worth having running first.',
+  },
+  accionAbrir: {
+    es: 'Tocá “Nuevo agente”. Se abre la pantalla donde se lo arma.',
+    en: 'Tap “New agent”. That opens the screen where you build it.',
+  },
+
+  nombreTitulo: { es: 'Ponele nombre y cara', en: 'Give it a name and a face' },
+  nombreBajada: {
+    es: 'El nombre y el emoji son para vos: es cómo lo vas a reconocer en la bandeja y en las carpetas de la barra. El cliente no los ve nunca.',
+    en: 'The name and the emoji are for you: it is how you will spot it in the inbox and in the sidebar folders. The customer never sees them.',
+  },
+  accionNombre: {
+    es: 'Escribí “Recepcionista” en el nombre.',
+    en: 'Type “Receptionist” in the name field.',
+  },
+
+  rolTitulo: { es: 'El rol dice cuándo entra', en: 'The role says when it steps in' },
+  rolBajada: {
+    es: 'Es lo único que el modelo compara contra el mensaje que llega para elegir quién atiende. No es la descripción del puesto: es en qué casos le toca a este.',
+    en: 'It is the only thing the model matches against the incoming message to pick who answers. It is not a job description: it is which cases belong to this one.',
+  },
+  accionRol: {
+    es: 'Copiá esto: “Atiende el primer mensaje de alguien que escribe por primera vez, los saludos y las consultas generales que todavía no se sabe de qué son.”',
+    en: 'Copy this: “Handles the first message from anyone writing in for the first time, greetings, and general questions that are still unclear.”',
+  },
+
+  instruccionesTitulo: {
+    es: 'Las instrucciones dicen cómo escribe',
+    en: 'The instructions say how it writes',
+  },
+  instruccionesBajada: {
+    es: 'Acá van el tono y los límites: qué puede contestar solo y qué te tiene que dejar a vos. Cuanto más concreto, menos se lo inventa.',
+    en: 'Tone and limits go here: what it can answer on its own and what it has to leave to you. The more concrete, the less it makes up.',
+  },
+  accionInstrucciones: {
+    es: 'Copiá esto: “Saludá con el nombre del negocio, preguntá en qué podés ayudar y contestá corto. Nunca inventes precios, plazos ni stock: si no está en el catálogo, decí que lo consultás y avisás.”',
+    en: 'Copy this: “Greet using the business name, ask how you can help, and keep it short. Never make up prices, delivery times or stock: if it is not in the catalog, say you will check and get back to them.”',
+  },
+
+  comportamientoTitulo: {
+    es: 'Contestar solo, o dejarte el borrador',
+    en: 'Answer alone, or leave you a draft',
+  },
+  comportamientoBajada: {
+    es: 'Encendido quiere decir que participa. El segundo interruptor es el techo de lo que puede hacer: apagado, todo lo que escriba te queda como borrador para revisar antes de que salga. Se prende más adelante, cuando ya viste cómo contesta.',
+    en: 'Enabled means it takes part. The second switch is the ceiling on what it may do: turned off, everything it writes waits as a draft for you to review before it goes out. You turn it on later, once you have seen how it answers.',
+  },
+
+  crearTitulo: { es: 'Creá el agente', en: 'Create the agent' },
+  crearBajada: {
+    es: 'Con el nombre alcanza para crearlo. El rol y las instrucciones se siguen corrigiendo todas las veces que haga falta, y cada cambio se prueba acá mismo.',
+    en: 'The name alone is enough to create it. The role and the instructions can be fixed as many times as needed, and every change gets tested right here.',
+  },
+  accionCrear: { es: 'Tocá “Crear agente”.', en: 'Tap “Create agent”.' },
+
+  probarTitulo: { es: 'Probalo antes de soltarlo', en: 'Try it before letting it loose' },
+  probarBajada: {
+    es: 'Es la misma llamada que la de un mensaje de verdad —mismo catálogo, mismo horario, mismo material—, con una diferencia: no escribe nada en ningún lado y no le llega a nadie. Y te dice algo que la conversación real no deja ver hasta que ya pasó: si esa respuesta salía sola o quedaba como borrador.',
+    en: 'It is the same call a real message makes —same catalog, same hours, same material— with one difference: it writes nothing anywhere and reaches nobody. And it tells you something a real conversation only reveals once it is too late: whether that answer would have gone out on its own or waited as a draft.',
+  },
+  accionProbar: {
+    es: 'Escribile como si fueras un cliente: “hola, están abiertos?”',
+    en: 'Write to it as if you were a customer: “hi, are you open?”',
+  },
+
+  finalTitulo: { es: 'Ya tenés quien atienda', en: 'You have someone on the desk' },
+  finalBajada: {
+    es: 'Podés armar los que quieras y cada uno entra cuando le toca; el primero encendido atiende lo que no encaja en ninguno. Lo único que falta para que esto conteste de verdad es un canal conectado.',
+    en: 'You can build as many as you like and each one steps in when its turn comes; the first one enabled takes whatever fits none of them. The only thing left for this to actually answer is a connected channel.',
+  },
+  finalConectar: { es: 'Conectar un canal', en: 'Connect a channel' },
+}
+
 export default {
   login: LOGIN,
+  alta: ALTA,
+  tourAgente: TOUR_AGENTE,
   barra: BARRA,
   errores: ERRORES,
   ui: UI,

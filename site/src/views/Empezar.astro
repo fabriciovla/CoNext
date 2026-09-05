@@ -46,7 +46,13 @@ const planes = t(lang).precios.planes.map((p) => ({
       de venir.
 
       Va inline y antes de pintar, como el script del tema: decidido desde React,
-      la pantalla aparece y se va. */}
+      la pantalla aparece y se va.
+
+      **El plan viaja con él.** Quien ya contestó y vuelve del checkout entra
+      derecho, pero la dashboard tiene que saber que atrás hay un pago recién
+      hecho: sin eso pregunta una sola vez por el plan, el webhook de Dodo
+      todavía no llegó y lo devuelve acá con la tabla de precios adelante tres
+      segundos después de haber pagado. Con `?plan=` puesto, espera. */}
   <script
     is:inline
     set:html={`
@@ -54,8 +60,13 @@ const planes = t(lang).precios.planes.map((p) => ({
         var q = new URLSearchParams(location.search);
         var propio = !q.get('correo') && q.get('sinplan') !== '1';
         var d = propio ? JSON.parse(localStorage.getItem(${JSON.stringify(ALTA_CLAVE)}) || 'null') : null;
-        if (d && d.listo) location.replace(${JSON.stringify(APP_URL)});
-        else document.documentElement.classList.add('empezar-vivo');
+        if (d && d.listo) {
+          var url = new URL(${JSON.stringify(APP_URL)}, location.origin);
+          var plan = q.get('plan') || d.plan || '';
+          if (plan) url.searchParams.set('plan', plan);
+          if (d.correo) url.searchParams.set('u', String(d.correo).split('@')[0]);
+          location.replace(url.toString());
+        } else document.documentElement.classList.add('empezar-vivo');
       } catch (e) {
         document.documentElement.classList.add('empezar-vivo');
       }

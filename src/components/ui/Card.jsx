@@ -10,11 +10,18 @@ export default function Card({
   className = '',
   bodyClassName = 'p-5',
   interactive = false,
+  // A quién señala el recorrido guiado. Va acá y no envolviendo la tarjeta en
+  // un div: el recorte se dibuja alrededor del borde de la tarjeta, y un
+  // envoltorio sin estilo mide lo mismo pero rompe el `space-y` y el
+  // `stagger > *` de quien la contiene. Es la misma salida que ya usa
+  // `SideNav` para sus filas.
+  dataTour,
 }) {
   const hasHeader = Boolean(title || actions)
 
   return (
     <div
+      data-tour={dataTour}
       className={`rounded-xl border border-tint/[0.08] bg-surface-card shadow-card
         ${interactive ? 'card-interactive cursor-pointer hover:border-tint/[0.16] hover:shadow-card-hover' : ''}
         ${className}`}

@@ -1,12 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Login from './pages/Login'
 import Layout from './components/Layout'
 import TitleBar from './components/TitleBar'
 import AppNav from './components/AppNav'
 import ApiErrorBanner from './components/ApiErrorBanner'
 import WelcomeTour, { bienvenidaPendiente } from './components/WelcomeTour'
-import Tour from './components/Tour'
+import Tour, {
+  PASOS_AGENTE,
+  marcarTourAgenteVisto,
+  tourAgentePendiente,
+} from './components/Tour'
 import Modal from './components/ui/Modal'
+import { LogoMarca } from './components/ui/Logo'
 import Button from './components/ui/Button'
 import Inbox from './pages/Inbox'
 import Products from './pages/Products'
@@ -23,7 +28,7 @@ import useTemplates from './hooks/useTemplates'
 import useTheme from './hooks/useTheme'
 import { groupMessagesByPhone } from './utils/groupMessages'
 import { alTocarAviso } from './lib/entorno'
-import { encuestaPendiente } from './lib/alta'
+import { encuestaPendiente, RECARGAR } from './lib/alta'
 import { useT } from './lib/i18n.jsx'
 
 export default function App() {
@@ -123,6 +128,12 @@ export default function App() {
   // mientras está prendido es él quien maneja la navegación: cada paso pide su
   // pantalla por `irDelTour`.
   const [tour, setTour] = useState(false)
+  // El otro recorrido: armar el primer agente. No lo abre nadie —arranca solo la
+  // primera vez que se entra a Agentes—, y por eso es el único que guarda su
+  // propio flag de "ya pasó". Son dos estados y no uno con el nombre del
+  // recorrido adentro porque cada uno se prende desde un lado distinto; que no
+  // haya dos abiertos a la vez lo garantizan los que los prenden.
+  const [tourAgente, setTourAgente] = useState(false)
   // Sección de Configuración que se pide abrir desde afuera. Como el `focus` de
   // Agentes: la página la consume y la suelta.
   const [settingsFocus, setSettingsFocus] = useState(null)
@@ -136,6 +147,10 @@ export default function App() {
   // un instante, y al toque la pantalla de la encuesta pisándola. Por eso el
   // render de abajo espera a `altaVerificada` igual que espera a `listo`.
   const [altaVerificada, setAltaVerificada] = useState(false)
+  // Prendido mientras se espera a que llegue el pago de alguien que acaba de
+  // comprar (ver `lib/alta.js`). Es lo único que separa esa espera de una
+  // pantalla en blanco de veinte segundos justo después de poner la tarjeta.
+  const [preparando, setPreparando] = useState(false)
 
   // Un día archivado se navega igual que el día en vivo: mismas carpetas, misma
   // lista y mismo panel de chat, solo que de solo lectura.
@@ -211,10 +226,12 @@ export default function App() {
   // empezar por el principio y no por donde quedó la pantalla.
   const empezarTour = useCallback(() => {
     setBienvenida(false)
+    setTourAgente(false)
     setTour(true)
   }, [])
 
   const cerrarTour = useCallback(() => setTour(false), [])
+  const cerrarTourAgente = useCallback(() => setTourAgente(false), [])
 
   const selectDay = (day) => {
     setViewingDayId((prev) => (prev === day.id ? null : day.id))
@@ -240,15 +257,51 @@ export default function App() {
   useEffect(() => {
     if (!isAuthenticated) return undefined
     let cancel = false
-    encuestaPendiente(correo).then((url) => {
+    const alEsperar = (esperando) => {
+      if (!cancel) setPreparando(esperando)
+    }
+    encuestaPendiente(correo, { alEsperar }).then((destino) => {
       if (cancel) return
-      if (url) window.location.assign(url)
+      // El plan apareció mientras esperábamos: se vuelve a cargar la app en vez
+      // de dejarla entrar. Los hooks de la dashboard ya consultaron una vez y se
+      // comieron el 403 de cuando todavía no había negocio, así que entrar sin
+      // recargar muestra un CRM recién comprado sin agentes ni configuración.
+      if (destino === RECARGAR) window.location.reload()
+      else if (destino) window.location.assign(destino)
       else setAltaVerificada(true)
     })
     return () => {
       cancel = true
     }
   }, [isAuthenticated, correo])
+
+  // El recorrido de armar un agente arranca la primera vez que se entra a
+  // Agentes, y una sola vez: se marca visto al abrirlo y no al terminarlo, o
+  // cerrarlo en el primer paso lo haría volver en la próxima visita.
+  //
+  // **Arranca al entrar y no mientras se está adentro**, y por eso lo primero
+  // que mira es de qué pantalla se venía. Sin eso el efecto también corre
+  // cuando cambia cualquiera de las otras condiciones estando ya en Agentes, y
+  // hay dos formas de que eso pase justo en el peor momento: entrar a un agente
+  // desde la barra (`agentFocus` bloquea el arranque, la pantalla del agente se
+  // abre, Agentes suelta el pedido y el efecto vuelve a correr con el camino
+  // libre y la lista ya no en pantalla) y salir del recorrido general parado en
+  // su paso de Agentes, que encendería este encima del que se acaba de cerrar.
+  //
+  // Las otras tres condiciones: sin la bienvenida abierta (es un modal encima
+  // de todo, y abajo el tour recortaría un agujero que no se ve), sin el
+  // recorrido general andando, y con el alta ya verificada, que es lo mismo que
+  // espera la bienvenida.
+  const paginaPrevia = useRef(page)
+  useEffect(() => {
+    const venia = paginaPrevia.current
+    paginaPrevia.current = page
+    if (page !== 'agents' || venia === 'agents' || !altaVerificada) return
+    if (tour || bienvenida || agentFocus != null) return
+    if (!tourAgentePendiente()) return
+    marcarTourAgenteVisto()
+    setTourAgente(true)
+  }, [page, altaVerificada, tour, bienvenida, agentFocus])
 
   // Tocar una notificación del escritorio abre esa conversación. Sin esto el
   // aviso deja a la persona parada en la pantalla en la que estaba y hay que
@@ -298,7 +351,7 @@ export default function App() {
     return (
       <>
         <TitleBar theme={theme} onToggleTheme={toggleTheme} />
-        <div className="min-h-dvh bg-surface-page" />
+        {preparando ? <PreparandoEspacio t={t} /> : <div className="min-h-dvh bg-surface-page" />}
       </>
     )
   }
@@ -471,6 +524,12 @@ export default function App() {
           una pantalla más de la app, es algo apoyado sobre la app. */}
       {tour && <Tour onIr={irDelTour} onClose={cerrarTour} />}
 
+      {/* El mismo componente con otra lista de pasos: el tour no sabe cuál está
+          haciendo, mide objetivos y escucha lo que el paso pidió. */}
+      {tourAgente && (
+        <Tour pasos={PASOS_AGENTE} onIr={irDelTour} onClose={cerrarTourAgente} />
+      )}
+
       {/* El botón de cerrar el día está en la barra, que ahora se ve en toda la
           app: la confirmación tiene que vivir igual de arriba. */}
       {confirmClose && (
@@ -487,5 +546,38 @@ export default function App() {
         </Modal>
       )}
     </>
+  )
+}
+
+// La espera de después de pagar. No es un estado de carga más: quien la ve
+// acaba de poner la tarjeta y todavía no vio nunca la dashboard, así que lo
+// único que hay que contestar es que el pago se está acreditando y que no hay
+// nada que hacer. Dura lo que dure `REINTENTOS` en `lib/alta.js`.
+//
+// La barra es la misma de "algo en camino" del resto de la app (`animate-barrido`):
+// indeterminada a propósito, porque no sabemos cuánto falta —es un webhook de
+// Dodo, no una descarga— y una barra que se llena hasta el 90% y espera ahí
+// miente más que no decir nada.
+function PreparandoEspacio({ t }) {
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-surface-page px-6">
+      <div className="w-full max-w-sm text-center">
+        <div className="animate-pop-in mx-auto flex w-fit text-violet">
+          <LogoMarca className="h-14 w-auto" />
+        </div>
+        <h1
+          className="animate-fade-in mt-6 text-[22px] font-medium tracking-tight text-ink-primary"
+          style={{ '--d': '80ms' }}
+        >
+          {t('alta.preparandoTitulo')}
+        </h1>
+        <p className="animate-fade-in mt-2 text-[14px] text-ink-secondary" style={{ '--d': '160ms' }}>
+          {t('alta.preparandoBajada')}
+        </p>
+        <div className="mx-auto mt-7 h-1 w-40 overflow-hidden rounded-full bg-tint/[0.08]">
+          <div className="animate-barrido h-full w-1/3 rounded-full bg-violet" />
+        </div>
+      </div>
+    </div>
   )
 }

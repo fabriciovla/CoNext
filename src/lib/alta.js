@@ -36,6 +36,22 @@ const API = String(import.meta.env.VITE_API_URL ?? '').trim().replace(/\/$/, '')
 // dos servidores distintos y hace falta decirlo (VITE_SITE_URL).
 const SITIO = String(import.meta.env.VITE_SITE_URL ?? '').trim().replace(/\/$/, '')
 
+// Lo que hay que hacer después de esperar a que el pago llegue: volver a
+// cargar la app. No alcanza con dejar entrar. Los hooks de la dashboard
+// (`useProducts`, `useAgents`, `useSettings`, `useTemplates`) consultan **una
+// sola vez** al montar, y montan con el resto de `App`, o sea que ya se
+// comieron el 403 de cuando todavía no había negocio: dejarlos así muestra una
+// dashboard recién comprada sin agentes, sin catálogo y sin configuración.
+export const RECARGAR = 'recargar'
+
+// Cada cuánto se vuelve a preguntar, en milisegundos, mientras se espera que
+// llegue el pago. Arranca corto porque el webhook de Dodo suele tardar un
+// segundo o dos, y se va estirando: si a los veinte segundos no llegó, no está
+// por llegar. La suma es lo que dura la pantalla de "preparando".
+const REINTENTOS = [700, 1300, 2000, 3000, 4000, 5000, 5000]
+
+const demora = (ms) => new Promise((resolver) => setTimeout(resolver, ms))
+
 // No hace falta una reserva de "ya lo mandé una vez": `urlEncuesta` siempre
 // pone `correo` y `sinplan` en la vuelta, y el atajo de `/empezar` que manda
 // solo a la app (`propio` en Empezar.astro) se apaga apenas hay `correo` o
@@ -53,9 +69,49 @@ function urlEncuesta(correo) {
   return url.toString()
 }
 
-// Devuelve la URL de la encuesta si esta cuenta no tiene plan activo, y null en
-// cualquier otro caso —incluido el de no poder averiguarlo—.
-export async function encuestaPendiente(correo) {
+// Qué plan se acaba de comprar, si la dirección lo dice. Lo pone el
+// cuestionario al terminar y el atajo de `/empezar` cuando alguien que ya
+// contestó vuelve del checkout.
+//
+// Se lo saca de la barra al leerlo, igual que el `?u=` del login: es una señal
+// de *este* ingreso y no un estado que tenga que sobrevivir a una recarga. Si
+// sobreviviera, la espera de abajo volvería a correr en cada F5 de alguien que
+// nunca terminó de pagar.
+function planDeLaVuelta() {
+  try {
+    const url = new URL(window.location.href)
+    const plan = url.searchParams.get('plan')?.trim()
+    if (!plan) return ''
+    url.searchParams.delete('plan')
+    window.history.replaceState({}, '', url.pathname + url.search + url.hash)
+    return plan
+  } catch {
+    return ''
+  }
+}
+
+// true **solo** cuando el server dice con todas las letras que esta cuenta no
+// tiene negocio. Todo lo demás —la red caída, un 500, un 401— es false, que
+// acá quiere decir "dejala entrar": ver el encabezado del archivo.
+async function sinPlan(token) {
+  try {
+    const res = await fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
+    if (res.ok || res.status !== 403) return false
+    const { codigo } = await res.json().catch(() => ({}))
+    return codigo === 'sin-tenant'
+  } catch {
+    return false
+  }
+}
+
+// Devuelve la URL de la encuesta si esta cuenta no tiene plan activo, `RECARGAR`
+// si lo consiguió mientras esperábamos, y null en cualquier otro caso —incluido
+// el de no poder averiguarlo—.
+//
+// `alEsperar` se prende mientras se espera al pago: sin eso la app se queda en
+// blanco veinte segundos justo después de que alguien puso la tarjeta, que es
+// el peor momento posible para no decir nada.
+export async function encuestaPendiente(correo, { alEsperar } = {}) {
   if (!correo || esEscritorio()) return null
 
   const auth = clienteAuth()
@@ -63,17 +119,37 @@ export async function encuestaPendiente(correo) {
   const token = (await auth.auth.getSession()).data.session?.access_token
   if (!token) return null
 
+  // Se lee siempre, aunque después no se use: el parámetro se limpia de la
+  // barra en la misma lectura, y dejarlo colgado haría que la próxima recarga
+  // se creyera que viene de un checkout.
+  const compro = planDeLaVuelta()
+
+  if (!(await sinPlan(token))) return null
+  if (!compro) return urlEncuesta(correo)
+
+  // Acaba de pagar y todavía no tiene negocio. Casi siempre es lo mismo: el
+  // webhook de Dodo todavía no llegó. El navegador vuelve del checkout en el
+  // acto y el evento tarda unos segundos, así que preguntar una sola vez es
+  // preguntar antes de tiempo — y la respuesta de esa única pregunta era
+  // mandarlo de vuelta a la encuesta que acababa de contestar, con la tabla de
+  // precios adelante, tres segundos después de haber pagado.
+  //
+  // Por eso acá se espera en vez de rebotar. Si el pago llega, el alta la hace
+  // `resolveTenant` en el momento (`provisionarDesdeDodo`) y esto no tiene que
+  // hacer nada más que volver a preguntar.
+  alEsperar?.(true)
   try {
-    const res = await fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
-    if (res.ok) return null
-    // Solo este código. Un 401 es una sesión vencida —de eso se ocupa el
-    // login—, y un 500 es un problema nuestro.
-    if (res.status !== 403) return null
-    const { codigo } = await res.json().catch(() => ({}))
-    if (codigo !== 'sin-tenant') return null
-  } catch {
-    return null
+    for (const espera of REINTENTOS) {
+      await demora(espera)
+      if (!(await sinPlan(token))) return RECARGAR
+    }
+  } finally {
+    alEsperar?.(false)
   }
 
+  // Se esperó y no llegó. Puede ser un webhook demorado de verdad, o que el
+  // correo del checkout no sea el de la cuenta con la que entró —lo único que
+  // ata los dos lados—. La encuesta no vuelve a preguntar nada (ya contestó) y
+  // lo deja en la pantalla que explica las dos cosas y ofrece reintentar.
   return urlEncuesta(correo)
 }

@@ -167,7 +167,10 @@ export default function Agents({
             title={t('agentes.vacioTitulo')}
             description={t('agentes.vacioTexto')}
             action={
-              <Button onClick={() => setAbierto('nuevo')}>
+              // El mismo `data-tour` que el de la cabecera: el recorrido acepta
+              // cualquiera de los dos, y sin ningún agente creado este es el que
+              // la persona tiene adelante.
+              <Button data-tour="agentes-nuevo" onClick={() => setAbierto('nuevo')}>
                 <IconPlus size={14} />
                 {t('agentes.nuevoAgente')}
               </Button>

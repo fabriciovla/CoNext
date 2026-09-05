@@ -93,12 +93,31 @@ export default function useMessages() {
     [],
   )
 
+  // Los días cerrados no entran en el poll a propósito: traen todos los
+  // mensajes de todo el historial y solo cambian cuando se cierra un día.
+  const refreshArchivedDays = useCallback(async () => {
+    setArchivedDays(await apiGet('/days?status=closed'))
+  }, [])
+
+  // El día anterior visto por el poll. Sirve para enterarse de un cierre que no
+  // hicimos nosotros —otra pestaña, otra persona del equipo, la app de
+  // escritorio— y volver a pedir los archivados en ese momento.
+  //
+  // Sin esto los mensajes de ese día desaparecen de las métricas hasta la
+  // próxima recarga: `getOpenMessages` devuelve [] apenas el día se cierra y
+  // `archivedDays`, que es donde el día acaba de caer, se quedó viejo — así que
+  // el gráfico de 12 meses se dibuja sin ellos y los números BAJAN solos.
+  const diaAnterior = useRef(null)
+
   const refreshDay = useCallback(async () => {
     const day = await apiGet('/days/current')
+    const cerroSolo = diaAnterior.current === 'open' && day.status === 'closed'
+    diaAnterior.current = day.status
     setDayStatus(day.status)
     setDayOpenedAt(day.openedAt)
     setDayClosedAt(day.closedAt)
-  }, [])
+    if (cerroSolo) await refreshArchivedDays()
+  }, [refreshArchivedDays])
 
   // Qué mensajes entrantes ya vimos, para tocar el aviso solo con los que
   // llegan de verdad en un poll y no con los que ya estaban la primera vez
@@ -125,10 +144,6 @@ export default function useMessages() {
     setMessages(data)
     // El poll es lo que corre siempre: si este pasa, el server volvió.
     setApiError(null)
-  }, [])
-
-  const refreshArchivedDays = useCallback(async () => {
-    setArchivedDays(await apiGet('/days?status=closed'))
   }, [])
 
   const refreshMeta = useCallback(async () => {

@@ -281,7 +281,7 @@ export default function AgentDetail({
             {t('agentes.descartar')}
           </Button>
         )}
-        <Button disabled={!puedeGuardar || guardando} onClick={guardar}>
+        <Button data-tour="agente-guardar" disabled={!puedeGuardar || guardando} onClick={guardar}>
           {esNuevo ? t('agentes.crearAgente') : t('comun.guardar')}
         </Button>
       </div>
@@ -297,7 +297,11 @@ export default function AgentDetail({
           de la página queda a tres scrolls del campo que se acaba de tocar. */}
       <div className="grid min-h-0 flex-1 grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
         <div className="stagger animate-fade-in min-w-0 space-y-4" style={{ '--stagger-base': '40ms' }}>
-          <Card title={t('agentes.identidad')} description={t('agentes.identidadDesc')}>
+          <Card
+            dataTour="agente-identidad"
+            title={t('agentes.identidad')}
+            description={t('agentes.identidadDesc')}
+          >
             <div className="flex items-end gap-2.5">
               {/* El emoji no lleva rótulo: `items-end` lo apoya en la misma
                   base que el campo del nombre, y un rótulo de una palabra
@@ -326,7 +330,7 @@ export default function AgentDetail({
                 )}
               </div>
 
-              <label className="min-w-0 flex-1">
+              <label data-tour="agente-nombre" className="min-w-0 flex-1">
                 <span className={LABEL_CLASS}>{t('agentes.campoNombre')}</span>
                 <input
                   type="text"
@@ -339,7 +343,7 @@ export default function AgentDetail({
               </label>
             </div>
 
-            <label className="mt-4 block">
+            <label data-tour="agente-rol" className="mt-4 block">
               <span className={LABEL_CLASS}>{t('agentes.campoRol')}</span>
               <span className="mb-2 block text-[12px] leading-snug text-ink-muted">
                 {t('agentes.campoRolHint')}
@@ -353,7 +357,7 @@ export default function AgentDetail({
               />
             </label>
 
-            <label className="mt-4 block">
+            <label data-tour="agente-instrucciones" className="mt-4 block">
               <span className={LABEL_CLASS}>{t('agentes.campoInstrucciones')}</span>
               <span className="mb-2 block text-[12px] leading-snug text-ink-muted">
                 {t('agentes.campoInstruccionesHint')}
@@ -393,7 +397,7 @@ export default function AgentDetail({
             deshabilitado={esNuevo}
           />
 
-          <Card title={t('agentes.comportamiento')}>
+          <Card dataTour="agente-comportamiento" title={t('agentes.comportamiento')}>
             <div className="space-y-2">
               <Switch
                 checked={draft.enabled}
@@ -479,7 +483,10 @@ export default function AgentDetail({
             un mensaje y llega la respuesta. Abajo de `lg` no puede ser el alto
             de la ventana —está apilada arriba de la configuración— así que
             lleva uno propio, pero fijo igual. */}
-        <div className="h-[34rem] lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--barra-titulo)-8.5rem)] lg:min-h-[38rem]">
+        <div
+          data-tour="agente-prueba"
+          className="h-[34rem] lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--barra-titulo)-8.5rem)] lg:min-h-[38rem]"
+        >
           <AgentTester
             agentId={agent?.id ?? null}
             agentEmoji={draft.emoji}
