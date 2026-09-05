@@ -120,6 +120,18 @@ Los enlaces se traen con el chequeo de destino puesto: solo http/https, se resue
 3. **Un agente encendido y con `autoSend`.** El interruptor del agente es un techo sobre lo que decida el modelo: apagado, la respuesta queda como borrador y el revisor no ve nada. Avisa además si quedan otros agentes encendidos sin `autoSend`, porque si el modelo elige uno de esos pasa lo mismo.
 4. **`aiLanguage: 'en'`.** Y acá hay algo que no se adivina: **`auto` no alcanza**. Contestar en el idioma del cliente es lo que suena correcto, pero el prompt entero está escrito en español y el modelo lo arrastra igual — a un "Hi, what do you sell?" le contesta en español. Verificado contra el modelo, no supuesto. El costo es que mientras dure la revisión los clientes reales también reciben inglés, así que el script imprime cuál era el idioma anterior para poder volver.
 
+### Cuando aprueben el App Review
+
+Enviado el 2026-09-04 con ocho permisos; Meta contesta dentro de los 20 días. Aprobado, los permisos pasan de acceso **estándar** a **avanzado** y con eso deja de hacer falta que quien escribe tenga un rol en la app — que es lo único que hoy separa esto de ser un SaaS de verdad. También habilita la coexistencia (ver más arriba), que pide ser Tech Provider.
+
+Lo que hay que deshacer ese día, porque son cambios que se hicieron **para el revisor** y no para el negocio:
+
+1. **El idioma de la IA vuelve a `es`** (Configuración → Respuestas automáticas). `preparar-revision` lo deja en `en` para que el revisor reciba inglés, y mientras tanto los clientes reales del negocio también lo reciben.
+2. **El horario vuelve al real.** Quedó 00:00–23:59 los siete días.
+3. **Sacar los accesos de prueba**: el rol de evaluador de la cuenta de Facebook que se le pasó a Meta, y decidir si la cuenta de la dashboard que se usó para la revisión sigue siendo miembro del tenant (`tenant_members`).
+
+Si en vez de aprobar piden cambios, dicen qué permiso y por qué; lo más común es que el video no muestre el permiso en acción con claridad. Se corrige y se reenvía, sin penalidad.
+
 ### Días
 
 La unidad de trabajo del CRM es el "día" (`days`), que se abre y cierra a mano, no por fecha. Sin día abierto no se puede enviar ni agregar notas, y un índice único garantiza uno solo abierto por tenant. `provisionTenant` abre el primero en el alta.
@@ -360,7 +372,21 @@ Tres cosas que el corte no hace, y las tres a propósito:
 
 **La bienvenida es lo primero que se ve ya adentro** (`components/WelcomeTour.jsx`): la portada del tutorial, no el tutorial. Se dibuja recién cuando el corte de la encuesta contestó —si no, el modal aparece y se lo lleva puesto la navegación un cuadro después—. Es el único modal con `banner`, la franja a todo el ancho que `ui/Modal.jsx` dibuja arriba del encabezado: el resto son preguntas, y una ilustración arriba de una pregunta la disfraza de aviso. El degradé del banner es de tinta y no del acento, que es el único color con voz y ahí no señala nada.
 
-Los tres pasos que ofrece van **en el orden en que hay que tocarlos**, que no es un orden cualquiera: sin canal conectado no entra nada, sin agente lo que entra no se contesta, y recién ahí la bandeja tiene algo que mostrar. El interruptor de "No volver a mostrar" **arranca tildado**: está para que alguien que quiera volver a verla lo destilde, y no para que la pantalla reaparezca en cada recarga hasta que se acuerden de tildarlo — una bienvenida que insiste deja de ser una bienvenida. El paso a paso resaltando la barra, la bandeja y el composer todavía no existe; hasta que exista, "Hacer el tour" lleva al primer paso.
+Los tres pasos que ofrece van **en el orden en que hay que tocarlos**, que no es un orden cualquiera: sin canal conectado no entra nada, sin agente lo que entra no se contesta, y recién ahí la bandeja tiene algo que mostrar. El interruptor de "No volver a mostrar" **arranca tildado**: está para que alguien que quiera volver a verla lo destilde, y no para que la pantalla reaparezca en cada recarga hasta que se acuerden de tildarlo — una bienvenida que insiste deja de ser una bienvenida. Los ordinales de las tres filas reemplazaron al cartel de "Empezá acá" que llevaba la primera: el orden es de las tres, y un 1, un 2 y un 3 lo dicen entero.
+
+### El recorrido guiado
+
+`components/Tour.jsx`, y es lo que abre "Hacer el tour" de la bienvenida y el botón de Configuración → General. **No es una pila de modales: se hace sobre la app de verdad.** El tour navega solo entre las pantallas y en cada paso recorta un agujero en el velo alrededor de la pieza de la que habla, y **en cuatro de los once pasos lo que sigue no lo hace el tour sino el admin**: tocar "Bandeja" en la barra, probar la carpeta "Pendientes", abrir una conversación y escribir en el composer. Esos pasos **no tienen botón de avanzar** — avanzan cuando la acción pasó de verdad en la app de abajo, y recién ahí la tarjeta contesta con una tilde y sigue. Un recorrido en el que lo único que se hace es apretar "Siguiente" once veces se lee como un folleto: se mira, no se aprende, y al terminar la persona sigue sin haber abierto una sola conversación.
+
+- **El objetivo se busca por `data-tour` y no por una ref.** Una ref obligaría a que la barra, la lista, el composer y la ficha le pasaran algo al tour hacia arriba; con el atributo, lo único que la app sabe del tour es una palabra en un `div`. Un paso cuyo objetivo no aparece en 1,2s **se saltea, no rompe**.
+- **Qué se ilumina y qué se toca son dos cosas.** `target` es el recorte —la barra entera, para que se vea de qué lista se está hablando— y `accion.en` es la única pieza de adentro que hay que apretar, que es la que lleva el anillo que late y el puntero en la esquina. Cuando coinciden, `en` se omite.
+- **Una acción cuyo elemento no está en pantalla no existe**: sin conversaciones no hay ninguna que abrir y sin día abierto el composer es un cartel sin campo adentro, así que ahí el paso vuelve a ser uno normal, con su botón. Es la misma regla que ya tenían los objetivos, un escalón más abajo. Y nadie queda encerrado igual: todo paso con acción ofrece "Seguir sin probar" y las flechas del teclado siguen caminando.
+- **Los listeners van en `document` y en captura**, no en el elemento: el objetivo se remonta solo (React redibuja la fila al cambiar el filtro y la lista entera cuando llega un mensaje), y un listener colgado del nodo se quedaría pegado a algo que ya no está en la pantalla. Lo cumple **cualquiera** de los elementos con ese `data-tour` —todas las filas de la lista lo llevan— aunque el anillo señale la primera: abrir la tercera conversación es exactamente lo que se estaba enseñando.
+- **Nada de lo que se pide toca al cliente**, y por eso el paso del composer **se come el Enter** mientras dura (en captura, para llegar antes que el `onKeyDown` del cuadro). Escribir para probar es parte del recorrido; que ese "hola" le salga a una persona de verdad, no. Es lo que permite pedir la acción sin ninguna advertencia al lado.
+- **El paso que pide filtrar por "Pendientes" deja la bandeja filtrada**, así que el paso de la lista trae `filtro: 'todos'` (lo aplica `irDelTour` en `App.jsx`). Sin eso, los tres pasos que vienen después se quedan sin nada que señalar por algo que hizo el propio recorrido dos pasos antes.
+- **Lo hecho queda hecho**: volver atrás a un paso ya cumplido muestra la tilde y su botón, no lo vuelve a pedir. El festejo se apaga *antes* de mover — si quedara puesto, ese paso auto-avanzaría de nuevo y no habría forma de quedarse mirándolo.
+- El velo y el anillo son **dos elementos** desde que el anillo late: una animación sobre `box-shadow` se llevaría puesta también la sombra de 9999px que hace de velo. Y los clicks: el contenedor es `pointer-events-none` y en los pasos con acción lo que tapa son cuatro rectángulos alrededor del recorte (`marco`) — adentro manda la app, afuera sigue mandando el tour. En los demás pasos tapa uno solo a pantalla completa, porque abajo la app está viva y un click perdido en la barra cambiaría de página en medio de una explicación.
+- El último paso cuenta **cuántas de esas acciones hizo la persona** y ofrece el botón de conectar un canal, que es lo único que se puede decir ahí que no se sabía al empezar.
 
 ### Idiomas
 
