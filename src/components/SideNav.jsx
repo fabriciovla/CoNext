@@ -28,9 +28,14 @@ const NAV_ITEMS = [
 // Fila de la barra: ícono (o emoji), nombre y cantidad a la derecha. Es el
 // ladrillo de toda la columna — secciones de la app y carpetas de la bandeja
 // usan la misma fila, así que la selección y el hover se definen una sola vez.
-export function NavRow({ icon, emoji, label, count, active, onClick }) {
+// El `dataTour` es a quién señala el recorrido guiado (`Tour.jsx`) cuando el
+// paso pide tocar una fila puntual y no la lista entera. Va como atributo y no
+// como una ref que suba hasta App: así el tour sabe de la barra sin que la barra
+// sepa nada del tour.
+export function NavRow({ icon, emoji, label, count, active, onClick, dataTour }) {
   return (
     <button
+      data-tour={dataTour}
       onClick={onClick}
       // El ítem activo se dice solo con el fondo y el peso del texto. Antes
       // llevaba además una barrita violeta pegada al borde izquierdo: era una
@@ -150,6 +155,7 @@ export default function SideNav({
               icon={<Icon size={16} />}
               label={t(`nav.${key}`)}
               count={key === 'inbox' && pendingCount > 0 ? pendingCount : null}
+              dataTour={`nav-${key}`}
               active={key === 'inbox' ? inboxActive : current === key}
               onClick={() => onNavigate(key)}
             />

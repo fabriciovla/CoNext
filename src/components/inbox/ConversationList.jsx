@@ -173,6 +173,12 @@ export default function ConversationList({
                 style={{ '--d': `${Math.min(i, 8) * 25}ms` }}
               >
                 <button
+                  // La fila que el recorrido guiado pide abrir (`Tour.jsx`). Va en
+                  // todas: el anillo que late señala la primera —con treinta
+                  // latiendo a la vez no señalaría ninguna— pero el paso lo
+                  // cumple cualquiera, porque abrir la tercera es exactamente lo
+                  // mismo que se estaba enseñando.
+                  data-tour="inbox-conversacion"
                   onClick={() => onSelect(group.phone)}
                   // La conversación abierta se dice con el fondo del bloque y
                   // nada más. La barrita violeta del borde izquierdo era una

@@ -329,6 +329,38 @@ body {
   }
 }
 
+/* El anillo de un paso del tour que espera una acción del admin. Late —y es la
+   excepción a "sin movimiento decorativo"— porque no adorna: es lo único que
+   separa a la pieza que hay que tocar de las otras nueve que quedaron a la
+   vista adentro del mismo recorte. Late lento y sin cambiar de tamaño: lo que
+   pulsa es el halo de afuera, así que el borde de la pieza no se mueve y el
+   texto de abajo no vibra. */
+@keyframes ui-invitar {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgb(var(--violet) / 0.55),
+      0 0 0 5px rgb(var(--violet) / 0.16);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgb(var(--violet) / 0.95),
+      0 0 0 13px rgb(var(--violet) / 0);
+  }
+}
+
+/* El puntero que acompaña a ese anillo: se acerca y se aleja dos píxeles, que
+   es el gesto de señalar. Sin él, el anillo dice "acá hay algo" y no "tocá". */
+@keyframes ui-tocar {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-2px, -2px);
+  }
+}
+
 /* Halo del punto "día abierto": late sin llamar la atención. */
 @keyframes ui-pulse-ring {
   0% {
@@ -430,6 +462,12 @@ body {
   }
   .animate-foco {
     animation: ui-foco 620ms var(--ease-out-expo) var(--d, 0ms) backwards;
+  }
+  .animate-invitar {
+    animation: ui-invitar 2s var(--ease-out-soft) infinite;
+  }
+  .animate-tocar {
+    animation: ui-tocar 1.6s var(--ease-out-soft) infinite;
   }
 
   /* Escalona los hijos directos sin calcular delays en JS. El contenedor puede

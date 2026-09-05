@@ -143,7 +143,12 @@ const BIENVENIDA = {
     es: 'Todos los mensajes de WhatsApp, Instagram y Messenger entran a una sola bandeja, y la IA contesta lo seguro y te deja el resto redactado. Son tres pasos hasta el primer mensaje.',
     en: 'Every WhatsApp, Instagram and Messenger message lands in a single inbox, and the AI answers the safe ones and leaves the rest drafted for you. It takes three steps to your first message.',
   },
-  empezaAca: { es: 'Empezá acá', en: 'Start here' },
+  // El cartel de "Empezá acá" que llevaba la primera fila se fue: ahora las tres
+  // van numeradas, que dice el orden entero y no solo dónde arranca.
+  tourInteractivo: {
+    es: 'El recorrido se hace sobre la app de verdad y en varios pasos te toca a vos: abrís una conversación, escribís un mensaje. Nada de lo que hagas ahí le llega a un cliente.',
+    en: 'The tour runs on the real app, and several steps hand you the controls: you open a conversation, you type a message. Nothing you do in there reaches a customer.',
+  },
   pasoCanalesTitulo: { es: 'Conectá tus canales', en: 'Connect your channels' },
   pasoCanalesBajada: {
     es: 'WhatsApp por un lado, la Página de Facebook para Instagram y Messenger.',
@@ -178,6 +183,42 @@ const TOUR = {
   siguiente: { es: 'Siguiente', en: 'Next' },
   terminar: { es: 'Empezar', en: 'Get started' },
   salir: { es: 'Salir del recorrido', en: 'Exit the tour' },
+
+  // Los pasos en los que le toca al admin. La pista dice **qué tocar y para
+  // qué**, en ese orden y en una sola oración: en pantalla convive con un
+  // anillo latiendo sobre la pieza, así que repetir dónde está sería decir dos
+  // veces lo mismo.
+  tuTurno: { es: 'Te toca', en: 'Your turn' },
+  hecho: { es: '¡Listo!', en: 'Nice!' },
+  loHiciste: { es: 'Esto ya lo hiciste.', en: 'You already did this one.' },
+  seguirSin: { es: 'Seguir sin probar', en: 'Skip this one' },
+  accionBarra: {
+    es: 'Tocá “Bandeja” para entrar: es la carpeta con todas las conversaciones.',
+    en: 'Tap “Inbox” to go in: it’s the folder holding every conversation.',
+  },
+  accionCarpetas: {
+    es: 'Probá “Pendientes”: deja a la vista solo lo que todavía espera respuesta.',
+    en: 'Try “Pending”: it leaves only what’s still waiting for an answer.',
+  },
+  accionLista: {
+    es: 'Abrí una conversación. Cualquiera sirve — se abre a la derecha, entera.',
+    en: 'Open a conversation. Any of them — it opens in full on the right.',
+  },
+  accionComposer: {
+    es: 'Escribí algo en el cuadro. Mientras dure el recorrido no se envía nada.',
+    en: 'Type something in the box. Nothing gets sent while the tour is running.',
+  },
+  finalHechos: {
+    es: ({ n, total }) =>
+      n === total
+        ? `Hiciste las ${total} cosas que te pedí por tu cuenta.`
+        : `Hiciste ${n} de ${total} cosas por tu cuenta.`,
+    en: ({ n, total }) =>
+      n === total
+        ? `You did all ${total} things yourself.`
+        : `You did ${n} of ${total} things yourself.`,
+  },
+  finalConectar: { es: 'Conectar un canal', en: 'Connect a channel' },
 
   inicioTitulo: { es: 'Tu día, de un vistazo', en: 'Your day at a glance' },
   inicioBajada: {
@@ -230,9 +271,11 @@ const TOUR = {
     en: 'WhatsApp goes on its own; the Facebook Page brings Instagram and Messenger together. Until you connect at least one, the inbox stays empty.',
   },
   finalTitulo: { es: 'Listo, es tuya', en: "That's it — it's yours" },
+  // Lo que sigue no se nombra acá: el paso lo ofrece con un botón, y decirlo
+  // además en la bajada es escribir dos veces el mismo renglón.
   finalBajada: {
-    es: 'Podés volver a ver este recorrido cuando quieras desde Configuración → General. Lo que sigue es conectar un canal y esperar el primer mensaje.',
-    en: 'You can take this tour again any time from Settings → General. What comes next is connecting a channel and waiting for the first message.',
+    es: 'Podés volver a ver este recorrido cuando quieras desde Configuración → General.',
+    en: 'You can take this tour again any time from Settings → General.',
   },
 }
 

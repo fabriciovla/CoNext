@@ -1,14 +1,52 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Button from './ui/Button'
-import { IconChevronRight, IconClose } from './ui/icons'
+import {
+  IconCheck,
+  IconChevronRight,
+  IconClock,
+  IconClose,
+  IconCompose,
+  IconContactCard,
+  IconFolder,
+  IconHome,
+  IconInbox,
+  IconPointer,
+  IconSettings,
+  IconSidebarToggle,
+  IconSparkles,
+} from './ui/icons'
 import { useT } from '../lib/i18n.jsx'
 
-// El recorrido guiado: el paso a paso que la bienvenida venía prometiendo y que
-// hasta ahora no existía. No es un carrusel de capturas — se hace **sobre la
-// app de verdad**: el tour navega solo entre las pantallas, y en cada paso
-// recorta un agujero en el velo alrededor de la pieza de la que está hablando.
+// El recorrido guiado. No es un carrusel de capturas ni una pila de modales: se
+// hace **sobre la app de verdad** —el tour navega solo entre las pantallas y en
+// cada paso recorta un agujero en el velo alrededor de la pieza de la que está
+// hablando— y, en varios pasos, **lo toca el admin y no el tour**.
 //
-// Dos decisiones que sostienen todo lo demás:
+// Esa es la decisión que ordena el archivo. Un recorrido en el que lo único que
+// se hace es apretar "Siguiente" once veces se lee como un folleto: se mira, no
+// se aprende, y al terminar la persona sigue sin haber abierto una sola
+// conversación. Los pasos con `accion` no tienen botón de avanzar — avanzan
+// cuando la acción ocurrió de verdad en la app de abajo (se tocó *esa* fila, se
+// escribió en *ese* cuadro), y recién ahí la tarjeta contesta con una tilde.
+//
+// Cuatro reglas sostienen que eso no se convierta en una trampa:
+//
+// - **Nadie queda encerrado.** Todo paso con acción ofrece "Seguir sin probar",
+//   y las flechas del teclado siguen caminando el recorrido.
+// - **Una acción cuyo elemento no está en pantalla no existe.** Sin ninguna
+//   conversación no hay ninguna que abrir, y sin día abierto el composer es un
+//   cartel sin campo adentro: ahí el paso vuelve a ser uno normal, con su botón
+//   de siempre. Es la misma regla que ya tenían los objetivos (`saltear`), un
+//   escalón más abajo.
+// - **Nada de lo que se pide toca al cliente.** Se navega, se filtra, se abre
+//   una conversación y se escribe un borrador. Por eso el paso del composer se
+//   come el Enter mientras dura: escribir para probar es parte del recorrido,
+//   mandarle eso a una persona de verdad no. Es lo que deja pedir la acción sin
+//   ninguna advertencia al lado.
+// - **Lo hecho queda hecho.** Volver atrás a un paso ya cumplido no lo vuelve a
+//   pedir ni lo hace auto-avanzar: muestra la tilde y su botón.
+//
+// Y dos que vienen de antes y no cambiaron:
 //
 // - **El objetivo se busca por `data-tour` y no por una clase ni por una ref.**
 //   Una ref obligaría a que cada pieza de la app —la barra, la lista, el
@@ -16,14 +54,13 @@ import { useT } from '../lib/i18n.jsx'
 //   pasaría a estar metido adentro de seis componentes que no tienen nada que
 //   ver entre sí. Con el atributo, lo único que sabe la app del tour es una
 //   palabra en un `div`.
-// - **Un paso cuyo objetivo no aparece se saltea, no rompe.** La mitad de los
-//   objetivos existen solo en ciertas condiciones: sin ninguna conversación no
-//   hay hilo ni composer, y con el día cerrado el composer es un cartel. Un tour
-//   que se traba esperando algo que no va a llegar es peor que uno más corto.
+// - **Un paso cuyo objetivo no aparece se saltea, no rompe.** Un tour que se
+//   traba esperando algo que no va a llegar es peor que uno más corto.
 //
 // El movimiento es uno solo: el recorte viaja de un objetivo al siguiente y la
-// tarjeta viaja con él. No hay nada latiendo mientras se lee — el único destello
-// es el anillo que se abre al aterrizar, que señala dónde quedó parado.
+// tarjeta viaja con él. Lo único que late es el anillo de la pieza que hay que
+// tocar, y late porque no adorna: es lo que la separa de las otras nueve que
+// quedaron a la vista adentro del mismo recorte.
 
 // Acá no hay ningún flag propio de "ya lo vio": quién ve esto la primera vez lo
 // decide la bienvenida (`WelcomeTour.jsx`, que guarda el suyo) y volver a verlo
@@ -37,11 +74,17 @@ import { useT } from '../lib/i18n.jsx'
 // El orden es el de la app y no el de la importancia: se entra por Inicio, se
 // baja por la barra, se trabaja en la bandeja y recién al final se configura.
 // `lado` es solo una preferencia — si de ese lado no entra, se ubica sola.
+//
+// `accion.en` es qué se toca y **no es lo mismo que `target`**, que es lo que se
+// ilumina: el recorte abre la barra entera para que se vea de qué lista se está
+// hablando, y adentro late la única fila que hay que apretar. Cuando son la
+// misma pieza, `en` se omite.
 export const PASOS = [
   {
     clave: 'inicio',
     pagina: 'home',
     target: 'home-kpis',
+    Icono: IconHome,
     lado: 'abajo',
     titulo: 'tour.inicioTitulo',
     bajada: 'tour.inicioBajada',
@@ -49,36 +92,49 @@ export const PASOS = [
   {
     clave: 'barra',
     target: 'nav-secciones',
+    Icono: IconSidebarToggle,
     lado: 'derecha',
     titulo: 'tour.barraTitulo',
     bajada: 'tour.barraBajada',
+    accion: { tipo: 'click', en: 'nav-inbox', pista: 'tour.accionBarra' },
   },
   {
     clave: 'carpetas',
     target: 'nav-carpetas',
+    Icono: IconFolder,
     lado: 'derecha',
     titulo: 'tour.carpetasTitulo',
     bajada: 'tour.carpetasBajada',
+    accion: { tipo: 'click', en: 'nav-pendientes', pista: 'tour.accionCarpetas' },
   },
   {
     clave: 'dia',
     target: 'nav-dia',
+    Icono: IconClock,
     lado: 'derecha',
     titulo: 'tour.diaTitulo',
     bajada: 'tour.diaBajada',
   },
+  // Vuelve a poner la carpeta "Todas". El paso anterior deja la bandeja
+  // filtrada en Pendientes, y si ahí no hay ninguna, los tres pasos que siguen
+  // —la lista, el hilo, el composer— se quedan sin nada que señalar por algo
+  // que hizo el propio recorrido dos pasos antes.
   {
     clave: 'lista',
     pagina: 'inbox',
+    filtro: 'todos',
     target: 'inbox-lista',
+    Icono: IconInbox,
     lado: 'derecha',
     titulo: 'tour.listaTitulo',
     bajada: 'tour.listaBajada',
+    accion: { tipo: 'click', en: 'inbox-conversacion', pista: 'tour.accionLista' },
   },
   {
     clave: 'hilo',
     pagina: 'inbox',
     target: 'inbox-hilo',
+    Icono: IconInbox,
     lado: 'izquierda',
     titulo: 'tour.hiloTitulo',
     bajada: 'tour.hiloBajada',
@@ -87,14 +143,17 @@ export const PASOS = [
     clave: 'composer',
     pagina: 'inbox',
     target: 'inbox-composer',
+    Icono: IconCompose,
     lado: 'arriba',
     titulo: 'tour.composerTitulo',
     bajada: 'tour.composerBajada',
+    accion: { tipo: 'escribir', en: 'inbox-composer', pista: 'tour.accionComposer' },
   },
   {
     clave: 'ficha',
     pagina: 'inbox',
     target: 'inbox-ficha',
+    Icono: IconContactCard,
     lado: 'izquierda',
     titulo: 'tour.fichaTitulo',
     bajada: 'tour.fichaBajada',
@@ -103,6 +162,7 @@ export const PASOS = [
     clave: 'agentes',
     pagina: 'agents',
     target: 'agentes-nuevo',
+    Icono: IconSparkles,
     lado: 'abajo',
     titulo: 'tour.agentesTitulo',
     bajada: 'tour.agentesBajada',
@@ -112,6 +172,7 @@ export const PASOS = [
     pagina: 'settings',
     seccion: 'canales',
     target: 'config-canales',
+    Icono: IconSettings,
     lado: 'izquierda',
     titulo: 'tour.canalesTitulo',
     bajada: 'tour.canalesBajada',
@@ -121,20 +182,32 @@ export const PASOS = [
   {
     clave: 'final',
     pagina: 'inbox',
+    filtro: 'todos',
+    Icono: IconCheck,
     titulo: 'tour.finalTitulo',
     bajada: 'tour.finalBajada',
   },
 ]
+
+// Cuántos pasos piden que el admin haga algo. Se cuenta una vez, al cargar el
+// módulo: la lista es una constante y no cambia entre renders.
+const CON_ACCION = PASOS.filter((p) => p.accion).length
 
 // Cuánto se espera a que aparezca el objetivo de un paso antes de darlo por
 // inexistente y seguir. Alcanza para un cambio de página (que remonta el
 // contenido) y para el salto de sección de Configuración, que es un efecto.
 const ESPERA_MAX_MS = 1200
 const AIRE_RECORTE = 8 // cuánto respira el agujero alrededor de la pieza
-const ANCHO_TARJETA = 320
+const AIRE_ANILLO = 3 // el de la pieza que hay que tocar: pegado, para señalarla
+const ANCHO_TARJETA = 344
 const AIRE_TARJETA = 14 // entre el borde del recorte y la tarjeta
 const MARGEN = 16 // mínimo contra el borde de la pantalla
 const LADOS = ['derecha', 'izquierda', 'abajo', 'arriba']
+
+// Lo que queda la tilde en pantalla antes de pasar al paso siguiente. Es el
+// acuse de recibo de lo que la persona acaba de hacer: sin esa pausa, tocar la
+// fila correcta se ve igual que haber apretado "Siguiente".
+const FESTEJO_MS = 900
 
 // Quien pidió menos movimiento no tiene por qué ver el recorte viajar: ahí el
 // salto es instantáneo. Se lee una sola vez — nadie cambia esta preferencia
@@ -149,13 +222,39 @@ const sinMovimiento = () => {
 
 const acotar = (v, min, max) => Math.max(min, Math.min(max, v))
 
-function recuadroDe(el) {
+const buscar = (nombre) => (nombre ? document.querySelector(`[data-tour="${nombre}"]`) : null)
+
+// Qué se toca en este paso. Son varios y no uno porque la pieza que se señala
+// no siempre es la única que cumple: el anillo late sobre la primera fila de la
+// lista, pero abrir la tercera conversación es exactamente lo mismo que se
+// estaba enseñando, y un paso que no lo acepta le dice a alguien que acaba de
+// hacerlo bien que lo hizo mal.
+//
+// Para "escribir" no alcanza con que esté el bloque: lo que hay que poder tocar
+// es el campo, y el composer sin día abierto es un cartel sin ningún campo
+// adentro. Devolver la lista vacía es lo que degrada el paso a uno normal, con
+// su botón de avanzar.
+function elementosDeAccion(paso) {
+  const acc = paso?.accion
+  if (!acc) return []
+  const bases = Array.from(document.querySelectorAll(`[data-tour="${acc.en ?? paso.target}"]`))
+  if (acc.tipo === 'escribir') {
+    const campo = bases[0]?.querySelector('textarea, input[type="text"]')
+    return campo ? [campo] : []
+  }
+  return bases
+}
+
+// El que se mide y se señala: el primero en el orden del documento.
+const elDeAccion = (paso) => elementosDeAccion(paso)[0] ?? null
+
+function recuadroDe(el, aire = AIRE_RECORTE) {
   const r = el.getBoundingClientRect()
   return {
-    left: r.left - AIRE_RECORTE,
-    top: r.top - AIRE_RECORTE,
-    width: r.width + AIRE_RECORTE * 2,
-    height: r.height + AIRE_RECORTE * 2,
+    left: r.left - aire,
+    top: r.top - aire,
+    width: r.width + aire * 2,
+    height: r.height + aire * 2,
   }
 }
 
@@ -245,22 +344,52 @@ function ubicarTarjeta(caja, alto, lado) {
   }
 }
 
-function mismaVista(prev, caja, tarjeta) {
+const mismoRect = (a, b) =>
+  a === b ||
+  (!!a && !!b && a.left === b.left && a.top === b.top && a.width === b.width && a.height === b.height)
+
+function mismaVista(prev, caja, tarjeta, accion) {
   if (!prev) return false
   return (
-    prev.caja.left === caja.left &&
-    prev.caja.top === caja.top &&
-    prev.caja.width === caja.width &&
-    prev.caja.height === caja.height &&
+    mismoRect(prev.caja, caja) &&
     prev.tarjeta.left === tarjeta.left &&
-    prev.tarjeta.top === tarjeta.top
+    prev.tarjeta.top === tarjeta.top &&
+    mismoRect(prev.accion, accion)
   )
+}
+
+// Los cuatro rectángulos que rodean al agujero, y que es lo que deja pasar el
+// click en los pasos que piden algo: adentro del recorte manda la app, afuera
+// sigue mandando el tour. El resto de los pasos tapan la pantalla entera con
+// uno solo — abajo del velo la app está viva, y un click perdido en la barra
+// cambiaría de página en medio de una explicación.
+function marco(caja) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const derecha = caja.left + caja.width
+  const abajo = caja.top + caja.height
+  const alto = Math.max(0, Math.min(vh, abajo) - Math.max(0, caja.top))
+  const top = Math.max(0, caja.top)
+  return [
+    { left: 0, top: 0, width: vw, height: top },
+    { left: 0, top: abajo, width: vw, height: Math.max(0, vh - abajo) },
+    { left: 0, top, width: Math.max(0, caja.left), height: alto },
+    { left: derecha, top, width: Math.max(0, vw - derecha), height: alto },
+  ]
 }
 
 export default function Tour({ onIr, onClose }) {
   const t = useT()
   const [indice, setIndice] = useState(0)
   const [vista, setVista] = useState(null)
+  // Las acciones que ya cumplió el admin, por clave de paso. Sirven para dos
+  // cosas: que volver atrás no vuelva a pedir lo mismo, y que el final pueda
+  // decir cuántas hizo — que es toda la diferencia entre haber mirado la app y
+  // haberla usado.
+  const [hechos, setHechos] = useState([])
+  // El paso que se acaba de cumplir. Vive aparte de `hechos` porque es un
+  // estado momentáneo —la tilde y la pausa antes de avanzar— y no un registro.
+  const [festejando, setFestejando] = useState(null)
   const cajaRef = useRef(null)
   const tarjetaRef = useRef(null)
   // Hacia dónde se estaba yendo. Sirve para saltear en la dirección correcta:
@@ -274,6 +403,15 @@ export default function Tour({ onIr, onClose }) {
 
   const paso = PASOS[indice]
   const ultimo = indice === PASOS.length - 1
+  // El paso actual, para los listeners que se montan una sola vez y no pueden
+  // tenerlo como dependencia (ver el del teclado).
+  const pasoRef = useRef(paso)
+  pasoRef.current = paso
+
+  const yaHecho = hechos.includes(paso.clave)
+  // Un paso pide algo solo si lo que hay que tocar está en pantalla.
+  const interactivo = Boolean(paso.accion && vista?.accion)
+  const esperando = interactivo && !yaHecho
 
   const terminar = onClose
 
@@ -302,12 +440,12 @@ export default function Tour({ onIr, onClose }) {
     else setIndice(destino)
   }, [indice, terminar])
 
-  // Los dos efectos de abajo se montan una vez por paso y no una vez por
-  // render, y para eso las acciones tienen que entrar por una ref. Con las
-  // funciones como dependencia bastaba que quien monta el tour pasara un
-  // `onClose` inline para que se rearmaran en cada cuadro del viaje del
-  // recorte: el bucle se reiniciaría solo, el plazo de espera nunca se
-  // cumpliría y el `scrollIntoView` del paso saldría sesenta veces por segundo.
+  // Los efectos de abajo se montan una vez por paso y no una vez por render, y
+  // para eso las acciones tienen que entrar por una ref. Con las funciones como
+  // dependencia bastaba que quien monta el tour pasara un `onClose` inline para
+  // que se rearmaran en cada cuadro del viaje del recorte: el bucle se
+  // reiniciaría solo, el plazo de espera nunca se cumpliría y el
+  // `scrollIntoView` del paso saldría sesenta veces por segundo.
   const acciones = useRef({})
   acciones.current = { saltear, terminar, siguiente, anterior }
 
@@ -325,13 +463,15 @@ export default function Tour({ onIr, onClose }) {
   // El bucle: mide el objetivo, acerca el recorte y reubica la tarjeta. Corre
   // mientras dura el paso y no una sola vez, porque abajo del velo la app sigue
   // viva —una sección de la barra que se despliega, la ventana que cambia de
-  // tamaño, el scroll que acomoda el objetivo— y el agujero tiene que quedar
-  // donde está la pieza y no donde estaba al entrar. Cuando ya llegó, el estado
-  // deja de cambiar y React no vuelve a dibujar aunque el bucle siga.
+  // tamaño, el scroll que acomoda el objetivo, la fila que aparece cuando entra
+  // un mensaje— y el agujero tiene que quedar donde está la pieza y no donde
+  // estaba al entrar. Cuando ya llegó, el estado deja de cambiar y React no
+  // vuelve a dibujar aunque el bucle siga.
   useEffect(() => {
     let vivo = true
     let raf = 0
     let encontrado = false
+    let enfocado = false
     const limite = performance.now() + ESPERA_MAX_MS
     // De dónde sale el viaje de este paso y cuándo arrancó. `desde` es donde
     // quedó el recorte del paso anterior; en el primero no hay ninguno y el
@@ -342,7 +482,7 @@ export default function Tour({ onIr, onClose }) {
     const cuadro = () => {
       if (!vivo) return
 
-      const el = paso.target ? document.querySelector(`[data-tour="${paso.target}"]`) : null
+      const el = buscar(paso.target)
 
       if (paso.target && !el) {
         if (performance.now() > limite) {
@@ -377,10 +517,24 @@ export default function Tour({ onIr, onClose }) {
       const caja = !desde || directo || avance >= 1 ? destino : mezclar(desde, destino, avance)
       cajaRef.current = caja
 
-      const alto = tarjetaRef.current?.offsetHeight ?? 180
+      // La pieza que hay que tocar se mide en cada cuadro igual que el objetivo,
+      // y por el mismo motivo: la fila de la barra se corre cuando se pliega una
+      // sección, y el cuadro de escribir crece con el texto que se le mete.
+      const elAccion = elDeAccion(paso)
+      const accion = elAccion ? recuadroDe(elAccion, AIRE_ANILLO) : null
+
+      // Pedir que se escriba en un cuadro que hay que ir a buscar con el mouse
+      // son dos cosas. El foco va una sola vez por paso, cuando el campo
+      // aparece, y sin mover el scroll: de eso ya se ocupó el objetivo.
+      if (elAccion && !enfocado && paso.accion.tipo === 'escribir') {
+        enfocado = true
+        elAccion.focus({ preventScroll: true })
+      }
+
+      const alto = tarjetaRef.current?.offsetHeight ?? 200
       const lado = el ? elegirLado(destino, alto, paso.lado) : null
       const tarjeta = ubicarTarjeta(el ? caja : null, alto, lado)
-      setVista((prev) => (mismaVista(prev, caja, tarjeta) ? prev : { caja, tarjeta }))
+      setVista((prev) => (mismaVista(prev, caja, tarjeta, accion) ? prev : { caja, tarjeta, accion }))
 
       raf = requestAnimationFrame(cuadro)
     }
@@ -392,27 +546,111 @@ export default function Tour({ onIr, onClose }) {
     }
   }, [paso, directo])
 
+  // Lo que convierte al recorrido en algo que se hace y no que se mira: mirar la
+  // app de abajo hasta que pase lo que el paso pidió.
+  //
+  // Los dos escuchan **en `document` y en captura**, no en el elemento: el
+  // objetivo se remonta solo (React redibuja la fila al cambiar el filtro, y la
+  // lista entera cuando llega un mensaje), y un listener colgado del nodo se
+  // quedaría pegado a un elemento que ya no está en la pantalla.
+  //
+  // Un paso ya cumplido no vuelve a escuchar: volviendo atrás, cada click
+  // dispararía el festejo de nuevo y el recorrido se iría solo para adelante.
+  useEffect(() => {
+    if (!paso.accion || hechos.includes(paso.clave)) return
+
+    const dentro = (nodo) =>
+      nodo instanceof Node &&
+      elementosDeAccion(paso).some((el) => el === nodo || el.contains(nodo))
+
+    const cumplir = () => {
+      setHechos((prev) => (prev.includes(paso.clave) ? prev : [...prev, paso.clave]))
+      setFestejando(paso.clave)
+    }
+
+    const alClick = (e) => {
+      if (paso.accion.tipo === 'click' && dentro(e.target)) cumplir()
+    }
+    // Dos caracteres y no uno: con uno solo la tilde aparece antes de que la
+    // persona haya terminado de escribir la primera palabra, y el paso se va
+    // solo mientras todavía está tipeando.
+    const alEscribir = (e) => {
+      if (paso.accion.tipo !== 'escribir') return
+      if (dentro(e.target) && (e.target.value ?? '').trim().length >= 2) cumplir()
+    }
+
+    document.addEventListener('click', alClick, true)
+    document.addEventListener('input', alEscribir, true)
+    return () => {
+      document.removeEventListener('click', alClick, true)
+      document.removeEventListener('input', alEscribir, true)
+    }
+  }, [paso, hechos])
+
+  // La tilde queda un momento en pantalla y recién ahí sigue el recorrido. El
+  // festejo se apaga antes de mover: si quedara puesto, volver atrás a ese paso
+  // lo haría auto-avanzar otra vez y no habría forma de quedarse mirándolo.
+  useEffect(() => {
+    if (festejando !== paso.clave) return
+    const id = setTimeout(
+      () => {
+        setFestejando(null)
+        if (!ultimo) mover(1)
+      },
+      directo ? 200 : FESTEJO_MS,
+    )
+    return () => clearTimeout(id)
+  }, [festejando, paso.clave, ultimo, mover, directo])
+
   // Escape sale, las flechas caminan. Un tour que solo se puede recorrer con el
   // mouse obliga a soltar el teclado en la única pantalla que enseña a usar la
   // app con el teclado.
   useEffect(() => {
     const alTeclado = (e) => {
+      if (e.key === 'Escape') {
+        acciones.current.terminar()
+        e.preventDefault()
+        return
+      }
+      // Escribiendo en un campo no hay atajos: el paso del composer pide
+      // justamente eso, y ahí las flechas mueven el cursor y Enter es del
+      // cuadro (que además se lo come el listener de abajo).
+      const enCampo =
+        e.target instanceof HTMLElement &&
+        (e.target.closest('input, textarea, select') || e.target.isContentEditable)
+      if (enCampo) return
       // Enter no cuenta cuando el foco está en un botón del propio tour: ahí el
       // navegador ya lo convierte en un click, y sumarle este atajo haría que
       // "Atrás" caminara para los dos lados en la misma tecla.
       const enBoton = e.target instanceof HTMLElement && e.target.closest('button')
-      if (e.key === 'Escape') acciones.current.terminar()
-      else if (e.key === 'ArrowRight' || (e.key === 'Enter' && !enBoton))
-        acciones.current.siguiente()
+      if (e.key === 'ArrowRight' || (e.key === 'Enter' && !enBoton)) acciones.current.siguiente()
       else if (e.key === 'ArrowLeft') acciones.current.anterior()
       else return
       e.preventDefault()
     }
+
+    // El Enter del paso que pide escribir se lo come el tour, y va en captura
+    // para llegar antes que el `onKeyDown` del composer. Probar a escribir es
+    // parte del recorrido; que ese "hola" de prueba le salga a un cliente de
+    // verdad, no. Es lo que permite pedir la acción sin ninguna advertencia al
+    // lado, y lo que deja el texto escrito ahí para cuando el tour termine.
+    const alTecladoCaptura = (e) => {
+      if (e.key !== 'Enter' || e.shiftKey) return
+      const actual = pasoRef.current
+      if (actual?.accion?.tipo !== 'escribir') return
+      if (e.target === elDeAccion(actual)) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+
     const overflowPrevio = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', alTecladoCaptura, true)
     document.addEventListener('keydown', alTeclado)
     return () => {
       document.body.style.overflow = overflowPrevio
+      document.removeEventListener('keydown', alTecladoCaptura, true)
       document.removeEventListener('keydown', alTeclado)
     }
   }, [])
@@ -431,37 +669,95 @@ export default function Tour({ onIr, onClose }) {
   // por un cuadro se ve como un parpadeo negro, así que no se dibuja nada.
   if (!vista) return null
 
-  const { caja, tarjeta } = vista
+  const { caja, tarjeta, accion } = vista
+  const { Icono } = paso
+  const festejo = festejando === paso.clave
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={t('tour.aria')}
-      // El contenedor se come los clicks: abajo del velo la app está viva y un
-      // click perdido en la barra cambiaría de página en medio de un paso. Lo
-      // que se puede tocar es lo que dibuja el tour.
-      className="fixed inset-0 z-[60]"
+      // El contenedor deja pasar los clicks y cada pieza se los queda si los
+      // necesita (ver `marco`). Lo que se puede tocar es lo que dibuja el tour y,
+      // en los pasos que piden algo, lo que quedó adentro del recorte.
+      className="pointer-events-none fixed inset-0 z-[60]"
     >
+      {interactivo ? (
+        marco(caja).map((r, i) => <div key={i} className="pointer-events-auto absolute" style={r} />)
+      ) : (
+        <div className="pointer-events-auto absolute inset-0" />
+      )}
+
       {/* El velo es la sombra de este elemento, no un div aparte: así el
           agujero y lo que lo rodea son la misma pieza y no hay forma de que se
-          desincronicen. El anillo va primero en la lista para quedar dibujado
-          arriba de la sombra grande. */}
+          desincronicen. El anillo va en su propio elemento —y no en una segunda
+          sombra de este— porque en los pasos con acción late, y una animación
+          sobre `box-shadow` se llevaría puesta también la sombra de 9999px que
+          hace de velo. */}
       <div
-        className="pointer-events-none absolute rounded-2xl"
+        className="absolute rounded-2xl"
         style={{
           left: caja.left,
           top: caja.top,
           width: caja.width,
           height: caja.height,
-          // Sin objetivo no va el anillo: el agujero mide cero, y un contorno de
-          // 2px alrededor de la nada es un puntito violeta en el medio de la
-          // pantalla. Ahí queda el velo liso, que es lo que corresponde.
-          boxShadow: paso.target
-            ? '0 0 0 2px rgb(var(--violet) / 0.5), 0 0 0 9999px var(--scrim)'
-            : '0 0 0 9999px var(--scrim)',
+          boxShadow: '0 0 0 9999px var(--scrim)',
         }}
       />
+
+      {/* Sin objetivo no va el anillo: el agujero mide cero, y un contorno de
+          2px alrededor de la nada es un puntito violeta en el medio de la
+          pantalla. Ahí queda el velo liso, que es lo que corresponde.
+
+          Cuando adentro hay una pieza esperando que la toquen, este anillo se
+          hace fino y se apaga: dos contornos del mismo color y del mismo peso,
+          uno adentro del otro, no señalan nada. */}
+      {paso.target && (
+        <div
+          className="absolute rounded-2xl"
+          style={{
+            left: caja.left,
+            top: caja.top,
+            width: caja.width,
+            height: caja.height,
+            boxShadow: esperando
+              ? '0 0 0 1px rgb(var(--violet) / 0.22)'
+              : '0 0 0 2px rgb(var(--violet) / 0.5)',
+          }}
+        />
+      )}
+
+      {/* El anillo de la pieza que hay que tocar. Late mientras se la espera y
+          se queda quieto cuando ya se la tocó: en un recorte que puede abarcar
+          la barra entera, es lo único que dice cuál de las diez filas es. */}
+      {accion && (
+        <div
+          className={`absolute rounded-xl ${esperando ? 'animate-invitar' : ''}`}
+          // El anillo quieto va **siempre** en el estilo y el latido se le monta
+          // encima: una animación le gana a la línea sin `!important`. Puesto
+          // solo en el keyframe, quien pidió menos movimiento se quedaba sin
+          // ningún anillo —la regla global de `index.css` corta la animación al
+          // primer ciclo, y sin `forwards` el elemento vuelve a su estilo— o sea
+          // que justo ahí desaparecía la única marca de qué hay que tocar.
+          style={{
+            left: accion.left,
+            top: accion.top,
+            width: accion.width,
+            height: accion.height,
+            boxShadow: '0 0 0 2px rgb(var(--violet) / 0.55)',
+          }}
+        >
+          {/* El puntero se apoya en la esquina de abajo a la derecha, que es de
+              donde viene la mano: adentro taparía justo el rótulo de la fila que
+              se está pidiendo tocar. */}
+          {esperando && (
+            <span className="animate-tocar absolute -bottom-2.5 -right-2.5 flex size-6 items-center justify-center rounded-full bg-violet text-ink-inverted shadow-pop">
+              <IconPointer size={13} />
+            </span>
+          )}
+        </div>
+      )}
 
       {/* El destello de llegada. Se remonta en cada paso (`key`), así que se ve
           una vez y se apaga: no es un latido de fondo, es el punto final del
@@ -471,7 +767,7 @@ export default function Tour({ onIr, onClose }) {
       {paso.target && (
         <div
           key={paso.clave}
-          className="animate-foco pointer-events-none absolute rounded-2xl"
+          className="animate-foco absolute rounded-2xl"
           style={{
             left: caja.left,
             top: caja.top,
@@ -489,18 +785,35 @@ export default function Tour({ onIr, onClose }) {
         // que cambia adentro es el texto. Remontada, cada paso la haría
         // aparecer de la nada en otro lugar de la pantalla, y con eso se pierde
         // lo único que ata un paso con el siguiente.
-        className="animate-scale-in absolute rounded-xl border border-tint/10 bg-surface-raised shadow-pop"
+        className="animate-scale-in pointer-events-auto absolute overflow-hidden rounded-2xl border border-tint/10 bg-surface-raised shadow-pop"
         style={{ left: tarjeta.left, top: tarjeta.top, width: ANCHO_TARJETA }}
       >
-        <div className="flex items-start justify-between gap-2 px-4 pt-3">
-          <span className="text-[11px] font-medium tabular-nums text-ink-faint">
+        {/* Un hilo de acento cruzando el borde de arriba. Es lo único que
+            distingue a la tarjeta del tour de cualquier otra tarjeta de la app,
+            y alcanza: el acento es el color que en esta dashboard señala. */}
+        <span className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-violet/60 to-transparent" />
+
+        <div className="flex items-center gap-2 px-4 pt-3.5">
+          <span className="rounded-full bg-tint/[0.06] px-2 py-0.5 text-[10.5px] font-medium tabular-nums text-ink-muted">
             {t('tour.progreso', { n: indice + 1, total: PASOS.length })}
           </span>
+          {esperando && (
+            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-violet-soft px-2 py-0.5 text-[10.5px] font-semibold text-violet">
+              <IconPointer size={11} />
+              {t('tour.tuTurno')}
+            </span>
+          )}
+          {festejo && (
+            <span className="animate-pop-in flex items-center gap-1 rounded-full bg-status-good/[0.15] px-2 py-0.5 text-[10.5px] font-semibold text-status-good">
+              <IconCheck size={11} />
+              {t('tour.hecho')}
+            </span>
+          )}
           <button
             onClick={terminar}
             aria-label={t('tour.salir')}
             title={t('tour.salir')}
-            className="-mr-1.5 -mt-1 shrink-0 rounded-md p-1.5 text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
+            className="-mr-1.5 ml-auto shrink-0 rounded-md p-1.5 text-ink-muted transition-colors duration-150 hover:bg-tint/[0.06] hover:text-ink-primary"
           >
             <IconClose size={14} />
           </button>
@@ -511,21 +824,82 @@ export default function Tour({ onIr, onClose }) {
             se pelean. El retraso es corto y no la mitad del viaje —el texto
             viejo se va con el cambio de paso, no se desvanece—, así que estirarlo
             deja la tarjeta volando vacía. */}
-        <div key={indice} className="animate-fade-in px-4 pb-3.5 pt-1.5" style={{ '--d': '140ms' }}>
-          <h3 className="text-[14px] font-semibold tracking-[-0.01em] text-ink-primary">
-            {t(paso.titulo)}
-          </h3>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-muted">{t(paso.bajada)}</p>
+        <div key={indice} className="animate-fade-in px-4 pb-3 pt-2.5" style={{ '--d': '140ms' }}>
+          <div className="flex items-start gap-2.5">
+            {/* La baldosa del ícono ubica el paso en la app —una casa, una
+                bandeja, un cuadro de escribir— antes de leer el título. */}
+            <span className="mt-px flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-soft text-violet">
+              <Icono size={15} />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-[14.5px] font-semibold tracking-[-0.01em] text-ink-primary">
+                {t(paso.titulo)}
+              </h3>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">{t(paso.bajada)}</p>
+            </div>
+          </div>
+
+          {/* Lo que hay que hacer va en su propio recuadro y no como un renglón
+              más de la bajada: es lo único de la tarjeta que no se lee, se
+              obedece. Punteado y en el acento, que es el mismo lenguaje del
+              anillo que está latiendo del otro lado de la pantalla. */}
+          {esperando && (
+            <p className="mt-3 flex items-start gap-2 rounded-xl border border-dashed border-violet/40 bg-violet-soft px-3 py-2 text-[12px] leading-snug text-violet">
+              <IconPointer size={13} className="mt-px shrink-0" />
+              {t(paso.accion.pista)}
+            </p>
+          )}
+          {/* "Ya lo hiciste" es para cuando se vuelve atrás a un paso cumplido.
+              En el momento de cumplirlo sería una respuesta rara a algo que se
+              acaba de hacer, y encima ahí ya está la tilde del encabezado. */}
+          {interactivo && yaHecho && !festejo && (
+            <p className="mt-3 flex items-center gap-2 rounded-xl bg-status-good/[0.10] px-3 py-2 text-[12px] font-medium text-status-good">
+              <IconCheck size={13} className="shrink-0" />
+              {t('tour.loHiciste')}
+            </p>
+          )}
+
+          {/* El final cuenta cuántas de las cosas que el recorrido pidió las hizo
+              la persona. No es un puntaje: es lo que hace que el último paso no
+              sea otro cartel de despedida, y lo único que se puede decir ahí que
+              no se sabía al empezar. */}
+          {ultimo && hechos.length > 0 && (
+            <p className="mt-3 flex items-center gap-2 rounded-xl bg-tint/[0.04] px-3 py-2 text-[12px] text-ink-secondary">
+              <IconCheck size={13} className="shrink-0 text-status-good" />
+              {t('tour.finalHechos', { n: hechos.length, total: CON_ACCION })}
+            </p>
+          )}
+          {/* Lo que sigue después del recorrido es siempre lo mismo —sin canal
+              conectado no entra ni un mensaje—, así que el último paso lo ofrece
+              en vez de nombrarlo. */}
+          {ultimo && (
+            <button
+              onClick={() => {
+                irRef.current({ pagina: 'settings', seccion: 'canales' })
+                terminar()
+              }}
+              className="mt-2.5 flex w-full items-center justify-between gap-2 rounded-xl border border-tint/[0.12] px-3 py-2 text-left text-[12.5px] font-medium text-ink-primary transition-colors duration-150 hover:border-tint/25 hover:bg-tint/[0.03]"
+            >
+              {t('tour.finalConectar')}
+              <IconChevronRight size={14} className="shrink-0 text-ink-faint" />
+            </button>
+          )}
         </div>
 
-        {/* La barra dice cuánto falta sin ocupar un renglón. Los pasos que se
-            saltean por no tener su objetivo en pantalla la hacen avanzar de a
-            dos, que es exactamente lo que pasó. */}
-        <div className="h-[2px] w-full overflow-hidden bg-tint/[0.08]">
-          <div
-            className="h-full bg-violet transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{ width: `${((indice + 1) / PASOS.length) * 100}%` }}
-          />
+        {/* Cuánto falta, en un segmento por paso. Era una barra de 2px pegada al
+            borde de abajo: decía la misma proporción sin decir de cuántos pasos
+            se está hablando, que es justo lo que uno quiere saber cuando decide
+            si lo hace ahora. Los pasos que se saltean por no tener su objetivo
+            en pantalla pintan de a dos, que es exactamente lo que pasó. */}
+        <div className="flex items-center gap-[3px] px-4">
+          {PASOS.map((p, i) => (
+            <span
+              key={p.clave}
+              className={`h-[3px] flex-1 rounded-full transition-colors duration-300 ${
+                i <= indice ? 'bg-violet' : 'bg-tint/[0.10]'
+              }`}
+            />
+          ))}
         </div>
 
         <div className="flex items-center justify-between gap-2 px-3 py-2.5">
@@ -533,10 +907,21 @@ export default function Tour({ onIr, onClose }) {
             <IconChevronRight size={13} className="rotate-180" />
             {t('tour.atras')}
           </Button>
-          <Button size="sm" onClick={siguiente}>
-            {ultimo ? t('tour.terminar') : t('tour.siguiente')}
-            {!ultimo && <IconChevronRight size={13} />}
-          </Button>
+          {/* Esperando una acción no hay botón de avanzar: si lo hubiera sería el
+              camino corto y nadie tocaría nada. Queda la salida, en el tono más
+              bajo que hay — nadie puede quedar encerrado en un paso porque la
+              app todavía no tenga una conversación que abrir. */}
+          {esperando ? (
+            <Button size="sm" variant="ghost" onClick={siguiente}>
+              {t('tour.seguirSin')}
+              <IconChevronRight size={13} />
+            </Button>
+          ) : (
+            <Button size="sm" onClick={siguiente}>
+              {ultimo ? t('tour.terminar') : t('tour.siguiente')}
+              {!ultimo && <IconChevronRight size={13} />}
+            </Button>
+          )}
         </div>
       </div>
     </div>

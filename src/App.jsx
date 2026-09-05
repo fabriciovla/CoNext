@@ -189,14 +189,20 @@ export default function App() {
   // por paso; una función nueva en cada render lo haría rehacer el paso entero.
   //
   // Un paso no toca lo que no nombra: sin `pagina` se queda donde está —los
-  // pasos de la barra sirven en cualquier pantalla— y sin `seccion` no le
-  // manda nada a Configuración.
+  // pasos de la barra sirven en cualquier pantalla—, sin `seccion` no le manda
+  // nada a Configuración y sin `filtro` no toca la carpeta elegida.
+  //
+  // `filtro` existe porque ahora el recorrido pide cosas y no solo las cuenta:
+  // el paso de las carpetas hace que el admin toque "Pendientes" de verdad, y
+  // si ahí no hay ninguna conversación, los tres pasos que vienen después se
+  // quedan sin nada que señalar por algo que hizo el propio recorrido.
   const irDelTour = useCallback((paso) => {
     if (paso.pagina) {
       setPage(paso.pagina)
       setFocusPhone(null)
       if (paso.pagina !== 'inbox') setViewingDayId(null)
     }
+    if (paso.filtro) setFilter({ type: paso.filtro, value: null })
     if (paso.seccion) setSettingsFocus(paso.seccion)
   }, [])
 

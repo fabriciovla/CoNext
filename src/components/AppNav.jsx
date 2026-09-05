@@ -158,6 +158,7 @@ export default function AppNav({
         <NavRow
           icon={<IconClock size={16} />}
           label={t('nav.pendientes')}
+          dataTour="nav-pendientes"
           count={pendientes}
           active={is('pendientes')}
           onClick={() => select('pendientes')}

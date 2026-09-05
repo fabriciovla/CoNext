@@ -364,6 +364,15 @@ export const IconSidebarToggle = (props) => (
   </Svg>
 )
 
+// La flecha del mouse con su estela: es el ícono de "esto se toca", y por eso
+// solo aparece en los pasos del recorrido que esperan una acción.
+export const IconPointer = (props) => (
+  <Svg {...props}>
+    <path d="M6.4 4.2 17.8 11.1 12.6 12.4 10.7 17.4Z" />
+    <path d="M13.6 13.6 18 18" />
+  </Svg>
+)
+
 export const IconTrash = (props) => (
   <Svg {...props}>
     <path d="M4.5 6.8h15" />

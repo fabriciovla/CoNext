@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Modal from './ui/Modal'
 import Button from './ui/Button'
 import { LogoMarca } from './ui/Logo'
-import { IconChevronRight, IconSettings, IconUsers, IconInbox } from './ui/icons'
+import { IconChevronRight, IconInbox, IconPointer, IconSettings, IconUsers } from './ui/icons'
 import { useT } from '../lib/i18n.jsx'
 import pkg from '../../package.json'
 
@@ -13,9 +13,13 @@ import pkg from '../../package.json'
 // canal conectado no llega nada, y sin agente lo que llega no se contesta—.
 //
 // "Hacer el tour" abre el recorrido guiado (`Tour.jsx`), que es el paso a paso
-// arriba de la pantalla señalando la barra, la bandeja y el composer. Las tres
-// filas siguen llevando directo a su pantalla: son para quien ya sabe qué es
-// esto y viene a enchufar su WhatsApp, no a que le expliquen la app.
+// sobre la app de verdad: recorta la pieza de la que habla y, en varios pasos,
+// le pasa el control al admin —tocá esta fila, escribí en este cuadro— en vez
+// de ofrecerle otro "Siguiente". Que sea así es justamente lo que hay que decir
+// acá antes de que alguien elija: ver `bienvenida.tourInteractivo`.
+//
+// Las tres filas siguen llevando directo a su pantalla: son para quien ya sabe
+// qué es esto y viene a enchufar su WhatsApp, no a que le expliquen la app.
 
 const CLAVE = 'wsp-crm:bienvenida'
 
@@ -100,8 +104,20 @@ export default function WelcomeTour({ nombre, onClose, onNavigate, onTour }) {
         // Un degradé de tinta y no el de marca: el acento es el único color con
         // voz y acá no señala nada, es el fondo de un dibujo. La marca sola
         // —no el logotipo— porque el nombre escrito ya está en el título.
-        <div className="relative flex h-28 items-center justify-center bg-gradient-to-br from-tint/[0.07] to-tint/[0.02]">
-          <LogoMarca className="h-11 w-auto text-ink-primary" />
+        //
+        // Atrás va un halo del mismo gris, apoyado justo detrás de la marca:
+        // el degradé de esquina a esquina dejaba la marca flotando sobre la
+        // parte más clara de la franja, sin nada que la sostuviera.
+        <div className="relative flex h-28 items-center justify-center overflow-hidden bg-gradient-to-br from-tint/[0.08] via-tint/[0.03] to-transparent">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-1/2 top-1/2 size-56 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background:
+                'radial-gradient(closest-side, rgb(var(--tint) / 0.10), rgb(var(--tint) / 0.03) 55%, transparent)',
+            }}
+          />
+          <LogoMarca className="relative h-11 w-auto text-ink-primary" />
           <span className="absolute right-3 top-3 font-mono text-[11px] text-ink-faint">
             v{pkg.version}
           </span>
@@ -113,21 +129,23 @@ export default function WelcomeTour({ nombre, onClose, onNavigate, onTour }) {
           <li key={clave}>
             <button
               onClick={() => ir(pagina)}
-              className="group flex w-full items-center gap-3 rounded-lg border border-tint/[0.12] px-3 py-2.5 text-left transition-colors duration-150 hover:border-tint/25 hover:bg-tint/[0.03]"
+              className="group flex w-full items-center gap-3 rounded-xl border border-tint/[0.12] px-3 py-2.5 text-left transition-colors duration-150 hover:border-tint/25 hover:bg-tint/[0.03]"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-tint/[0.06] text-ink-secondary">
+              {/* El ordinal reemplazó al cartel de "Empezá acá" que llevaba la
+                  primera fila. El orden es de las tres y no de una: sin canal
+                  conectado no entra nada, sin agente lo que entra no se
+                  contesta, y recién ahí la bandeja tiene algo que mostrar. Un
+                  1, un 2 y un 3 dicen eso entero; el cartel decía un tercio y
+                  encima solo mientras se lo estaba mirando. */}
+              <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-tint/[0.06] text-ink-secondary transition-colors duration-150 group-hover:bg-violet-soft group-hover:text-violet">
                 <Icono size={16} />
+                <span className="absolute -left-1.5 -top-1.5 flex size-[17px] items-center justify-center rounded-full bg-surface-raised text-[10px] font-semibold tabular-nums text-ink-muted ring-1 ring-tint/[0.12]">
+                  {i + 1}
+                </span>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2">
-                  <span className="truncate text-[13px] font-medium text-ink-primary">
-                    {t(titulo)}
-                  </span>
-                  {i === 0 && (
-                    <span className="shrink-0 rounded-full bg-violet/10 px-2 py-0.5 text-[11px] font-medium text-violet">
-                      {t('bienvenida.empezaAca')}
-                    </span>
-                  )}
+                <span className="block truncate text-[13px] font-medium text-ink-primary">
+                  {t(titulo)}
                 </span>
                 <span className="mt-0.5 block truncate text-[12px] text-ink-muted">
                   {t(bajada)}
@@ -141,6 +159,15 @@ export default function WelcomeTour({ nombre, onClose, onNavigate, onTour }) {
           </li>
         ))}
       </ul>
+
+      {/* Lo que separa al recorrido de las tres filas de arriba no es que sea
+          más largo: es que se hace sobre la app y que en varios pasos toca el
+          admin. Eso hay que decirlo antes de que alguien elija entre un botón
+          que dice "Hacer el tour" y tres atajos que llevan directo. */}
+      <p className="mt-3 flex items-start gap-2 px-0.5 text-[12px] leading-relaxed text-ink-muted">
+        <IconPointer size={13} className="mt-0.5 shrink-0 text-violet" />
+        {t('bienvenida.tourInteractivo')}
+      </p>
 
       {/* La misma franja que cierra cada tarjeta de Configuración: la opción a
           la izquierda, las acciones contra el borde derecho. */}
