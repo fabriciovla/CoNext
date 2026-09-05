@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { one } from '../db/index.js'
@@ -37,7 +38,7 @@ export async function guardarPostulacion({ nombre, contacto, negocio, idioma }) 
   // página que de verdad leyó.
   const idiomaLimpio = IDIOMAS.has(idioma) ? idioma : 'es'
 
-  const id = `postulacion-${crypto.randomUUID()}`
+  const id = `postulacion-${randomUUID()}`
   const now = new Date().toISOString()
 
   const fila = await one(

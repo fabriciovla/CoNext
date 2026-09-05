@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import { one } from '../db/index.js'
 
 const PLANES = new Set(['gratis', 'estandar', 'premium'])
@@ -58,7 +59,7 @@ export async function guardarAlta({ plan, correo, respuestas }) {
     throw err
   }
 
-  const id = `alta-${crypto.randomUUID()}`
+  const id = `alta-${randomUUID()}`
   const now = new Date().toISOString()
 
   return one(
