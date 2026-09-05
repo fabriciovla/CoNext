@@ -2,10 +2,14 @@ import { useState } from 'react'
 import Button from './ui/Button'
 import Modal from './ui/Modal'
 import { SkeletonLinea } from './ui/Skeleton'
-import Switch from './ui/Switch'
-import ChannelCard, { AvisoCanal, Dato, DatosConexion, EstadoCanal } from './ui/ChannelCard'
+import ChannelCard, {
+  AvisoCanal,
+  Dato,
+  DatosConexion,
+  FilaEstado,
+  MenuCanal,
+} from './ui/ChannelCard'
 import ChannelLogo from './ui/ChannelLogo'
-import { IconCheck } from './ui/icons'
 import { useMetaConnection } from '../hooks/useMetaConnection'
 import { useT } from '../lib/i18n.jsx'
 
@@ -14,19 +18,41 @@ import { useT } from '../lib/i18n.jsx'
 const TONO = 'rgba(150, 47, 191, 0.11)'
 
 // La marca de esta tarjeta son dos: es un solo trámite que engancha dos
-// canales, y un logo solo dejaría afuera al otro. Van uno al lado del otro y no
-// superpuestos como en un avatar: estos archivos no traen contorno blanco, así
-// que encimados el círculo de Messenger se comería la esquina de Instagram.
+// canales, y un logo solo dejaría afuera al otro.
+//
+// Van **encimados y no uno al lado del otro**: separados son dos cosas, y esto
+// es una sola conexión con dos caras. Lo que hace posible encimarlos es el aro
+// del color de la tarjeta que lleva el de adelante: los archivos no traen
+// contorno, y pegados a secas Messenger se comería la esquina de Instagram.
+//
+// El aro son cuatro `drop-shadow` sin desenfoque, uno por lado, y **no un fondo
+// abajo de la imagen**. Un fondo es un rectángulo —redondeado o no— y las dos
+// marcas no tienen la misma silueta: la de Messenger es un globo redondo con
+// cola, así que atrás de él un cuadrado redondeado asomaba por las cuatro
+// esquinas como un marco blanco. `drop-shadow` sigue el alfa del archivo, así
+// que el aro le calca la forma sin que acá haya que saber cuál es.
+const ARO = 'rgb(var(--surface-card))'
+const CONTORNO = {
+  filter: [
+    `drop-shadow(1.5px 0 0 ${ARO})`,
+    `drop-shadow(-1.5px 0 0 ${ARO})`,
+    `drop-shadow(0 1.5px 0 ${ARO})`,
+    `drop-shadow(0 -1.5px 0 ${ARO})`,
+  ].join(' '),
+}
+
 function Marcas() {
   return (
-    <span className="flex shrink-0 items-center gap-1">
-      <ChannelLogo channel="messenger" size={24} />
-      <ChannelLogo channel="instagram" size={24} />
+    <span className="flex shrink-0 items-center">
+      <ChannelLogo channel="instagram" size={38} />
+      <span className="-ml-2.5" style={CONTORNO}>
+        <ChannelLogo channel="messenger" size={38} />
+      </span>
     </span>
   )
 }
 
-function Marco({ className = '', descripcion, subtitulo, distintivo, acciones, children }) {
+function Marco({ className = '', descripcion, subtitulo, estado, menu, accion, children }) {
   return (
     <ChannelCard
       className={className}
@@ -35,8 +61,9 @@ function Marco({ className = '', descripcion, subtitulo, distintivo, acciones, c
       titulo="Instagram y Messenger"
       subtitulo={subtitulo}
       descripcion={descripcion}
-      distintivo={distintivo}
-      acciones={acciones}
+      estado={estado}
+      menu={menu}
+      accion={accion}
     >
       {children}
     </ChannelCard>
@@ -72,7 +99,7 @@ export default function MetaConnection({ className = '' }) {
       <Marco className={className}>
         <div role="status" aria-label={t('canales.consultandoEstado')}>
           <SkeletonLinea className="h-2.5 w-[62%]" />
-          <SkeletonLinea className="mt-4 h-7 w-32 rounded-lg" />
+          <SkeletonLinea className="mt-4 h-8 w-full rounded-lg" />
         </div>
       </Marco>
     )
@@ -93,7 +120,11 @@ export default function MetaConnection({ className = '' }) {
   // esta tarjeta puede estar disponible aunque la de WhatsApp diga que falta.
   if (!config.metaConfigurado) {
     return (
-      <Marco className={className} distintivo={<EstadoCanal>{t('canales.sinConfigurar')}</EstadoCanal>}>
+      <Marco
+        className={className}
+        subtitulo={t('canales.sinConectar')}
+        estado={<FilaEstado>{t('canales.sinConfigurar')}</FilaEstado>}
+      >
         <p className="text-[12px] leading-relaxed text-ink-muted">
           {t('canales.cargaAntes')}
           <code className="text-ink-secondary">META_APP_ID</code> +{' '}
@@ -128,8 +159,8 @@ export default function MetaConnection({ className = '' }) {
       <Marco
         className={className}
         descripcion={t('canales.variasPaginas')}
-        acciones={
-          <Button variant="ghost" size="sm" onClick={cancelarSeleccion} disabled={conectando}>
+        accion={
+          <Button variant="secondary" onClick={cancelarSeleccion} disabled={conectando} className="w-full">
             {t('comun.cancelar')}
           </Button>
         }
@@ -165,9 +196,15 @@ export default function MetaConnection({ className = '' }) {
     return (
       <Marco
         className={className}
+        subtitulo={t('canales.sinConectar')}
         descripcion={`${t('canales.metaBajada')} ${t('canales.ventanaDeMeta')}`}
-        acciones={
-          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
+        accion={
+          <Button
+            variant="primary"
+            onClick={conectar}
+            disabled={!sdkListo || conectando}
+            className="w-full"
+          >
             {conectando ? t('canales.conectando') : t('comun.conectar')}
           </Button>
         }
@@ -177,83 +214,96 @@ export default function MetaConnection({ className = '' }) {
     )
   }
 
+  const instagramActivo = Boolean(estado.canales?.instagram) && Boolean(estado.igAccountId)
+  const messengerActivo = Boolean(estado.canales?.messenger)
+  const activos = [instagramActivo, messengerActivo].filter(Boolean).length
+
   return (
     <Marco
       className={className}
       subtitulo={estado.pageName || t('canales.paginaNumero', { id: estado.pageId })}
-      distintivo={
+      estado={
         estado.vigente ? (
-          <EstadoCanal tono="conectado">
-            <IconCheck size={11} />
+          // El detalle de la derecha es cuántas caras están atendiendo. Es el
+          // equivalente de la calidad del número en la otra tarjeta: dice si el
+          // canal, además de conectado, está haciendo algo. Con los dos
+          // interruptores apagados la conexión sigue viva y no entra un mensaje,
+          // que es justo el caso que sin esto no se ve.
+          <FilaEstado tono="conectado" detalle={t('canales.canalesActivos', { n: activos })}>
             {t('comun.conectado')}
-          </EstadoCanal>
+          </FilaEstado>
         ) : (
           // No dice "Token vencido": los tokens de Página sacados con un token
           // de usuario largo no vencen. Si Graph deja de aceptarlo es porque se
           // revocó el acceso, y nombrarlo "vencido" mandaba a buscar una
           // renovación que no existe.
-          <EstadoCanal tono="problema">{t('canales.sinAcceso')}</EstadoCanal>
+          <FilaEstado tono="problema">{t('canales.sinAcceso')}</FilaEstado>
         )
       }
-      acciones={
-        <>
-          <Button variant="ghost" size="sm" onClick={refrescar}>
-            {t('comun.actualizar')}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
-            {conectando ? t('canales.conectando') : t('canales.conectarOtraPagina')}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setConfirmar(true)}>
-            {t('comun.desconectar')}
-          </Button>
-        </>
+      menu={
+        // Los dos interruptores son lo único que el negocio decide acá: la
+        // conexión es una sola porque Meta entrega un token que cubre los dos
+        // canales, y lo que se elige es cuál atiende el CRM. Van adentro del
+        // menú y no en el cuerpo de la tarjeta para que las dos fichas de
+        // Canales tengan la misma forma —logo, estado, detalles— y no una el
+        // doble de alta que la otra; cuántos quedaron encendidos lo dice la
+        // fila de estado, que es la pregunta que la tarjeta tiene que contestar
+        // sin abrir nada.
+        //
+        // La pista de cada uno es la cuenta y nada más: decía "Contestar los
+        // mensajes directos de @…", que es la misma frase que ya dice el
+        // nombre del canal. La frase entera quedó en el `title`.
+        <MenuCanal
+          ariaLabel={t('canales.menuMeta')}
+          nota={t('canales.apagarNoDesconecta')}
+          items={[
+            {
+              label: 'Instagram',
+              hint: estado.igUsername ? `@${estado.igUsername}` : t('canales.sinCuentaAsociada'),
+              title: t('canales.instagramTitle'),
+              checked: instagramActivo,
+              // Sin cuenta asociada no hay nada que prender: dejarlo activable
+              // sería ofrecer atender un canal que no existe.
+              disabled: !estado.igAccountId,
+              onClick: () => cambiarCanal('instagram', !instagramActivo),
+            },
+            {
+              label: 'Messenger',
+              hint: estado.pageName || t('canales.paginaDeFacebook'),
+              title: t('canales.messengerTitle'),
+              checked: messengerActivo,
+              onClick: () => cambiarCanal('messenger', !messengerActivo),
+            },
+            { separador: true },
+            { label: t('comun.actualizar'), onClick: refrescar },
+            {
+              label: t('canales.conectarOtraPagina'),
+              onClick: conectar,
+              disabled: !sdkListo || conectando,
+            },
+            { label: t('comun.desconectar'), onClick: () => setConfirmar(true), peligro: true },
+          ]}
+        />
       }
     >
       {/* Si el token dejó de servir, la Página sigue en la base pero no entra
           ni sale nada. Vale más decirlo acá que dejar que se note como "no me
           llegan los mensajes". El texto crudo de Graph va en el `title`. */}
       {!estado.vigente && (
-        <AvisoCanal detalle={estado.error}>{t('canales.sinAccesoAviso')}</AvisoCanal>
+        <div className="mb-3">
+          <AvisoCanal detalle={estado.error}>{t('canales.sinAccesoAviso')}</AvisoCanal>
+        </div>
       )}
 
-      {/* Los dos interruptores son lo único que el negocio decide acá: la
-          conexión es una sola porque Meta entrega un token que cubre los dos
-          canales, y lo que se elige es cuál atiende el CRM.
-
-          La pista de cada uno es la cuenta y nada más. Decía "Contestar los
-          mensajes directos de @…" y "Contestar los mensajes de la Página X",
-          que es la misma frase dos veces arriba del renglón que ya dice de qué
-          canal se trata. La frase entera quedó en el `title`. */}
-      <div className="space-y-1.5">
-        <Switch
-          label="Instagram"
-          hint={estado.igUsername ? `@${estado.igUsername}` : t('canales.sinCuentaAsociada')}
-          title={t('canales.instagramTitle')}
-          checked={Boolean(estado.canales?.instagram) && Boolean(estado.igAccountId)}
-          // Sin cuenta asociada no hay nada que prender: dejarlo activable
-          // sería ofrecer atender un canal que no existe.
-          disabled={!estado.igAccountId}
-          onChange={(v) => cambiarCanal('instagram', v)}
-        />
-        <Switch
-          label="Messenger"
-          hint={estado.pageName || t('canales.paginaDeFacebook')}
-          title={t('canales.messengerTitle')}
-          checked={Boolean(estado.canales?.messenger)}
-          onChange={(v) => cambiarCanal('messenger', v)}
-        />
-      </div>
-
-      {/* Lo único que queda del párrafo que había abajo de los interruptores:
-          apagar no desconecta nada del lado de Meta, y confundir las dos cosas
-          es lo que haría que alguien apague creyendo que cierra el canal. */}
-      <p className="mt-2 text-[11px] leading-snug text-ink-faint">
-        {t('canales.apagarNoDesconecta')}
-      </p>
-
       <DatosConexion>
-        <Dato label="Page ID">{estado.pageId}</Dato>
-        {estado.igAccountId && <Dato label="Instagram ID">{estado.igAccountId}</Dato>}
+        <Dato label="Page ID" copiable>
+          {estado.pageId}
+        </Dato>
+        {estado.igAccountId && (
+          <Dato label="Instagram ID" copiable>
+            {estado.igAccountId}
+          </Dato>
+        )}
       </DatosConexion>
 
       {problemas && <div className="mt-3">{problemas}</div>}

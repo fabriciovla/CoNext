@@ -3,18 +3,12 @@ import Base from '../layouts/Base.astro'
 import Titulo from '../components/landing/Titulo.astro'
 import Boton from '../components/Boton.jsx'
 import AppMock from '../components/landing/AppMock.jsx'
+import Mascota from '../components/landing/Mascota.jsx'
 import ControlFilm from '../components/landing/ControlFilm.astro'
 import LineaAhorro from '../components/landing/LineaAhorro.astro'
 import Faq from '../components/landing/Faq.astro'
 import { LogoMarca } from '../components/Logo.jsx'
-import {
-  IconArrowRight,
-  IconCheck,
-  IconChevronRight,
-  IconShield,
-  IconTag,
-  IconWhatsApp,
-} from '../components/icons.jsx'
+import { IconArrowRight, IconCheck, IconShield, IconTag } from '../components/icons.jsx'
 import { dodoCheckout } from '../config'
 import { getLocale, t, pathFor } from '../i18n/utils'
 import { origenDe, urlCanonico } from '../lib/seo.js'
@@ -76,74 +70,85 @@ const ESQUEMA = {
   {/* ---------------------------------------------------------------------- */}
   {/* Hero                                                                    */}
   {/* ---------------------------------------------------------------------- */}
-  <section class="fondo-seccion pt-14 sm:pt-20">
+  {/* Dos columnas a partir de `xl`: el texto a la izquierda y la app a la
+      derecha, a la altura del titular. Antes el hero era una sola columna con
+      la muestra abajo de todo, y eso dejaba el primer pantallazo entero en
+      manos de una promesa escrita — la app aparecía recién scrolleando, que es
+      justo lo que hay que ver primero.
+
+      La izquierda es una medida fija (30rem) y no una fracción: es una columna
+      de texto, así que lo que tiene que quedar clavado es el largo del renglón,
+      y lo que sobra se lo lleva la muestra, que siempre agradece el ancho.
+
+      Abajo de `xl` vuelven a apilarse y la muestra ocupa la hoja entera, que a
+      ese ancho es la única forma de que la bandeja se lea. */}
+  <section class="fondo-seccion pb-16 pt-14 sm:pt-20 xl:pb-24">
     <div class={CONTENEDOR}>
-      <a
-        href="#garantias"
-        class="animate-in-fade group inline-flex items-center gap-2 text-[15px] text-violet transition-colors duration-200 hover:text-ink-primary"
-      >
-        <IconWhatsApp size={15} className="text-status-good" />
-        {l.anuncio}
-        <IconChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-      </a>
+      <div class="grid items-center gap-16 xl:grid-cols-[30rem_minmax(0,1fr)] xl:gap-12">
+        <div>
+          {/* Dos líneas, y el corte va siempre y no solo en pantalla ancha: son
+              dos mitades de la misma frase —los canales, y dónde caen— y
+              partidas por el ancho de la ventana el corte cae en cualquier
+              lado. El titular tiene que entenderse solo; si nombra un canal, el
+              que atiende por otro se baja. */}
+          <h1
+            class="animate-in text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-ink-primary sm:text-[46px] lg:text-[54px] xl:text-[48px]"
+          >
+            {l.heroLineas[0]}<br />{l.heroLineas[1]}
+          </h1>
 
-      {/* Dos líneas: qué es, y la marca abajo. El titular tiene que
-          entenderse solo. Si nombra un canal, el que atiende por otro
-          se baja. */}
-      <h1
-        class="animate-in mt-7 max-w-4xl text-balance text-[32px] font-medium leading-[1.12] tracking-tight text-ink-primary sm:text-[44px] lg:text-[56px] lg:leading-[1.08] lg:text-wrap"
-        style="--d: 80ms"
-      >
-        {l.heroLineas[0]}
-        <br class="hidden lg:inline" /> {l.heroLineas[1]}
-      </h1>
+          <p
+            class="animate-in mt-6 max-w-xl text-[18px] font-normal leading-[28px] text-ink-secondary"
+            style="--d: 80ms"
+          >
+            {l.heroBajada}
+          </p>
 
-      <p
-        class="animate-in mt-6 max-w-2xl text-[19px] font-normal leading-[28px] text-ink-secondary"
-        style="--d: 160ms"
-      >
-        {l.heroBajada}
-      </p>
-
-      <div class="animate-in mt-9 flex flex-wrap items-center gap-3" style="--d: 240ms">
-        <Boton href={pathFor(lang, '/postulate')} tamano="lg" target="_self">
-          {l.heroCta}
-          <IconArrowRight size={17} />
-        </Boton>
-        <Boton href="#como-funciona" variante="secundario" tamano="lg">{l.verComo}</Boton>
-      </div>
-
-      {/* Lo que abajo de los botones era un pÃ¡rrafo de 18px âcasi el cuerpo de
-          la bajada, y a dos renglones del pliegueâ son tres marcas cortas en
-          una fila. Dice lo mismo, pero se barre de un vistazo en vez de
-          leerse: es la letra chica de la promesa, no un cuarto bloque de
-          prosa peleÃ¡ndole el turno al titular. */}
-      <ul class="animate-in-fade mt-8 flex flex-wrap items-center gap-x-6 gap-y-2" style="--d: 320ms">
-        {
-          l.heroMarcas.map((marca) => (
-            <li class="flex items-center gap-1.5 text-[14px] text-ink-muted">
-              <IconCheck size={15} strokeWidth="2" className="shrink-0 text-violet" />
-              {marca}
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-
-    <div class={`${CONTENEDOR_MUESTRA} mt-16 sm:mt-20`}>
-      <div class="relative">
-        <div class="marco-producto relative contain-paint overflow-hidden rounded-t-2xl">
-          <div class="flex items-center gap-1.5 border-b border-tint/[0.07] px-4 py-2.5">
-            <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
-            <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
-            <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+          <div class="animate-in mt-8 flex flex-wrap items-center gap-3" style="--d: 160ms">
+            <Boton href={pathFor(lang, '/postulate')} tamano="lg" target="_self">
+              {l.heroCta}
+              <IconArrowRight size={17} />
+            </Boton>
+            <Boton href="#como-funciona" variante="secundario" tamano="lg">{l.verComo}</Boton>
           </div>
-          <AppMock lang={lang} />
+
+          {/* Los tres agentes, con la cara que la app les dibuja de verdad.
+              Reemplazan a la fila de marcas que iba abajo de los botones ("API
+              oficial de Meta", "sin apps no oficiales"): eso era la letra chica
+              de la promesa y vive entera en Garantías, y acá abajo del titular
+              lo que falta contestar no es con qué está hecho el CRM sino quién
+              atiende del otro lado. */}
+          <ul class="mt-12 space-y-7 sm:space-y-8">
+            {
+              l.heroAgentes.map(({ cara, nombre, texto }, i) => (
+                <li class="animate-in flex items-center gap-5" style={`--d: ${240 + i * 90}ms`}>
+                  <Mascota cara={cara} size={104} className="hidden sm:block" />
+                  <Mascota cara={cara} size={76} className="sm:hidden" />
+                  <div class="min-w-0">
+                    <h2 class="text-[17px] font-medium text-ink-primary">{nombre}</h2>
+                    <p class="mt-1 text-[15px] leading-relaxed text-ink-secondary">{texto}</p>
+                  </div>
+                </li>
+              ))
+            }
+          </ul>
         </div>
-        <div
-          aria-hidden="true"
-          class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-surface-page"
-        >
+
+        {/* La muestra. Los fantasmas que la rodean van sueltos y solo en
+            pantalla ancha: apilada, la muestra ocupa la hoja de borde a borde y
+            no queda margen donde apoyarlos sin taparle una columna. */}
+        <div class="animate-in-scale relative" style="--d: 200ms">
+          <Mascota cara="sola" size={148} className="absolute -left-12 -top-16 z-10 hidden -rotate-6 xl:block" />
+          <div class="marco-producto relative contain-paint overflow-hidden rounded-2xl">
+            <div class="flex items-center gap-1.5 border-b border-tint/[0.07] px-4 py-2.5">
+              <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-tint/25"></span>
+            </div>
+            <AppMock lang={lang} hero alto="h-[460px] sm:h-[540px] xl:h-[560px]" />
+          </div>
+          <Mascota cara="idea" size={92} className="absolute -bottom-10 right-24 z-10 hidden rotate-3 xl:block" />
+          <Mascota cara="sola" size={116} className="absolute -bottom-14 -right-10 z-10 hidden -rotate-3 xl:block" />
         </div>
       </div>
     </div>

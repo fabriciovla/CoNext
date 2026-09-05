@@ -165,7 +165,14 @@ export function BarraMock({ className = 'hidden w-[200px] md:flex', lang = 'es' 
   )
 }
 
-export default function AppMock({ lang = 'es' }) {
+// `hero` saca la ficha del contacto y nada más. No es una preferencia de
+// encuadre: en el hero la muestra vive en la mitad derecha de una grilla de dos
+// columnas, y las columnas de adentro se prenden por ancho de **ventana** y no
+// de contenedor — así que a partir de `xl` la ficha aparecía adentro de una
+// columna de 900px y le dejaba doscientos píxeles a la conversación, que es la
+// única de las cuatro que hay que poder leer. Abajo de `xl` la muestra vuelve a
+// ocupar el ancho entero y ahí la ficha no llega a prenderse sola.
+export default function AppMock({ lang = 'es', hero = false, alto = 'h-[500px] sm:h-[600px]' }) {
   const m = mock(lang)
   const conversaciones = [
     { nombre: 'Martín Ríos', ultimo: m.martinUltimo, hora: '2 min', entrada: true, pendiente: 1, activa: true },
@@ -179,7 +186,7 @@ export default function AppMock({ lang = 'es' }) {
     // interfaz se lee como un escritorio, no como una UI inflada al ancho.
     <div
       aria-hidden="true"
-      className="relative h-[500px] w-full transform-gpu overflow-hidden bg-surface-page text-left sm:h-[600px]"
+      className={`relative w-full transform-gpu overflow-hidden bg-surface-page text-left ${alto}`}
     >
       <div className="absolute left-1/2 top-0 flex h-[114%] w-[114%] origin-top -translate-x-1/2 scale-[0.88]">
       {/* ------------------------------------------------------------------ */}
@@ -311,6 +318,7 @@ export default function AppMock({ lang = 'es' }) {
       {/* ------------------------------------------------------------------ */}
       {/* Ficha                                                               */}
       {/* ------------------------------------------------------------------ */}
+      {!hero && (
       <aside className="hidden shrink-0 border-l border-tint/[0.07] bg-surface-nav xl:flex">
         <div className="w-[248px] overflow-hidden p-4">
           <div className="flex flex-col items-center gap-2 text-center">
@@ -377,6 +385,7 @@ export default function AppMock({ lang = 'es' }) {
           </span>
         </div>
       </aside>
+      )}
       </div>
     </div>
   )

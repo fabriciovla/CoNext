@@ -1,14 +1,14 @@
 {
-	"pid": 6692,
-	"port": 5174,
-	"url": "http://127.0.0.1:5174",
+	"pid": 19756,
+	"port": 5175,
+	"url": "http://localhost:5175",
 	"urls": {
 		"local": [
-			"http://127.0.0.1:5174/"
+			"http://localhost:5175/"
 		],
 		"network": [],
 		"networkInterfaceNames": []
 	},
-	"background": false,
-	"startedAt": "2026-09-04T03:49:03.624Z"
+	"background": true,
+	"startedAt": "2026-09-05T18:25:54.185Z"
 }

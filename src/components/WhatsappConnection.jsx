@@ -2,9 +2,14 @@ import { useState } from 'react'
 import Button from './ui/Button'
 import Modal from './ui/Modal'
 import { SkeletonLinea } from './ui/Skeleton'
-import ChannelCard, { AvisoCanal, Dato, DatosConexion, EstadoCanal } from './ui/ChannelCard'
+import ChannelCard, {
+  AvisoCanal,
+  Dato,
+  DatosConexion,
+  FilaEstado,
+  MenuCanal,
+} from './ui/ChannelCard'
 import ChannelLogo from './ui/ChannelLogo'
-import { IconCheck } from './ui/icons'
 import { useWhatsappConnection } from '../hooks/useWhatsappConnection'
 import { useT } from '../lib/i18n.jsx'
 
@@ -12,17 +17,28 @@ import { useT } from '../lib/i18n.jsx'
 // que usa la marca: no sale de la paleta semántica y no cambia entre temas.
 const TONO = 'rgba(37, 211, 102, 0.11)'
 
-function Marco({ className = '', descripcion, subtitulo, distintivo, acciones, children }) {
+// Lo que devuelve Graph en `quality_rating`. Se traduce acá y no se muestra
+// crudo: "GREEN" al lado del estado se lee como un código de error, no como
+// "el número está sano". Cualquier otro valor (UNKNOWN, NA) no dice nada, así
+// que no se dibuja: media frase inventada es peor que el hueco.
+const CALIDAD = {
+  GREEN: 'canales.calidadAlta',
+  YELLOW: 'canales.calidadMedia',
+  RED: 'canales.calidadBaja',
+}
+
+function Marco({ className = '', descripcion, subtitulo, estado, menu, accion, children }) {
   return (
     <ChannelCard
       className={className}
       tono={TONO}
-      marca={<ChannelLogo channel="whatsapp" size={28} />}
+      marca={<ChannelLogo channel="whatsapp" size={38} />}
       titulo="WhatsApp Business"
       subtitulo={subtitulo}
       descripcion={descripcion}
-      distintivo={distintivo}
-      acciones={acciones}
+      estado={estado}
+      menu={menu}
+      accion={accion}
     >
       {children}
     </ChannelCard>
@@ -44,7 +60,7 @@ export default function WhatsappConnection({ className = '' }) {
       <Marco className={className}>
         <div role="status" aria-label={t('canales.consultandoEstado')}>
           <SkeletonLinea className="h-2.5 w-[62%]" />
-          <SkeletonLinea className="mt-4 h-7 w-32 rounded-lg" />
+          <SkeletonLinea className="mt-4 h-8 w-full rounded-lg" />
         </div>
       </Marco>
     )
@@ -67,7 +83,8 @@ export default function WhatsappConnection({ className = '' }) {
     return (
       <Marco
         className={className}
-        distintivo={<EstadoCanal>{t('canales.sinConfigurar')}</EstadoCanal>}
+        subtitulo={t('canales.sinConectar')}
+        estado={<FilaEstado>{t('canales.sinConfigurar')}</FilaEstado>}
       >
         <p className="text-[12px] leading-relaxed text-ink-muted">
           {t('canales.cargaAntes')}
@@ -101,13 +118,24 @@ export default function WhatsappConnection({ className = '' }) {
       </div>
     ) : null
 
+  // Desconectado no hay nada que mirar ni nada que decidir: la tarjeta explica
+  // qué se está por enganchar y ofrece el único botón que tiene sentido, sólido
+  // y a todo el ancho. Sin fila de estado: "Sin conectar" ya está abajo del
+  // título, y repetirlo en una fila propia es decirlo dos veces en tres
+  // centímetros.
   if (!conectado) {
     return (
       <Marco
         className={className}
+        subtitulo={t('canales.sinConectar')}
         descripcion={`${t('canales.whatsappBajada')} ${t('canales.ventanaDeMeta')}`}
-        acciones={
-          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
+        accion={
+          <Button
+            variant="primary"
+            onClick={conectar}
+            disabled={!sdkListo || conectando}
+            className="w-full"
+          >
             {conectando ? t('canales.conectando') : t('comun.conectar')}
           </Button>
         }
@@ -117,6 +145,8 @@ export default function WhatsappConnection({ className = '' }) {
     )
   }
 
+  const calidad = CALIDAD[estado.calidad] ? t(CALIDAD[estado.calidad]) : null
+
   return (
     <Marco
       className={className}
@@ -124,42 +154,49 @@ export default function WhatsappConnection({ className = '' }) {
       // poner ahí el phone_number_id es un renglón de dígitos justo donde se
       // busca a qué número está enganchado: el id ya vive plegado abajo.
       subtitulo={estado.numero || estado.nombre}
-      distintivo={
+      estado={
         estado.vigente ? (
-          <EstadoCanal tono="conectado">
-            <IconCheck size={11} />
+          <FilaEstado tono="conectado" detalle={calidad}>
             {t('comun.conectado')}
-          </EstadoCanal>
+          </FilaEstado>
         ) : (
-          <EstadoCanal tono="problema">{t('canales.tokenVencido')}</EstadoCanal>
+          <FilaEstado tono="problema">{t('canales.tokenVencido')}</FilaEstado>
         )
       }
-      acciones={
-        <>
-          <Button variant="ghost" size="sm" onClick={refrescar}>
-            {t('comun.actualizar')}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={conectar} disabled={!sdkListo || conectando}>
-            {conectando ? t('canales.conectando') : t('canales.conectarOtroNumero')}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setConfirmar(true)}>
-            {t('comun.desconectar')}
-          </Button>
-        </>
+      menu={
+        <MenuCanal
+          ariaLabel={t('canales.menuWhatsapp')}
+          items={[
+            { label: t('comun.actualizar'), onClick: refrescar },
+            {
+              label: t('canales.conectarOtroNumero'),
+              onClick: conectar,
+              disabled: !sdkListo || conectando,
+            },
+            { label: t('comun.desconectar'), onClick: () => setConfirmar(true), peligro: true },
+          ]}
+        />
       }
     >
       {/* Si el token dejó de servir, el número sigue en la base pero no entra
           ni sale nada. Vale más decirlo acá que dejar que se note como "no me
           llegan los mensajes". El texto de Meta va en el `title`. */}
       {!estado.vigente && (
-        <AvisoCanal detalle={estado.error}>{t('canales.tokenVencidoAviso')}</AvisoCanal>
+        <div className="mb-3">
+          <AvisoCanal detalle={estado.error}>{t('canales.tokenVencidoAviso')}</AvisoCanal>
+        </div>
       )}
 
       <DatosConexion>
         {estado.nombre && <Dato label={t('canales.datoNombre')}>{estado.nombre}</Dato>}
-        {estado.calidad && <Dato label={t('canales.datoCalidad')}>{estado.calidad}</Dato>}
-        <Dato label="Phone number ID">{estado.phoneNumberId}</Dato>
-        {estado.wabaId && <Dato label="WABA ID">{estado.wabaId}</Dato>}
+        <Dato label="Phone number ID" copiable>
+          {estado.phoneNumberId}
+        </Dato>
+        {estado.wabaId && (
+          <Dato label="WABA ID" copiable>
+            {estado.wabaId}
+          </Dato>
+        )}
       </DatosConexion>
 
       {problemas && <div className="mt-3">{problemas}</div>}

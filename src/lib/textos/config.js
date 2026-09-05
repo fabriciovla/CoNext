@@ -235,9 +235,18 @@ const CANALES = {
     en: "Couldn't check the connection status.",
   },
   sinConfigurar: { es: 'Sin configurar', en: 'Not set up' },
+  sinConectar: { es: 'Sin conectar', en: 'Not connected' },
   cargaAntes: { es: 'Cargá ', en: 'Add ' },
   cargaEn: { es: ' en ', en: ' to ' },
-  datosConexion: { es: 'Datos de la conexión', en: 'Connection details' },
+  datosConexion: { es: 'Detalles técnicos', en: 'Technical details' },
+  // Los ids van cortados por la cola y se copian al tocarlos, así que hay que
+  // decirlo: un valor que arranca con "…" y no se puede seleccionar entero se
+  // lee como un dato truncado y no como uno que se copia de un toque.
+  pistaCopiar: {
+    es: 'Tocá un ID para copiarlo completo.',
+    en: 'Tap an ID to copy the whole thing.',
+  },
+  copiado: { es: 'Copiado', en: 'Copied' },
   conectando: { es: 'Conectando…', en: 'Connecting…' },
   ventanaDeMeta: {
     es: 'Se abre una ventana de Meta: tu contraseña no pasa por acá.',
@@ -255,7 +264,14 @@ const CANALES = {
   },
   conectarOtroNumero: { es: 'Conectar otro número', en: 'Connect another number' },
   datoNombre: { es: 'Nombre', en: 'Name' },
-  datoCalidad: { es: 'Calidad', en: 'Quality' },
+  // `quality_rating` de Graph, traducido. Viene como GREEN / YELLOW / RED: la
+  // calificación que Meta le pone al número según cuánta gente lo bloquea o lo
+  // reporta, y de la que depende cuántos mensajes por día deja mandar.
+  calidadAlta: { es: 'Calidad alta', en: 'High quality' },
+  calidadMedia: { es: 'Calidad media', en: 'Medium quality' },
+  calidadBaja: { es: 'Calidad baja', en: 'Low quality' },
+  menuWhatsapp: { es: 'Acciones de WhatsApp', en: 'WhatsApp actions' },
+  menuMeta: { es: 'Acciones de Instagram y Messenger', en: 'Instagram and Messenger actions' },
 
   metaBajada: {
     es: 'Los directos de Instagram y los mensajes de Messenger, en la misma bandeja: cuelgan de la misma Página y se conectan juntos.',
@@ -275,6 +291,13 @@ const CANALES = {
   paginaNumero: { es: 'Página {id}', en: 'Page {id}' },
   sinCuentaAsociada: { es: 'Sin cuenta asociada', en: 'No account linked' },
   paginaDeFacebook: { es: 'Página de Facebook', en: 'Facebook Page' },
+  // Cuántas de las dos caras están atendiendo. Con los dos interruptores
+  // apagados la conexión sigue viva y no entra un mensaje, así que el cero se
+  // dice con todas las letras y no como "0 canales".
+  canalesActivos: {
+    es: ({ n }) => (n === 0 ? 'Ninguno activo' : n === 1 ? '1 canal activo' : `${n} canales activos`),
+    en: ({ n }) => (n === 0 ? 'None active' : n === 1 ? '1 channel active' : `${n} channels active`),
+  },
   instagramTitle: {
     es: 'Contestar desde el CRM los mensajes directos de Instagram',
     en: 'Reply to Instagram direct messages from the CRM',

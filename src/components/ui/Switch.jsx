@@ -57,7 +57,10 @@ export default function Switch({
   )
 }
 
-function Toggle({ checked }) {
+// Se exporta porque el menú de las tarjetas de canal necesita la misma palanca
+// adentro de un ítem, y ahí el `Switch` entero no sirve: el que maneja el foco,
+// el teclado y el rol es el ítem del menú, no un botón anidado adentro de otro.
+export function Toggle({ checked }) {
   return (
     <span
       className={`relative h-[18px] w-8 shrink-0 rounded-full transition-colors duration-200 ${

@@ -95,13 +95,32 @@ export const ui = {
       title: 'conext · unifica tus canales. Cada respuesta, con IA',
       description:
         'Atiende el WhatsApp de tu negocio con agentes de IA que responden solos o te dejan el borrador listo. Bandeja única, productos, horarios y métricas.',
-      anuncio: 'El CRM sobre la API oficial de Meta',
-      heroLineas: ['Tus canales, en una sola bandeja.', 'Conext.'],
+      heroLineas: ['Todos tus canales,', 'un solo inbox.'],
       heroBajada:
-        'Los agentes de IA responden precios, stock y envíos con los datos de tu negocio, o te dejan el borrador. Si el cliente cambia de canal, el hilo sigue. La última palabra es tuya.',
+        'Agentes de IA que responden precios, stock y envíos con los datos de tu negocio. Si el cliente cambia de canal, la conversación sigue.',
       heroCta: 'Postulate',
       verComo: 'Ver cómo funciona',
-      heroMarcas: ['WhatsApp, Instagram y Messenger', 'API oficial de Meta', 'Sin apps no oficiales'],
+      // Los tres del hero, con su cara. No es el catálogo entero de agentes
+      // —son veinte— sino los tres que tiene cualquier negocio, y en el orden
+      // en que atienden un mensaje: quién lo recibe, quién lo contesta y quién
+      // se queda con lo que vino después.
+      heroAgentes: [
+        {
+          cara: 'recepcionista',
+          nombre: 'Recepcionista',
+          texto: 'Recibe cada mensaje y lo deriva al agente correcto.',
+        },
+        {
+          cara: 'ventas',
+          nombre: 'Ventas',
+          texto: 'Consulta stock y precios antes de contestar.',
+        },
+        {
+          cara: 'soporte',
+          nombre: 'Soporte',
+          texto: 'Contesta con el material que subiste: garantías, envíos, cambios.',
+        },
+      ],
       funcionesEtiqueta: 'Qué es Conext',
       funcionesTitulo: 'Un CRM para tus canales, no un chatbot.',
       funcionesTexto:
@@ -823,13 +842,28 @@ export const ui = {
       title: 'Conext | WhatsApp & Instagram CRM for small businesses',
       description:
         'Conext is the CRM for small businesses that brings WhatsApp, Instagram, and Messenger into one inbox. AI replies on its own or leaves a draft. Free for seven days.',
-      anuncio: 'The CRM on the official Meta API',
-      heroLineas: ['All your channels, one inbox.', 'Conext.'],
+      heroLineas: ['All your channels,', 'one inbox.'],
       heroBajada:
-        'AI agents answer prices, stock, and shipping from your business data, or leave a draft. If the customer switches channels, the thread continues. The last word is yours.',
+        'AI agents answer prices, stock, and shipping from your business data. If the customer switches channels, the conversation continues.',
       heroCta: 'Apply',
       verComo: 'See how it works',
-      heroMarcas: ['WhatsApp, Instagram, and Messenger', 'Official Meta API', 'No unofficial apps'],
+      heroAgentes: [
+        {
+          cara: 'recepcionista',
+          nombre: 'Receptionist',
+          texto: 'Takes every message and routes it to the right agent.',
+        },
+        {
+          cara: 'ventas',
+          nombre: 'Sales',
+          texto: 'Checks stock and prices before replying.',
+        },
+        {
+          cara: 'soporte',
+          nombre: 'Support',
+          texto: 'Answers from the material you uploaded: warranties, shipping, returns.',
+        },
+      ],
       funcionesEtiqueta: 'What Conext is',
       funcionesTitulo: 'A CRM for your channels, not a chatbot.',
       funcionesTexto:
