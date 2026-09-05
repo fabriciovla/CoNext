@@ -139,7 +139,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
             lo contestó solo y no lleva etiqueta — en la bandeja real las
             etiquetas las pone una persona, no el tema del agente. */}
         <div class="film-fila film-fila-martin flex items-start gap-2.5 rounded-lg px-2 py-2.5" data-t="fila-martin">
-          <AvatarCanal size={38} />
+          <AvatarCanal size={38} seed="Martín Ríos" />
           <div class="min-w-0 flex-1">
             <div class="flex items-baseline justify-between gap-2">
               <p class="truncate text-[13.5px] font-medium text-ink-primary">Martín Ríos</p>
@@ -163,7 +163,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
         </div>
 
         <div class="film-fila film-fila-laura flex items-start gap-2.5 rounded-lg px-2 py-2.5" data-t="fila-laura">
-          <AvatarCanal size={38} />
+          <AvatarCanal size={38} seed="Laura Gómez" />
           <div class="min-w-0 flex-1">
             <div class="flex items-baseline justify-between gap-2">
               <p class="truncate text-[13.5px] font-medium text-ink-primary">Laura Gómez</p>
@@ -187,7 +187,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
         </div>
 
         <div class="film-fila film-fila-nicolas flex items-start gap-2.5 rounded-lg px-2 py-2.5" data-t="fila-nicolas">
-          <AvatarCanal size={38} />
+          <AvatarCanal size={38} seed="Nicolás Paz" />
           <div class="min-w-0 flex-1">
             <div class="flex items-baseline justify-between gap-2">
               <p class="truncate text-[13.5px] font-medium text-ink-primary">Nicolás Paz</p>
@@ -205,7 +205,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
         {
           RESTO.map(({ clave, nombre, hora, texto }) => (
             <div class="film-fila flex items-start gap-2.5 rounded-lg px-2 py-2.5" data-t={`fila-${clave}`}>
-              <AvatarCanal size={38} />
+              <AvatarCanal size={38} seed={nombre} />
               <div class="min-w-0 flex-1">
                 <div class="flex items-baseline justify-between gap-2">
                   <p class="truncate text-[13.5px] font-medium text-ink-primary">{nombre}</p>
@@ -238,7 +238,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
               <header
                 class="flex shrink-0 items-center gap-2.5 border-b border-tint/[0.07] px-4 py-2.5 sm:px-5"
               >
-                <Foto size={34} />
+                <Foto size={34} seed={nombre} />
                 <div class="min-w-0 flex-1 leading-tight">
                   <p class="truncate text-[14px] font-medium text-ink-primary">{nombre}</p>
                   <p class="truncate text-[11.5px] tabular-nums text-ink-muted">{telefono}</p>
@@ -271,7 +271,7 @@ const RESTO = [{ clave: 'carla', nombre: 'Carla Vega', hora: '3 h', texto: m.car
                       ]}
                     >
                       {de === 'cliente' ? (
-                        <Foto size={30} />
+                        <Foto size={30} seed={nombre} />
                       ) : (
                         <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-violet/30 bg-violet-soft text-[10.5px] font-semibold text-violet">
                           {autor.charAt(0)}

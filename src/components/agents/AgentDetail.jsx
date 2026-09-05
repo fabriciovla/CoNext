@@ -3,7 +3,8 @@ import Card from '../ui/Card'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import Switch from '../ui/Switch'
-import EmojiPicker from '../inbox/EmojiPicker'
+import AgentAvatar, { AVATAR_POR_DEFECTO } from '../ui/AgentAvatar'
+import AvatarPicker from './AvatarPicker'
 import KnowledgeCard from './KnowledgeCard'
 import AgentTester from './AgentTester'
 import { LABEL_CLASS } from '../ui/Input'
@@ -40,7 +41,11 @@ const CAMPO = `w-full rounded-lg border border-tint/[0.12] bg-transparent px-3 p
   placeholder:text-ink-faint transition-colors duration-150
   focus:border-violet/60 focus:outline-none focus:ring-1 focus:ring-violet/30`
 
-const VACIO = { name: '', emoji: '🤖', role: '', instructions: '', enabled: true, autoSend: true }
+// `emoji` es el nombre de la columna, de cuando la cara del agente era un
+// emoji del sistema; lo que guarda hoy es la clave de una de las caras nuestras
+// (ver `ui/AgentAvatar`). Renombrar la columna es tocar la tabla, el servicio y
+// las dos pantallas para no cambiar nada de lo que pasa.
+const VACIO = { name: '', emoji: AVATAR_POR_DEFECTO, role: '', instructions: '', enabled: true, autoSend: true }
 
 // Los mismos cuatro estados que dibuja Inicio, con los mismos textos: es el
 // horario del negocio, no uno de esta pantalla.
@@ -144,11 +149,11 @@ export default function AgentDetail({
   const t = useT()
   const esNuevo = !agent
   const [draft, setDraft] = useState(agent ?? VACIO)
-  const [emojis, setEmojis] = useState(false)
+  const [caras, setCaras] = useState(false)
   const [confirmarBorrado, setConfirmarBorrado] = useState(false)
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState(null)
-  const emojiRef = useRef(null)
+  const carasRef = useRef(null)
 
   const conocimiento = useAgentKnowledge(agent?.id ?? null)
   const fuentesActivas = conocimiento.fuentes.filter((f) => f.enabled).length
@@ -165,15 +170,15 @@ export default function AgentDetail({
   }, [agent])
 
   useEffect(() => {
-    if (!emojis) return
+    if (!caras) return
     const alClick = (e) => {
-      if (!emojiRef.current?.contains(e.target)) setEmojis(false)
+      if (!carasRef.current?.contains(e.target)) setCaras(false)
     }
     // En captura, como los desplegables del sitio: el listener del propio botón
     // corre después y volvería a abrirlo.
     document.addEventListener('click', alClick, true)
     return () => document.removeEventListener('click', alClick, true)
-  }, [emojis])
+  }, [caras])
 
   const set = (campo) => (e) => setDraft((prev) => ({ ...prev, [campo]: e.target.value }))
 
@@ -303,29 +308,28 @@ export default function AgentDetail({
             description={t('agentes.identidadDesc')}
           >
             <div className="flex items-end gap-2.5">
-              {/* El emoji no lleva rótulo: `items-end` lo apoya en la misma
+              {/* La cara no lleva rótulo: `items-end` la apoya en la misma
                   base que el campo del nombre, y un rótulo de una palabra
                   arriba de un botón de 38px pesa más que el botón. */}
-              <div ref={emojiRef} className="relative shrink-0">
+              <div ref={carasRef} className="relative shrink-0">
                 <button
                   type="button"
-                  onClick={() => setEmojis((v) => !v)}
-                  aria-expanded={emojis}
-                  aria-label={t('agentes.campoNombre')}
+                  onClick={() => setCaras((v) => !v)}
+                  aria-expanded={caras}
+                  aria-label={t('agentes.elegirCara')}
                   className="flex h-[38px] w-[38px] items-center justify-center rounded-lg border border-tint/[0.12]
-                    text-[18px] leading-none transition-colors duration-150 hover:border-tint/25"
+                    leading-none transition-colors duration-150 hover:border-tint/25"
                 >
-                  {draft.emoji || '🤖'}
+                  <AgentAvatar avatar={draft.emoji} size={28} />
                 </button>
-                {emojis && (
-                  <EmojiPicker
-                    hacia="abajo"
-                    anclaje="left-0"
-                    onPick={(emoji) => {
-                      setDraft((prev) => ({ ...prev, emoji }))
-                      setEmojis(false)
+                {caras && (
+                  <AvatarPicker
+                    valor={draft.emoji}
+                    onPick={(cara) => {
+                      setDraft((prev) => ({ ...prev, emoji: cara }))
+                      setCaras(false)
                     }}
-                    onClose={() => setEmojis(false)}
+                    onClose={() => setCaras(false)}
                   />
                 )}
               </div>
@@ -489,7 +493,7 @@ export default function AgentDetail({
         >
           <AgentTester
             agentId={agent?.id ?? null}
-            agentEmoji={draft.emoji}
+            agentAvatar={draft.emoji}
             sinGuardar={esNuevo}
             contexto={contexto}
           />

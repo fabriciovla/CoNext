@@ -25,10 +25,10 @@ const ORDENES = ['recientes', 'antiguas', 'pendientes']
 // El logo estaba fijo en el de WhatsApp, de cuando era el unico canal. Ahora
 // sale de la conversacion: es el unico lugar de la lista que dice por donde
 // se contesta, y contestar por el canal equivocado no se deshace.
-function ChannelAvatar({ name, channel, size = 38 }) {
+function ChannelAvatar({ phone, name, channel, size = 38 }) {
   return (
     <div className="relative shrink-0">
-      <Avatar photo name={name} size={size} className="!rounded-full" />
+      <Avatar photo seed={phone} name={name} size={size} />
       <ChannelMark channel={channel} size={15} className="absolute -bottom-0.5 -right-0.5" />
     </div>
   )
@@ -187,7 +187,7 @@ export default function ConversationList({
                     transition-colors duration-150
                     ${active ? 'bg-violet-soft' : 'hover:bg-tint/[0.045]'}`}
                 >
-                  <ChannelAvatar name={group.customer} channel={group.channel} size={38} />
+                  <ChannelAvatar phone={group.phone} name={group.customer} channel={group.channel} size={38} />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">

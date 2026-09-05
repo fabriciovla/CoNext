@@ -55,7 +55,7 @@ export default function PendingReview({ messages, onOpenConversation, onNavigate
                 onClick={() => onOpenConversation(group.phone)}
                 className="group/row -mx-2 flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors duration-150 hover:bg-tint/[0.04]"
               >
-                <Avatar photo name={group.customer} size={30} />
+                <Avatar photo seed={group.phone} name={group.customer} size={30} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-3">
                     <p className="truncate text-sm font-medium text-ink-primary">{group.customer}</p>

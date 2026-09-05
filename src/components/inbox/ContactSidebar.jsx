@@ -102,7 +102,7 @@ export default function ContactSidebar({
             {openTab === 'contacto' && (
               <div className="animate-fade-in space-y-4">
                 <div className="flex flex-col items-center gap-2 text-center">
-                  <Avatar photo name={group.customer} size={64} className="!rounded-full" />
+                  <Avatar photo seed={group.phone} name={group.customer} size={64} />
                   <div>
                     <p className="text-[15.5px] font-semibold text-ink-primary">{group.customer}</p>
                     {/* Instagram y Messenger no dan un telefono: dan un id

@@ -13,7 +13,7 @@ const AGENTES_POR_DEFECTO = [
   {
     key: 'recepcion',
     name: 'Recepcionista',
-    emoji: '🤖',
+    emoji: 'recepcionista',
     role: 'Primer contacto y consultas generales: saludos, horarios, ubicación, medios de pago, "¿están?", agradecimientos y cualquier mensaje que todavía no se sabe a dónde va.',
     instructions:
       'Sé breve y cálido. Respondé la consulta y, si el cliente todavía no dijo qué busca, preguntale en una línea en qué lo podés ayudar.',
@@ -22,7 +22,7 @@ const AGENTES_POR_DEFECTO = [
   {
     key: 'ventas',
     name: 'Agente de ventas',
-    emoji: '💼',
+    emoji: 'ventas',
     role: 'Consultas de compra: precio, stock, talles, colores, disponibilidad, comparaciones entre productos e intención explícita de comprar.',
     instructions:
       'Respondé con el precio y el stock exactos del catálogo. Si el producto está sin stock, decilo y ofrecé una alternativa del catálogo. No negocies descuentos ni prometas reservas.',
@@ -31,7 +31,7 @@ const AGENTES_POR_DEFECTO = [
   {
     key: 'soporte',
     name: 'Agente de soporte',
-    emoji: '🎧',
+    emoji: 'soporte',
     role: 'Posventa y problemas: estado del pedido, demoras, reclamos, cambios, devoluciones, problemas de pago y clientes molestos.',
     instructions:
       'Reconocé el problema antes de responder. Nunca confirmes reintegros, cancelaciones ni cambios por tu cuenta: eso lo resuelve el equipo, así que dejá la respuesta como borrador pendiente.',

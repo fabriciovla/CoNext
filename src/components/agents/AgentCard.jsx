@@ -1,3 +1,4 @@
+import AgentAvatar from '../ui/AgentAvatar'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
 import { useT } from '../../lib/i18n.jsx'
@@ -44,9 +45,9 @@ export default function AgentCard({ agent, onAbrir }) {
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-tint/[0.08] bg-tint/[0.04] text-[18px] leading-none"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-tint/[0.08] bg-tint/[0.04]"
         >
-          {agent.emoji || '🤖'}
+          <AgentAvatar avatar={agent.emoji} size={30} />
         </span>
 
         <div className="min-w-0 flex-1">

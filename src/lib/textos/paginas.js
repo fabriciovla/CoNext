@@ -253,6 +253,35 @@ const AGENTES = {
     es: 'Sin al menos uno encendido, todos los mensajes te quedan a vos para contestar a mano.',
     en: 'Without at least one turned on, every message is left for you to answer by hand.',
   },
+  // --- las caras (`ui/AgentAvatar`) ---
+  // El nombre de cada una es el del rol que dibuja, y sirve para dos cosas: el
+  // lector de pantalla, que de un dibujo no saca nada, y el renglón de abajo del
+  // selector. No es el nombre del agente —ese lo escribe el dueño del negocio—,
+  // así que "Ventas" acá es el objeto de la cara y no cómo se va a llamar.
+  elegirCara: { es: 'Elegí una cara', en: 'Pick a face' },
+  avatares: {
+    recepcionista: { es: 'Recepción', en: 'Reception' },
+    ventas: { es: 'Ventas', en: 'Sales' },
+    carrito: { es: 'Pedidos', en: 'Orders' },
+    leads: { es: 'Leads', en: 'Leads' },
+    marketing: { es: 'Marketing', en: 'Marketing' },
+    soporte: { es: 'Soporte', en: 'Support' },
+    postventa: { es: 'Posventa', en: 'Aftercare' },
+    reclamos: { es: 'Reclamos', en: 'Claims' },
+    escalamiento: { es: 'Escalamiento', en: 'Escalation' },
+    agenda: { es: 'Turnos', en: 'Bookings' },
+    envios: { es: 'Envíos', en: 'Shipping' },
+    stock: { es: 'Stock', en: 'Stock' },
+    cobranzas: { es: 'Cobranzas', en: 'Payments' },
+    facturacion: { es: 'Facturación', en: 'Billing' },
+    reportes: { es: 'Reportes', en: 'Reports' },
+    onboarding: { es: 'Bienvenida', en: 'Onboarding' },
+    conocimiento: { es: 'Consultas', en: 'Knowledge' },
+    traductor: { es: 'Traducción', en: 'Translation' },
+    encuestas: { es: 'Encuestas', en: 'Surveys' },
+    nocturno: { es: 'Fuera de horario', en: 'After hours' },
+  },
+
   campoNombre: { es: '¿Cómo se llama?', en: "What's its name?" },
   campoNombrePlaceholder: { es: 'Agente de ventas', en: 'Sales agent' },
   campoRol: { es: '¿De qué se encarga?', en: 'What does it handle?' },

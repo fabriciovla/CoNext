@@ -1,4 +1,5 @@
 import Logo from '../Logo'
+import ContactAvatar from '../ContactAvatar'
 import {
   IconArrowIn,
   IconArrowOut,
@@ -39,23 +40,17 @@ function mock(lang) {
   return ui[lang]?.mock ?? ui.es.mock
 }
 
-export function Foto({ size = 38 }) {
-  return (
-    <img
-      src="/IconoSinFoto.webp"
-      alt=""
-      draggable={false}
-      decoding="async"
-      className="shrink-0 rounded-full object-cover"
-      style={{ width: size, height: size }}
-    />
-  )
+// `seed` es el nombre del contacto: no hay teléfono en este mock, y a
+// diferencia de la app real acá no importa que sea estable entre sesiones —
+// alcanza con que cada fila de la lista se vea distinta a la de al lado.
+export function Foto({ size = 38, seed = '' }) {
+  return <ContactAvatar seed={seed} size={size} />
 }
 
-export function AvatarCanal({ size = 38 }) {
+export function AvatarCanal({ size = 38, seed = '' }) {
   return (
     <div className="relative shrink-0">
-      <Foto size={size} />
+      <Foto size={size} seed={seed} />
       <img
         src="/logowsp.webp"
         alt=""
@@ -223,7 +218,7 @@ export default function AppMock({ lang = 'es' }) {
               key={nombre}
               className={`flex items-start gap-2.5 rounded-lg px-2 py-2 ${activa ? 'bg-violet-soft' : ''}`}
             >
-              <AvatarCanal size={36} />
+              <AvatarCanal size={36} seed={nombre} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="truncate text-[13px] font-medium text-ink-primary">{nombre}</p>
@@ -319,7 +314,7 @@ export default function AppMock({ lang = 'es' }) {
       <aside className="hidden shrink-0 border-l border-tint/[0.07] bg-surface-nav xl:flex">
         <div className="w-[248px] overflow-hidden p-4">
           <div className="flex flex-col items-center gap-2 text-center">
-            <Foto size={56} />
+            <Foto size={56} seed="Martín Ríos" />
             <div>
               <p className="text-[14.5px] font-semibold text-ink-primary">Martín Ríos</p>
               <p className="text-[12px] tabular-nums text-ink-muted">+54 9 11 5555-0142</p>
@@ -400,7 +395,7 @@ function Burbuja({ propio, bot, agente, children }) {
             {bot ? (agente?.charAt(0) ?? 'V') : 'A'}
           </span>
         ) : (
-          <Foto size={28} />
+          <Foto size={28} seed="Martín Ríos" />
         )}
         <div>
           <p

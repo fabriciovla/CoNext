@@ -131,7 +131,7 @@ export default function Agents({
       {/* "Todavía no hay agentes" es una afirmación, y mientras la lista viaja
           todavía no se sabe: dibujarla es contarle al cliente algo falso
           durante medio segundo. */}
-      {/* El hueco tiene la forma de la ficha —la baldosa del emoji y el
+      {/* El hueco tiene la forma de la ficha —la baldosa de la cara y el
           nombre—, no la de una tarjeta genérica: si midiera otra cosa, la
           página saltaría al llegar la lista. */}
       {cargando && agents.length === 0 && (

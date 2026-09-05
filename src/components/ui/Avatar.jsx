@@ -1,24 +1,19 @@
-// Marcador gris de contacto sin foto. La Cloud API de Meta no nos entrega la
-// foto de perfil de WhatsApp, así que todos los contactos caen en el mismo
-// dibujo — el mismo que muestra WhatsApp cuando no hay foto. El nombre va al
-// lado en todos los lugares donde aparece, así que la inicial no hacía falta
-// para distinguir: la fila se lee por el nombre, no por la letra.
-const SIN_FOTO = `${import.meta.env.BASE_URL || '/'}IconoSinFoto.webp`
+import ContactAvatar from './ContactAvatar'
 
-// `photo` es para los contactos. El equipo (el responsable de una conversación,
-// el usuario de la barra, el Bot/Admin del hilo) se queda con la inicial: ahí sí
-// hay pocas personas y distintas entre sí, que es cuando una letra identifica.
-export default function Avatar({ name, size = 36, photo = false, className = '' }) {
+// `photo` es para los contactos: sin foto de perfil (la Cloud API de Meta no
+// nos la entrega), cada uno cae en uno de los doce fantasmas de
+// `ContactAvatar`, siempre el mismo para el mismo contacto. El nombre va al
+// lado en todos los lugares donde aparece, así que la cara no tiene que
+// distinguir por sí sola: la fila se lee por el nombre.
+//
+// El equipo (el responsable de una conversación, el usuario de la barra, el
+// Bot/Admin del hilo) se queda con la inicial: ahí sí hay pocas personas y
+// distintas entre sí, que es cuando una letra identifica.
+export default function Avatar({ name, size = 36, photo = false, seed, className = '' }) {
   if (photo) {
-    return (
-      <img
-        src={SIN_FOTO}
-        alt=""
-        draggable={false}
-        className={`shrink-0 select-none rounded-xl object-cover ${className}`}
-        style={{ width: size, height: size }}
-      />
-    )
+    // `seed` es el teléfono crudo cuando quien llama lo tiene —la identidad
+    // real de una conversación (ver `utils/phone.js`)— y si no, el nombre.
+    return <ContactAvatar seed={seed ?? name ?? ''} size={size} className={className} />
   }
 
   const initial = name?.trim()?.[0]?.toUpperCase() ?? '?'

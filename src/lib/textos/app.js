@@ -318,8 +318,8 @@ const TOUR_AGENTE = {
 
   nombreTitulo: { es: 'Ponele nombre y cara', en: 'Give it a name and a face' },
   nombreBajada: {
-    es: 'El nombre y el emoji son para vos: es cómo lo vas a reconocer en la bandeja y en las carpetas de la barra. El cliente no los ve nunca.',
-    en: 'The name and the emoji are for you: it is how you will spot it in the inbox and in the sidebar folders. The customer never sees them.',
+    es: 'El nombre y la cara son para vos: es cómo lo vas a reconocer en la bandeja y en las carpetas de la barra. El cliente no los ve nunca.',
+    en: 'The name and the face are for you: it is how you will spot it in the inbox and in the sidebar folders. The customer never sees them.',
   },
   accionNombre: {
     es: 'Escribí “Recepcionista” en el nombre.',

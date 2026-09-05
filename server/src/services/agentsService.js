@@ -1,6 +1,13 @@
 import crypto from 'node:crypto'
 import { one, many, run, tx } from '../db/index.js'
 
+// La cara del agente. La columna se sigue llamando `emoji` porque nació
+// guardando uno del sistema; lo que guarda hoy es la clave de uno de los
+// dibujos nuestros (`src/components/ui/AgentAvatar.jsx`). El server no valida
+// contra esa lista a propósito: es la pantalla la que ofrece las veinte, y los
+// agentes creados antes tienen ahí un emoji de texto que se sigue dibujando.
+const AVATAR_POR_DEFECTO = 'recepcionista'
+
 const COLUMNS = `
   id, key, name, emoji, role, instructions, enabled, auto_send AS "autoSend",
   position, created_at AS "createdAt", updated_at AS "updatedAt"
@@ -83,7 +90,7 @@ export async function addAgent(tenantId, { name, emoji, role, instructions, enab
       id,
       await uniqueKey(tenantId, name),
       name,
-      emoji || '🤖',
+      emoji || AVATAR_POR_DEFECTO,
       role ?? '',
       instructions ?? '',
       enabled === false ? 0 : 1,
@@ -109,7 +116,7 @@ export async function updateAgent(tenantId, id, changes) {
      WHERE tenant_id = $9 AND id = $10`,
     [
       next.name,
-      next.emoji || '🤖',
+      next.emoji || AVATAR_POR_DEFECTO,
       next.role ?? '',
       next.instructions ?? '',
       next.enabled ? 1 : 0,

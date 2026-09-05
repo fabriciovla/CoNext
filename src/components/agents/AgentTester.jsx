@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Button from '../ui/Button'
 import FormattedText from '../ui/FormattedText'
 import { IconBolt, IconNote, IconSend, IconSparkles } from '../ui/icons'
+import AgentAvatar from '../ui/AgentAvatar'
 import { apiPost } from '../../api/client'
 import { useT } from '../../lib/i18n.jsx'
 
@@ -62,7 +63,7 @@ function Globo({ mensaje }) {
   )
 }
 
-export default function AgentTester({ agentId, agentEmoji, sinGuardar = false, contexto = null }) {
+export default function AgentTester({ agentId, agentAvatar, sinGuardar = false, contexto = null }) {
   const t = useT()
   const [mensajes, setMensajes] = useState([])
   const [texto, setTexto] = useState('')
@@ -160,8 +161,12 @@ export default function AgentTester({ agentId, agentEmoji, sinGuardar = false, c
           // que la prueba sirva: si contesta mal, el problema está en el
           // catálogo, en el horario o en el material, y esto lo dice antes.
           <div className="flex h-full flex-col items-center justify-center px-4 text-center">
-            <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-tint/[0.08] bg-tint/[0.03] text-[18px] leading-none">
-              {sinGuardar ? <IconSparkles size={18} className="text-ink-muted" /> : agentEmoji || '🤖'}
+            <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-tint/[0.08] bg-tint/[0.03]">
+              {sinGuardar ? (
+                <IconSparkles size={18} className="text-ink-muted" />
+              ) : (
+                <AgentAvatar avatar={agentAvatar} size={32} />
+              )}
             </span>
             <p className="text-[13.5px] font-medium text-ink-primary">
               {sinGuardar ? t('agentes.probarSinGuardar') : t('agentes.probarVacioTitulo')}

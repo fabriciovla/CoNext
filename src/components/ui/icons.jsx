@@ -1,4 +1,18 @@
 // Íconos de línea, trazo único, sin dependencias externas.
+//
+// Los de la navegación —Inicio, Bandeja, Agentes, Productos, Plantillas,
+// Configuración, las carpetas de la bandeja, la lupa, el chevron y la salida—
+// salen del pliego `ConexIconsDash/icons`, dibujados para esta app: 24x24,
+// trazo 1.6, terminaciones redondeadas y, donde hay una caja, el mismo
+// squircle del logotipo (radio al 39%). Por eso la bandeja, las plantillas y
+// la nota son cuadrados redondeados y no rectángulos: es la forma de la marca
+// repetida a 16px, y es lo que hace que la columna izquierda se lea como un
+// juego y no como íconos juntados de a uno.
+//
+// Los que no están en el pliego (el clip, el micrófono, los acuses, las
+// flechas) siguen siendo los de antes, con los mismos números: mismo tamaño,
+// mismo trazo, mismas terminaciones.
+
 const base = {
   fill: 'none',
   stroke: 'currentColor',
@@ -25,16 +39,16 @@ function Svg({ children, size = 16, className = '', ...rest }) {
 
 export const IconInbox = (props) => (
   <Svg {...props}>
-    <path d="M3.5 12.5h4.2l1.3 2.4h5.9l1.3-2.4h4.3" />
-    <path d="M5.4 6.5h13.2l2 6v6.2a1.3 1.3 0 0 1-1.3 1.3H4.7a1.3 1.3 0 0 1-1.3-1.3V12.5Z" />
+    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="6.5" />
+    <path d="M3.7 13.4h4.1l1.1 2c.3.5.8.8 1.4.8h3.4c.6 0 1.1-.3 1.4-.8l1.1-2h4.1" />
   </Svg>
 )
 
 export const IconBox = (props) => (
   <Svg {...props}>
-    <path d="M3.5 8.2 12 4l8.5 4.2v7.6L12 20l-8.5-4.2Z" />
-    <path d="M3.7 8.3 12 12.4l8.3-4.1" />
-    <path d="M12 12.4V20" />
+    <path d="M10.4 3.9a3.2 3.2 0 0 1 3.2 0l5 2.8c1 .55 1.6 1.6 1.6 2.75v5.1c0 1.15-.6 2.2-1.6 2.75l-5 2.8a3.2 3.2 0 0 1-3.2 0l-5-2.8a3.15 3.15 0 0 1-1.6-2.75v-5.1c0-1.15.6-2.2 1.6-2.75l5-2.8Z" />
+    <path d="M3.9 8.3 12 12.6l8.1-4.3" />
+    <path d="M12 12.6V20.1" />
   </Svg>
 )
 
@@ -43,38 +57,44 @@ export const IconBox = (props) => (
 // dos formas apiladas se leen como una mancha.
 export const IconFolder = (props) => (
   <Svg {...props}>
-    <path d="M3.8 8V6.6a1.4 1.4 0 0 1 1.4-1.4h3.3l2 2.4h8.1a1.4 1.4 0 0 1 1.4 1.4v8.4a1.4 1.4 0 0 1-1.4 1.4H5.2a1.4 1.4 0 0 1-1.4-1.4Z" />
+    <path d="M3.6 9.2c0-2 0-3 .6-3.7.6-.7 1.5-.7 3.3-.7h.6c.8 0 1.2 0 1.5.2.4.2.6.5 1 1.1l.4.6c.2.3.3.5.5.6.2.1.5.1.9.1h2.7c1.9 0 2.8 0 3.4.7.6.7.6 1.7.6 3.7v2.9c0 2 0 3-.6 3.7-.6.7-1.5.7-3.4.7H7.5c-1.8 0-2.7 0-3.3-.7-.6-.7-.6-1.7-.6-3.7V9.2Z" />
   </Svg>
 )
 
 export const IconHome = (props) => (
   <Svg {...props}>
-    <path d="M3.5 10.2 12 3.8l8.5 6.4V19a1.2 1.2 0 0 1-1.2 1.2H4.7A1.2 1.2 0 0 1 3.5 19Z" />
-    <path d="M9.5 20.2v-6h5v6" />
+    <path d="M4 10.8c0-1.3.6-2.5 1.6-3.3l4.3-3.4a3.4 3.4 0 0 1 4.2 0l4.3 3.4c1 .8 1.6 2 1.6 3.3v4.6c0 2.7-1.6 4.1-4.4 4.1H8.4C5.6 19.5 4 18.1 4 15.4v-4.6Z" />
+    <path d="M9.5 19.5v-3.2c0-1.1.9-2 2-2h1c1.1 0 2 .9 2 2v3.2" />
   </Svg>
 )
 
 export const IconChart = (props) => (
   <Svg {...props}>
-    <path d="M4 20V10.5" />
-    <path d="M11 20V4" />
-    <path d="M18 20v-7" />
-    <path d="M3.5 20h17" />
+    <path d="M5.6 20.4v-5.6" />
+    <path d="M12 20.4V7.4" />
+    <path d="M18.4 20.4v-8.6" />
   </Svg>
 )
 
 export const IconSettings = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="12" r="3.1" />
-    <path d="M12 3.5v2.1M12 18.4v2.1M20.5 12h-2.1M5.6 12H3.5M17.7 6.3l-1.5 1.5M7.8 16.2l-1.5 1.5M17.7 17.7l-1.5-1.5M7.8 7.8 6.3 6.3" />
+    <path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" />
+    <path d="M18.2 12h2.2" />
+    <path d="m16.38 7.62 1.56-1.56" />
+    <path d="M12 5.8V3.6" />
+    <path d="M7.62 7.62 6.06 6.06" />
+    <path d="M5.8 12H3.6" />
+    <path d="M7.62 16.38 6.06 17.94" />
+    <path d="M12 18.2v2.2" />
+    <path d="m16.38 16.38 1.56 1.56" />
   </Svg>
 )
 
 export const IconLogOut = (props) => (
   <Svg {...props}>
-    <path d="M9.5 20H5.8A1.8 1.8 0 0 1 4 18.2V5.8A1.8 1.8 0 0 1 5.8 4h3.7" />
-    <path d="M16.5 16.5 21 12l-4.5-4.5" />
-    <path d="M21 12H9.5" />
+    <path d="M14.6 3.9h.4c2 0 3 0 3.6.7.6.7.6 1.7.6 3.7v7.4c0 2 0 3-.6 3.7-.6.7-1.6.7-3.6.7h-.4" />
+    <path d="M13.4 12H4.4" />
+    <path d="M7.6 8.6 4.2 12l3.4 3.4" />
   </Svg>
 )
 
@@ -98,8 +118,8 @@ export const IconCheck = (props) => (
 
 export const IconClock = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="12" r="8.3" />
-    <path d="M12 7.5V12l3 2" />
+    <path d="M12 20.4a8.4 8.4 0 1 0 0-16.8 8.4 8.4 0 0 0 0 16.8Z" />
+    <path d="M12 8.2V12l2.8 1.8" />
   </Svg>
 )
 
@@ -112,8 +132,8 @@ export const IconLock = (props) => (
 
 export const IconUser = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="8.2" r="3.4" />
-    <path d="M4.8 20c1-3.6 3.9-5.6 7.2-5.6s6.2 2 7.2 5.6" />
+    <path d="M12 11.4a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2Z" />
+    <path d="M5.6 20.4c0-3.2 2.9-5.2 6.4-5.2s6.4 2 6.4 5.2" />
   </Svg>
 )
 
@@ -125,15 +145,15 @@ export const IconChevronRight = (props) => (
 
 export const IconSearch = (props) => (
   <Svg {...props}>
-    <circle cx="10.5" cy="10.5" r="6.5" />
-    <path d="m20 20-4.8-4.8" />
+    <path d="M10.8 17.2a6.4 6.4 0 1 0 0-12.8 6.4 6.4 0 0 0 0 12.8Z" />
+    <path d="m15.6 15.6 4.4 4.4" />
   </Svg>
 )
 
 export const IconBell = (props) => (
   <Svg {...props}>
-    <path d="M6 10.5a6 6 0 0 1 12 0c0 3.5 1 5 1.5 5.8H4.5C5 15.5 6 14 6 10.5Z" />
-    <path d="M10.3 19a1.9 1.9 0 0 0 3.4 0" />
+    <path d="M12 3.6c-3.1 0-5.4 2.4-5.4 5.4 0 3.9-1.3 4.9-1.3 6 0 .8.7 1.4 1.9 1.4h9.6c1.2 0 1.9-.6 1.9-1.4 0-1.1-1.3-2.1-1.3-6 0-3-2.3-5.4-5.4-5.4Z" />
+    <path d="M9.8 19.2a2.6 2.6 0 0 0 4.4 0" />
   </Svg>
 )
 
@@ -173,7 +193,7 @@ export const IconArchive = (props) => (
 
 export const IconChevronDown = (props) => (
   <Svg {...props}>
-    <path d="M5.5 9 12 15.5 18.5 9" />
+    <path d="m6 9.5 6 5.5 6-5.5" />
   </Svg>
 )
 
@@ -193,10 +213,10 @@ export const IconPhoneIncoming = (props) => (
 
 export const IconUsers = (props) => (
   <Svg {...props}>
-    <circle cx="9.6" cy="8.6" r="3.1" />
-    <path d="M3.8 19.2c.9-3 3.2-4.7 5.8-4.7s4.9 1.7 5.8 4.7" />
-    <path d="M16.2 5.9a3.1 3.1 0 0 1 0 5.6" />
-    <path d="M17.4 14.9c1.6.6 2.8 2.1 3.3 4.3" />
+    <path d="M9.6 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" />
+    <path d="M4 20.4c0-2.9 2.5-4.7 5.6-4.7s5.6 1.8 5.6 4.7" />
+    <path d="M16 5.1a3.2 3.2 0 0 1 0 6.2" />
+    <path d="M17.4 15.9c1.7.5 2.8 1.8 2.8 3.6" />
   </Svg>
 )
 
@@ -228,9 +248,9 @@ export const IconFlow = (props) => (
 
 export const IconHelp = (props) => (
   <Svg {...props}>
-    <circle cx="12" cy="12" r="8.3" />
-    <path d="M9.8 9.6a2.3 2.3 0 1 1 2.9 2.4c-.5.2-.7.6-.7 1.1v.5" />
-    <path d="M12 16.6h.01" strokeWidth="2" />
+    <path d="M12 20.4a8.4 8.4 0 1 0 0-16.8 8.4 8.4 0 0 0 0 16.8Z" />
+    <path d="M9.8 9.6a2.3 2.3 0 0 1 4.5.5c0 1.9-2.3 1.7-2.3 3.5" />
+    <path d="M12 16.8h.01" strokeWidth="2" />
   </Svg>
 )
 
@@ -258,15 +278,16 @@ export const IconMic = (props) => (
 
 export const IconTemplate = (props) => (
   <Svg {...props}>
-    <rect x="3.6" y="4.6" width="16.8" height="14.8" rx="2" />
-    <path d="M3.6 9.4h16.8M9.4 9.4v10" />
+    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="6.5" />
+    <path d="M3.8 9.4h16.4" />
+    <path d="M9.4 20.3V9.7" />
   </Svg>
 )
 
 export const IconSparkles = (props) => (
   <Svg {...props}>
-    <path d="M11 4.2 12.4 8l3.8 1.4-3.8 1.4L11 14.6 9.6 10.8 5.8 9.4 9.6 8Z" />
-    <path d="M17.6 14.4 18.3 16.3l1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7Z" />
+    <path d="M10.6 3.6c.6 3.6 1.9 4.9 5.5 5.5-3.6.6-4.9 1.9-5.5 5.5-.6-3.6-1.9-4.9-5.5-5.5 3.6-.6 4.9-1.9 5.5-5.5Z" />
+    <path d="M17.7 15.1c.25 1.6.85 2.2 2.45 2.45-1.6.25-2.2.85-2.45 2.45-.25-1.6-.85-2.2-2.45-2.45 1.6-.25 2.2-.85 2.45-2.45Z" />
   </Svg>
 )
 
@@ -279,8 +300,10 @@ export const IconCompose = (props) => (
 
 export const IconNote = (props) => (
   <Svg {...props}>
-    <rect x="3.8" y="4.8" width="16.4" height="14.4" rx="2" />
-    <path d="M7.6 9.4h8.8M7.6 12.8h8.8M7.6 16.2h5" />
+    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="6.5" />
+    <path d="M8.4 8.6h7.2" />
+    <path d="M8.4 12h7.2" />
+    <path d="M8.4 15.4h4" />
   </Svg>
 )
 
