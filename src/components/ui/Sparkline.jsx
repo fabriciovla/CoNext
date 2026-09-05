@@ -13,8 +13,27 @@
 // no como una raya.
 const FLOOR = 0.12
 
+// Cuántas barras entran antes de que dejen de ser barras.
+//
+// La miniatura mide 140px de ancho como mucho, así que con veinticuatro horas
+// —un negocio abierto todo el día— cada barra queda en tres píxeles con tres de
+// separación: eso ya no es una forma, es una trama. La serie se muestrea a este
+// tope quedándose con puntos repartidos parejo.
+//
+// El último punto se conserva siempre y no por prolijidad: es "ahora", es la
+// barra que va en violeta pleno y es exactamente el número que la tarjeta
+// muestra al lado en grande. Perderlo haría que la miniatura termine en un
+// valor que no es el que está escrito.
+const MAX_BARRAS = 14
+
+function muestrear(valores) {
+  if (valores.length <= MAX_BARRAS) return valores
+  const paso = (valores.length - 1) / (MAX_BARRAS - 1)
+  return Array.from({ length: MAX_BARRAS }, (_, i) => valores[Math.round(i * paso)])
+}
+
 export default function Sparkline({ data = [], className = '', delay = 0 }) {
-  const points = data.filter((v) => Number.isFinite(v))
+  const points = muestrear(data.filter((v) => Number.isFinite(v)))
   if (points.length === 0) return null
 
   const max = Math.max(...points)
@@ -22,7 +41,7 @@ export default function Sparkline({ data = [], className = '', delay = 0 }) {
   const range = max - min
 
   return (
-    <div className={`flex items-end gap-[3px] ${className}`} aria-hidden="true">
+    <div className={`flex items-end gap-[2px] ${className}`} aria-hidden="true">
       {points.map((v, i) => {
         const pct = range === 0 ? 55 : Math.round((FLOOR + (1 - FLOOR) * ((v - min) / range)) * 100)
         const actual = i === points.length - 1
