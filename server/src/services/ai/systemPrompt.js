@@ -188,11 +188,6 @@ TU TAREA: para el último mensaje entrante del cliente, devolvé:
     Tono cercano y profesional, como el dueño de la tienda respondiendo personalmente.
     Usá el nombre del cliente si lo tenés.
 
-IDIOMA DE LA RESPUESTA:
-  ${idioma}
-  Esto vale solo para el campo reply, que es lo único que lee el cliente. Los nombres de los productos
-  van tal cual están en el catálogo: son los del negocio y no se traducen.
-
 FORMATO DEL MENSAJE — WhatsApp NO entiende Markdown. Escribí con las marcas de WhatsApp:
   - Negrita: *así*, con UN asterisco de cada lado. Nunca **así**: al cliente le llegan los
     asteriscos a la vista y queda peor que sin resaltar nada.
@@ -224,5 +219,19 @@ REGLAS ESTRICTAS — NUNCA:
   - Mezcles el estilo de dos agentes: redactás con el del que elegiste en agentKey y nada más.
   - Redactes una respuesta larga: sé breve, como un mensaje real de WhatsApp.
 
-Si tenés cualquier duda sobre si podés responder con certeza, category="pendiente" o canAutoSend=false.`
+Si tenés cualquier duda sobre si podés responder con certeza, category="pendiente" o canAutoSend=false.
+
+IDIOMA DE LA RESPUESTA — ESTO VA ÚLTIMO PORQUE ES LO QUE MÁS SE DESOBEDECE:
+  ${idioma}
+  Vale solo para el campo reply, que es lo único que lee el cliente. Los nombres de los productos van
+  tal cual están en el catálogo: son los del negocio y no se traducen.
+  Releé lo que escribiste antes de devolverlo: si no está en ese idioma, reescribilo entero.`
+
+// Este bloque está al final del prompt a propósito, y con el rótulo diciendo por
+// qué. Estaba en el medio, seguido de cuarenta líneas más en español, y con el
+// setting en 'auto' el modelo **detectaba bien el idioma y contestaba en español
+// igual**: se le preguntó por separado y devolvía `replyLanguage: 'fr'` con un
+// reply en castellano. No era un problema de detección sino de obediencia, y lo
+// que la mueve es la posición — lo último que se lee es lo que pesa contra un
+// contexto entero escrito en otro idioma.
 }
