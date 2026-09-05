@@ -2,7 +2,7 @@
 import { LogoMarca } from './Logo.jsx'
 import LangSwitch from './LangSwitch.astro'
 import { IconChevronDown } from './icons.jsx'
-import { EMAIL, GITHUB_URL, WHATSAPP_URL } from '../config'
+import { EMAIL, GITHUB_URL } from '../config'
 import { PRODUCTO_COLUMNAS } from '../data/producto'
 import { t, pathFor } from '../i18n/utils'
 
@@ -56,7 +56,6 @@ const COLUMNAS = [
   {
     titulo: c.general,
     enlaces: [
-      { href: WHATSAPP_URL, label: l.demo, externo: true },
       { href: pathFor(lang, '/login'), label: l.login },
       { href: GITHUB_URL, label: 'GitHub', externo: true },
     ],

@@ -12,7 +12,7 @@ import {
   IconSparkles,
   IconWhatsApp,
 } from './icons.jsx'
-import { dodoCheckout, GITHUB_URL, WHATSAPP_URL } from '../config'
+import { dodoCheckout, GITHUB_URL } from '../config'
 import { PRODUCTO_COLUMNAS, PRODUCTO_PAGINAS } from '../data/producto'
 import { t, pathFor } from '../i18n/utils'
 import { ICONOS_PAGINA } from '../lib/iconosPagina.js'
@@ -256,9 +256,7 @@ const BARRA =
                           su renglón en una sola línea. Más angosto que eso,
                           entre la tarjeta y los renglones gana el contenido. */}
                       <a
-                        href={WHATSAPP_URL}
-                        target="_blank"
-                        rel="noreferrer"
+                        href={checkoutGratis}
                         class={`group/dest hidden w-[15.5rem] shrink-0 self-stretch flex-col justify-between rounded-xl border border-tint/[0.08] bg-surface-nav p-5 transition-colors duration-200 hover:border-violet/30 min-[1440px]:flex ${FOCO}`}
                       >
                         <div>
@@ -362,7 +360,7 @@ const BARRA =
       >
         {n.iniciarSesion}
       </a>
-      <Boton href={WHATSAPP_URL} variante="secundario" tamano="sm">{n.pedirDemo}</Boton>
+      <Boton href={precios} variante="secundario" tamano="sm">{n.verPrecios}</Boton>
       <Boton href={checkoutGratis} variante="acento" tamano="sm" target="_self">{n.empezarGratis}</Boton>
     </div>
 
